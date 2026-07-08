@@ -1,0 +1,3089 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>拼多多物流工单 Agent 看板 V1.0 原型</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafd;
+      --line: #e5eaf2;
+      --text: #182033;
+      --muted: #667085;
+      --muted-2: #98a2b3;
+      --blue: #2563eb;
+      --blue-2: #e8f1ff;
+      --green: #16a34a;
+      --green-2: #eaf8ef;
+      --orange: #f59e0b;
+      --orange-2: #fff5df;
+      --red: #dc2626;
+      --red-2: #fff0f0;
+      --shadow: 0 18px 45px rgba(32, 43, 67, 0.08);
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      position: relative;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .shell {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.76);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 270px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(225, 29, 46, 0.22));
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .field select,
+    .field input {
+      flex: 1;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      min-width: 0;
+    }
+
+    .field select {
+      min-width: 126px;
+    }
+
+    /* ===== 日期范围选择器 ===== */
+    .dr-wrap { position: relative; display: flex; align-items: center; gap: 6px; }
+    .dr-preset-label select { min-width: 110px; }
+    .dr-trigger {
+      min-width: 220px;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      justify-content: space-between;
+    }
+    .dr-trigger:hover { border-color: #93c5fd; }
+    #drTriggerText { font-size: 13px; color: var(--muted); flex: 1; }
+    #drTriggerText.has-value { color: var(--text); }
+
+    .dr-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(15,23,42,.13);
+      z-index: 200;
+      padding: 16px 20px 14px;
+    }
+    .dr-panel.open { display: block; }
+    .dr-months { display: flex; gap: 24px; }
+    .dr-month { width: 224px; }
+    .dr-month-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .dr-nav {
+      border: none; background: none; cursor: pointer;
+      font-size: 18px; color: var(--muted); padding: 0 4px;
+      line-height: 1;
+    }
+    .dr-nav:hover { color: var(--blue); }
+    .dr-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 32px);
+      gap: 0;
+    }
+    .dr-wdays span {
+      height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--muted); font-weight: 600;
+    }
+    .dr-cell {
+      height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      position: relative;
+      z-index: 0;
+    }
+    .dr-blank { cursor: default; }
+    .dr-future { color: #cbd5e1 !important; cursor: default; }
+    .dr-cell:not(.dr-future):not(.dr-blank):not(.dr-start):not(.dr-end):hover {
+      background: #eff6ff;
+      border-radius: 50%;
+    }
+    .dr-today { color: var(--blue); font-weight: 700; }
+    .dr-today::after {
+      content: '';
+      position: absolute;
+      bottom: 3px; left: 50%;
+      transform: translateX(-50%);
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+    .dr-range { background: #eff6ff; color: #1e40af; border-radius: 0; }
+    .dr-start, .dr-end {
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+      z-index: 1;
+    }
+    .dr-start { border-radius: 50% 0 0 50%; }
+    .dr-end { border-radius: 0 50% 50% 0; }
+    .dr-start.dr-end, .dr-single { border-radius: 50% !important; }
+    /* start has range to the right → half bg */
+    .dr-start:not(.dr-single)::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 50%;
+      background: #eff6ff;
+      z-index: -1;
+    }
+    .dr-end:not(.dr-single)::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 50%;
+      background: #eff6ff;
+      z-index: -1;
+    }
+    /* the colored circle sits on top */
+    .dr-start::after, .dr-end::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--blue);
+      border-radius: 50%;
+      z-index: -1;
+    }
+    .dr-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      margin-top: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+      font-weight: 650;
+      font-size: 13px;
+    }
+
+    .btn.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn.ghost {
+      color: var(--blue);
+      background: var(--blue-2);
+      border-color: #cfe0ff;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      border: 1px solid #ffe0a3;
+      border-radius: var(--radius);
+      background: var(--orange-2);
+      color: #8a5a00;
+      font-size: 13px;
+    }
+
+    .notice strong {
+      color: #6b4400;
+    }
+
+    .section {
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px 12px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .last-refresh {
+      color: var(--muted);
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      padding: 0 18px 0;
+    }
+
+    .metrics-aux-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px 8px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--muted-2);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .metrics-aux-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .metrics-aux {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 18px 18px;
+    }
+
+    .metric {
+      min-height: 116px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-soft);
+    }
+
+    .metric.accent {
+      border: 0;
+      background: linear-gradient(135deg, #2563eb 0%, #5aa7ff 100%);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+    }
+
+    .metric.aux {
+      min-height: 80px;
+      padding: 12px 14px;
+      background: #fff;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .metric.aux .label {
+      font-size: 12px;
+      color: var(--muted-2);
+    }
+
+    .metric.accent .label,
+    .metric.accent .hint,
+    .metric.accent .delta {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .metric .value {
+      margin-top: 12px;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .metric.aux .value {
+      margin-top: 8px;
+      font-size: 22px;
+      color: var(--muted);
+    }
+
+    .metric .hint {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .metric.aux .hint {
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: var(--muted-2);
+    }
+
+    .delta {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      margin-left: 6px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.28fr) minmax(320px, 0.72fr);
+      gap: 16px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      padding: 0 18px 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+      font-size: 13px;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      text-align: left;
+      background: #f7f9fc;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background: #fbfdff;
+    }
+
+    .scene-name {
+      max-width: 260px;
+      font-weight: 700;
+    }
+
+    .reason {
+      max-width: 230px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .bar {
+      height: 7px;
+      overflow: hidden;
+      margin-top: 7px;
+      border-radius: 999px;
+      background: #edf1f7;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #2563eb, #56c0ff);
+    }
+
+    .side-card {
+      padding: 0 18px 18px;
+    }
+
+    .score-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-soft);
+    }
+
+    .ring {
+      position: relative;
+      display: grid;
+      width: 168px;
+      height: 168px;
+      margin: 8px auto 18px;
+      place-items: center;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #fff 0 54%, transparent 55%),
+        conic-gradient(var(--blue) 0 66%, #d9e5f7 66% 100%);
+    }
+
+    .ring strong {
+      font-size: 28px;
+    }
+
+    .ring span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .score-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .score-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: var(--radius);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .score-item span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .score-item strong {
+      font-size: 16px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1.4fr 1.2fr 1.2fr 1.2fr 1fr 1.2fr auto;
+      gap: 10px;
+      padding: 0 18px 14px;
+    }
+
+    .filters .field {
+      min-width: 0;
+    }
+
+    .filters .field input,
+    .filters .field select {
+      min-width: 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.success {
+      color: #087437;
+      background: var(--green-2);
+    }
+
+    .tag.warning {
+      color: #996100;
+      background: var(--orange-2);
+    }
+
+    .tag.danger {
+      color: #b42318;
+      background: var(--red-2);
+    }
+
+    .tag.neutral {
+      color: #475467;
+      background: #eef2f7;
+    }
+
+    .tag.blue {
+      color: #1d4ed8;
+      background: var(--blue-2);
+    }
+
+    .link-btn {
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      font-weight: 750;
+      padding: 4px 0;
+    }
+
+    .empty {
+      display: none;
+      padding: 28px 18px;
+      color: var(--muted);
+      text-align: center;
+      border-top: 1px solid var(--line);
+    }
+
+    /* ===== 分页 ===== */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+    .page-size-wrap, .page-nav, .page-jump {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #5b6678;
+    }
+    .page-size-wrap select, .page-jump input {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 13px;
+      color: #16213a;
+      background: #fff;
+    }
+    .page-jump input {
+      width: 52px;
+      text-align: center;
+    }
+    .page-btn {
+      padding: 5px 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #16213a;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .page-btn:hover:not(:disabled) { background: #f0f4ff; border-color: #b3c4f5; }
+    .page-btn:disabled { opacity: .4; cursor: default; }
+    .page-info { font-size: 13px; color: #5b6678; white-space: nowrap; }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 30;
+      transform: translateY(24px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      background: #172033;
+      color: #fff;
+      font-size: 13px;
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.2);
+      transition: 0.2s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      background: rgba(15, 23, 42, 0.36);
+    }
+
+    .drawer-backdrop.show {
+      display: block;
+    }
+
+    .drawer {
+      position: fixed;
+      inset: 0 0 0 auto;
+      z-index: 21;
+      width: min(720px, 100%);
+      transform: translateX(100%);
+      transition: 0.24s ease;
+      border-left: 1px solid var(--line);
+      background: #fff;
+      box-shadow: -18px 0 50px rgba(15, 23, 42, 0.18);
+    }
+
+    .drawer.show {
+      transform: translateX(0);
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .drawer-head h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .drawer-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .icon-btn {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .drawer-body {
+      height: calc(100vh - 78px);
+      overflow: auto;
+      padding: 18px 22px 28px;
+    }
+
+    .detail-block {
+      margin-bottom: 14px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-soft);
+    }
+
+    .detail-block h4 {
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kv div,
+    .log-item {
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      min-width: 0;
+    }
+
+    .kv span,
+    .log-time {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .kv strong,
+    .log-text {
+      display: block;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .copy {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #344054;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 9px;
+    }
+
+    .log-item {
+      position: relative;
+      padding-left: 16px;
+    }
+
+    .log-item::before {
+      content: "";
+      position: absolute;
+      top: 17px;
+      left: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    @media (max-width: 1180px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .metrics-aux {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 12px;
+      }
+
+      main,
+      .topbar {
+        padding: 14px;
+      }
+
+      .brand {
+        min-width: 0;
+      }
+
+      .toolbar,
+      .toolbar .field,
+      .toolbar .btn {
+        width: 100%;
+      }
+
+      .toolbar .field {
+        justify-content: space-between;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .metrics-aux,
+      .filters,
+      .kv {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .notice {
+        flex-direction: column;
+      }
+
+      .metric .value {
+        font-size: 26px;
+      }
+    }
+    /* ===== PRD 标注层样式（演示用） ===== */
+    /* 统一样式：右上角小方块上标，不占行高、不影响布局，所有角标(区域级/字段级)外观一致 */
+    .prd-badge {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      height: 13px !important;
+      min-width: 13px !important;
+      padding: 0 2px !important;
+      margin-left: 2px;
+      border-radius: 3px;
+      border: 1px solid var(--blue);
+      color: var(--blue) !important;
+      background: #fff;
+      font-size: 9px !important;
+      font-weight: 700 !important;
+      font-style: normal;
+      line-height: 1 !important;
+      cursor: pointer;
+      vertical-align: super;
+      white-space: nowrap;
+      transition: background .12s ease, color .12s ease;
+    }
+    .prd-badge:hover {
+      background: var(--blue);
+      color: #fff !important;
+    }
+
+    .prd-badge.ring-badge {
+      position: absolute !important;
+      top: 6px;
+      right: 10px;
+    }
+
+    .prd-pop-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(15, 23, 42, 0.32);
+    }
+
+    .prd-pop-backdrop.show { display: block; }
+
+    .prd-popover {
+      display: none;
+      position: fixed;
+      z-index: 61;
+      width: 420px;
+      max-width: calc(100vw - 32px);
+      max-height: 70vh;
+      overflow: auto;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px rgba(20, 28, 50, 0.22);
+      padding: 16px 18px 18px;
+    }
+
+    .prd-popover.show { display: block; }
+
+    .prd-pop-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .prd-pop-tag {
+      display: inline-block;
+      margin-bottom: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--blue-2);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .prd-pop-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .prd-pop-close {
+      flex: none;
+      width: 22px;
+      height: 22px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .prd-pop-body {
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #344054;
+      white-space: pre-wrap;
+    }
+
+    .prd-pop-source {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      color: var(--muted-2);
+      font-size: 11.5px;
+    }
+
+    /* ===== 角标编辑功能样式 ===== */
+    .prd-pop-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .prd-pop-actions button {
+      flex: none;
+      padding: 6px 12px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .prd-pop-actions button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .prd-pop-actions button.danger {
+      border-color: #fca5a5;
+      color: var(--red);
+      background: #fff;
+    }
+
+    .prd-pop-actions .spacer { flex: 1; }
+
+    .prd-pop-edit-field {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .prd-pop-edit-field input,
+    .prd-pop-edit-field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--text);
+      background: #fbfcfe;
+      resize: vertical;
+    }
+
+    .prd-pop-edit-field textarea {
+      min-height: 140px;
+      line-height: 1.6;
+    }
+
+    .prd-pop-edited-tag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #fff7ed;
+      color: #b45309;
+      font-size: 10.5px;
+      font-weight: 700;
+      vertical-align: middle;
+    }
+
+    /* ===== 自定义标注点（用户自己添加的） ===== */
+    .custom-pin {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      padding: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1.5px solid #16a34a;
+      background: #fff;
+      color: #15803d;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 30;
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
+    }
+
+    .custom-pin:hover {
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .custom-pin-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .custom-pin-layer .custom-pin {
+      pointer-events: auto;
+    }
+
+    body.placing-mark {
+      cursor: crosshair;
+    }
+
+    body.placing-mark .shell {
+      cursor: crosshair;
+    }
+
+    .placing-hint {
+      display: none;
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 80;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #16a34a;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 24px rgba(22, 163, 74, 0.35);
+    }
+
+    body.placing-mark .placing-hint { display: block; }
+
+    /* ===== 右下角悬浮操作按钮 ===== */
+    .anno-toolbar {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .anno-fab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+    }
+
+    .anno-fab.active {
+      border-color: #16a34a;
+      background: #16a34a;
+      color: #fff;
+    }
+
+    .anno-fab.sync-status {
+      cursor: default;
+      font-weight: 600;
+      color: var(--muted);
+      box-shadow: none;
+      border-color: var(--line);
+    }
+
+    .anno-fab.sync-status.error {
+      border-color: #fca5a5;
+      color: var(--red);
+      background: #fff5f5;
+    }
+
+    .anno-fab.sync-status.syncing {
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark"><img src="data:image/png;base64,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" alt="先马 XIANMA-EC 吉祥物"></div>
+          <div>
+            <h1>拼多多物流工单 Agent 看板<span class="prd-badge" data-prd="overview" tabindex="0" role="button" aria-label="查看对应PRD说明">1</span></h1>
+            <p>V1.0 试点监控 · 自动处理、转人工追踪、单工单日志追溯</p>
+          </div>
+        </div>
+        <div class="toolbar" aria-label="全局范围控制">
+          <span class="prd-badge" data-prd="global-range" tabindex="0" role="button" aria-label="查看对应PRD说明">2</span>
+          <!-- 隐藏的 rangeFilter 供 applyFilters 读取 -->
+          <select id="rangeFilter" style="display:none">
+            <option value="今日">今日</option>
+            <option value="近 7 天" selected>近 7 天</option>
+            <option value="近 30 天">近 30 天</option>
+            <option value="custom" id="customOption">自定义</option>
+          </select>
+          <!-- 日期范围选择器 -->
+          <div class="dr-wrap" id="drWrap">
+            <label class="field dr-preset-label">
+              <select id="drPreset">
+                <option value="">快速选择时间</option>
+                <option value="today">今日</option>
+                <option value="7d" selected>近 7 天</option>
+                <option value="30d">近 30 天</option>
+              </select>
+            </label>
+            <div class="field dr-trigger" id="drTrigger" tabindex="0" role="button">
+              <span id="drTriggerText">开始时间 ~ 结束时间</span>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0"><rect x="1.5" y="2.5" width="12" height="11" rx="1.5" stroke="#94a3b8" stroke-width="1.3"/><path d="M5 1v3M10 1v3M1.5 6.5h12" stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <!-- 隐藏 inputs 供 getDayCount 读取 -->
+            <input type="hidden" id="dateStart">
+            <input type="hidden" id="dateEnd">
+            <!-- 日历面板 -->
+            <div class="dr-panel" id="drPanel">
+              <div class="dr-months">
+                <div class="dr-month">
+                  <div class="dr-month-head">
+                    <button type="button" class="dr-nav" id="drPrev">‹</button>
+                    <span id="drLabelL"></span>
+                    <span></span>
+                  </div>
+                  <div class="dr-grid dr-wdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+                  <div class="dr-grid dr-days" id="drDaysL"></div>
+                </div>
+                <div class="dr-month">
+                  <div class="dr-month-head">
+                    <span></span>
+                    <span id="drLabelR"></span>
+                    <button type="button" class="dr-nav" id="drNext">›</button>
+                  </div>
+                  <div class="dr-grid dr-wdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+                  <div class="dr-grid dr-days" id="drDaysR"></div>
+                </div>
+              </div>
+              <div class="dr-footer">
+                <button type="button" class="btn ghost" id="drConfirm">确认</button>
+              </div>
+            </div>
+          </div>
+          <label class="field">店铺
+            <select id="shopFilter">
+              <option selected>全部已接入店铺</option>
+              <option>PANAPOPO医疗旗舰店</option>
+              <option>PANAPOPO旗舰店（众创）</option>
+              <option>PANAPOPO医疗器械旗舰店</option>
+              <option>PANAPOPO保健按摩旗舰店</option>
+              <option>PANAPOPO器械保健官方旗舰店</option>
+            </select>
+          </label>
+          <button class="btn ghost" id="queryBtn" type="button">查询</button>
+          <button class="btn ghost" id="refreshBtn" type="button">刷新</button>
+          <button class="btn primary" id="exportBtn" type="button">导出</button>
+          <span class="prd-badge" data-prd="export" tabindex="0" role="button" aria-label="查看对应PRD说明">3</span>
+        </div>
+      </header>
+
+      <main>
+        <div class="notice">
+          <div>
+            <strong>同步提示：<span class="prd-badge" data-prd="notice-banner" tabindex="0" role="button" aria-label="查看字段说明">4</span></strong>
+            单工单状态目标 1 分钟内可见；当前存在 2 条日志延迟、1 条钉钉推送回执待同步。
+          </div>
+          <span>数据每 5 分钟自动刷新，支持手动刷新</span>
+        </div>
+
+        <section class="section" aria-labelledby="summaryTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="summaryTitle">当前范围汇总<span class="prd-badge" data-prd="summary" tabindex="0" role="button" aria-label="查看对应PRD说明">5</span></h2>
+              <p>顶部时间、店铺和查询动作决定整页统计口径；明细查询不影响本区数据。</p>
+            </div>
+            <div class="last-refresh">最近刷新：<span id="lastRefresh">2026-06-20 10:25:00</span></div>
+          </div>
+          <div class="metrics">
+            <article class="metric accent">
+              <div class="label">今日处理工单数</div>
+              <div class="value" id="mv-today">128</div>
+              <div class="hint">进入 Agent 并完成处理 / 转人工</div>
+            </article>
+            <article class="metric">
+              <div class="label">累计处理工单数</div>
+              <div class="value" id="mv-total">1,246</div>
+              <div class="hint">试点期间累计处理量</div>
+            </article>
+            <article class="metric">
+              <div class="label">自动处理成功数</div>
+              <div class="value" id="mv-success">832</div>
+              <div class="hint">自动提交成功，含完结、补发、退款、跟进</div>
+            </article>
+            <article class="metric">
+              <div class="label">转人工数</div>
+              <div class="value" id="mv-human">356</div>
+              <div class="hint">已推送钉钉对接群（PDD工单推送群）</div>
+            </article>
+            <article class="metric">
+              <div class="label">处理失败数<span class="prd-badge" data-prd="m-fail" tabindex="0" role="button" aria-label="查看字段说明">6</span></div>
+              <div class="value" id="mv-fail">58</div>
+              <div class="hint">最终仍停留在失败状态；已转人工的不重复计入</div>
+            </article>
+          </div>
+
+          <div class="metrics-aux-label">辅助参考</div>
+
+          <div class="metrics-aux">
+            <article class="metric aux">
+              <div class="label">工单总量</div>
+              <div class="value" id="mv-allTotal">1,392</div>
+              <div class="hint">含 V1 物流范围 + 非物流类跳过工单</div>
+            </article>
+            <article class="metric aux">
+              <div class="label">非物流类工单数</div>
+              <div class="value" id="mv-nonLogistic">146</div>
+              <div class="hint">已跳过，不进入核心指标分母</div>
+            </article>
+            <article class="metric aux">
+              <div class="label">Agent 平均响应时长<span class="prd-badge" data-prd="m-avgtime" tabindex="0" role="button" aria-label="查看字段说明">7</span></div>
+              <div class="value" id="mv-avgTime">2m 18s</div>
+              <div class="hint">工单进入队列 → Agent 开始处理；仅统计自动成功工单</div>
+            </article>
+            <article class="metric aux">
+              <div class="label">响应时长缩短比<span class="prd-badge" data-prd="m-shorten" tabindex="0" role="button" aria-label="查看字段说明">8</span></div>
+              <div class="value" id="mv-shorten">96%</div>
+              <div class="hint">人工基准 30～60 分钟（依据不足，仅供参考）</div>
+            </article>
+          </div>
+        </section>
+
+        <div class="grid-2">
+          <section class="section" aria-labelledby="sceneTitle">
+            <div class="section-head">
+              <div>
+                <h2 id="sceneTitle">当前范围 · 场景汇总<span class="prd-badge" data-prd="scene-summary" tabindex="0" role="button" aria-label="查看对应PRD说明">9</span></h2>
+                <p>当前范围由顶部时间、店铺和查询动作决定；V1 不做趋势分析和店铺排行。</p>
+              </div>
+              <span class="tag blue">7 个场景</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>物流子场景</th>
+                    <th>总数<span class="prd-badge" data-prd="col-scene-total" tabindex="0" role="button" aria-label="查看字段说明">10</span></th>
+                    <th>自动成功</th>
+                    <th>转人工</th>
+                    <th>失败/异常</th>
+                    <th>主要转人工原因<span class="prd-badge" data-prd="col-scene-reason" tabindex="0" role="button" aria-label="查看字段说明">11</span></th>
+                  </tr>
+                </thead>
+                <tbody id="sceneRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="section" aria-labelledby="healthTitle">
+            <div class="section-head">
+              <div>
+                <h2 id="healthTitle">试点健康度<span class="prd-badge" data-prd="health" tabindex="0" role="button" aria-label="查看对应PRD说明">12</span></h2>
+                <p>辅助判断试点稳定性，属于观察项，不作为强验收主指标。</p>
+              </div>
+            </div>
+            <div class="side-card">
+              <div class="score-card">
+                <div class="ring">
+                  <span class="prd-badge ring-badge" data-prd="h-autosuccess" tabindex="0" role="button" aria-label="查看字段说明">13</span>
+                  <div>
+                    <strong>66.8%</strong>
+                    <span>应自动处理成功率</span>
+                  </div>
+                </div>
+                <div class="score-list">
+                  <div class="score-item"><span>应转人工正确率<span class="prd-badge" data-prd="h-correctHuman" tabindex="0" role="button" aria-label="查看字段说明">14</span></span><strong>96.4%</strong></div>
+                  <div class="score-item"><span>转人工原因完整率<span class="prd-badge" data-prd="h-reasonComplete" tabindex="0" role="button" aria-label="查看字段说明">15</span></span><strong>98.1%</strong></div>
+                  <div class="score-item"><span>日志完整率<span class="prd-badge" data-prd="h-logComplete" tabindex="0" role="button" aria-label="查看字段说明">16</span></span><strong>97.6%</strong></div>
+                  <div class="score-item"><span>人工基准响应时长<span class="prd-badge" data-prd="h-humanBaseline" tabindex="0" role="button" aria-label="查看字段说明">17</span></span><strong>30～60 分钟 *</strong></div>
+                </div>
+              </div>
+              <p style="margin:10px 0 0;font-size:11.5px;color:var(--muted);line-height:1.5;">* 人工基准时长为客服人员经验估算，依据支撑不足，仅供参考。如试点期间采集到实测数据，可更新基准值。</p>
+            </div>
+          </section>
+        </div>
+
+        <section class="section" aria-labelledby="ticketTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="ticketTitle">工单明细列表<span class="prd-badge" data-prd="ticket-list" tabindex="0" role="button" aria-label="查看对应PRD说明">18</span></h2>
+              <p>明细查询只影响下方列表，不反向改变汇总指标和场景汇总口径。</p>
+            </div>
+            <span class="tag neutral">共 <span id="visibleCount">0</span> 条</span>
+          </div>
+          <div class="filters">
+            <label class="field">工单
+              <input id="keywordInput" type="search" placeholder="工单/订单/运单号">
+            </label>
+            <label class="field">子场景
+              <select id="sceneFilter">
+                <option value="">全部子场景</option>
+              </select>
+            </label>
+            <label class="field">转人工
+              <select id="humanFilter">
+                <option value="">全部</option>
+                <option value="是">是</option>
+                <option value="否">否</option>
+              </select>
+            </label>
+            <label class="field">原因
+              <select id="reasonFilter">
+                <option value="">全部原因</option>
+                <option>微信群对接</option>
+                <option>关键字段缺失</option>
+                <option>买家表达不明确</option>
+                <option>系统异常</option>
+                <option>超权限/高风险</option>
+                <option>凭证缺失</option>
+              </select>
+            </label>
+            <label class="field">状态
+              <select id="listStatusFilter">
+                <option value="">全部状态</option>
+                <option>处理成功</option>
+                <option>处理失败</option>
+                <option>已转人工</option>
+                <option>等待外部结果</option>
+                <option>处理中</option>
+              </select>
+            </label>
+            <button class="btn" id="resetBtn" type="button">重置查询</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>工单编号</th>
+                  <th>店铺</th>
+                  <th>订单号</th>
+                  <th>运单号</th>
+                  <th>物流子场景</th>
+                  <th>Agent 状态<span class="prd-badge" data-prd="col-status" tabindex="0" role="button" aria-label="查看字段说明">19</span></th>
+                  <th>处理结果<span class="prd-badge" data-prd="col-result" tabindex="0" role="button" aria-label="查看字段说明">20</span></th>
+                  <th>是否转人工<span class="prd-badge" data-prd="col-ishuman" tabindex="0" role="button" aria-label="查看字段说明">21</span></th>
+                  <th>原因<span class="prd-badge" data-prd="col-reason" tabindex="0" role="button" aria-label="查看字段说明">22</span></th>
+                  <th>耗时<span class="prd-badge" data-prd="col-duration" tabindex="0" role="button" aria-label="查看字段说明">23</span></th>
+                  <th>备注<span class="prd-badge" data-prd="col-remark" tabindex="0" role="button" aria-label="查看字段说明">24</span></th>
+                  <th>详情</th>
+                </tr>
+              </thead>
+              <tbody id="ticketRows"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="emptyState">没有匹配的工单，换个查询条件试试。</div>
+          <div class="pagination" id="pagination">
+            <div class="page-size-wrap">
+              每页
+              <select id="pageSizeSelect">
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+              条
+            </div>
+            <div class="page-nav">
+              <button class="page-btn" id="prevBtn" type="button">‹ 上一页</button>
+              <span class="page-info" id="pageInfo">第 1 页 / 共 1 页</span>
+              <button class="page-btn" id="nextBtn" type="button">下一页 ›</button>
+            </div>
+            <div class="page-jump">
+              跳至
+              <input id="pageJumpInput" type="number" min="1" value="1">
+              页
+              <button class="page-btn" id="pageJumpBtn" type="button">GO</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <h3 id="drawerTitle">工单详情<span class="prd-badge" data-prd="detail" tabindex="0" role="button" aria-label="查看对应PRD说明">25</span></h3>
+        <p id="drawerSub">Agent 判断依据、执行动作、外部对接结果与完整日志</p>
+      </div>
+      <button class="icon-btn" id="closeDrawer" type="button" aria-label="关闭详情">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const scenes = [
+      { name: "消费者担忧货物无法送达", total: 238, success: 172, human: 51, fail: 15, reason: "微信群对接、48h 起算点缺失" },
+      { name: "消费者反馈未收到货", total: 184, success: 118, human: 54, fail: 12, reason: "签收凭证缺失、地址电话缺失" },
+      { name: "物流轨迹已退回", total: 151, success: 91, human: 48, fail: 12, reason: "买家诉求不明确、退款条件待确认" },
+      { name: "派件阶段物流断更", total: 176, success: 132, human: 35, fail: 9, reason: "预计送达日期不可选" },
+      { name: "消费者未收到货 · 处理情况跟进", total: 142, success: 79, human: 52, fail: 11, reason: "聊天语义不明确、买家未回复" },
+      { name: "召回 / 物流在途退款工单", total: 213, success: 139, human: 62, fail: 12, reason: "拦截凭证缺失、超权限/高风险" },
+      { name: "物流异常，消费者要求补寄", total: 142, success: 101, human: 54, fail: 8, reason: "库存缺失、补发单创建失败" }
+    ];
+
+    const tickets = [
+      {
+        id: "PDD-WL-20260620-0018",
+        shop: "PANAPOPO医疗旗舰店",
+        order: "2406208841290031",
+        waybill: "YT748562914CN",
+        scene: "消费者担忧货物无法送达",
+        status: "处理成功",
+        result: "完结",
+        human: "否",
+        reason: "物流已正常更新",
+        start: "2026-06-20 09:42:13",
+        end: "2026-06-20 09:44:21",
+        duration: "2m 08s",
+        warehouse: "筑越仓",
+        courier: "圆通速递",
+        judgement: "最近轨迹 3 小时内更新，未命中临近超时，符合自动选择“物流已正常更新”。",
+        action: "读取订单和物流轨迹，选择平台处理项，发送解释话术并提交。",
+        copy: "您好，包裹物流已恢复正常更新，目前正在运输中，请您耐心等待签收。",
+        evidence: "物流轨迹截图 1 张",
+        external: "无需外部对接",
+        remark: "自动完结，物流 3 小时内有新轨迹",
+        logs: ["读取工单基础信息", "读取 OMS 仓库与运单信息", "判断物流正常更新", "提交处理项并记录日志"]
+      },
+      {
+        id: "PDD-WL-20260620-0024",
+        shop: "PANAPOPO旗舰店（众创）",
+        order: "2406208841291087",
+        waybill: "SF1539027742",
+        scene: "消费者反馈未收到货",
+        status: "已转人工",
+        result: "转人工",
+        human: "是",
+        reason: "凭证缺失",
+        start: "2026-06-20 09:51:02",
+        end: "2026-06-20 09:52:46",
+        duration: "1m 44s",
+        warehouse: "代发仓",
+        courier: "顺丰速运",
+        judgement: "签收未收到分支需要送达地址和签收凭证，当前对接结果无有效凭证。",
+        action: "生成接管摘要并推送钉钉对接群（PDD工单推送群）。",
+        copy: "已核实订单签收状态，但缺少签收未收到处理所需凭证，需人工接管核实。",
+        evidence: "缺少签收凭证",
+        external: "金山文档读取结果为空，需人工补充",
+        remark: "导出复盘重点：补充签收未收到凭证来源",
+        logs: ["读取工单和订单信息", "识别为签收未收到", "尝试读取外部凭证", "凭证缺失，推送钉钉对接群"]
+      },
+      {
+        id: "PDD-WL-20260620-0036",
+        shop: "PANAPOPO医疗器械旗舰店",
+        order: "2406208841292306",
+        waybill: "JDVA00926318411",
+        scene: "物流轨迹已退回",
+        status: "已转人工",
+        result: "转人工",
+        human: "是",
+        reason: "买家表达不明确",
+        start: "2026-06-20 10:03:45",
+        end: "2026-06-20 10:06:02",
+        duration: "2m 17s",
+        warehouse: "筑越仓",
+        courier: "京东物流",
+        judgement: "轨迹显示退回，但聊天记录中买家未明确选择退款或补发。",
+        action: "保留已读取信息，生成下一步建议：人工确认买家诉求。",
+        copy: "包裹物流出现退回异常，建议先与买家确认退款或补发诉求后再处理。",
+        evidence: "退回轨迹截图、聊天记录摘要",
+        external: "无需外部对接",
+        remark: "需人工确认退款或补发诉求",
+        logs: ["读取退回轨迹", "读取买家聊天记录", "判断诉求不明确", "推送钉钉对接群"]
+      },
+      {
+        id: "PDD-WL-20260620-0041",
+        shop: "PANAPOPO医疗旗舰店",
+        order: "2406208841293317",
+        waybill: "ZTO77231090853",
+        scene: "派件阶段物流断更",
+        status: "等待外部结果",
+        result: "跟进",
+        human: "否",
+        reason: "等待 TMS 催件结果",
+        start: "2026-06-20 10:12:20",
+        end: "-",
+        duration: "进行中",
+        warehouse: "筑越仓",
+        courier: "中通快递",
+        judgement: "物流处于派件阶段且超过 SOP 断更阈值，需要 TMS 催件。",
+        action: "已提交 TMS 客服物流对接表单，等待结果回写。",
+        copy: "已联系物流核实派送进度，将继续跟进。",
+        evidence: "派件轨迹截图",
+        external: "TMS 表单已提交，回执待同步",
+        remark: "等待 TMS 催件结果回写",
+        logs: ["读取派件轨迹", "判断派件断更", "提交 TMS 催件", "进入等待外部结果"]
+      },
+      {
+        id: "PDD-WL-20260620-0059",
+        shop: "PANAPOPO保健按摩旗舰店",
+        order: "2406208841294608",
+        waybill: "YD884611208994",
+        scene: "消费者未收到货 · 处理情况跟进",
+        status: "处理成功",
+        result: "确认收到",
+        human: "否",
+        reason: "买家反馈已收到",
+        start: "2026-06-20 10:18:28",
+        end: "2026-06-20 10:20:11",
+        duration: "1m 43s",
+        warehouse: "代发仓",
+        courier: "韵达快递",
+        judgement: "聊天记录中买家明确反馈已收到，符合上传聊天记录并确认拿到快递。",
+        action: "上传聊天记录截图，选择确认拿到快递并提交。",
+        copy: "已核实买家反馈收到包裹，工单按确认收到处理。",
+        evidence: "聊天记录截图 2 张",
+        external: "无需外部对接",
+        remark: "聊天记录可作为确认收到凭证",
+        logs: ["读取历史处理记录", "识别买家已收到", "上传聊天凭证", "提交处理成功"]
+      },
+      {
+        id: "PDD-WL-20260620-0067",
+        shop: "PANAPOPO旗舰店（众创）",
+        order: "2406208841295809",
+        waybill: "STO55201773422",
+        scene: "召回 / 物流在途退款工单",
+        status: "处理失败",
+        result: "—",
+        human: "否",
+        reason: "系统异常",
+        start: "2026-06-20 10:21:01",
+        end: "2026-06-20 10:24:09",
+        duration: "3m 08s",
+        warehouse: "代发仓",
+        courier: "申通快递",
+        judgement: "订单未离开发货地且有拦截成功凭证，满足同意退款条件。",
+        action: "提交退款时页面返回异常，重试 3 次后仍失败，已记录失败原因并标记处理失败。",
+        copy: "系统异常，暂未发送买家话术。",
+        evidence: "拦截成功凭证",
+        external: "金山文档拦截结果：成功",
+        remark: "重试 3 次后仍失败，处理失败；待人工排查后补发或退款",
+        logs: ["读取物流阶段", "校验低值品/拦截品标识", "读取拦截成功凭证", "提交退款时页面异常", "重试 3 次后仍失败，记录处理失败"]
+      },
+      {
+        id: "PDD-WL-20260620-0072",
+        shop: "PANAPOPO器械保健官方旗舰店",
+        order: "2406208841296720",
+        waybill: "YTO768091235CN",
+        scene: "物流异常，消费者要求补寄",
+        status: "已转人工",
+        result: "转人工",
+        human: "是",
+        reason: "微信群对接",
+        start: "2026-06-20 10:26:18",
+        end: "2026-06-20 10:27:05",
+        duration: "47s",
+        warehouse: "代发仓",
+        courier: "圆通速递",
+        judgement: "补发需要联系仓库群确认库存，命中 V1 不自动化的微信群对接分支。",
+        action: "推送钉钉对接群（PDD工单推送群），摘要包含仓库、快递、原单轨迹和补发诉求。",
+        copy: "该工单需要微信群对接仓库，Agent 已按规则转人工。",
+        evidence: "原单异常轨迹截图",
+        external: "微信群对接，不自动处理",
+        remark: "命中微信群对接分支，V1 按规则转人工",
+        logs: ["识别物流异常补寄", "读取 OMS 库存为空", "命中微信群对接", "生成接管摘要并推送钉钉对接群"]
+      },
+      {
+        id: "PDD-WL-20260621-0083",
+        shop: "PANAPOPO医疗旗舰店",
+        order: "2406218841297001",
+        waybill: "YT748891023CN",
+        scene: "物流异常，消费者要求补寄",
+        status: "处理成功",
+        result: "补发成功",
+        human: "否",
+        reason: "库存充足，补发创建成功",
+        start: "2026-06-21 09:10:02",
+        end: "2026-06-21 09:12:44",
+        duration: "2m 42s",
+        warehouse: "筑越仓",
+        courier: "圆通速递",
+        judgement: "物流显示异常，OMS 库存充足，满足补发条件，无需微信群对接。",
+        action: "创建补发单并提交，发送告知话术。",
+        copy: "您好，已为您安排补发，新包裹预计 1-3 个工作日内发出，请注意查收。",
+        evidence: "OMS 库存截图、补发单号",
+        external: "无需外部对接",
+        remark: "补发成功，库存充足",
+        logs: ["读取物流异常轨迹", "查询 OMS 库存", "创建补发单", "提交成功"]
+      },
+      {
+        id: "PDD-WL-20260621-0091",
+        shop: "PANAPOPO旗舰店（众创）",
+        order: "2406218841297218",
+        waybill: "SF1539048811",
+        scene: "消费者担忧货物无法送达",
+        status: "处理成功",
+        result: "完结",
+        human: "否",
+        reason: "物流轨迹正常更新",
+        start: "2026-06-21 10:05:13",
+        end: "2026-06-21 10:07:01",
+        duration: "1m 48s",
+        warehouse: "代发仓",
+        courier: "顺丰速运",
+        judgement: "最近轨迹 2 小时内更新，未命中超时阈值。",
+        action: "读取轨迹，选择平台处理项并提交。",
+        copy: "您好，包裹物流正常更新中，目前在运输途中，请您耐心等待。",
+        evidence: "物流轨迹截图",
+        external: "无需外部对接",
+        remark: "自动完结",
+        logs: ["读取物流轨迹", "判断轨迹正常", "提交处理项", "记录日志"]
+      },
+      {
+        id: "PDD-WL-20260621-0104",
+        shop: "PANAPOPO保健按摩旗舰店",
+        order: "2406218841297503",
+        waybill: "JDVA00982741822",
+        scene: "物流轨迹已退回",
+        status: "处理成功",
+        result: "退款成功",
+        human: "否",
+        reason: "买家明确要退款",
+        start: "2026-06-21 10:22:05",
+        end: "2026-06-21 10:24:38",
+        duration: "2m 33s",
+        warehouse: "代发仓",
+        courier: "京东物流",
+        judgement: "轨迹退回且聊天记录中买家明确要求退款，满足同意退款条件。",
+        action: "提交同意退款，发送确认话术。",
+        copy: "您好，已为您申请退款，预计 1-3 个工作日内到账，感谢您的理解。",
+        evidence: "退回轨迹、聊天记录截图",
+        external: "无需外部对接",
+        remark: "退款成功",
+        logs: ["读取退回轨迹", "读取聊天记录", "判断诉求明确退款", "提交退款成功"]
+      },
+      {
+        id: "PDD-WL-20260621-0117",
+        shop: "PANAPOPO医疗器械旗舰店",
+        order: "2406218841297904",
+        waybill: "ZTO77298101234",
+        scene: "派件阶段物流断更",
+        status: "已转人工",
+        result: "转人工",
+        human: "是",
+        reason: "关键字段缺失",
+        start: "2026-06-21 10:44:18",
+        end: "2026-06-21 10:46:02",
+        duration: "1m 44s",
+        warehouse: "筑越仓",
+        courier: "中通快递",
+        judgement: "派件阶段断更，但订单收货地址缺少门牌号，无法通过 TMS 催件。",
+        action: "生成接管摘要推送钉钉对接群，提示人工补充收货地址。",
+        copy: "该工单收货地址不完整，Agent 已按规则转人工处理。",
+        evidence: "派件轨迹截图",
+        external: "TMS 因地址缺失无法催件",
+        remark: "地址字段缺失，转人工补充",
+        logs: ["读取派件轨迹", "识别断更", "校验收货地址", "地址缺失推送钉钉对接群"]
+      },
+      {
+        id: "PDD-WL-20260621-0128",
+        shop: "PANAPOPO器械保健官方旗舰店",
+        order: "2406218841298201",
+        waybill: "YD884699312115",
+        scene: "消费者反馈未收到货",
+        status: "处理成功",
+        result: "完结",
+        human: "否",
+        reason: "已签收，凭证齐全",
+        start: "2026-06-21 11:03:45",
+        end: "2026-06-21 11:05:22",
+        duration: "1m 37s",
+        warehouse: "代发仓",
+        courier: "韵达快递",
+        judgement: "物流显示已签收，签收凭证完整，判断包裹已送达。",
+        action: "上传签收凭证，选择已签收处理项并提交。",
+        copy: "您好，根据物流记录，包裹已于近期完成签收，如有疑问请联系快递核实。",
+        evidence: "签收凭证截图",
+        external: "无需外部对接",
+        remark: "已签收完结",
+        logs: ["读取签收状态", "核验签收凭证", "判断已签收", "提交完结"]
+      },
+      {
+        id: "PDD-WL-20260622-0139",
+        shop: "PANAPOPO旗舰店（众创）",
+        order: "2406228841298509",
+        waybill: "STO55209918872",
+        scene: "召回 / 物流在途退款工单",
+        status: "处理成功",
+        result: "退款成功",
+        human: "否",
+        reason: "在途拦截成功",
+        start: "2026-06-22 09:15:30",
+        end: "2026-06-22 09:18:02",
+        duration: "2m 32s",
+        warehouse: "代发仓",
+        courier: "申通快递",
+        judgement: "订单未离开发货地，拦截凭证完整，满足同意退款条件。",
+        action: "提交退款，发送确认话术。",
+        copy: "您好，已为您完成在途拦截并申请退款，预计 1-3 个工作日内到账。",
+        evidence: "拦截成功凭证",
+        external: "金山文档拦截结果：成功",
+        remark: "在途拦截退款成功",
+        logs: ["读取物流阶段", "核验拦截凭证", "确认未离开发货地", "提交退款成功"]
+      },
+      {
+        id: "PDD-WL-20260622-0145",
+        shop: "PANAPOPO医疗旗舰店",
+        order: "2406228841298801",
+        waybill: "YT749012344CN",
+        scene: "消费者反馈未收到货",
+        status: "处理成功",
+        result: "完结",
+        human: "否",
+        reason: "物流显示签收",
+        start: "2026-06-22 09:31:00",
+        end: "2026-06-22 09:33:11",
+        duration: "2m 11s",
+        warehouse: "筑越仓",
+        courier: "圆通速递",
+        judgement: "物流显示已签收，签收凭证完整，判断已送达。",
+        action: "上传凭证并提交处理。",
+        copy: "您好，根据物流记录包裹已签收，如有问题请联系当地快递网点核实。",
+        evidence: "签收凭证截图",
+        external: "无需外部对接",
+        remark: "已签收完结",
+        logs: ["读取签收状态", "核验凭证", "提交完结"]
+      },
+      {
+        id: "PDD-WL-20260622-0158",
+        shop: "PANAPOPO保健按摩旗舰店",
+        order: "2406228841299102",
+        waybill: "JDVA01003298411",
+        scene: "派件阶段物流断更",
+        status: "已转人工",
+        result: "转人工",
+        human: "是",
+        reason: "超权限/高风险",
+        start: "2026-06-22 10:02:14",
+        end: "2026-06-22 10:03:55",
+        duration: "1m 41s",
+        warehouse: "代发仓",
+        courier: "京东物流",
+        judgement: "订单金额超 500 元，命中高风险订单分支，V1 不自动催件。",
+        action: "推送钉钉对接群，备注高风险标识。",
+        copy: "该订单因金额较高命中人工核查规则，Agent 已转人工处理。",
+        evidence: "物流断更轨迹截图",
+        external: "无需外部对接",
+        remark: "高金额订单，转人工核查",
+        logs: ["读取派件轨迹", "校验订单金额", "命中高风险规则", "推送钉钉对接群"]
+      },
+      {
+        id: "PDD-WL-20260622-0163",
+        shop: "PANAPOPO医疗器械旗舰店",
+        order: "2406228841299408",
+        waybill: "ZTO77312009988",
+        scene: "消费者未收到货 · 处理情况跟进",
+        status: "处理失败",
+        result: "—",
+        human: "否",
+        reason: "系统异常",
+        start: "2026-06-22 10:18:33",
+        end: "2026-06-22 10:21:44",
+        duration: "3m 11s",
+        warehouse: "筑越仓",
+        courier: "中通快递",
+        judgement: "跟进工单应上传聊天凭证，但平台 API 返回超时，无法完成上传。",
+        action: "重试 3 次后仍失败，记录处理失败。",
+        copy: "系统异常，暂未发送买家话术。",
+        evidence: "聊天记录截图（上传失败）",
+        external: "平台 API 超时",
+        remark: "平台 API 超时，重试 3 次失败",
+        logs: ["读取历史处理记录", "识别跟进工单", "尝试上传聊天凭证", "平台 API 超时", "重试 3 次后记录处理失败"]
+      },
+      {
+        id: "PDD-WL-20260622-0171",
+        shop: "PANAPOPO器械保健官方旗舰店",
+        order: "2406228841299711",
+        waybill: "YTO768201877CN",
+        scene: "消费者担忧货物无法送达",
+        status: "处理成功",
+        result: "完结",
+        human: "否",
+        reason: "轨迹正常更新",
+        start: "2026-06-22 10:38:09",
+        end: "2026-06-22 10:40:02",
+        duration: "1m 53s",
+        warehouse: "代发仓",
+        courier: "圆通速递",
+        judgement: "最近轨迹 1 小时内更新，未命中超时阈值，直接完结。",
+        action: "选择处理项并提交，发送安抚话术。",
+        copy: "您好，包裹物流正常更新，预计近期送达，请您耐心等待。",
+        evidence: "物流轨迹截图",
+        external: "无需外部对接",
+        remark: "自动完结",
+        logs: ["读取物流轨迹", "判断轨迹正常", "提交完结"]
+      }
+    ];
+
+    const sceneRows = document.getElementById("sceneRows");
+    const sceneFilter = document.getElementById("sceneFilter");
+    const ticketRows = document.getElementById("ticketRows");
+    const visibleCount = document.getElementById("visibleCount");
+    const emptyState = document.getElementById("emptyState");
+    const toast = document.getElementById("toast");
+    const drawer = document.getElementById("drawer");
+    const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const drawerBody = document.getElementById("drawerBody");
+    const drawerTitle = document.getElementById("drawerTitle");
+    const drawerSub = document.getElementById("drawerSub");
+
+    function statusTag(status) {
+      if (status === "处理成功") return "success";
+      if (status === "已转人工" || status === "等待外部结果") return "warning";
+      if (status === "处理失败") return "danger";
+      if (status === "处理中") return "blue";
+      return "neutral";
+    }
+
+    // ---- 模拟数据联动配置 ----
+    const BASE_METRICS = {
+      today: 128, total: 1246, success: 832, human: 356, fail: 58,
+      allTotal: 1392, nonLogistic: 146
+    };
+    const TIME_SCALE = { "今日": 0.10, "近 7 天": 1.0, "近 30 天": 4.2 };
+    const STORE_SCALE = {
+      "全部已接入店铺": 1.0,
+      "PANAPOPO医疗旗舰店": 0.24,
+      "PANAPOPO旗舰店（众创）": 0.28,
+      "PANAPOPO医疗器械旗舰店": 0.19,
+      "PANAPOPO保健按摩旗舰店": 0.16,
+      "PANAPOPO器械保健官方旗舰店": 0.13
+    };
+    const TIME_QUAL = {
+      "今日":    { avgTime: "1m 52s", shorten: "97%" },
+      "近 7 天": { avgTime: "2m 18s", shorten: "96%" },
+      "近 30 天":{ avgTime: "2m 45s", shorten: "95%" },
+      "custom":  { avgTime: "2m 31s", shorten: "96%" }
+    };
+    let currentSceneScale = 1;
+    let activeShopFilter = "";
+
+    // ---- 日期工具 ----
+    function toDateStr(d) {
+      return d.toISOString().slice(0, 10);
+    }
+    function initDateInputs(preset) {
+      const now = new Date();
+      const end = toDateStr(now);
+      let start;
+      if (preset === "今日") {
+        start = end;
+      } else if (preset === "近 7 天") {
+        const d = new Date(now); d.setDate(d.getDate() - 6);
+        start = toDateStr(d);
+      } else if (preset === "近 30 天") {
+        const d = new Date(now); d.setDate(d.getDate() - 29);
+        start = toDateStr(d);
+      } else {
+        return; // 自定义：不覆盖用户输入
+      }
+      document.getElementById("dateStart").value = start;
+      document.getElementById("dateEnd").value = end;
+    }
+    function getDayCount() {
+      const s = document.getElementById("dateStart").value;
+      const e = document.getElementById("dateEnd").value;
+      if (!s || !e) return 7;
+      const diff = (new Date(e) - new Date(s)) / 86400000 + 1;
+      return Math.max(1, Math.round(diff));
+    }
+
+    function applyFilters() {
+      const timeRange = document.getElementById("rangeFilter").value;
+      const store = document.getElementById("shopFilter").value;
+      // 按天数缩放：基准是近7天=7天
+      const days = (timeRange === "custom") ? getDayCount() : (getDayCount());
+      const ts = Math.max(0.05, days / 7);
+      const ss = STORE_SCALE[store] ?? 1;
+      const scale = ts * ss;
+      const fmt = (n) => Math.round(n).toLocaleString("zh-CN");
+
+      document.getElementById("mv-today").textContent = fmt(BASE_METRICS.today * ss);
+      document.getElementById("mv-total").textContent = fmt(BASE_METRICS.total * scale);
+      document.getElementById("mv-success").textContent = fmt(BASE_METRICS.success * scale);
+      document.getElementById("mv-human").textContent = fmt(BASE_METRICS.human * scale);
+      document.getElementById("mv-fail").textContent = fmt(BASE_METRICS.fail * scale);
+      document.getElementById("mv-allTotal").textContent = fmt(BASE_METRICS.allTotal * scale);
+      document.getElementById("mv-nonLogistic").textContent = fmt(BASE_METRICS.nonLogistic * scale);
+      const qual = TIME_QUAL[timeRange] ?? TIME_QUAL["custom"];
+      document.getElementById("mv-avgTime").textContent = qual.avgTime;
+      document.getElementById("mv-shorten").textContent = qual.shorten;
+
+      currentSceneScale = scale;
+      renderScenes();
+
+      activeShopFilter = (store === "全部已接入店铺") ? "" : store;
+      renderTickets(true);
+
+      updateRefreshTime();
+      const startVal = document.getElementById("dateStart").value;
+      const endVal = document.getElementById("dateEnd").value;
+      const rangeLabel = (timeRange === "custom") ? `${startVal} 至 ${endVal}` : timeRange;
+      showToast(`已按「${rangeLabel} · ${store}」更新统计口径`);
+    }
+
+    function renderScenes() {
+      sceneRows.innerHTML = scenes.map((scene) => {
+        const s = Math.round;
+        const total   = s(scene.total   * currentSceneScale);
+        const success = s(scene.success * currentSceneScale);
+        const human   = s(scene.human   * currentSceneScale);
+        const fail    = s(scene.fail    * currentSceneScale);
+        const successRate = Math.round((success / total) * 100);
+        return `
+          <tr>
+            <td class="scene-name">${scene.name}<div class="bar"><span style="width:${successRate}%"></span></div></td>
+            <td>${total}</td>
+            <td><span class="tag success">${success}</span></td>
+            <td><span class="tag warning">${human}</span></td>
+            <td><span class="tag danger">${fail}</span></td>
+            <td class="reason">${scene.reason}</td>
+          </tr>
+        `;
+      }).join("");
+
+      const currentOptions = Array.from(sceneFilter.options).map(o => o.value);
+      scenes.forEach((scene) => {
+        if (!currentOptions.includes(scene.name)) {
+          const opt = document.createElement("option");
+          opt.value = scene.name;
+          opt.textContent = scene.name;
+          sceneFilter.appendChild(opt);
+        }
+      });
+    }
+
+    // ---- 分页状态 ----
+    let currentPage = 1;
+    let lastFiltered = [];
+
+    function getPageSize() {
+      return parseInt(document.getElementById("pageSizeSelect").value, 10);
+    }
+
+    function renderTickets(resetPage) {
+      if (resetPage) currentPage = 1;
+      const keyword = document.getElementById("keywordInput").value.trim().toLowerCase();
+      const scene = document.getElementById("sceneFilter").value;
+      const human = document.getElementById("humanFilter").value;
+      const reason = document.getElementById("reasonFilter").value;
+      const listStatus = document.getElementById("listStatusFilter").value;
+
+      lastFiltered = tickets.filter((item) => {
+        const haystack = `${item.id} ${item.order} ${item.waybill} ${item.shop}`.toLowerCase();
+        return (!keyword || haystack.includes(keyword)) &&
+          (!activeShopFilter || item.shop === activeShopFilter) &&
+          (!scene || item.scene === scene) &&
+          (!human || item.human === human) &&
+          (!reason || item.reason.includes(reason)) &&
+          (!listStatus || item.status === listStatus);
+      });
+
+      visibleCount.textContent = lastFiltered.length;
+      renderPage();
+    }
+
+    function renderPage() {
+      const pageSize = getPageSize();
+      const totalPages = Math.max(1, Math.ceil(lastFiltered.length / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const pageItems = lastFiltered.slice(start, start + pageSize);
+
+      emptyState.style.display = lastFiltered.length ? "none" : "block";
+      document.getElementById("pagination").style.display = lastFiltered.length ? "flex" : "none";
+
+      ticketRows.innerHTML = pageItems.map((item) => `
+        <tr>
+          <td><strong>${item.id}</strong></td>
+          <td>${item.shop}</td>
+          <td>${item.order}</td>
+          <td>${item.waybill}</td>
+          <td class="reason">${item.scene}</td>
+          <td><span class="tag ${statusTag(item.status)}">${item.status}</span></td>
+          <td>${item.result}</td>
+          <td>${item.human}</td>
+          <td class="reason">${item.reason}</td>
+          <td>${item.duration}</td>
+          <td class="reason">${item.remark}</td>
+          <td><button class="link-btn" type="button" data-ticket="${item.id}">查看</button></td>
+        </tr>
+      `).join("");
+
+      document.getElementById("pageInfo").textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+      document.getElementById("prevBtn").disabled = currentPage <= 1;
+      document.getElementById("nextBtn").disabled = currentPage >= totalPages;
+      document.getElementById("pageJumpInput").value = currentPage;
+      document.getElementById("pageJumpInput").max = totalPages;
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function openDrawer(id) {
+      const item = tickets.find((ticket) => ticket.id === id);
+      if (!item) return;
+
+      drawerTitle.textContent = item.id;
+      drawerSub.textContent = `${item.shop} · ${item.scene}`;
+      drawerBody.innerHTML = `
+        <section class="detail-block">
+          <h4>工单基础信息<span class="prd-badge" data-prd="d-basic-group" tabindex="0" role="button" aria-label="查看字段说明">26</span></h4>
+          <div class="kv">
+            <div><span>店铺名称</span><strong>${item.shop}</strong></div>
+            <div><span>Agent 状态</span><strong><span class="tag ${statusTag(item.status)}">${item.status}</span></strong></div>
+            <div><span>处理结果</span><strong>${item.result}</strong></div>
+            <div><span>是否转人工</span><strong>${item.human}</strong></div>
+            <div><span>开始处理时间</span><strong>${item.start}</strong></div>
+            <div><span>完成时间</span><strong>${item.end}</strong></div>
+	            <div><span>处理耗时</span><strong>${item.duration}</strong></div>
+	            <div><span>失败/转人工原因</span><strong>${item.reason}</strong></div>
+	            <div><span>备注</span><strong>${item.remark}</strong></div>
+	          </div>
+        </section>
+        <section class="detail-block">
+          <h4>订单 / 物流 / OMS 关键数据<span class="prd-badge" data-prd="d-oms-group" tabindex="0" role="button" aria-label="查看字段说明">27</span></h4>
+          <div class="kv">
+            <div><span>订单号</span><strong>${item.order}</strong></div>
+            <div><span>运单号</span><strong>${item.waybill}</strong></div>
+            <div><span>快递公司</span><strong>${item.courier}</strong></div>
+            <div><span>发货仓库</span><strong>${item.warehouse}</strong></div>
+            <div><span>物流子场景</span><strong>${item.scene}</strong></div>
+            <div><span>外部对接结果</span><strong>${item.external}</strong></div>
+          </div>
+        </section>
+        <section class="detail-block">
+          <h4>Agent 判断结果与依据<span class="prd-badge" data-prd="d-judgement" tabindex="0" role="button">28</span></h4>
+          <p class="copy">${item.judgement}</p>
+        </section>
+        <section class="detail-block">
+          <h4>执行动作<span class="prd-badge" data-prd="d-action" tabindex="0" role="button">29</span></h4>
+          <p class="copy">${item.action}</p>
+        </section>
+        <section class="detail-block">
+          <h4>发送话术<span class="prd-badge" data-prd="d-copy" tabindex="0" role="button">30</span></h4>
+          <p class="copy">${item.copy}</p>
+        </section>
+        <section class="detail-block">
+          <h4>上传凭证<span class="prd-badge" data-prd="d-evidence" tabindex="0" role="button">31</span></h4>
+          <p class="copy">${item.evidence}</p>
+        </section>
+        <section class="detail-block">
+          <h4>完整操作日志时间线<span class="prd-badge" data-prd="d-logs" tabindex="0" role="button">32</span></h4>
+          <div class="timeline">
+            ${item.logs.map((log, index) => `
+              <div class="log-item">
+                <span class="log-time">${item.start} + ${index + 1} 步</span>
+                <span class="log-text">${log}</span>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+      `;
+
+      drawer.classList.add("show");
+      drawerBackdrop.classList.add("show");
+      drawer.setAttribute("aria-hidden", "false");
+	    }
+
+    function updateRefreshTime() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const text = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      document.getElementById("lastRefresh").textContent = text;
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("show");
+      drawerBackdrop.classList.remove("show");
+      drawer.setAttribute("aria-hidden", "true");
+    }
+
+    document.getElementById("queryBtn").addEventListener("click", () => {
+      applyFilters();
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", () => {
+      applyFilters();
+      showToast("已刷新当前看板数据");
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const timeRange = document.getElementById("rangeFilter").value;
+      const store = document.getElementById("shopFilter").value;
+      const keyword = document.getElementById("keywordInput").value.trim().toLowerCase();
+      const scene = document.getElementById("sceneFilter").value;
+      const human = document.getElementById("humanFilter").value;
+      const reason = document.getElementById("reasonFilter").value;
+      const listStatus = document.getElementById("listStatusFilter").value;
+      const rows = tickets.filter((item) => {
+        const haystack = `${item.id} ${item.order} ${item.waybill} ${item.shop}`.toLowerCase();
+        return (!keyword || haystack.includes(keyword)) &&
+          (!activeShopFilter || item.shop === activeShopFilter) &&
+          (!scene || item.scene === scene) &&
+          (!human || item.human === human) &&
+          (!reason || item.reason.includes(reason)) &&
+          (!listStatus || item.status === listStatus);
+      });
+      const header = ["工单编号","店铺","订单号","运单号","物流子场景","Agent状态","处理结果","是否转人工","转人工原因","处理耗时","仓库","快递","备注"].join(",");
+      const csvRows = rows.map(r => [
+        r.id, r.shop, r.order, r.waybill, r.scene, r.status, r.result,
+        r.human, r.reason, r.duration, r.warehouse, r.courier, r.remark
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
+      const csv = "﻿" + [header, ...csvRows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const startVal2 = document.getElementById("dateStart").value;
+      const endVal2 = document.getElementById("dateEnd").value;
+      const exportLabel = (timeRange === "custom") ? `${startVal2}_${endVal2}` : timeRange;
+      a.download = `工单明细_${exportLabel}_${store}_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`已导出 ${rows.length} 条工单明细（CSV）`);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.getElementById("keywordInput").value = "";
+      document.getElementById("sceneFilter").value = "";
+      document.getElementById("humanFilter").value = "";
+      document.getElementById("reasonFilter").value = "";
+      document.getElementById("listStatusFilter").value = "";
+      renderTickets(true);
+      showToast("已重置明细查询条件");
+    });
+
+    ["keywordInput", "sceneFilter", "humanFilter", "reasonFilter", "listStatusFilter"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => renderTickets(true));
+      document.getElementById(id).addEventListener("change", () => renderTickets(true));
+    });
+
+    // 分页控件事件
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      if (currentPage > 1) { currentPage--; renderPage(); }
+    });
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      const totalPages = Math.max(1, Math.ceil(lastFiltered.length / getPageSize()));
+      if (currentPage < totalPages) { currentPage++; renderPage(); }
+    });
+    document.getElementById("pageSizeSelect").addEventListener("change", () => {
+      currentPage = 1;
+      renderPage();
+    });
+    document.getElementById("pageJumpBtn").addEventListener("click", () => {
+      const input = document.getElementById("pageJumpInput");
+      const totalPages = Math.max(1, Math.ceil(lastFiltered.length / getPageSize()));
+      const target = Math.min(Math.max(1, parseInt(input.value, 10) || 1), totalPages);
+      currentPage = target;
+      renderPage();
+    });
+    document.getElementById("pageJumpInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("pageJumpBtn").click();
+    });
+
+    ticketRows.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-ticket]");
+      if (button) openDrawer(button.dataset.ticket);
+    });
+
+    document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
+    drawerBackdrop.addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeDrawer();
+    });
+
+    // ===== 日历选择器 =====
+    (function initDatePicker() {
+      const _now = new Date();
+      let dpStart = null, dpEnd = null, dpHover = null, dpSelecting = false;
+      let viewY = _now.getFullYear(), viewM = _now.getMonth();
+
+      function p2(n) { return String(n).padStart(2, '0'); }
+      function ds(y, m, d) { return `${y}-${p2(m + 1)}-${p2(d)}`; }
+      function todayS() { return ds(_now.getFullYear(), _now.getMonth(), _now.getDate()); }
+      function daysIn(y, m) { return new Date(y, m + 1, 0).getDate(); }
+      function dowOffset(y, m) { return (new Date(y, m, 1).getDay() + 6) % 7; } // Mon=0
+      function nextYM() { return viewM === 11 ? { y: viewY + 1, m: 0 } : { y: viewY, m: viewM + 1 }; }
+
+      function renderMonth(daysEl, labelEl, y, m) {
+        const td = todayS();
+        const effEnd = dpSelecting ? (dpHover || dpStart) : dpEnd;
+        const rMin = dpStart && effEnd ? (dpStart < effEnd ? dpStart : effEnd) : null;
+        const rMax = dpStart && effEnd ? (dpStart > effEnd ? dpStart : effEnd) : null;
+        labelEl.textContent = `${y}年${m + 1}月`;
+        let html = '';
+        for (let i = 0; i < dowOffset(y, m); i++) html += '<span class="dr-cell dr-blank"></span>';
+        for (let d = 1; d <= daysIn(y, m); d++) {
+          const dstr = ds(y, m, d);
+          const future = dstr > td;
+          const isToday = dstr === td;
+          const isStart = dstr === rMin;
+          const isEnd = dstr === rMax;
+          const inRange = rMin && rMax && dstr > rMin && dstr < rMax;
+          const single = isStart && isEnd;
+          let cls = 'dr-cell';
+          if (future) cls += ' dr-future';
+          if (isToday && !isStart && !isEnd) cls += ' dr-today';
+          if (inRange) cls += ' dr-range';
+          if (isStart) cls += ' dr-start';
+          if (isEnd) cls += ' dr-end';
+          if (single) cls += ' dr-single';
+          html += `<span class="${cls}" data-d="${dstr}">${d}</span>`;
+        }
+        daysEl.innerHTML = html;
+      }
+
+      function render() {
+        const { y: ry, m: rm } = nextYM();
+        renderMonth(document.getElementById('drDaysL'), document.getElementById('drLabelL'), viewY, viewM);
+        renderMonth(document.getElementById('drDaysR'), document.getElementById('drLabelR'), ry, rm);
+        syncDisplay();
+      }
+
+      function syncDisplay() {
+        const triggerText = document.getElementById('drTriggerText');
+        if (!dpStart) {
+          triggerText.textContent = '开始时间 ~ 结束时间';
+          triggerText.classList.remove('has-value');
+          return;
+        }
+        const s = dpStart && dpEnd ? (dpStart < dpEnd ? dpStart : dpEnd) : dpStart;
+        const e = dpStart && dpEnd ? (dpStart > dpEnd ? dpStart : dpEnd) : null;
+        triggerText.textContent = s.replace(/-/g, '/') + ' ~ ' + (e ? e.replace(/-/g, '/') : '?');
+        triggerText.classList.add('has-value');
+        if (dpStart && dpEnd) {
+          document.getElementById('dateStart').value = s;
+          document.getElementById('dateEnd').value = e;
+        }
+      }
+
+      function openPanel() { document.getElementById('drPanel').classList.add('open'); }
+      function closePanel() {
+        document.getElementById('drPanel').classList.remove('open');
+        if (dpSelecting) { dpStart = null; dpEnd = null; dpSelecting = false; }
+        dpHover = null;
+        render();
+      }
+
+      function setPreset(preset) {
+        const td = todayS();
+        if (preset === 'today') {
+          dpStart = td; dpEnd = td;
+          document.getElementById('rangeFilter').value = '今日';
+        } else if (preset === '7d') {
+          const d = new Date(_now); d.setDate(d.getDate() - 6);
+          dpStart = ds(d.getFullYear(), d.getMonth(), d.getDate()); dpEnd = td;
+          document.getElementById('rangeFilter').value = '近 7 天';
+        } else if (preset === '30d') {
+          const d = new Date(_now); d.setDate(d.getDate() - 29);
+          dpStart = ds(d.getFullYear(), d.getMonth(), d.getDate()); dpEnd = td;
+          document.getElementById('rangeFilter').value = '近 30 天';
+        }
+        dpSelecting = false;
+        render();
+      }
+
+      // 触发器点击
+      document.getElementById('drTrigger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('drPanel').classList.contains('open') ? closePanel() : openPanel();
+      });
+      // 面板内任意点击阻止冒泡，避免 DOM 重绘后 contains() 误判关闭
+      document.getElementById('drPanel').addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('click', (e) => {
+        if (!document.getElementById('drWrap').contains(e.target)) {
+          if (document.getElementById('drPanel').classList.contains('open')) closePanel();
+        }
+      });
+
+      // 日历点击 & hover
+      function onDayClick(e) {
+        e.stopPropagation();
+        const cell = e.target.closest('.dr-cell[data-d]');
+        if (!cell || cell.classList.contains('dr-future')) return;
+        const d = cell.dataset.d;
+        if (!dpSelecting) {
+          dpStart = d; dpEnd = null; dpSelecting = true;
+        } else {
+          dpEnd = d; dpSelecting = false;
+          document.getElementById('rangeFilter').value = 'custom';
+        }
+        render();
+      }
+      function onDayHover(e) {
+        if (!dpSelecting) return;
+        const cell = e.target.closest('.dr-cell[data-d]');
+        if (cell && !cell.classList.contains('dr-future')) { dpHover = cell.dataset.d; render(); }
+      }
+      function onDayLeave() { if (dpSelecting) { dpHover = null; render(); } }
+
+      ['drDaysL', 'drDaysR'].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('click', onDayClick);
+        el.addEventListener('mousemove', onDayHover);
+        el.addEventListener('mouseleave', onDayLeave);
+      });
+
+      document.getElementById('drPrev').addEventListener('click', () => {
+        if (viewM === 0) { viewM = 11; viewY--; } else viewM--;
+        render();
+      });
+      document.getElementById('drNext').addEventListener('click', () => {
+        if (viewM === 11) { viewM = 0; viewY++; } else viewM++;
+        render();
+      });
+      document.getElementById('drConfirm').addEventListener('click', () => {
+        document.getElementById('drPanel').classList.remove('open');
+        dpHover = null; dpSelecting = false;
+      });
+
+      // 快选下拉
+      document.getElementById('drPreset').addEventListener('change', (e) => {
+        if (e.target.value) setPreset(e.target.value);
+      });
+
+      // 初始化：近7天
+      setPreset('7d');
+      render();
+    })();
+
+    // 初始化：静默执行一次
+    (function initDashboard() {
+      const days = getDayCount();
+      const ts = Math.max(0.05, days / 7);
+      const ss = STORE_SCALE[document.getElementById("shopFilter").value] ?? 1;
+      currentSceneScale = ts * ss;
+      renderScenes();
+      renderTickets(true);
+    })();
+  </script>
+
+  <!-- ===== PRD 标注层（演示新增） ===== -->
+  <div class="prd-pop-backdrop" id="prdPopBackdrop"></div>
+  <div class="prd-popover" id="prdPopover" role="dialog" aria-modal="true">
+    <div class="prd-pop-head">
+      <div>
+        <span class="prd-pop-tag" id="prdPopTag">PRD</span>
+        <h4 class="prd-pop-title" id="prdPopTitle"></h4>
+      </div>
+      <button class="prd-pop-close" id="prdPopClose" type="button" aria-label="关闭">×</button>
+    </div>
+
+    <!-- 展示态 -->
+    <div id="prdPopView">
+      <div class="prd-pop-body" id="prdPopBody"></div>
+      <div class="prd-pop-source" id="prdPopSource"></div>
+      <div class="prd-pop-actions">
+        <button type="button" id="prdPopEditBtn">编辑</button>
+        <button type="button" id="prdPopResetBtn" style="display:none;">恢复默认</button>
+        <span class="spacer"></span>
+        <button type="button" class="danger" id="prdPopDeleteBtn" style="display:none;">删除标注</button>
+      </div>
+    </div>
+
+    <!-- 编辑态 -->
+    <div id="prdPopEdit" style="display:none;">
+      <label class="prd-pop-edit-field">
+        <input type="text" id="prdPopEditTitle" placeholder="标注标题">
+      </label>
+      <label class="prd-pop-edit-field">
+        <textarea id="prdPopEditBody" placeholder="标注内容"></textarea>
+      </label>
+      <div class="prd-pop-actions">
+        <button type="button" class="primary" id="prdPopSaveBtn">保存</button>
+        <button type="button" id="prdPopCancelBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自定义标注点的承载层，铺在整个app容器上 -->
+  <div class="custom-pin-layer" id="customPinLayer"></div>
+
+  <div class="placing-hint">点击页面任意位置添加标注 · 再次点击下方按钮退出</div>
+
+  <div class="anno-toolbar">
+    <span class="anno-fab sync-status" id="annoSyncStatus">☁️ 已连接</span>
+    <button type="button" class="anno-fab" id="annoAddBtn">📍 添加标注</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // ===== PRD 标注数据（示例：根据 PRD v1 第 4.2 节"数据看板"逐条映射） =====
+    // 这是内置角标的默认文字，作为"恢复默认"的依据，不会被编辑功能直接修改
+    const PRD_NOTES_DEFAULT = {
+      /* ===== 区域级（方形角标）：8个页面区块定位 ===== */
+      "overview": {
+        tag: "PRD 1.1 / 1.2",
+        title: "项目背景与 V1.0 目标",
+        body: "当前拼多多物流类工单由客服人工按 SOP 处理，频次高且具备明确判断逻辑。\n\nV1.0 目标：让 Agent 像真人客服一样自动操作工单/订单后台，结合 OMS、TMS、金山文档完成可自动化判断和处理；无法处理、规则缺失、系统不可访问或命中高风险时，推送钉钉对接群（PDD工单推送群）人工接管。"
+      },
+      "global-range": {
+        tag: "PRD 6.1",
+        title: "顶部范围控制",
+        body: "时间范围、店铺范围、查询按钮。店铺默认「全部已接入店铺」，V1 中等同于全部试点店铺，不代表全部历史店铺。\n\n用户选完时间和店铺后点击「查询」，整页汇总、场景和明细按当前条件刷新。"
+      },
+      "notice-banner": {
+        tag: "PRD 6.1 · 异常状态",
+        title: "同步提示条",
+        body: "完整触发规则（PRD 6.1）：\n\n1. 失败类异常一旦发生立即提示。\n2. 延迟类异常超过1个刷新周期仍未同步时提示（V1刷新周期=5分钟）。\n3. 提示条展示于顶部全局筛选下方，作为常驻告警区域；无异常时不占位。\n4. 异常恢复后，下一次自动/手动刷新时自动消失，V1不做人工确认关闭。\n5. 提示内容覆盖4类：日志延迟、钉钉推送回执待同步、数据同步失败、看板刷新失败。\n6. 文案以简短汇总为主，PRD给出的示例文案与本原型展示文案完全一致。\n\n⚠️ 开发注意：本原型为静态演示，固定显示该提示条；按PRD规则第3点，实际开发时无异常应不占位（不渲染/高度为0），不能像本原型一样常驻展示。"
+      },
+      "summary": {
+        tag: "PRD 6.1",
+        title: "当前范围汇总",
+        body: "展示9个指标：工单总量、非物流类工单数、今日处理数、累计处理数、自动成功数、转人工数、处理失败数、Agent平均响应时长、响应时长缩短比。\n\n以下4个为简单指标，口径一致无特殊逻辑：\n· 今日处理工单数 / 累计处理工单数：含待重试/处理中/等待外部结果/处理成功/处理失败/已转人工，不含待处理和已跳过工单；二者仅统计时间窗口不同（今日 vs 试点开始日起累计）。\n· 自动处理成功数 / 转人工数：均为按Agent状态简单计数（COUNT WHERE 状态=对应状态）。\n\n处理失败数、Agent平均响应时长、响应时长缩短比有特殊计算逻辑，见对应字段角标。\n\n工单总量 = V1物流工单数 + 非物流类工单数（含跳过）；非物流类工单数不进入自动成功率、转人工率等核心指标分母。"
+      },
+      "scene-summary": {
+        tag: "PRD 6.2",
+        title: "场景汇总",
+        body: "按7个物流场景展示当前范围内的处理分布。V1只做基础汇总，不做趋势分析、店铺排行或人效分析。\n\n以下4列为简单字段，无特殊逻辑：\n· 物流子场景：枚举值固定为PRD 1.3.1确认的7个场景。\n· 自动成功 / 转人工 / 失败异常：均为按Agent状态在该场景下的简单计数。\n\n「工单总数」「主要转人工原因」有特殊口径要求，见对应字段角标。"
+      },
+      "health": {
+        tag: "PRD 6.5",
+        title: "试点健康度",
+        body: "用于辅助判断V1试点是否稳定，属于观察项，不作为强验收主指标。\n\n⚠️ 关键约束（PRD 6.5）：健康度中的「应自动处理成功率」「应转人工正确率」必须与第13.1节核心指标判定口径保持一致，不另设一套计算口径。"
+      },
+      "ticket-list": {
+        tag: "PRD 6.3 + 6.1",
+        title: "工单明细列表 + 明细查询",
+        body: "按工单维度展示12个字段（含详情入口）。\n\n以下5列为系统直传字段，无加工逻辑：工单编号、店铺、订单号、运单号、物流子场景。\n\n其余6列（状态/结果/转人工/原因/耗时/备注）有特殊逻辑，见对应字段角标。\n\n上方明细查询5个筛选条件（工单号/订单号/运单号关键字、物流子场景、是否转人工、失败/转人工原因、状态）为AND组合关系，互不冲突，各自枚举值已在对应表头列角标中说明，此处不重复。\n\n明细查询只影响本列表，不反向改变上方汇总指标和场景汇总口径。"
+      },
+      "export": {
+        tag: "PRD 6.1.1",
+        title: "导出规则",
+        body: "导出对象：当前查询范围内可见的工单明细。\n\n导出内容（13列，PRD已固定）：工单编号、店铺名称、订单号、运单号、物流子场景、Agent状态、处理结果、是否转人工、转人工/失败原因、开始处理时间、完成时间、处理耗时、备注。\n\n⚠️ V1明确不导出汇总统计，导出后不改变当前页面筛选和统计口径；不做独立账号权限管理。"
+      },
+      "detail": {
+        tag: "PRD 6.4",
+        title: "工单详情",
+        body: "点击列表「详情入口」打开详情抽屉，不跳转新页面，内容只读，不改变当前汇总口径和列表筛选。\n\n展示顺序：工单基础信息 → 订单/物流/OMS关键数据 → Agent判断结果与依据 → 执行动作 → 发送话术 → 上传凭证 → 外部对接结果 → 失败/转人工原因 → 完整操作日志时间线。"
+      },
+
+      /* ===== 字段级（圆形角标）：当前范围汇总 7指标→5角标 ===== */
+      "m-fail": {
+        tag: "PRD 6.1",
+        title: "处理失败数",
+        body: "处理失败数 = COUNT(工单) WHERE Agent状态=处理失败（即重试3次后仍失败，最终停留在失败状态）。\n\n⚠️ 边界条件（PRD 6.1）：\n1. 不包含中间态「待重试」——重试中的工单不计入，重试成功后归入对应结果，重试3次后仍失败才计入本字段。\n2. 重试失败后已成功转人工的工单不双算，只计入「转人工数」，不计入「处理失败数」。"
+      },
+      "m-avgtime": {
+        tag: "PRD 6.1",
+        title: "Agent 平均响应时长",
+        body: "计算公式：\nAVG(Agent开始处理时间 − 工单进入队列时间)，仅对 Agent状态=处理成功 的工单统计。\n\n字段来源（PRD 11）：「工单进入队列时间」= 工单同步进入 Agent 待处理队列的时间；「Agent开始处理时间」= 开始读取/判断时间。\n\n衡量的是 Agent 的响应速度，即工单出现后 Agent 多快开始处理，而非完整处理耗时。"
+      },
+      "m-shorten": {
+        tag: "PRD 13.2",
+        title: "响应时长缩短比",
+        body: "计算公式：\n响应时长缩短比 = (人工基准响应时长 − Agent平均响应时长) / 人工基准响应时长\n\n口径说明：\n1. Agent平均响应时长：自动成功工单从工单进入队列到 Agent 开始处理的平均时长（响应速度）。\n2. 人工基准响应时长：30～60 分钟（工单生成到人工开始处理的等待时长；业务估算，依据不足，仅供参考）。\n3. 看板展示单一估算值（以60分钟为基准计算），依据不足，仅供参考。\n4. 转人工工单不纳入 Agent 平均响应时长统计。\n5. 需同时展示人工基准响应时长和 Agent 平均响应时长，便于业务理解计算依据。\n\n属于试点价值观察指标，不作为强验收指标。"
+      },
+
+      /* ===== 字段级：场景汇总表头 6列→3角标 ===== */
+      "col-scene-total": {
+        tag: "PRD 6.2",
+        title: "工单总数",
+        body: "统计当前查询范围内已进入Agent且属于V1物流7场景的全部工单，包含待处理、待重试、处理中、等待外部结果、处理成功、处理失败、已转人工；不包含已跳过工单。\n\n⚠️ 注意与顶部「今日处理工单数」的口径差异（PRD 6.2明确）：场景汇总「工单总数」含「待处理」，而「今日处理工单数」不含「待处理」——两者统计维度不同，数字不要求相等；筛选范围（时间+店铺）保持一致即可。开发需重点核对，是评审时最容易被挑出的对账点。"
+      },
+      "col-scene-reason": {
+        tag: "PRD 6.2 + 10",
+        title: "主要转人工原因",
+        body: "取该场景下转人工原因出现频次最高的类型，枚举值对应PRD 10「异常与兜底规则」表（微信群对接 / 关键字段缺失 / 业务规则缺失冲突 / 买家表达不明确 / 超权限高风险 / 凭证缺失 / 系统异常等）。\n\n⚠️ 与「工单明细-原因」字段共用同一套原因字典，需保持枚举值一致，避免两处展示口径不统一。"
+      },
+
+      /* ===== 字段级：试点健康度 5个（不合并） ===== */
+      "h-autosuccess": {
+        tag: "PRD 6.5 + 13.1",
+        title: "应自动处理成功率",
+        body: "计算公式（与13.1节完全一致）：\n应自动处理成功率 = 应自动处理且最终自动处理成功的工单数 / 应自动处理工单数\n\n判定时点（PRD 13.1）：「应自动处理工单」必须由Agent在执行平台提交/退款/补发/上传凭证等关键动作前预判并写入日志（对应PRD 11新增的「处理前预判分类」字段），不能处理完成后倒推归类。\n\n关联验收建议值：≥60%（PRD 13）。"
+      },
+      "h-correctHuman": {
+        tag: "PRD 6.5 + 13.1",
+        title: "应转人工正确率",
+        body: "计算公式（与13.1节完全一致）：\n应转人工正确率 = 应转人工且实际已转人工的工单数 / 应转人工工单数\n\n判定时点（PRD 13.1）：「应转人工工单」必须由Agent在执行转人工推送前预判并写入日志，不能事后倒推。\n\n关联验收建议值：≥95%（PRD 13）。属于安全兜底类指标，误判代价高。"
+      },
+      "h-reasonComplete": {
+        tag: "PRD 6.5",
+        title: "转人工原因完整率",
+        body: "计算公式：\n转人工原因完整率 = 已记录转人工原因工单数 / 转人工工单数\n\n字段来源：PRD 11操作日志要求中的「转人工原因」字段，要求为结构化原因（非自由文本）。\n\n关联验收建议值：≥95%（PRD 13）。"
+      },
+      "h-logComplete": {
+        tag: "PRD 6.5",
+        title: "日志完整率",
+        body: "计算公式：\n日志完整率 = 日志完整工单数 / 当前范围V1工单总数\n\n必填字段清单见PRD 11操作日志要求（共26项）。本质是工程完整性问题，出现缺失建议视为bug而非容错范围。\n\n关联验收建议值：≥95%（PRD 13）。"
+      },
+      "h-humanBaseline": {
+        tag: "PRD 13.2",
+        title: "人工基准响应时长",
+        body: "对应PRD 13.2「响应时长缩短比」公式中的人工基准响应时长。\n\n含义：工单生成到人工开始处理的等待时长（响应速度），不是完整处理耗时。\n\n30～60 分钟（业务部门经验估算，依据不足，仅供参考）。如试点期间能采集到更精确的人工响应时长样本，可更新基准值。"
+      },
+
+      /* ===== 字段级：明细查询筛选 5个→1角标 ===== */
+
+      /* ===== 字段级：工单明细表头 11列→7角标 ===== */
+      "col-status": {
+        tag: "PRD 9",
+        title: "Agent 状态",
+        body: "完整状态机定义（PRD 9）：\n待处理 → 处理中 → 等待外部结果 → 处理成功 / 处理失败 / 已跳过 / 已转人工 / 待重试\n\n各状态进入条件和下一步流转详见PRD 9状态流转表，开发需严格按此实现状态机，不能自行新增/合并状态。\n\n注：工单明细列表（PRD 6.3）只展示「待处理、处理中、处理成功、处理失败、已转人工」5种，已跳过工单不进入本列表，等待外部结果/待重试为短暂中间态。"
+      },
+      "col-result": {
+        tag: "PRD 8（417-433行）",
+        title: "处理结果",
+        body: "枚举值（PRD 8已定义6个）：完结、跟进、补发成功、退款成功、确认收到、转人工。\n\n与「Agent状态」的区分（PRD原文明确）：\nAgent状态=系统流程状态；处理结果=业务处理结论。同一个Agent状态可能对应不同处理结果（例如「处理成功」可对应完结/补发成功/退款成功/确认收到）。\n\n⚠️「待重试」是Agent状态，不是处理结果，不在本枚举内。系统自动生成；未形成业务结论时为空或显示「—」。"
+      },
+      "col-ishuman": {
+        tag: "PRD 6.3",
+        title: "是否转人工",
+        body: "布尔字段，是/否。\n\n⚠️ 衍生逻辑：当Agent状态=已转人工时为「是」，否则为「否」。不是独立存储字段，建议由「Agent状态」字段计算得出，避免双字段不一致。"
+      },
+      "col-reason": {
+        tag: "PRD 10 + 11",
+        title: "转人工/失败原因",
+        body: "对应PRD 11操作日志要求中的「失败原因」/「转人工原因」字段，要求为结构化原因（非自由文本）。\n\n枚举值参考PRD 10「异常与兜底规则」表：微信群对接、关键字段缺失、业务规则缺失冲突、买家表达不明确、超权限/高风险、凭证缺失、系统异常等。\n\n⚠️ 与场景汇总「主要转人工原因」共用同一套字典，两处枚举值需保持一致。"
+      },
+      "col-duration": {
+        tag: "PRD 11",
+        title: "处理耗时",
+        body: "计算公式：\n处理耗时 = Agent完成时间 − Agent开始处理时间\n\n字段来源（PRD 11）：「Agent完成时间」= 成功、失败或转人工时间；「Agent开始处理时间」= 开始读取/判断时间。"
+      },
+      "col-remark": {
+        tag: "PRD 8 + 6.3",
+        title: "备注",
+        body: "字段定义（已在最新PRD补充）：系统自动生成的补充说明，用于解释处理结果、失败原因或转人工原因；V1不支持人工编辑，必填性为「否」。\n\n开发注意：这是生成字段，不是自由输入字段，需要明确生成规则模板（基于处理结果/失败原因/转人工原因自动拼接说明文案）。"
+      },
+
+      /* ===== 字段级：详情抽屉 20个→7角标 ===== */
+      "d-basic-group": {
+        tag: "PRD 6.4",
+        title: "工单基础信息9字段（合并说明）",
+        body: "店铺名称 / Agent状态 / 处理结果 / 是否转人工 / 开始处理时间 / 完成时间 / 处理耗时 / 失败转人工原因 / 备注。\n\n以上9个字段定义与工单明细列表中的同名字段完全一致，详细口径见列表对应表头角标，此处不重复展示。"
+      },
+      "d-oms-group": {
+        tag: "PRD 6.4 + 8",
+        title: "订单/物流/OMS关键数据6字段（合并说明）",
+        body: "订单号 / 运单号 / 快递公司 / 发货仓库 / 物流子场景 / 外部对接结果。\n\n均为系统直传展示字段，无额外计算逻辑。字段定义见PRD 8数据字段要求表；仓库/渠道对应关系见PRD 5.4（筑越仓→TMS；金山文档渠道含捷佑韵达/众邦/简卓圆通/亿哈/铭如；微信群渠道含捷佑中通/顺丰、简卓邮政、洁文及其他未列代发仓）。"
+      },
+      "d-judgement": {
+        tag: "PRD 5.2 + 6.4",
+        title: "Agent 判断结果与依据",
+        body: "对应PRD 11操作日志要求中两个字段的合并展示：判断结果（当前分支判断）+ 判断依据（SOP规则、字段、凭证）。\n\n具体判断逻辑请交叉参考PRD 5.2「七个物流场景处理规则」表中对应场景的「触发条件」「Agent必读数据」列——这是7个场景分支逻辑最核心的参考依据，开发实现时必须逐场景对照。"
+      },
+      "d-action": {
+        tag: "PRD 5.1 + 6.4",
+        title: "执行动作",
+        body: "字段定义（PRD 11）：点击选项、发送话术、上传凭证、创建补发、同意退款等具体执行内容。\n\n动作边界需符合PRD 5.1「自动处理边界」6条要求：规则明确、数据完整、系统可访问、操作项在授权范围内、外部对接结果可读取且明确、补发/退款满足SOP凭证权限要求。"
+      },
+      "d-copy": {
+        tag: "PRD 11",
+        title: "发送话术",
+        body: "字段定义（PRD 11）：实际发送给买家的话术内容，需留痕（PRD 1.4核心原则第5条：全流程留痕，话术须记录）。"
+      },
+      "d-evidence": {
+        tag: "PRD 10 + 11",
+        title: "上传凭证",
+        body: "字段定义（PRD 11）：凭证类型和文件/截图引用。\n\n凭证缺失时的处理规则见PRD 10「异常与兜底规则」：凭证缺失 → 转人工，需记录缺失凭证类型。"
+      },
+      "d-logs": {
+        tag: "PRD 6.4 + 11",
+        title: "完整操作日志时间线",
+        body: "本区块应完整覆盖PRD 11操作日志要求列出的全部字段（节选关键项）：\n工单编号、店铺名称、订单号、运单号、工单类型/子场景、Agent开始/完成处理时间、处理耗时、读取到的关键数据、判断结果、处理前预判分类、判断依据、执行动作、发送话术、话术来源（系统统一回复模板/Agent按SOP生成）、上传凭证、外部对接记录、处理状态、处理结果、失败原因、转人工原因、备注、接管目标（单独对接群）、接管群钉钉标识（PDD工单推送群，群号179525024697）、钉钉通知发送时间/状态、推送失败原因、地址表/权限表版本信息等。\n\n原型当前以「时间线」形式简化展示步骤摘要，开发实现时建议保留可展开查看完整结构化字段的能力，而非仅展示文字摘要。"
+      }
+    };
+
+    // ===================================================================
+    // 标注系统：编辑 / 新增标注点 / 实时同步到 Supabase（所有人共享同一份数据）
+    // ===================================================================
+
+    // 把自定义标注层移到 .app 内部，作为绝对定位的坐标基准
+    document.querySelector(".app").appendChild(document.getElementById("customPinLayer"));
+
+    const ANNOTATION_SOURCE = "拼多多物流工单处理Agent_V1.0 PRD 评审版 v1";
+    const EDIT_MODE = new URLSearchParams(window.location.search).get("edit") === "mengdie";
+
+    // ---- Supabase 连接配置 ----
+    const SUPABASE_URL = "https://uqqdfomevnoaqsadhvex.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxcWRmb21ldm5vYXFzYWRodmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjk0ODksImV4cCI6MjA5NzY0NTQ4OX0.Qqs_Z_rZzCkqIRebE2FMkewKuz9kn_3ErYlcbAcVsz8";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const TABLE = "prd_annotations";
+    const PROJECT_ID = "pdd-v1";
+    const ID_PREFIX  = PROJECT_ID + "-";
+
+    const syncStatusEl = document.getElementById("annoSyncStatus");
+    function setSyncStatus(state) {
+      syncStatusEl.classList.remove("error", "syncing");
+      if (state === "syncing") {
+        syncStatusEl.classList.add("syncing");
+        syncStatusEl.textContent = "☁️ 同步中…";
+      } else if (state === "error") {
+        syncStatusEl.classList.add("error");
+        syncStatusEl.textContent = "⚠️ 同步失败";
+      } else {
+        syncStatusEl.textContent = "☁️ 已连接";
+      }
+    }
+
+    let annoState = { overrides: {}, custom: [] };
+
+    async function loadAnnotationsFromCloud() {
+      setSyncStatus("syncing");
+      const { data, error } = await supabaseClient.from(TABLE).select("*").like("id", ID_PREFIX + "%");
+      if (error) {
+        console.warn("加载云端标注失败", error);
+        setSyncStatus("error");
+        return;
+      }
+      annoState.overrides = {};
+      annoState.custom = [];
+      (data || []).forEach((row) => {
+        if (row.type === "override") {
+          const key = row.id.slice(ID_PREFIX.length);
+          annoState.overrides[key] = { title: row.title, body: row.body };
+        } else if (row.type === "custom") {
+          annoState.custom.push({
+            id: row.id,
+            xPct: row.x_pct,
+            yPct: row.y_pct,
+            title: row.title,
+            body: row.body,
+          });
+        }
+      });
+      setSyncStatus("ok");
+      renderAllCustomPins();
+    }
+
+    async function upsertOverrideToCloud(key, title, body) {
+      setSyncStatus("syncing");
+      const { error } = await supabaseClient.from(TABLE).upsert({
+        id: ID_PREFIX + key, type: "override", title, body, updated_at: new Date().toISOString(),
+      });
+      setSyncStatus(error ? "error" : "ok");
+      if (error) console.warn("同步失败", error);
+      return !error;
+    }
+
+    async function deleteOverrideFromCloud(key) {
+      setSyncStatus("syncing");
+      const { error } = await supabaseClient.from(TABLE).delete().eq("id", ID_PREFIX + key).eq("type", "override");
+      setSyncStatus(error ? "error" : "ok");
+      return !error;
+    }
+
+    async function upsertCustomToCloud(item) {
+      setSyncStatus("syncing");
+      const { error } = await supabaseClient.from(TABLE).upsert({
+        id: item.id, type: "custom", title: item.title, body: item.body,
+        x_pct: item.xPct, y_pct: item.yPct, updated_at: new Date().toISOString(),
+      });
+      setSyncStatus(error ? "error" : "ok");
+      if (error) console.warn("同步失败", error);
+      return !error;
+    }
+
+    async function deleteCustomFromCloud(id) {
+      setSyncStatus("syncing");
+      const { error } = await supabaseClient.from(TABLE).delete().eq("id", id).eq("type", "custom");
+      setSyncStatus(error ? "error" : "ok");
+      return !error;
+    }
+
+    function getEffectiveNote(key) {
+      if (!key) return null;
+      if (key.startsWith(ID_PREFIX + "custom-")) {
+        const item = annoState.custom.find((c) => c.id === key);
+        if (!item) return null;
+        return { tag: "自定义标注", title: item.title, body: item.body, isCustom: true };
+      }
+      const base = PRD_NOTES_DEFAULT[key];
+      if (!base) return null;
+      const override = annoState.overrides[key];
+      if (override) {
+        return { tag: base.tag, title: override.title, body: override.body, isCustom: false, isEdited: true };
+      }
+      return { ...base, isCustom: false, isEdited: false };
+    }
+
+    // ---- 弹窗 DOM 引用 ----
+    const prdPopover = document.getElementById("prdPopover");
+    const prdPopBackdrop = document.getElementById("prdPopBackdrop");
+    const prdPopTitle = document.getElementById("prdPopTitle");
+    const prdPopTag = document.getElementById("prdPopTag");
+    const prdPopBody = document.getElementById("prdPopBody");
+    const prdPopSource = document.getElementById("prdPopSource");
+    const prdPopView = document.getElementById("prdPopView");
+    const prdPopEdit = document.getElementById("prdPopEdit");
+    const prdPopEditTitle = document.getElementById("prdPopEditTitle");
+    const prdPopEditBody = document.getElementById("prdPopEditBody");
+    const prdPopEditBtn = document.getElementById("prdPopEditBtn");
+    const prdPopResetBtn = document.getElementById("prdPopResetBtn");
+    const prdPopDeleteBtn = document.getElementById("prdPopDeleteBtn");
+    const prdPopSaveBtn = document.getElementById("prdPopSaveBtn");
+    const prdPopCancelBtn = document.getElementById("prdPopCancelBtn");
+
+    let currentKey = null;       // 当前打开的标注 key
+    let currentAnchorEl = null;  // 当前角标/标记点 DOM，用于关闭后重新定位
+
+    function renderPopoverView() {
+      const note = getEffectiveNote(currentKey);
+      if (!note) { closePrdPopover(); return; }
+
+      prdPopTag.textContent = note.tag;
+      prdPopTitle.textContent = note.title;
+      if (note.isEdited) {
+        const tag = document.createElement("span");
+        tag.className = "prd-pop-edited-tag";
+        tag.textContent = "已编辑";
+        prdPopTitle.appendChild(tag);
+      }
+      prdPopBody.textContent = note.body;
+      prdPopSource.textContent = "来源：" + ANNOTATION_SOURCE;
+
+      prdPopEditBtn.style.display = EDIT_MODE ? "" : "none";
+      prdPopResetBtn.style.display = EDIT_MODE && note.isEdited ? "" : "none";
+      prdPopDeleteBtn.style.display = EDIT_MODE && note.isCustom ? "" : "none";
+
+      prdPopView.style.display = "";
+      prdPopEdit.style.display = "none";
+    }
+
+    function positionPopover(anchorEl) {
+      const rect = anchorEl.getBoundingClientRect();
+      const popW = 420;
+      let left = rect.left;
+      let top = rect.bottom + 8;
+      if (left + popW > window.innerWidth - 16) left = window.innerWidth - popW - 16;
+      if (left < 16) left = 16;
+      if (top + 320 > window.innerHeight) top = Math.max(16, rect.top - 320);
+      prdPopover.style.left = `${left}px`;
+      prdPopover.style.top = `${top}px`;
+    }
+
+    function openPrdPopover(key, anchorEl, startInEdit) {
+      const note = getEffectiveNote(key);
+      if (!note) return;
+      currentKey = key;
+      currentAnchorEl = anchorEl;
+
+      prdPopover.classList.add("show");
+      prdPopBackdrop.classList.add("show");
+      positionPopover(anchorEl);
+
+      if (startInEdit) {
+        enterEditMode();
+      } else {
+        renderPopoverView();
+      }
+    }
+
+    function closePrdPopover() {
+      prdPopover.classList.remove("show");
+      prdPopBackdrop.classList.remove("show");
+      // 如果是刚创建、还没保存过内容的自定义标注点，关闭时直接丢弃，不留垃圾数据
+      if (currentKey && currentKey.startsWith(ID_PREFIX + "custom-")) {
+        const item = annoState.custom.find((c) => c.id === currentKey);
+        if (item && item.isNew) {
+          annoState.custom = annoState.custom.filter((c) => c.id !== currentKey);
+          const pinEl = document.querySelector(`.custom-pin[data-prd="${currentKey}"]`);
+          if (pinEl) pinEl.remove();
+        }
+      }
+      currentKey = null;
+      currentAnchorEl = null;
+    }
+
+    function enterEditMode() {
+      const note = getEffectiveNote(currentKey);
+      if (!note) return;
+      prdPopEditTitle.value = note.title;
+      prdPopEditBody.value = note.body;
+      prdPopView.style.display = "none";
+      prdPopEdit.style.display = "";
+      prdPopEditTitle.focus();
+    }
+
+    function exitEditMode() {
+      renderPopoverView();
+    }
+
+    async function saveCurrentEdit() {
+      const title = prdPopEditTitle.value.trim();
+      const body = prdPopEditBody.value.trim();
+      if (!title) {
+        prdPopEditTitle.focus();
+        return;
+      }
+      const key = currentKey;
+      prdPopSaveBtn.disabled = true;
+      let ok = true;
+      if (key.startsWith(ID_PREFIX + "custom-")) {
+        const item = annoState.custom.find((c) => c.id === key);
+        if (item) {
+          item.title = title;
+          item.body = body;
+          delete item.isNew;
+          ok = await upsertCustomToCloud(item);
+          const pinEl = document.querySelector(`.custom-pin[data-prd="${key}"]`);
+          if (pinEl) pinEl.setAttribute("aria-label", title);
+        }
+      } else {
+        annoState.overrides[key] = { title, body };
+        ok = await upsertOverrideToCloud(key, title, body);
+      }
+      prdPopSaveBtn.disabled = false;
+      if (!ok) showToast("同步失败，请检查网络后重试");
+      if (currentKey === key) renderPopoverView();
+    }
+
+    async function resetCurrentToDefault() {
+      if (!currentKey || currentKey.startsWith(ID_PREFIX + "custom-")) return;
+      const key = currentKey;
+      delete annoState.overrides[key];
+      const ok = await deleteOverrideFromCloud(key);
+      if (!ok) showToast("同步失败，请检查网络后重试");
+      if (currentKey === key) renderPopoverView();
+    }
+
+    async function deleteCurrentCustom() {
+      if (!currentKey || !currentKey.startsWith(ID_PREFIX + "custom-")) return;
+      const idToDelete = currentKey;
+      annoState.custom = annoState.custom.filter((c) => c.id !== idToDelete);
+      const pinEl = document.querySelector(`.custom-pin[data-prd="${idToDelete}"]`);
+      if (pinEl) pinEl.remove();
+      closePrdPopover();
+      const ok = await deleteCustomFromCloud(idToDelete);
+      if (!ok) showToast("同步失败，请检查网络后重试");
+    }
+
+    // ---- 自定义标注点：渲染 + 添加 ----
+    const pinLayer = document.getElementById("customPinLayer");
+
+    function renderCustomPin(item) {
+      const pin = document.createElement("button");
+      pin.type = "button";
+      pin.className = "custom-pin";
+      pin.dataset.prd = item.id;
+      pin.style.left = item.xPct + "%";
+      pin.style.top = item.yPct + "%";
+      pin.textContent = "+";
+      pin.setAttribute("aria-label", item.title || "自定义标注");
+      pinLayer.appendChild(pin);
+      return pin;
+    }
+
+    function renderAllCustomPins() {
+      pinLayer.innerHTML = "";
+      annoState.custom.forEach(renderCustomPin);
+    }
+    loadAnnotationsFromCloud();
+
+    let placingMark = false;
+    const addMarkBtn = document.getElementById("annoAddBtn");
+    if (!EDIT_MODE) addMarkBtn.style.display = "none";
+    addMarkBtn.addEventListener("click", () => {
+      placingMark = !placingMark;
+      document.body.classList.toggle("placing-mark", placingMark);
+      addMarkBtn.classList.toggle("active", placingMark);
+      addMarkBtn.textContent = placingMark ? "✕ 退出标注模式" : "📍 添加标注";
+    });
+
+    document.querySelector(".app").addEventListener("click", (event) => {
+      if (!EDIT_MODE || !placingMark) return;
+      // 点在已有角标/按钮/弹窗上时不新建标注点
+      if (event.target.closest(".prd-badge, .custom-pin, .prd-popover, .anno-toolbar, button, a, input, select, textarea")) {
+        return;
+      }
+      const appRect = document.querySelector(".app").getBoundingClientRect();
+      const xPct = ((event.clientX - appRect.left) / appRect.width) * 100;
+      const yPct = ((event.clientY - appRect.top) / appRect.height) * 100;
+
+      const id = ID_PREFIX + "custom-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+      const item = { id, xPct: Math.round(xPct * 100) / 100, yPct: Math.round(yPct * 100) / 100, title: "", body: "", isNew: true };
+      annoState.custom.push(item);
+      const pinEl = renderCustomPin(item);
+
+      // 退出标注模式，直接进入这个新标注点的编辑态
+      placingMark = false;
+      document.body.classList.remove("placing-mark");
+      addMarkBtn.classList.remove("active");
+      addMarkBtn.textContent = "📍 添加标注";
+
+      openPrdPopover(id, pinEl, true);
+    });
+
+    // ---- 事件委托：打开/编辑相关按钮 ----
+    document.addEventListener("click", (event) => {
+      const badge = event.target.closest(".prd-badge, .custom-pin");
+      if (badge) {
+        event.stopPropagation();
+        openPrdPopover(badge.dataset.prd, badge);
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const badge = event.target.closest(".prd-badge, .custom-pin");
+      if (badge) {
+        event.preventDefault();
+        openPrdPopover(badge.dataset.prd, badge);
+      }
+    });
+
+    prdPopEditBtn.addEventListener("click", enterEditMode);
+    prdPopCancelBtn.addEventListener("click", exitEditMode);
+    prdPopSaveBtn.addEventListener("click", saveCurrentEdit);
+    prdPopResetBtn.addEventListener("click", resetCurrentToDefault);
+    prdPopDeleteBtn.addEventListener("click", deleteCurrentCustom);
+
+    document.getElementById("prdPopClose").addEventListener("click", closePrdPopover);
+    prdPopBackdrop.addEventListener("click", closePrdPopover);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closePrdPopover();
+    });
+  </script>
+</body>
+</html>

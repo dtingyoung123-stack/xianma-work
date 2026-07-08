@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拼多多工单处理 SOP</title>
+<style>
+  :root{
+    --logistics:#0098b9;
+    --aftersale:#7574bc;
+    --refund:#fa8155;
+    --ship:#b7c82b;
+    --insale:#a165a8;
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --line:#e3e6ea;
+    --txt:#2a2e33;
+    --muted:#6b7280;
+    --red:#e32c2d;
+    --green:#15831c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.7;overflow-x:hidden;
+  }
+  header{
+    background:linear-gradient(120deg,#fa8155,#ef6c70);
+    color:#fff;padding:28px 24px;text-align:center;
+  }
+  header h1{margin:0;font-size:26px;letter-spacing:1px;}
+  header p{margin:8px 0 0;font-size:13px;opacity:.9;}
+  .wrap{width:min(calc(100vw - 32px),1280px);margin:0 auto;padding:20px 0 96px;}
+
+  /* 全局要求 */
+  .global{
+    background:#fff4e6;border:1px solid #ffd8a8;border-radius:12px;
+    padding:16px 20px;margin-bottom:24px;
+  }
+  .global h3{margin:0 0 10px;color:#d9480f;font-size:16px;}
+  .global ul{margin:0;padding-left:20px;}
+  .global li{margin:4px 0;font-size:14px;}
+
+  /* 分类导航 */
+  .nav{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+  .nav a{
+    text-decoration:none;color:#fff;padding:8px 16px;border-radius:20px;
+    font-size:14px;font-weight:600;
+  }
+
+  /* 分类块 */
+  .cat{margin-bottom:28px;border-radius:14px;overflow:hidden;background:var(--card);
+    box-shadow:0 2px 10px rgba(0,0,0,.05);}
+  .cat>summary{
+    list-style:none;cursor:pointer;padding:16px 20px;font-size:19px;font-weight:700;color:#fff;
+    display:flex;align-items:center;gap:10px;
+  }
+  .cat>summary::-webkit-details-marker{display:none;}
+  .cat>summary::before{content:"▸";transition:transform .2s;font-size:14px;}
+  .cat[open]>summary::before{transform:rotate(90deg);}
+  .badge{font-size:11px;background:rgba(255,255,255,.25);padding:2px 8px;border-radius:10px;font-weight:500;}
+
+  .cat-body{padding:14px 18px;}
+
+  /* 场景卡片 */
+  .scene{border:1px solid var(--line);border-radius:10px;margin:12px 0;overflow:hidden;}
+  .scene>summary{
+    list-style:none;cursor:pointer;padding:12px 16px;font-weight:600;font-size:15px;
+    background:#fafbfc;display:flex;align-items:center;gap:8px;
+  }
+  .scene>summary::-webkit-details-marker{display:none;}
+  .scene>summary::before{content:"+";color:var(--muted);font-weight:700;}
+  .scene[open]>summary::before{content:"−";}
+  .scene-body{padding:10px 16px 16px;}
+
+  /* 步骤流程 */
+  .step{
+    background:#f9fafb;border-left:3px solid #cbd5e1;border-radius:0 8px 8px 0;
+    padding:10px 14px;margin:10px 0;font-size:14px;white-space:pre-wrap;
+  }
+  .step .label{
+    display:inline-block;font-weight:700;color:#fff;background:#64748b;
+    padding:1px 8px;border-radius:6px;font-size:12px;margin-bottom:4px;
+  }
+  .branch-title{font-weight:700;margin:12px 0 4px;font-size:14px;color:#334155;}
+  .note{
+    background:#fffbea;border:1px dashed #f0c000;border-radius:8px;
+    padding:8px 12px;margin:8px 0;font-size:13px;color:#7a5c00;white-space:pre-wrap;
+  }
+  .talk{
+    background:#eef6ff;border:1px solid #b9dcff;border-radius:8px;
+    padding:8px 12px;margin:8px 0;font-size:13px;color:#1b4f8a;white-space:pre-wrap;
+  }
+  .talk::before{content:"💬 话术  ";font-weight:700;}
+  .red{color:var(--red);font-weight:700;}
+  .green{color:var(--green);font-weight:700;}
+  .arrow{color:#fa8155;font-weight:700;}
+  .nest{margin-left:16px;border-left:2px dotted #d1d5db;padding-left:14px;}
+  .tag-time{background:#ffe3e3;color:#c92a2a;}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px;}
+
+  /* 分区大标题 */
+  .part-head{
+    display:flex;align-items:center;gap:12px;margin:38px 0 18px;padding-bottom:10px;
+    border-bottom:2px solid #e3e6ea;
+  }
+  .part-head .no{
+    flex:0 0 auto;width:38px;height:38px;border-radius:10px;background:#fa8155;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;
+  }
+  .part-head h2{margin:0;font-size:22px;}
+  .part-head .sub{color:var(--muted);font-size:13px;margin-top:2px;}
+
+  /* 固定侧边栏导航 */
+  .side-nav{
+    position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:100;
+    display:flex;flex-direction:column;gap:4px;width:172px;
+    background:#fff;border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 4px 16px rgba(0,0,0,.10);padding:12px 10px;
+    max-height:88vh;overflow-y:auto;
+  }
+  .side-nav .sn-top{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1px;
+    padding:2px 6px 6px;border-bottom:1px solid var(--line);margin-bottom:4px;}
+  .side-nav a{
+    text-decoration:none;padding:9px 12px;border-radius:8px;font-size:14px;font-weight:700;
+    color:var(--txt);transition:all .15s;line-height:1.35;display:block;
+  }
+  .side-nav a.sub{
+    font-size:12.5px;font-weight:500;padding:6px 12px 6px 26px;color:#5c636a;position:relative;
+  }
+  .side-nav a.sub::before{content:"";position:absolute;left:15px;top:50%;
+    width:6px;height:6px;border-radius:50%;background:#ced4da;transform:translateY(-50%);}
+  .side-nav a:hover{background:#fff4ee;color:#fa8155;}
+  .side-nav a:hover.sub::before{background:#fa8155;}
+  .side-nav a.active{background:#fa8155;color:#fff;}
+  .side-nav a.active::before{background:#fff;}
+  .side-nav .sn-group{margin-top:4px;}
+  /* 宽屏：正文使用侧边栏以外的可用空间 */
+  @media(min-width:1341px){
+    .wrap{
+      width:calc(100vw - 252px);
+      max-width:1880px;
+      margin-left:220px;
+      margin-right:32px;
+      padding-top:22px;
+    }
+  }
+  @media(min-width:2160px){
+    .wrap{
+      width:min(calc(100vw - 300px),1880px);
+      margin-left:calc(220px + (100vw - 220px - min(calc(100vw - 300px),1880px)) / 2);
+      margin-right:auto;
+    }
+  }
+  /* 窄屏：侧边栏退化为顶部横向条 */
+  @media(max-width:1340px){
+    .wrap{width:min(calc(100vw - 28px),1180px);margin:0 auto;padding:18px 0 56px;}
+    .side-nav{position:static;transform:none;flex-direction:row;flex-wrap:wrap;
+      width:auto;margin-bottom:18px;max-height:none;gap:8px;}
+    .side-nav .sn-top{display:none;}
+    .side-nav a.sub::before{display:none;}
+    .side-nav a.sub{padding:9px 12px;border:1px solid var(--line);}
+  }
+
+  /* 待确定问题表 */
+  .qtable{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05);
+    table-layout:fixed;}
+  .qtable th,.qtable td{border:1px solid #eceff2;padding:10px 12px;text-align:left;vertical-align:top;}
+  .qtable th{background:#f1f3f5;font-size:13px;color:#495057;}
+  .qtable tr:nth-child(even) td{background:#fafbfc;}
+  .qtable th,.qtable td{word-break:break-word;overflow-wrap:anywhere;}
+  .qtable td.loc{color:var(--muted);white-space:normal;font-size:12.5px;}
+  .qtable td.qid{font-weight:700;color:#334155;white-space:nowrap;font-size:12.5px;}
+  .qtable th:nth-child(1),.qtable td:nth-child(1){width:96px;}
+  .qtable th:nth-child(2),.qtable td:nth-child(2){width:132px;}
+  .qtable th:nth-child(3),.qtable td:nth-child(3){width:30%;}
+  .qtable th:nth-child(4),.qtable td:nth-child(4){width:25%;}
+  .qtable th:nth-child(5),.qtable td:nth-child(5){width:82px;text-align:center;}
+  .qtable th:nth-child(6),.qtable td:nth-child(6){width:220px;}
+  #q5 .qtable th:nth-child(1),#q5 .qtable td:nth-child(1){width:96px;}
+  #q5 .qtable th:nth-child(2),#q5 .qtable td:nth-child(2){width:40%;}
+  #q5 .qtable th:nth-child(3),#q5 .qtable td:nth-child(3){width:28%;}
+  #q5 .qtable th:nth-child(4),#q5 .qtable td:nth-child(4){width:82px;text-align:center;}
+  #q5 .qtable th:nth-child(5),#q5 .qtable td:nth-child(5){width:220px;}
+  #q7 .qtable th:nth-child(1),#q7 .qtable td:nth-child(1){width:96px;}
+  #q7 .qtable th:nth-child(2),#q7 .qtable td:nth-child(2){width:160px;}
+  #q7 .qtable th:nth-child(3),#q7 .qtable td:nth-child(3){width:auto;}
+  #q7 .qtable th:nth-child(4),#q7 .qtable td:nth-child(4){width:92px;text-align:center;}
+  #q7 .qtable th:nth-child(5),#q7 .qtable td:nth-child(5){width:220px;}
+  .qgroup{margin:20px 0;overflow-x:visible;}
+  .qgroup h3{font-size:16px;margin:0 0 6px;color:#343a40;display:flex;align-items:center;gap:8px;}
+  .qgroup h3 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .ref-link{color:#1c7ed6;text-decoration:underline;text-underline-offset:2px;font-weight:700;cursor:pointer;}
+  .ref-link:hover{color:#0b5ed7;background:#e7f1ff;}
+  .source-hit{scroll-margin-top:18px;}
+  .source-hit.flash{animation:flashSource 5s ease;}
+  .inline-hit{
+    background:#ffe066;color:#1f2937;border-radius:4px;padding:1px 3px;
+    box-shadow:0 0 0 2px rgba(250,176,5,.28);
+    animation:inlineSource 5s ease;
+  }
+  @keyframes flashSource{
+    0%,100%{background:inherit;}
+    10%,90%{background:#fff3bf;}
+  }
+  @keyframes inlineSource{
+    0%,100%{background:transparent;box-shadow:none;}
+    10%,90%{background:#ffe066;box-shadow:0 0 0 2px rgba(250,176,5,.28);}
+  }
+
+  /* 优先级标记 */
+  .pri{display:inline-block;padding:1px 8px;border-radius:6px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}
+  .pri.p1{background:#e03131;}
+  .pri.p2{background:#f08c00;}
+  .pri.p3{background:#1c7ed6;}
+
+  /* AI 可行性卡片 */
+  .ai-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0;}
+  @media(max-width:820px){.ai-cols{grid-template-columns:1fr;}}
+  .ai-card{border-radius:12px;padding:14px 16px;border:1px solid var(--line);background:#fff;}
+  .ai-card h4{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px;}
+  .ai-card ul{margin:0;padding-left:18px;}
+  .ai-card li{margin:7px 0;font-size:13px;}
+  .ai-card.can{border-top:4px solid #2f9e44;}
+  .ai-card.partial{border-top:4px solid #f08c00;}
+  .ai-card.cannot{border-top:4px solid #e03131;}
+
+  /* 落地路线表 */
+  .roadmap{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:#fff;
+    border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.05);}
+  .roadmap th,.roadmap td{border:1px solid #eceff2;padding:10px 12px;vertical-align:top;}
+  .roadmap th{background:#f1f3f5;font-size:13px;color:#495057;text-align:left;}
+  .roadmap td:first-child{white-space:nowrap;font-weight:700;}
+  .phase{display:inline-block;padding:1px 9px;border-radius:6px;font-size:12px;font-weight:700;color:#fff;}
+  .phase.a{background:#2f9e44;}
+  .phase.b{background:#f08c00;}
+  .phase.c{background:#1c7ed6;}
+  .status{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;}
+  .status.done{background:#e6fcf5;color:#087f5b;border:1px solid #96f2d7;}
+  .status.partial{background:#fff4e6;color:#d9480f;border:1px solid #ffd8a8;}
+  .status.todo{background:#fff5f5;color:#c92a2a;border:1px solid #ffc9c9;}
+  .status.ignore{background:#f1f3f5;color:#495057;border:1px solid #dee2e6;}
+
+  /* 编辑工具 */
+  .edit-toolbar{
+    position:fixed;right:18px;bottom:18px;z-index:200;
+    display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);
+    border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.14);padding:8px;
+  }
+  .edit-toolbar button{
+    border:1px solid #d0d7de;background:#f6f8fa;color:#24292f;border-radius:7px;
+    padding:7px 10px;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  .edit-toolbar button:hover{background:#eef2f6;}
+  .edit-toolbar .primary{background:#fa8155;border-color:#fa8155;color:#fff;}
+  .edit-toolbar .primary:hover{background:#ee6f43;}
+  .edit-toolbar .danger{color:#c92a2a;}
+  .edit-hint{font-size:12px;color:var(--muted);padding:0 4px;display:none;}
+  body.editing .edit-hint{display:inline;}
+  body.editing [data-editable="true"]{
+    outline:2px dashed rgba(250,129,85,.45);outline-offset:3px;border-radius:4px;
+  }
+  .reply-cell{background:#fffdf7;}
+  .reply-note{
+    width:100%;min-height:54px;max-height:140px;resize:vertical;border:1px solid #d0d7de;border-radius:7px;
+    padding:8px 9px;font:inherit;font-size:13px;line-height:1.5;background:#fff;
+  }
+  .reply-note:focus{outline:2px solid rgba(28,126,214,.22);border-color:#74b9ff;}
+
+  @media(max-width:980px){
+    header{padding:22px 16px;}
+    header h1{font-size:22px;}
+    .cat-body,.scene-body{padding-left:12px;padding-right:12px;}
+    .qgroup,.table-scroll{overflow-x:auto;}
+    .qgroup{padding-bottom:2px;}
+    .qtable{min-width:980px;}
+    .roadmap{min-width:760px;}
+    .edit-toolbar{left:10px;right:10px;bottom:10px;flex-wrap:wrap;justify-content:flex-start;}
+  }
+
+  @media(max-width:640px){
+    header{padding:18px 14px;}
+    header h1{font-size:20px;line-height:1.35;letter-spacing:0;}
+    header p{font-size:12px;line-height:1.55;}
+    .wrap{width:min(calc(100vw - 20px),100%);padding-top:12px;}
+    .part-head{align-items:flex-start;margin:28px 0 14px;}
+    .part-head .no{width:32px;height:32px;border-radius:8px;font-size:17px;}
+    .part-head h2{font-size:19px;line-height:1.35;}
+    .part-head .sub{font-size:12px;line-height:1.5;}
+    .global{padding:14px;margin-bottom:18px;border-radius:10px;}
+    .nav a{flex:1 1 calc(50% - 8px);text-align:center;padding:7px 10px;}
+    .side-nav{gap:6px;padding:10px 8px;border-radius:10px;}
+    .side-nav a,.side-nav a.sub{font-size:12px;padding:7px 9px;}
+    .cat{border-radius:10px;margin-bottom:20px;}
+    .cat>summary{padding:13px 14px;font-size:16px;line-height:1.4;}
+    .scene>summary{padding:10px 12px;font-size:14px;line-height:1.45;}
+    .step,.note,.talk{font-size:13px;padding:8px 10px;}
+    .ai-cols{grid-template-columns:1fr;gap:10px;}
+    .edit-toolbar button{flex:1 1 auto;padding:7px 8px;font-size:12px;}
+    .edit-hint{display:none !important;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>拼多多工单处理 SOP &amp; AI 落地分析</h1>
+  <p>编写人：梦蝶     版本号：V1.1（6.18 更新）</p>
+  <p>业务对接人：楚乔、息芸      产品对接人：梦蝶      开发对接人：勾陈</p>
+</header>
+
+<div class="edit-toolbar">
+  <button id="editToggle" class="primary" type="button">编辑页面</button>
+  <button id="saveEdits" type="button">保存</button>
+  <button id="clearEdits" class="danger" type="button">清除本地修改</button>
+  <span class="edit-hint">编辑中</span>
+</div>
+
+<div class="wrap">
+
+  <!-- 固定侧边栏导航 -->
+  <nav class="side-nav">
+    <div class="sn-top">快速切换</div>
+    <a href="#part1" data-target="part1">① 现有处理流程</a>
+    <a class="sub" href="#logistics" data-target="logistics" data-open="logistics">物流类型</a>
+    <a class="sub" href="#aftersale" data-target="aftersale" data-open="aftersale">售后类型</a>
+    <a class="sub" href="#refund" data-target="refund" data-open="refund">退款类型</a>
+    <a class="sub" href="#ship" data-target="ship" data-open="ship">催发货类型</a>
+    <a class="sub" href="#insale" data-target="insale" data-open="insale">售中类型</a>
+    <a class="sn-group" href="#part2" data-target="part2">② 待确定问题</a>
+    <a class="sub" href="#q1" data-target="q1">一、判断条件模糊</a>
+    <a class="sub" href="#q2" data-target="q2">二、分支不闭环</a>
+    <a class="sub" href="#q3" data-target="q3">三、术语未定义</a>
+    <a class="sub" href="#q5" data-target="q5">四、缺失高频场景</a>
+    <a class="sub" href="#q6" data-target="q6">五、原文数据冲突</a>
+    <a class="sub" href="#q7" data-target="q7">六、AI 自动化确认</a>
+    <a class="sub" href="#q-status" data-target="q-status">状态汇总</a>
+    <a class="sn-group" href="#part3" data-target="part3">③ AI 落地建议</a>
+    <a class="sub" href="#ai-solution" data-target="ai-solution">落地方案</a>
+    <a class="sub" href="#ai-principle" data-target="ai-principle">执行原则</a>
+    <a class="sub" href="#ai-levels" data-target="ai-levels">放开等级</a>
+    <a class="sub" href="#ai-sop-fit" data-target="ai-sop-fit">流程评估</a>
+  </nav>
+
+  <!-- ============================================================ -->
+  <!-- 第一部分：现有处理流程                                        -->
+  <!-- ============================================================ -->
+  <div class="part-head" id="part1">
+    <span class="no">1</span>
+    <div>
+      <h2>现有处理流程</h2>
+      <div class="sub">客服部门当前的工单处理 SOP（按 XMind 原文整理）</div>
+    </div>
+  </div>
+
+  <!-- 全局要求 -->
+  <div class="global">
+    <h3>⚠️ 工单处理总要求</h3>
+    <ul>
+      <li><b>不得逾期处理：</b>白班处理 14:00 前产生的工单；中班处理 19:30 前产生的工单；晚班处理 23:00 前产生的工单。</li>
+      <li>各类型工单时效有差异，一般为 <b>24h / 48h</b>，工单分不同阶段，注意各阶段倒计时，不要超时；<b>紧急工单或剩余 1 小时内临近超时工单</b>可直接推送钉钉客服人工接管。</li>
+      <li>需按订单实际情况处理，<b>不得乱选工单选项</b>。</li>
+      <li>以解决问题为目的完结工单，提升工单<b>有效率至 80% 以上</b>。</li>
+      <li>与商家/买家协商一致必须有<b>明确聊天记录</b>；若买家未读/未回复，需电话联系引导上线回复，联系不上需与上级报备。</li>
+      <li><b>6.18 补充依据：</b>代发仓“是否已出当地”按《代发仓发货地址.xlsx》的仓库发货地址所在市区判断；售后补偿按《拼多多权限表0617.xlsx》执行。</li>
+    </ul>
+  </div>
+
+  <div class="global" style="background:#eef6ff;border-color:#b9dcff;">
+    <h3 style="color:#1b4f8a;">6.18 统一判断口径</h3>
+    <ul>
+      <li><b>代发仓渠道：</b>金山文档对接捷佑韵达、众邦、简卓圆通、亿哈、铭如；捷佑中通/顺丰、简卓邮政、洁文及其他未列代发仓走微信群。</li>
+      <li><b>低值品/拦截品：</b>以 OMS 订单标识为统一依据；筑越仓低值品在 TMS 登记弃件处理，代发仓按 OMS 标识对接拦截/拒收后退款。非低值品只要物流未出当地且已拿到拦截成功凭证，也可直接退款。</li>
+      <li><b>对接结果：</b>快递回复以金山文档或微信群结果为准；技术无法结构化读取时转人工接管。</li>
+      <li><b>退款凭证：</b>普通拦截/拒收场景需拿到拦截成功或拒收成功凭证后再退款；低值品/拦截品按特殊规则执行。</li>
+      <li><b>时效兜底：</b>紧急工单、剩余 1 小时内临近超时工单或超时风险工单，直接推送钉钉客服人工接管，不要求再等统一时效总表。</li>
+      <li><b>补偿权限：</b>通用售后低客单最高实付金额 30%，中高客单最高 20%；订单总金额 ≥500 元的售后订单/工单转人工客服处理，所有补偿需先协商 2-3 轮。</li>
+      <li><b>特殊周期：</b>遇到春节/大促标签或平台特殊公告时，转人工或按平台实时规则处理。</li>
+    </ul>
+  </div>
+
+  <!-- 导航 -->
+  <div class="nav">
+    <a href="#logistics" style="background:var(--logistics)">物流类型</a>
+    <a href="#aftersale" style="background:var(--aftersale)">售后类型</a>
+    <a href="#refund" style="background:var(--refund)">退款类型</a>
+    <a href="#ship" style="background:var(--ship);color:#3a4000">催发货类型</a>
+    <a href="#insale" style="background:var(--insale)">售中类型</a>
+  </div>
+
+  <!-- ============ 物流类型 ============ -->
+  <details class="cat" id="logistics" open>
+    <summary style="background:var(--logistics)">🚚 物流类型 <span class="badge">红旗 · 优先</span></summary>
+    <div class="cat-body">
+
+      <details class="scene">
+        <summary>消费者担忧货物无法送达（催促/咨询物流）</summary>
+        <div class="scene-body">
+          <div class="branch-title">① 物流正常更新中</div>
+          <div class="step">选择"物流已正常更新"，系统自动生成话术，点击发送即可完结。</div>
+
+          <div class="branch-title">② 物流 48 小时内未更新</div>
+          <div class="step source-hit" id="src-logistics-48h">用订单号/运单号在 OMS 查询对应发货仓库 <span class="arrow">→</span> <span class="red">对接快递催件</span>【筑越仓：TMS 系统/客服物流对接表单；代发仓：金山文档(<span class="source-hit" id="src-logistics-warehouse-list">捷佑韵达、众邦、简卓圆通、亿哈、铭如</span>)；捷佑中通/顺丰、简卓邮政、洁文及其他代发仓走微信群】<span class="arrow">→</span> 点击【需联系物流核实】<span class="arrow">→</span>【物流可以更新，能送达】，"轨迹更新日期"往后延 2 天 <span class="arrow">→</span> 后续关注物流是否正常更新。</div>
+          <div class="step source-hit" id="src-logistics-loss-follow"><span class="label">后续跟进</span>①24h 内物流正常更新：点击"物流已正常更新"完结工单。
+②延迟 2 天后剩余时长不足 24h 且仍未更新：OMS 查仓库 <span class="arrow">→</span> 快递二次<span class="red">对接丢件</span> <span class="arrow">→</span> OMS 建补发单并手工配货 <span class="arrow">→</span> 对接配货仓库优先出单号【筑越仓：钉钉筑越仓客服群；代发仓：对应仓库微信群】<span class="arrow">→</span> 补发后点击【已补发】并上传补发单号。</div>
+
+          <div class="branch-title source-hit" id="src-logistics-over48">③ 超 48 小时未更新物流</div>
+          <div class="step">OMS 查仓库 <span class="arrow">→</span> <span class="red">对接快递记丢件</span> <span class="arrow">→</span> OMS 创建补发单 <span class="arrow">→</span> 对接配货仓库优先出单号 <span class="arrow">→</span> 补发后点击【已补发】并上传补发单号。</div>
+          <div class="talk source-hit" id="src-placeholder-bufa">亲亲，您的物流已超时未更新，为了不耽误您的更多时间，我们已记丢件，为您重新安排补##发，带来不便请谅解。补##发单号为：</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>消费者反馈未收到货</summary>
+        <div class="scene-body">
+          <div class="step source-hit" id="src-express-contact">OMS 查仓库 <span class="arrow">→</span> <span class="red">快递对接"签收未收到"</span> <span class="arrow">→</span> 点击【告知送达地址并承诺核实】<span class="arrow">→</span> 填写送达地址及电话 <span class="arrow">→</span> 上传对接快递"签收未收到"凭证 <span class="arrow">→</span> 可以送达 <span class="arrow">→</span> 需要消费者自取 <span class="arrow">→</span> 自取地址(填写物流信息 [] 内的)。</div>
+          <div class="note">如果选项内没有"需要消费者自取"，则选择填写"可以送到消费者指定地址"。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>物流轨迹已退回，消费者咨询物流问题</summary>
+        <div class="scene-body">
+          <div class="step">① 留言告知买家物流轨迹退回/异常，协商退款。
+② 若协商补发 <span class="arrow">→</span> OMS 创建补发单 <span class="arrow">→</span> 手工配货并对接配货仓库优先出单号 <span class="arrow">→</span> 已补发点击【协商一致已补发】<span class="arrow">→</span> 填写单号。
+③ 若协商退款 <span class="arrow">→</span> 点击【协商一致已退款】<span class="arrow">→</span> 上传与消费者聊天记录。</div>
+          <div class="note source-hit" id="src-return-platform-help">以上都不符合，点击"未协商一致请平台协助处理"，待买家回复需补发或退款后再处理。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>派件阶段物流断更</summary>
+        <div class="scene-body">
+          <div class="step source-hit" id="src-delivery-stale-date">OMS 查仓库 <span class="arrow">→</span> <span class="red">对接快递催件</span> <span class="arrow">→</span> 点击【与消费者协商一致继续派送】<span class="arrow">→</span> 选择预计送达日期(能延多晚延多晚)<span class="arrow">→</span> 物流更新后选择"物流正常更新"完结。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>消费者未收到货 · 处理情况跟进</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实聊天记录</span>① <span class="red">消费者反馈已收到货：</span>点击"确认消费者已拿到快递"<span class="arrow">→</span> 上传消费者说明收到产品的聊天记录。
+② <span class="red">消费者反馈未收到货：</span>OMS 查仓库 <span class="arrow">→</span> 快递对接丢件 <span class="arrow">→</span> 留言买家退款或补发 <span class="arrow">→</span> 买家回复后选择"已协商一致退款/补发"<span class="arrow">→</span> 上传聊天记录。</div>
+          <div class="note">此类工单基本是之前已创建"签收未收到"工单，在原有基础工单上对接丢件即可。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>召回 / 物流在途 退款工单</summary>
+        <div class="scene-body">
+          <div class="branch-title">情形 A · 退款</div>
+          <div class="step source-hit" id="src-return-refund-ketuijian">① <span class="red">物流待揽收或未离开发货地：</span>OMS 查仓库 <span class="arrow">→</span> 对接快递拦截 <span class="arrow">→</span> 拿到拦截成功凭证 <span class="arrow">→</span> 直接同意退款。
+② <span class="red">物流在途：</span>OMS 查仓库 <span class="arrow">→</span> 对接快递拦截 <span class="arrow">→</span> 核实 OMS 是否标记低值品/拦截品 <span class="arrow">→</span> 有标识则按低值品/拦截品规则对接后直接退款；无标识且物流未出当地、拦截成功时可直接退款；无标识且未拦截成功则选"已同意退货退款"跟进工单，物流退回第一时间退款。</div>
+          <div class="branch-title">情形 B · 拒收/召回</div>
+          <div class="step">① <span class="red">快递正在正常派件：</span>OMS 查仓库 <span class="arrow">→</span> 对接快递拒收 <span class="arrow">→</span> 核实 OMS 是否标记低值品/拦截品 <span class="arrow">→</span> 有标识则按特殊规则处理；无标识需拿到拒收成功凭证后退款，否则选"已进行召回"跟进，物流召回第一时间退款。
+② <span class="red">物流已到达代收点：</span>OMS 查仓库 <span class="arrow">→</span> 对接快递拒收 <span class="arrow">→</span> 核实 OMS 是否标记低值品/拦截品 <span class="arrow">→</span> 有标识则按特殊规则处理；无标识需拿到拒收成功凭证后退款，否则上传召回凭证跟进，物流召回第一时间退款。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>物流异常，消费者要求补寄</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实物流轨迹</span>① <span class="red">已更新物流：</span>点击"物流轨迹已恢复更新"。
+② <span class="red">未更新物流：</span>原单物流对接拦截 <span class="arrow">→</span> OMS 创建补发单 <span class="arrow">→</span> 手工配货并对接配货仓库优先出单号 <span class="arrow">→</span> 补发单发货填写补发单号。</div>
+        </div>
+      </details>
+
+    </div>
+  </details>
+
+  <!-- ============ 售后类型 ============ -->
+  <details class="cat" id="aftersale">
+    <summary style="background:var(--aftersale)">🛠️ 售后类型 <span class="badge">紫旗</span></summary>
+    <div class="cat-body">
+
+      <details class="scene">
+        <summary>商品少发</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">判定</span>查看订单聊天记录和所含商品，是否包含买家反馈未收到的商品：
+① 买家未反馈少件(如反馈尺码少了，平台错误识别)——<b>未少发</b>
+② 订单不包含买家反馈未收到的商品——<b>未少发</b>
+③ 订单包含买家反馈未收到的商品——<b>少发</b>
+打开 OMS 查看是否漏绑商品/数量是否正确，复制单号联系仓库询问是否少发或拆包发出：
+④ 仓库反馈拆包发出——<b>未少发</b>
+⑤ OMS 漏绑 / 仓库少发——<b>少发</b></div>
+
+          <div class="nest">
+            <div class="branch-title green">【未少发】处理</div>
+            <div class="step"><b>买家未反馈少件：</b>截图聊天记录(含平台触发提示、买家反馈、订单信息，红框标注)<span class="arrow">→</span>【点击反馈】<span class="arrow">→</span>【平台问题识别错误】<span class="arrow">→</span> 情况说明、上传截图。</div>
+            <div class="talk">买家反馈的问题是尺码不合适/不喜欢，未反馈少件，小店按订单发出，未少发，平台问题识别错误。</div>
+            <div class="step"><b>订单不含/含反馈商品(误解)：</b>截图聊天记录红框标注 <span class="arrow">→</span>【已核实，填写核实结果】<span class="arrow">→</span> 已核实未少发 <span class="arrow">→</span> 消费者误解(拍错/无赠品)<span class="arrow">→</span> 核实结果说明(按订单发出)<span class="arrow">→</span> 上传聊天记录、图片凭证。</div>
+            <div class="talk">①您好，客户订单包含 <span class="source-hit" id="src-placeholder-products">**、**、**</span>，根据客户照片/视频核实均收到，无少发问题。
+②您好，买家买的是没有 ** 赠品的套餐，小店已按订单发出，并未少发。</div>
+            <div class="step"><b>仓库反馈拆包发出：</b>【已核实未少发】<span class="arrow">→</span> 拆分多包裹发货 <span class="arrow">→</span> 上传拆包单号并选对应快递。</div>
+	            <div class="step source-hit" id="src-wait-30min"><b>无"点击反馈"选项/外包误点工单：</b>复制订单快递单号 <span class="arrow">→</span> 钉钉/微信发给自己(单号+买家反馈未收到 XX 商品，麻烦核实是否少发)<span class="arrow">→</span> 截图 <span class="arrow">→</span>【已联系快递或仓库核实】上传截图 <span class="arrow">→</span> <span class="source-hit" id="src-wait-30min-text">30 分钟</span>后【已核实，填写核实结果】<span class="arrow">→</span> 已核实未少发 <span class="arrow">→</span> 消费者误解 <span class="arrow">→</span> 上传凭证。</div>
+
+            <div class="branch-title red">【少发】处理</div>
+	            <div class="step source-hit" id="src-stock-branches">OMS 复制商品名称，在商品库存界面查询库存。</div>
+            <div class="step"><b><span class="source-hit" id="src-stock-has">有库存</span>：</b>OMS 右键订单选择补发 <span class="arrow">→</span> 填【业务类型】【买家备注】<span class="arrow">→</span> 删除感谢卡 <span class="arrow">→</span> 完成补发 <span class="arrow">→</span>【已核实，填写核实结果】<span class="arrow">→</span> 已核实未少发 <span class="arrow">→</span> 拆分多包裹发货 <span class="arrow">→</span> 填写拆包单号并选快递。</div>
+            <div class="note">“已核实未少发”为平台选项限制下的提交路径，业务实际仍按少发补发处理。</div>
+            <div class="note">若工单已到【填写解决方案并处理】阶段，则选择【去补发商品】→ 填写拆包单号并选对应快递。</div>
+            <div class="step"><b><span class="source-hit" id="src-stock-lack">库存不足</span>：</b>留言引导退款 <span class="arrow">→</span>【已核实少发，协商方案】<span class="arrow">→</span>【确认商品少发】说明"<span class="source-hit" id="src-placeholder-missing-product">少发 XX 商品</span>"<span class="arrow">→</span>【无合适方案，自行填写】<span class="arrow">→</span> 30 分钟后买家未回复/不同意 <span class="arrow">→</span>【去协商退款】【消费者未申请退款】。</div>
+            <div class="step"><b>部分有货：</b>适用于组合商品/带配件商品部分有库存，例如电疗仪订单包含主机、连接线、贴片，买家反馈未收到贴片，则在 OMS 核实贴片库存；按缺货细分继续处理，不再作为未闭环分支。</div>
+            <div class="note">缺货细分：整体缺货时用瑕疵话术引导退款；主产品有货、配件缺货时先协商补偿退款，买家不接受可引导退货退款；部分主产品缺货时按缺货商品数量/金额协商部分退款，买家不接受部分退款时可协商退货退款。工单先按平台路径闭环，后续买家售后由人工继续跟进。</div>
+            <div class="talk">抱歉亲亲，可能是仓库不小心弄错了，这边给您补偿 <span class="source-hit" id="src-placeholder-money">XX 元</span>或者换货可以吗？</div>
+          </div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>承诺补寄</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实</span>查看聊天记录，核实补寄原因、买家是否同意补寄方案。</div>
+          <div class="branch-title green">同意补寄</div>
+          <div class="step">复制订单编号在 OMS 查询 <span class="arrow">→</span> 复制商品名称/编码查库存。</div>
+          <div class="step"><b>有库存：</b>OMS 右键选择补发 <span class="arrow">→</span> 填【业务类型】【买家备注】(仓库/运营/快递原因，简述补寄原因)<span class="arrow">→</span> 删除感谢卡创建补寄 <span class="arrow">→</span> 右键手工配货选有库存仓库，全选订单自动匹配 <span class="arrow">→</span> 复制配货单号对接仓库出快递单号 <span class="arrow">→</span>【已补发，填写单号】填写补发单号并选快递。</div>
+          <div class="step"><b>库存不足：</b>留言协商退款 <span class="arrow">→</span>【与消费者协商其他方案】<span class="arrow">→</span> 去协商退款 <span class="arrow">→</span> 消费者未申请退款。</div>
+          <div class="branch-title red">不同意补寄</div>
+	          <div class="step source-hit" id="src-reissue-disagree">截图(订单、快递单号、买家未回复/未同意图)<span class="arrow">→</span>【点击反馈】<span class="arrow">→</span>【其它】说明："由于 XX 原因包裹无法送达，小店与买家协商补寄，买家暂未回复/不同意补寄，买家若不想要可申请退款，小店将优先处理。"</div>
+          <div class="note">6.18 补充：留言协商补寄后等待 1 小时；买家不同意或无明确回复时，走【与消费者协商其它方案】→【去协商退款】→【消费者未申请退款】→ 发送系统自动生成回复话术 → 工单关闭。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>居家日用 · 质量问题</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实</span>核实聊天 & 售后申请。</div>
+          <div class="branch-title">存在质量问题，已提供凭证</div>
+          <div class="step">【商品质量问题】<span class="arrow">→</span> 按实际选具体问题并发送话术(含方案)<span class="arrow">→</span> 待买家选择 <span class="arrow">→</span> 回复则按实际方案点选；未回复则【无法与消费者达成一致】<span class="arrow">→</span> 请平台协助处理。</div>
+          <div class="branch-title">不存在 & 未提供问题凭证</div>
+          <div class="step"><b>已申请仅退款：</b>【其他】<span class="arrow">→</span> 无法与消费者协商一致 <span class="arrow">→</span> 说明(消费者未申请退货退款)<span class="arrow">→</span> 上传申请售后凭证 <span class="arrow">→</span> 消费者不接受部分补偿方案 <span class="arrow">→</span> 无法达成一致 <span class="arrow">→</span> 其他 <span class="arrow">→</span> 说明。</div>
+          <div class="step"><b>已申请退货退款：</b>同意申请，【其他】<span class="arrow">→</span>【和消费者协商其它解决方案】<span class="arrow">→</span> 退货退款。</div>
+          <div class="step"><b>未申请售后、未回复协商方案：</b>【点击反馈】<span class="arrow">→</span> 其它 <span class="arrow">→</span> 描述情况。</div>
+	          <div class="talk source-hit" id="src-quality-support">买家反馈少支撑，但未提供有效凭证，待买家提供小店核实后将尽快处理。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>物流异常主动服务（退货物流核实）</summary>
+        <div class="scene-body">
+          <div class="step">物流轨迹选择【退货物流】<span class="arrow">→</span> 在对应快递官网查询退回物流并保存截图。</div>
+          <div class="branch-title">无物流信息/异常</div>
+          <div class="step">点击"未收到退回商品"<span class="arrow">→</span> 未查到退货物流轨迹 <span class="arrow">→</span> 无法确认快递单号 <span class="arrow">→</span> 上传退回物流截图 <span class="arrow">→</span> 说明(消费者退回单号无走件信息)。</div>
+          <div class="talk">①亲亲，您寄回的快递单号未查询到物流信息，辛苦您联系寄出快递核实情况，或核实单号是否有误，核实后及时联系我们处理。
+②亲亲，您寄回的快递单号超 48h 未更新物流信息，辛苦您联系寄出快递核实，或核实单号是否有误，核实后及时联系我们处理。</div>
+          <div class="branch-title">退回物流正常</div>
+          <div class="step">点击"未收到退回商品"<span class="arrow">→</span> 有查到退货物流轨迹。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>消费者投诉紧急工单（如过敏）</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实</span>出现紧急售后问题(如过敏)，查看聊天记录 & 工单要求提供的凭证，核实问题。</div>
+	          <div class="step source-hit" id="src-service-compensation">复制订单编号 OMS 查询，核实是否标记<span class="source-hit" id="src-customer-return-monthly">低值品/拦截品</span> <span class="arrow">→</span> 协商售后方案【低值品最高可仅退款；非低值品按权限表协商：通用售后低客单最高实付金额 30%，中高客单最高 20%，总金额 ≥500 元转人工】<span class="arrow">→</span> 提供聊天记录截图、品牌授权书、质检报告 <span class="arrow">→</span> 发送方案后 <span class="source-hit" id="src-service-1h">1h</span> 内未回复，上传截图并描述。</div>
+          <div class="note">凭证查找：先在班牛【店铺质检报告/说明书】内查找，没有则对接产品部-邓琪。</div>
+        </div>
+      </details>
+
+	      <details class="scene source-hit" id="src-afterservice-1h">
+	        <summary>催售后紧急工单（<span class="source-hit" id="src-afterservice-1h-text">处理时效 1 小时</span>）</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实</span>查看工单内容，确认处理方案(如买家已收到催退款，需提供与消费者协商一致凭证)，核实 OMS 是否标记低值品/拦截品。</div>
+
+          <div class="branch-title green">低值品 / 拦截品</div>
+          <div class="step"><b>买家已申请仅退款/退货退款：</b>同意退款申请 <span class="arrow">→</span> 截图退款成功界面 <span class="arrow">→</span> 工单上传截图并描述。</div>
+	          <div class="talk source-hit" id="src-refunded-talk">订单已退款成功，售后已完结。</div>
+	          <div class="step source-hit" id="src-wait-10min"><b>买家暂未申请退款/退款已撤销：</b>协商售后方案 <span class="arrow">→</span> <span class="source-hit" id="src-wait-10min-text">10 分钟</span>后未回复截图保存 <span class="arrow">→</span> 工单上传截图 + 平台要求凭证 + 情况说明。</div>
+
+          <div class="branch-title red">非低值品 / 无拦截品标识</div>
+          <div class="step"><b>仅退款：</b>根据实际情况、客单价、<span class="source-hit" id="src-service-authority-table">客服权限表</span>协商。通用售后低客单最高实付金额 30%，中高客单最高 20%；订单总金额 ≥500 元或超出权限时转人工/上级报备。</div>
+	          <div class="step source-hit" id="src-refund-return-logistics"><b>退货退款：</b>复制退货单号在快递官网查询 →
+· 退货物流显示退回仓库所在市级：同意退款，截图退款成功界面，工单上传并描述。
+· <span class="source-hit" id="src-no-return-logistics">无退货物流/物流异常</span>：截图并发给买家，告知物流退回后尽快处理退款，截图协商界面，工单上传物流&聊天截图并描述。
+· 特殊同意退款处理：需将订单情况与上级说明并报备。</div>
+          <div class="note">【品牌授权书】店铺后台右上角点击店铺二维码 → 打开网页查看店铺 → 品牌官方授权 → 品牌授权。
+【质检报告】班牛"店铺质检报告/说明书"中搜索商品名称 / 提供商品名称或编码对接满月。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>绿植/花卉/农用物资/五金 质量问题（平台受理）</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实</span>核实聊天记录 & 售后申请。</div>
+          <div class="step">【其他问题】<span class="arrow">→</span> 说明内描述问题原因：
+① 买家误解，委婉告知产品批次不同、优化整改等原因 <span class="arrow">→</span> 提供质量报告或授权书；
+② 平台触发错误(买家订单并非植物花卉农用五金产品)<span class="arrow">→</span> 发送话术(系统自动有补偿方案)<span class="arrow">→</span> 人工补充完整方案(如补偿金额、退换货等)。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>高频售后商品质量问题</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实</span>核实聊天记录 & 售后申请。</div>
+          <div class="step"><b>步骤一：解释问题产生的客观原因</b>
+如买家反馈下滑，解释护膝为垂直穿戴，是否合身与尺码选择、每人腿型均有关联 <span class="arrow">→</span> 上传聊天记录、产品质检报告、品牌授权书等。</div>
+          <div class="step"><b>步骤二：向平台解释此类产品为何高频出现类似售后问题</b>
+①近期产品在做质量优化迭代，产品批次不同会有细微区别；
+②详情页有详细尺码推荐，客户静默下单未自主选择/未咨询等，尽量描述客观原因。
+凭证选择与解释相符的证明即可，如没有可不填。</div>
+          <div class="note">此工单为"问答 + 凭证"类，无可选项。</div>
+        </div>
+      </details>
+
+    </div>
+  </details>
+
+  <!-- ============ 退款类型 ============ -->
+  <details class="cat" id="refund">
+    <summary style="background:var(--refund)">💰 退款类型</summary>
+    <div class="cat-body">
+
+      <details class="scene">
+        <summary>已发货无轨迹退款 / 仅揽件退款</summary>
+        <div class="scene-body">
+	          <div class="step source-hit" id="src-refund-local-warehouse">核实物流轨迹 <span class="arrow">→</span> 物流未出长沙/未出代发仓当地【代发仓当地按《代发仓发货地址.xlsx》的发货地址所在市区判断】<span class="arrow">→</span> OMS 查【快递单号/发货仓库】<span class="arrow">→</span> <span class="red">拦截快递</span>【筑越仓：TMS 系统/客服物流对接表单；代发仓：金山文档(<span class="source-hit" id="src-refund-warehouse-list">捷佑韵达、众邦、简卓圆通、亿哈、铭如</span>)；捷佑中通/顺丰、简卓邮政、洁文及其他代发仓走微信群】<span class="arrow">→</span> 拿到拦截成功凭证 <span class="arrow">→</span> 同意退款 <span class="arrow">→</span> 工单自动完结。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>在途无理由退款处理</summary>
+        <div class="scene-body">
+          <div class="step">① 物流未出长沙/未出代发仓当地 <span class="arrow">→</span> OMS 查仓库 <span class="arrow">→</span> <span class="red">拦截快递</span> <span class="arrow">→</span> 拿到拦截成功凭证 <span class="arrow">→</span> 同意退款 <span class="arrow">→</span> 自动完结。
+② 已到【代取点/派送中】<span class="arrow">→</span> OMS 查仓库 <span class="arrow">→</span> <span class="green">拒收快递</span> <span class="arrow">→</span> 核实 OMS 是否标记低值品/拦截品 <span class="arrow">→</span> 有标识则按低值品/拦截品特殊规则处理；无标识需拿到拒收成功凭证后同意退款，否则点击【已同意退货退款】并上传快递对接凭证跟进。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>逆向物流已签收催退款</summary>
+        <div class="scene-body">
+	          <div class="step source-hit" id="src-reverse-logistics">① <span class="red">仅退款：</span>核实【发货物流】轨迹显示退回我司 <span class="arrow">→</span> 同意退款。
+② <span class="green">退货退款：</span>核实【退货物流】轨迹显示退回我司 <span class="arrow">→</span> 同意退款。</div>
+          <div class="note">退货地址：筑越退货组，19313118663，湖南省长沙市岳麓区麓谷街道金桥路丰树物流园二期一栋 ID-2(先马仓)【拒绝到付】</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>消费者申请仅退款后提示拦截</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实</span>核实聊天记录 & 物流情况。</div>
+          <div class="step"><b>① 已签收：</b>OMS 查仓库 <span class="arrow">→</span> 对接快递提供清晰运单号【签收底单】<span class="arrow">→</span> 选择【消费者已收到货】或上传买家说明已收到货的截图 <span class="arrow">→</span> 工单完结。</div>
+          <div class="step"><b>② 未签收：</b>OMS 查仓库 <span class="arrow">→</span> 对接快递 <span class="arrow">→</span> 选择【已进行召回】<span class="arrow">→</span> 上传对接快递拒收退回截图 <span class="arrow">→</span> 工单完结。</div>
+          <div class="note">若短时间内无法提供已收到货凭证，则一律按【已进行召回】处理，做一个拒收工单保存截图后再将此班牛工单删除。</div>
+        </div>
+      </details>
+
+	      <details class="scene source-hit" id="src-refusal-4h">
+	        <summary>消费者拒收问题处理 <span id="src-refusal-4h-text" class="source-hit" style="font-size:11px;color:#c92a2a">（4 小时优先）</span></summary>
+        <div class="scene-body">
+          <div class="step">① 物流未出长沙/未出代发仓当地 <span class="arrow">→</span> OMS 查仓库 <span class="arrow">→</span> <span class="red">拦截快递</span> <span class="arrow">→</span> 拿到拦截成功凭证 <span class="arrow">→</span> 同意退款 <span class="arrow">→</span> 自动完结。
+② 已到【代取点/派送中】<span class="arrow">→</span> OMS 查仓库 <span class="arrow">→</span> <span class="green">拒收快递</span> <span class="arrow">→</span> 核实 OMS 是否标记低值品/拦截品 <span class="arrow">→</span> 有标识则按低值品/拦截品特殊规则处理；无标识需拿到拒收成功凭证后同意退款，否则【已同意退货退款】并上传快递对接凭证跟进。</div>
+          <div class="note">平台发起时效过短，需优先处理【4 小时】；若剩余 1 小时内仍无明确成功凭证，推送钉钉客服人工接管。</div>
+        </div>
+      </details>
+
+    </div>
+  </details>
+
+  <!-- ============ 催发货类型 ============ -->
+  <details class="cat" id="ship">
+    <summary style="background:var(--ship);color:#3a4000">📦 催发货类型 <span class="badge tag-time">处理时效 24h</span></summary>
+    <div class="cat-body">
+	      <div class="note source-hit" id="src-ship-time">商家需在 <span class="source-hit" id="src-ship-24h">24 小时</span>内完成发货、联系消费者完成退款，或回复该催发货工单（3 个动作任一完成即可）。注意核实清楚责任快递，切勿对接错，此类工单退款成功会自动完结。</div>
+
+      <details class="scene">
+        <summary>消费者催促/咨询发货</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实未发货原因</span></div>
+          <div class="branch-title">缺货</div>
+	          <div class="step source-hit" id="src-ship-out-of-stock">点击【可以发货】<span class="arrow">→</span> <span class="source-hit" id="src-ship-extend-time">往后延长承诺发货时间(能延多晚延多晚)</span><span class="arrow">→</span> 联系买家退款(留言 + 电话联系)。</div>
+          <div class="talk">亲亲，抱歉该产品因质检异常，仓库已紧急返厂，延误了发货，为了不耽误您的更多时间，我们给您退款处理可以吗，带来不便敬请谅解。</div>
+          <div class="note">6.18 补充：订单退款成功后工单自动完结，无需在工单界面进行其它操作。若买家要求发货但商品无库存，可发出精油并留言说明，平台识别到单号后工单自动完结。不论何种情形，优先选择【可以发货】完结工单，之后根据库存情况与买家留言协商售后方案。</div>
+          <div class="branch-title">不可抗力</div>
+          <div class="step">常见于快递停发(如自然灾害/国家重大会议等)，此项若能提供快递红章证明或明确限制快递的新闻则可选。</div>
+          <div class="branch-title">其他原因（商品异常/货在两仓等）</div>
+          <div class="step">· 商品异常 <span class="arrow">→</span> 对接运营处理 <span class="arrow">→</span> 手工配货对接仓库优先出库 <span class="arrow">→</span>【可以发货】选择发货时间 <span class="arrow">→</span> 发货后自动完结。
+· 货在两仓 <span class="arrow">→</span> 手工配货拆包发货 <span class="arrow">→</span> 分别对接两仓优先出库 <span class="arrow">→</span>【可以发货】选时间 <span class="arrow">→</span> 完结。
+	· <span id="src-manual-process-reason" class="source-hit">未取消手工处理原因</span> <span class="arrow">→</span> 手动配货 <span class="arrow">→</span> 对接仓库优先出库 <span class="arrow">→</span>【可以发货】选时间 <span class="arrow">→</span> 完结。</div>
+          <div class="note">选择【可以发货】时注意发货时间能延多晚延多晚，以防万一。</div>
+        </div>
+      </details>
+
+	      <details class="scene source-hit" id="src-guide-stale-scene">
+        <summary>导单断更催发货</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label source-hit" id="src-guide-check-stock">6.18 客服口径</span>① 先核实物流是否异常/退回。
+② 再核实买家诉求：未反馈诉求/要求退款/要求补寄。
+③ 再核实买家是否已申请退款：已申请退款则直接退款处理，并在工单最后一步选择【已退款成功】完结。
+④ 订单未申请退款且买家主动要求补寄时，再核实库存情况，并与买家协商补寄/退款。</div>
+          <div class="note"><span class="source-hit" id="src-guide-not-returned">闭环口径</span>：库存判断只作为“买家要求补寄”后的协商依据，不再与物流退回状态、退款状态并列混用；无明确诉求或要求退款时，优先按物流异常/退回与退款状态处理工单。</div>
+          <div class="talk"><span class="source-hit" id="src-guide-has-stock">有库存(拦截补发)</span>：亲亲，这边核实您的订单揽收异常，小妹给您重新登记了补##发，有单号后给您留言哦。
+<span class="source-hit" id="src-guide-no-stock">无库存(引导退款)</span>：亲亲，这边核实到您的订单快递那边揽收时遗失了包裹，您看这边给您先退款处理可以吗。</div>
+        </div>
+      </details>
+
+	      <details class="scene">
+        <summary>异常网点预警</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实发货状态</span>· 未发货：OMS 手工配货平台建议快递。
+· 已发货：点击"已按照建议快递发货"。
+· 未按建议快递发货：点击"无法按照建议快递发货"<span class="arrow">→</span> 说明(此件快递已正常揽收走件)。</div>
+        </div>
+      </details>
+
+	      <details class="scene source-hit" id="src-good-deed-scene">
+        <summary>好人好事工单</summary>
+        <div class="scene-body">
+          <div class="step"><span class="label">核实 OMS 是否已配货</span>· 已配货：复制配货单号对接仓库优先出库。
+· 未配货：客服手动配货，对接仓库优先出库。</div>
+          <div class="note">订单揽收后点击【已揽收】即可。</div>
+        </div>
+      </details>
+    </div>
+  </details>
+
+  <!-- ============ 售中类型 ============ -->
+  <details class="cat" id="insale">
+    <summary style="background:var(--insale)">🏷️ 售中类型</summary>
+    <div class="cat-body">
+
+      <details class="scene">
+        <summary>消费者申请修改地址</summary>
+        <div class="scene-body">
+          <div class="step"><b>未发货：</b>核实 OMS 订单状态 <span class="arrow">→</span> 未配货(已配货则先取消配货，注意后续取消手工处理，否则无法配货审核发出)<span class="arrow">→</span> 同意修改 <span class="arrow">→</span> 刷新工作台查看新地址 <span class="arrow">→</span> 复制新地址在 OMS 附属信息内修改收货信息。</div>
+	          <div class="step source-hit" id="src-outsourcing-status"><b><span class="source-hit" id="src-outsourcing-not-agreed">已发货 · 外包未同意</span>：</b>外包指磊藤外部客服，对接渠道为钉钉筑越-磊腾拼多多客服对接群；点击"无法修改地址，协商拒收退款"<span class="arrow">→</span> 留言引导原地址签收/退款重拍 <span class="arrow">→</span> 与消费者协商一致发往原地址。</div>
+	          <div class="step"><b><span class="source-hit" id="src-outsourcing-agreed">已发货 · 外包已同意</span>：</b>OMS 查仓库 <span class="arrow">→</span> <span class="red">对接快递</span> <span class="arrow">→</span> 复制新地址对接相应仓库 <span class="arrow">→</span> 点击"尝试联系快递修改收件地址"<span class="arrow">→</span> 已联系快递修改并截图对接记录上传 <span class="arrow">→</span> 工单完结。</div>
+        </div>
+      </details>
+
+      <details class="scene">
+        <summary>已签收改地址工单</summary>
+        <div class="scene-body">
+          <div class="step">OMS 查仓库 <span class="arrow">→</span> <span class="red">对接快递</span> <span class="arrow">→</span> 消费者填错地址 <span class="arrow">→</span> 无法修改地址 <span class="arrow">→</span> 上传拦截凭证 <span class="arrow">→</span> 已协商一致，消费者愿意拦截成功后退款 <span class="arrow">→</span> 上传与消费者聊天凭证。</div>
+        </div>
+      </details>
+
+    </div>
+  </details>
+
+  <!-- ============================================================ -->
+  <!-- 第二部分：待确定问题                                          -->
+  <!-- ============================================================ -->
+  <div class="part-head" id="part2">
+    <span class="no" style="background:#f08c00">2</span>
+    <div>
+      <h2>待确定问题</h2>
+      <div class="sub">需找客服部门确认的事项 —— 这些直接决定 Agent 能否自动决策；未确认规则转人工，确认后 AI 按规则执行</div>
+    </div>
+  </div>
+
+  <div class="global" style="background:#fff0f0;border-color:#ffc9c9;">
+    <h3 style="color:#c92a2a;">优先级说明</h3>
+    <ul>
+      <li><span class="pri p1">P1 必须先定</span> 阻塞 AI 自动决策的核心判断条件，不定就无法落地。</li>
+      <li><span class="pri p2">P2 重要</span> 影响分支完整性与正确率，建议尽快确认。</li>
+      <li><span class="pri p3">P3 完善</span> 表述/笔误/补充场景，可后续迭代。</li>
+    </ul>
+  </div>
+
+  <div class="global" style="background:#eef6ff;border-color:#b9dcff;">
+    <h3 style="color:#1b4f8a;">6.18 确认口径</h3>
+    <ul>
+      <li>本版结合最新 XMind SOP、客服回复、<b>代发仓发货地址.xlsx</b>、<b>拼多多权限表0617.xlsx</b> 重新判断问题状态。</li>
+      <li><b>P04-Q004</b> 节假日/春节时效不再作为 SOP 固定缺口；遇到春节/大促标签或平台特殊公告时，转人工或按平台实时规则处理。</li>
+      <li><b>P03-Q004</b> 按已解决处理：技术侧确认能否读取金山文档/群内回复；若不支持结构化获取，则转人工处理。</li>
+      <li><b>P02-Q005</b> 已按“物流异常/退回 → 买家诉求 → 是否已申请退款 → 库存协商”的顺序收口。</li>
+      <li><b>自动完结：</b>规则明确、数据可读取、凭证满足要求的场景，AI 可以自动提交并完结；需人工确认的场景以异常/高风险/责任边界未确认为准。</li>
+      <li><b>退款凭证：</b>非低值品未出当地且拦截成功可直接退款；普通拦截/拒收场景需拿到成功凭证后退款，低值品/拦截品按特殊规则执行。</li>
+      <li><b>时效预警：</b>剩余 1 小时内仍未闭环的紧急或超时风险工单，推送钉钉客服人工接管。</li>
+    </ul>
+  </div>
+
+  <div class="qgroup" id="q-status">
+    <h3><span class="dot" style="background:#2f9e44"></span>问题状态汇总（6.18 更新）</h3>
+    <table class="roadmap">
+      <thead><tr><th style="width:100px">问题ID</th><th style="width:110px">状态</th><th>当前判断 / 未解决点</th></tr></thead>
+      <tbody>
+        <tr><td>P01-Q001</td><td><span class="status done">已解决</span></td><td>以订单最近物流轨迹为 48h 起算点。</td></tr>
+        <tr><td>P01-Q002</td><td><span class="status done">已解决</span></td><td>此工单最多可延后三天，选择第三天。</td></tr>
+        <tr><td>P01-Q003</td><td><span class="status done">已解决</span></td><td>以《代发仓发货地址.xlsx》的仓库发货地址为准，按发货区域市区判断是否已出当地。</td></tr>
+        <tr><td>P01-Q004</td><td><span class="status done">已解决</span></td><td>权限表已补充：通用售后低客单最高实付金额 30%，中高客单最高 20%，总金额 ≥500 元转人工。</td></tr>
+        <tr><td>P01-Q005</td><td><span class="status done">已解决</span></td><td>紧急/剩余 1 小时内临近超时工单可直接推送钉钉客服人工接管，常规工单按各场景既定时效执行。</td></tr>
+        <tr><td>P01-Q006</td><td><span class="status done">已解决</span></td><td>时效兜底机制已补：无需统一时效总表，剩余 1 小时内未闭环的紧急或超时风险工单直接走人工接管。</td></tr>
+        <tr><td>P02-Q001</td><td><span class="status done">已解决</span></td><td>“部分有货”已按少发缺货细分处理：整体缺货引导退款；配件缺货协商补偿/退货退款；部分主产品缺货按缺货数量/金额协商部分退款，不接受则协商退货退款。</td></tr>
+        <tr><td>P02-Q002</td><td><span class="status done">已解决</span></td><td>承诺补寄已补齐 1 小时后闭环：买家不同意或无明确回复时，转协商其它方案/协商退款/消费者未申请退款，发送系统话术后关闭工单。</td></tr>
+        <tr><td>P02-Q003</td><td><span class="status done">已解决</span></td><td>请求平台协助后可默认退款，平台代买家申请退款后可直接同意。</td></tr>
+        <tr><td>P02-Q004</td><td><span class="status done">已解决</span></td><td>按 OMS 是否标记低值品/拦截品判断；普通场景需拿到拦截/拒收成功凭证后退款，非低值品未出当地且拦截成功可直接退款，低值品/拦截品按特殊规则执行。</td></tr>
+        <tr><td>P02-Q005</td><td><span class="status done">已解决</span></td><td>已按客服口径收口为：先核实物流是否异常/退回，再核实买家诉求，接着看是否已申请退款，未申请且主动要求补寄时再结合库存协商补寄/退款。</td></tr>
+        <tr><td>P02-Q006</td><td><span class="status done">已解决</span></td><td>退款成功后工单自动完结；无库存且买家要求发货时先发精油并留言，平台识别单号后自动完结。</td></tr>
+        <tr><td>P03-Q001</td><td><span class="status done">已解决</span></td><td>外包指磊藤外部客服，对接渠道为钉钉筑越-磊腾拼多多客服对接群。</td></tr>
+        <tr><td>P03-Q002</td><td><span class="status done">已解决</span></td><td>触发条件为催发货揽收、发货后物流长时间无走件，买家联系平台后生成工单。</td></tr>
+        <tr><td>P03-Q003</td><td><span class="status done">已解决</span></td><td>原意为订单在 OMS 软件中未取消手工处理的状态。</td></tr>
+        <tr><td>P03-Q004</td><td><span class="status done">已解决</span></td><td>业务口径已定：快递回复在金山文档/微信群查看；技术确认能否取数，取不到则转人工。</td></tr>
+        <tr><td>P04-Q001</td><td><span class="status done">已解决</span></td><td>订单未发货可直接同意退款。</td></tr>
+        <tr><td>P04-Q002</td><td><span class="status done">已解决</span></td><td>退回质检不符时可留言/电联确认，按寄回数量部分退款或按情况驳回。</td></tr>
+        <tr><td>P04-Q003</td><td><span class="status done">已解决</span></td><td>低价值订单直接退款化解投诉；非低价值订单按流程上报反馈。</td></tr>
+        <tr><td>P04-Q004</td><td><span class="status ignore">忽略</span></td><td>春节/大促等特殊时效按平台规则执行，不作为 SOP 固定规则。</td></tr>
+        <tr><td>P04-Q005</td><td><span class="status done">已解决</span></td><td>同一订单多个工单时，优先处理时效短工单，无需合并。</td></tr>
+        <tr><td>P05-Q001</td><td><span class="status done">已解决</span></td><td>代发仓渠道已收口：洁文走微信群；金山文档对接捷佑韵达、众邦、简卓圆通、亿哈、铭如；其他未列渠道按微信群处理。</td></tr>
+        <tr><td>P05-Q002</td><td><span class="status done">已解决</span></td><td>以 OMS 低值品/拦截品标识作为处理依据，不再依赖多份客退件表。</td></tr>
+        <tr><td>P06-Q001</td><td><span class="status done">已解决</span></td><td>5 家试点店铺已明确。</td></tr>
+        <tr><td>P06-Q002</td><td><span class="status done">已解决</span></td><td>AI 可以自动完结规则明确、数据可读取、凭证满足要求的工单；高风险、异常或责任边界未确认场景转人工。</td></tr>
+        <tr><td>P06-Q003</td><td><span class="status partial">待确认</span></td><td>责任边界可先保留“待技术/业务确认”，不影响 SOP 本身；试点阶段按已确认业务规则执行，异常转人工。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.1 判断条件模糊 -->
+  <div class="qgroup" id="q1">
+    <h3><span class="dot" style="background:#e03131"></span>一、判断条件模糊 / 缺少量化标准</h3>
+    <table class="qtable">
+      <thead><tr><th>问题ID</th><th style="width:130px">所在环节</th><th>问题</th><th style="width:300px">需向客服确认</th><th style="width:90px">优先级</th><th class="reply-head" style="width:240px">客服回复/备注</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="qid">P01-Q001</td>
+          <td class="loc">物流·48h 未更新</td>
+          <td>"<a class="ref-link" href="#src-logistics-48h">轨迹更新日期往后延 2 天</a>"、<a class="ref-link" href="#src-logistics-over48">超 48 小时未更新物流</a>——"48h" 起算点不明。</td>
+          <td>48 小时从哪个时间点算起？最后一条轨迹时间，还是发货时间？Agent 必须有明确锚点。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q1-0">以订单最近物流轨迹为起算点</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P01-Q002</td>
+          <td class="loc">物流·派件断更</td>
+          <td>"<a class="ref-link" href="#src-delivery-stale-date">选择预计送达日期，能延多晚延多晚</a>"。</td>
+          <td>系统最大可延几天？是否有上限？"能延多晚"无法被程序量化。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q1-1">此工单中最多可延后三天，选择第三天即可</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P01-Q003</td>
+          <td class="loc">退款·拒收/拦截</td>
+          <td>判断"<a class="ref-link" href="#src-refund-local-warehouse">物流未出长沙 / 未出代发仓当地</a>"。</td>
+          <td>代发仓有 6+ 个，每个仓"当地"如何界定？当前按《代发仓发货地址.xlsx》的仓库发货地址所在市区判断。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q1-2">已解决：以《代发仓发货地址.xlsx》中的仓库发货地址为准，按发货区域市区判断是否已出当地。</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P01-Q004</td>
+          <td class="loc">售后·非客退件补偿</td>
+          <td>"<a class="ref-link" href="#src-service-compensation">小额补偿客单价 30%</a>"、需对照"<a class="ref-link" href="#src-service-authority-table">客服权限表</a>"，但权限表未附。</td>
+          <td>金额阈值/上限是多少？超出多少元才必须报备？请提供完整权限表。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q1-3">已补充《拼多多权限表0617.xlsx》：通用售后低客单(100元以下)最大补偿实付金额30%，中高客单(100元以上)最大补偿实付金额20%；订单总金额≥500元的售后订单/工单转人工客服处理。所有补偿均需有2-3轮协商过程，不可直接到最高权限。</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P01-Q005</td>
+          <td class="loc">多处等待时长</td>
+          <td>少发 <a class="ref-link" href="#src-wait-30min-text">30 分钟</a>、催售后 <a class="ref-link" href="#src-wait-10min-text">10 分钟</a>、投诉 <a class="ref-link" href="#src-service-1h">1h</a>，等待阈值不统一。</td>
+          <td>场景内时长按 SOP 执行；剩余 1 小时内仍未闭环的紧急或超时风险工单，推送钉钉客服人工接管。</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q1-4">工单处理流程内标注的时效以各场景为准；若工单剩余 1 小时内临近超时或为紧急工单，可直接推送钉钉客服人工接管，不再强行等待统一时效表。</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P01-Q006</td>
+          <td class="loc">全局·工单时效</td>
+          <td>只标注了部分场景时效（<a class="ref-link" href="#src-afterservice-1h-text">处理时效 1 小时</a>、投诉 <a class="ref-link" href="#src-service-1h">1h</a>、<a class="ref-link" href="#src-refusal-4h-text">4 小时优先</a>、<a class="ref-link" href="#src-ship-24h">24 小时</a>），其余场景按平台工单倒计时与场景内时效执行。</td>
+          <td>紧急/剩余 1 小时内临近超时工单走钉钉客服人工接管；常规工单按场景时效处理，无需再补统一时效总表。</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q1-5">工单类型不同处理时效不同；紧急工单、剩余 1 小时内临近超时工单直接推送钉钉客服人工接管，不再依赖统一时效总表。</textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.2 决策分支不闭环 -->
+  <div class="qgroup" id="q2">
+    <h3><span class="dot" style="background:#f08c00"></span>二、决策分支不闭环（缺少兜底 / else 路径）</h3>
+    <table class="qtable">
+      <thead><tr><th>问题ID</th><th style="width:130px">所在环节</th><th>缺失分支</th><th style="width:300px">需向客服确认</th><th style="width:90px">优先级</th><th class="reply-head" style="width:240px">客服回复/备注</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="qid">P02-Q001</td>
+          <td class="loc">少发·库存查询</td>
+          <td>已补齐"部分有货"处理：按少发缺货细分为整体缺货、主产品有货配件缺货、部分主产品缺货。</td>
+          <td>无需再确认：配件缺货协商补偿/退货退款；部分主产品缺货按缺货数量/金额协商部分退款，不接受则退货退款；工单先闭环，后续售后人工继续跟进。</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q2-0">已解决：部分有货指组合商品/带配件商品部分有库存；按最新 SOP 缺货细分执行。整体缺货用瑕疵话术引导退款；主产品有货、配件缺货时协商补偿退款，买家不接受可引导退货退款；部分主产品缺货时按缺货商品数量/金额协商部分退款，不接受则协商退货退款。工单完结后，人工继续处理买家售后问题。</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P02-Q002</td>
+          <td class="loc">承诺补寄·不同意</td>
+          <td>已补齐买家不同意/无明确回复的兜底闭环。</td>
+          <td>留言协商补寄后等待 1 小时；买家不同意或无明确回复时，按协商其它方案、协商退款、消费者未申请退款路径关闭工单。</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q2-1">已解决：留言协商补寄后等待 1 小时；买家不同意或无明确回复时，走【与消费者协商其它方案】→【去协商退款】→【消费者未申请退款】→ 发送系统自动生成回复话术 → 工单关闭。</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P02-Q003</td>
+          <td class="loc">物流轨迹已退回</td>
+          <td>"<a class="ref-link" href="#src-return-platform-help">请平台协助</a>"后，买家长期不回复是否会超时被罚？</td>
+          <td>是否需设置兜底时限及到点后的默认动作（如默认退款）？</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q2-2">选择请求平台协助后可默认退款，平台代买家申请退款后可直接同意</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P02-Q004</td>
+          <td class="loc">客退件核实</td>
+          <td>依赖"<a class="ref-link" href="#src-return-refund-ketuijian">钉钉 Excel</a> / <a class="ref-link" href="#src-customer-return-monthly">客服总群每月最新客退件表格</a>"，表格查不到时无默认值。</td>
+          <td>以 OMS 低值品/拦截品标识为准；普通拦截/拒收场景需拿到成功凭证后退款，低值品/拦截品按特殊规则执行。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q2-3">根据 OMS 订单是否标记“低值品/拦截品”进行判断。普通拦截/拒收场景需拿到拦截成功或拒收成功凭证后退款；非低值品只要未出当地且拦截成功，也可直接退款；低值品/拦截品按特殊规则执行。</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P02-Q005</td>
+          <td class="loc">导单断更催发货</td>
+          <td>已按客服回复补齐判断顺序：物流异常/退回 → 买家诉求 → 是否已申请退款 → 未申请且买家要求补寄时再查库存协商。</td>
+          <td>无需再确认：库存只作为补寄/退款协商依据，不再与物流退回状态、退款状态并列混用。</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q2-4">①先核实物流是否异常/退回
+②再核实买家诉求
+③再核实是否已申请退款
+④订单未申请退款、买家主动表明要求补寄时，核实库存情况与买家协商补寄/退款
+⑤库存判断作为补寄/退款的协商依据，不再与退款状态并列混用。</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P02-Q006</td>
+          <td class="loc">催发货·缺货</td>
+          <td>已补齐催发货缺货闭环：退款成功后工单自动完结；无库存但买家要求发货时，发出精油并留言，平台识别单号后自动完结。</td>
+          <td>无需再确认：优先选择【可以发货】闭环工单，之后根据库存情况与买家留言协商售后方案；紧急/异常情况转人工。</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q2-5">①订单退款成功工单自动完结后，无需在工单界面进行其它操作
+②若买家要求发货，商品无库存，则发出精油，与买家留言“亲亲，抱歉给您带来不便，由于商品出现轻微问题已经返厂，无可替换商品，考虑到您的购物体验，小店已为您发出一瓶精油表达歉意，您注意查收哦~后续您可申请退款，小店将优先为您处理”，平台识别到单号后工单自动完结
+③不论何种情形，优先选择“可以发货”完结工单，之后根据库存情况与买家留言协商售后方案</textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.3 术语/引用未定义 -->
+  <div class="qgroup" id="q3">
+    <h3><span class="dot" style="background:#1c7ed6"></span>三、术语 / 引用未定义（Agent 无法识别）</h3>
+    <table class="qtable">
+      <thead><tr><th>问题ID</th><th style="width:130px">术语 / 引用</th><th>问题</th><th style="width:300px">需向客服确认</th><th style="width:90px">优先级</th><th class="reply-head" style="width:240px">客服回复/备注</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="qid">P03-Q001</td>
+          <td class="loc">"<a class="ref-link" href="#src-outsourcing-not-agreed">外包未同意</a> / <a class="ref-link" href="#src-outsourcing-agreed">外包已同意</a>"</td>
+          <td>外包指谁？状态来源不明。</td>
+          <td>外包指哪一方？该状态在哪个系统、哪个字段能查到？</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q3-0">外包是指磊藤那边的外部客服，对接渠道是钉钉筑越-磊腾拼多多客服对接群</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P03-Q002</td>
+          <td class="loc">"<a class="ref-link" href="#src-good-deed-scene">好人好事工单</a>"<br>"<a class="ref-link" href="#src-guide-stale-scene">导单断更</a>"</td>
+          <td>已补齐触发条件：催发货揽收、发货后物流长时间无走件，买家联系平台反馈后生成工单。</td>
+          <td>无需再确认：识别特征为订单是否发货、发货后物流是否长时间异常未更新；具体以平台规则为准。</td>
+          <td><span class="pri p2">P2</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q3-1">这两类工单都是发货类型工单，实际触发条件是买家催促发货揽收和发货后物流长时间没有走件信息，买家直接联系平台反馈导致工单的生成，具体已平台规则为准
+识别特征：订单是否发货，发货后物流是否长时间异常未更新</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P03-Q003</td>
+          <td class="loc">"<a class="ref-link" href="#src-manual-process-reason">未取消手工处理原因</a>"</td>
+          <td>表述不通顺，疑似笔误。</td>
+          <td>请确认该句原意。</td>
+          <td><span class="pri p3">P3</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q3-2">该句原意是指订单是在oms软件里未取消手工处理的状态</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P03-Q004</td>
+          <td class="loc">"<a class="ref-link" href="#src-express-contact">对接快递</a>"</td>
+          <td>对接后判定依赖人工回复，Agent 无法获取结构化结果。</td>
+          <td>对接结果（能否送达 / 是否拦截成功）由金山文档或微信群回复，业务上可作为判断依据；技术侧需确认是否能读取文档/群回复。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q3-3">已解决：对接结果快递会在金山文档或者微信群类回复告知，可直接在文档或者群内查看回复。待技术确认能否获取文档/群数据；若不支持，则该节点转人工处理。</textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.5 缺失高频场景 -->
+  <div class="qgroup" id="q5">
+    <h3><span class="dot" style="background:#7048e8"></span>四、缺失但高频的场景（建议补充）</h3>
+    <table class="qtable">
+      <thead><tr><th>问题ID</th><th>建议补充场景</th><th style="width:300px">需向客服确认</th><th style="width:90px">优先级</th><th class="reply-head" style="width:240px">客服回复/备注</th></tr></thead>
+      <tbody>
+        <tr><td class="qid">P04-Q001</td><td>仅退款（未发货、正常无异常）——最常见的退款类型反而未单列。</td><td>标准处理动作？是否可直接同意？</td><td><span class="pri p2">P2</span></td><td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q5-0">标准动作是凭订单号在 oms 查发货状态，订单未发货可直接同意退款</textarea></td></tr>
+        <tr><td class="qid">P04-Q002</td><td>退货退款·买家已寄回但商品有问题 / 少件。</td><td>退回质检不符如何处理？是否扣款 / 拒绝退款？</td><td><span class="pri p2">P2</span></td><td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q5-1">退回质检不符处理方案：留言 / 电连买家寄回商品数量和情况
+订单退款两种处理方案：和买家协商按寄回数量部分退款或者留言寄回具体情况进行驳回处理
+</textarea></td></tr>
+        <tr><td class="qid">P04-Q003</td><td>买家辱骂 / 威胁 / 恶意工单。</td><td>可以按规则自动处理：先在 OMS 核查商品价值，低价值订单直接退款化解投诉；非低价值订单按流程上报反馈。</td><td><span class="pri p3">P3</span></td><td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q5-2">订单投诉处理要点：先在 OMS 核查商品价值，低价值订单直接退款化解投诉；非低价值订单按流程上报反馈处理。规则明确、数据可读取、凭证满足要求时 AI 可以自动提交并完结。</textarea></td></tr>
+        <tr><td class="qid">P04-Q004</td><td>节假日 / 大促时效顺延规则。</td><td>此项不作为固定 SOP 规则；遇到春节/大促标签或平台特殊公告时，转人工或按平台实时规则处理。</td><td><span class="pri p3">P3</span></td><td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q5-3">忽略：目前没有固定内部规则；遇到春节/大促标签或平台特殊公告时，转人工或按平台实时规则处理。</textarea></td></tr>
+        <tr><td class="qid">P04-Q005</td><td>同一订单多个工单并存。</td><td>处理优先级 / 是否合并？</td><td><span class="pri p3">P3</span></td><td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q5-4">同一订单多工单，优先处理时效短工单，无需合并工单</textarea></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.6 原文数据冲突 -->
+  <div class="qgroup" id="q6">
+    <h3><span class="dot" style="background:#e03131"></span>五、原文数据冲突 / 数据源未统一（须订正）</h3>
+    <table class="qtable">
+      <thead><tr><th>问题ID</th><th style="width:130px">所在环节</th><th>冲突点</th><th style="width:300px">需向客服确认</th><th style="width:90px">优先级</th><th class="reply-head" style="width:240px">客服回复/备注</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="qid">P05-Q001</td>
+          <td class="loc">代发仓名单不一致</td>
+          <td>同一份 SOP 里代发仓清单不同：物流催件/丢件场景列了 6 个仓（<a class="ref-link" href="#src-logistics-warehouse-list">捷佑、众邦、洁文、简卓、亿哈、铭如</a>）；退款/拒收/拦截/售中场景只列了 5 个（<a class="ref-link" href="#src-refund-warehouse-list">捷佑、亿哈、简卓、铭如、众邦</a>）——<span class="red">缺"洁文"仓</span>。</td>
+          <td>洁文仓到底走班牛还是金山文档？请给出<b>唯一的、全场景统一</b>的代发仓名单，并明确每个仓的对接渠道（班牛 / 金山文档 / 微信）。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q6-0">洁文仓因为目前发货订单不多，暂时取消走金山文档可直接微信群内对接即可
+金山文档对接的仓库：捷佑韵达（捷佑中通和顺丰需对接微信群内）、众邦、简卓圆通（简卓邮政快递需对接微信群内）、亿哈、铭如</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P05-Q002</td>
+          <td class="loc">客退件数据源不统一</td>
+          <td>同一概念指向不同数据源：召回/在途退款、拒收工单写"<a class="ref-link" href="#src-return-refund-ketuijian">钉钉 Excel 客退件文件</a>"；投诉紧急、催售务工单写"<a class="ref-link" href="#src-customer-return-monthly">客服总群每月最新客退件表格</a>"。到底是同一份表还是两份？</td>
+          <td>客退件判定只有<b>一个权威数据源</b>吗？若有多份，以哪份为准？文件的确切位置（钉钉路径 / 群名）是什么？这是高频判断点，必须落到唯一数据源。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q6-1">根据 OMS 订单是否标记“低值品”进行判断，筑越仓订单有“低值品”标识可在 TMS 登记弃件处理；代发仓同样根据 OMS 标注的“低值品”和“拦截品”进行处理，有对应标识可直接对接拦截/拒收后退款处理。此项按 OMS 标识作为统一判断依据。</textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2.7 AI 自动化放开前需确认 -->
+  <div class="qgroup" id="q7">
+    <h3><span class="dot" style="background:#1c7ed6"></span>六、AI 自动化放开前需确认（不重复前述规则）</h3>
+    <table class="qtable">
+      <thead><tr><th>问题ID</th><th style="width:170px">确认项</th><th>需要客服明确的内容</th><th style="width:120px">优先级</th><th class="reply-head" style="width:240px">客服回复/备注</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="qid">P06-Q001</td>
+          <td class="loc">5 家试点范围</td>
+          <td>确认先接入哪 5 家店铺；每家店铺是否允许 Agent 自动登录、自动读取工单、自动提交处理结果。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q7-0">PANAPOPO医疗旗舰店
+PANAPOPO旗舰店（众创）
+PANAPOPO医疗器械旗舰店
+PANAPOPO保健按摩旗舰店
+PANAPOPO器械保健官方旗舰店</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P06-Q002</td>
+          <td class="loc">自动执行授权</td>
+          <td>AI 可以自动完结规则明确、数据可读取、凭证满足要求的工单；异常、高风险或责任边界未确认场景转人工。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q7-1">AI 可以自动完结：规则明确、数据可读取、凭证满足要求的工单；全部退款类工单退款完成后自动完结关闭；普通催发货工单发货后自动完结。
+转人工确认：异常、高风险、买家表达不明确、责任边界未确认、平台特殊公告/春节大促、技术无法读取关键数据的场景。
+</textarea></td>
+        </tr>
+        <tr>
+          <td class="qid">P06-Q003</td>
+          <td class="loc">业务责任边界</td>
+          <td>客服确认规则后，AI 按规则执行产生的退款、补发、赔付、平台判责等业务风险，由哪个客服/主管/部门承担。</td>
+          <td><span class="pri p1">P1</span></td>
+          <td class="reply-cell"><textarea class="reply-note" placeholder="输入客服回复或备注" data-reply-id="q7-2"></textarea></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 第三部分：AI 落地建议                                         -->
+  <!-- ============================================================ -->
+  <div class="part-head" id="part3">
+    <span class="no" style="background:#1c7ed6">3</span>
+    <div>
+      <h2>AI 方案落地建议</h2>
+      <div class="sub">从自动化 Agent 角度评估：哪些能做、哪些做不了、按什么优先级推进</div>
+    </div>
+  </div>
+
+  <h3 id="ai-solution" style="font-size:16px;margin:6px 0 8px;color:#343a40;">落地方案方向</h3>
+  <div class="table-scroll">
+  <table class="roadmap">
+    <thead><tr><th style="width:90px">方案</th><th>定位</th><th>落地方式</th><th style="width:180px">适用情况</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="phase a">主推</span></td>
+        <td>5 家试点店铺直接接入 Agent 插件，目标是让 AI 尽量自动处理工单。</td>
+        <td>优先选择问题最多/最痛的店铺，不直接覆盖 80 家；建议按"3 家工单量最大 + 1 家售后典型 + 1 家物流/催发货典型"选择。</td>
+        <td>客服希望快速减少人工处理量，且愿意确认自动化规则与责任边界。</td>
+      </tr>
+      <tr>
+        <td><span class="phase c">备选</span></td>
+        <td>建设工单中台，由 AI 做整理、分类、预警和处理建议，人工客服执行。</td>
+        <td>统一汇总多店铺工单，按风险和时效排序，输出 SOP 建议、话术和凭证要求。</td>
+        <td>插件接入、账号风控或自动操作风险较高时，先用中台方案稳步推进。</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div id="ai-principle" class="global" style="background:#eef6ff;border-color:#b9dcff;">
+    <h3 style="color:#1b4f8a;">自动化执行原则与责任边界</h3>
+    <ul>
+      <li><b>默认 AI 优先处理：</b>只要系统能读取数据、能判断条件、凭证满足要求、能完成操作，就优先让 AI 自动执行并完结。</li>
+      <li><b>风险规则先确认：</b>涉及退款、赔付、补发、平台处罚、客户纠纷或 SOP 规则不清时，必须先由客服确认具体执行规则。</li>
+      <li><b>确认后按规则执行：</b>客服确认后，AI 按确认规则自动处理并完结；未确认规则、命中异常、剩余 1 小时内仍无法闭环或平台特殊周期时转人工。</li>
+      <li><b>全流程留痕：</b>AI 需记录查询数据、判断依据、点击选项、发送话术、上传凭证、处理时间和异常信息。</li>
+      <li><b>责任边界：</b>AI 只按客服确认后的 SOP 规则执行；规则已确认后产生的业务争议、资损或平台风险，由确认规则的业务/客服负责人承担。若 AI 未按规则执行，则由技术侧排查修复。</li>
+    </ul>
+  </div>
+
+  <h3 id="ai-product-plan" style="font-size:16px;margin:26px 0 8px;color:#343a40;">产品方案</h3>
+  <div class="table-scroll">
+  <table class="roadmap">
+    <thead><tr><th style="width:170px">方案</th><th>默认产品设计</th><th style="width:260px">跟客服确认的点</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>异常兜底与人工接管</td>
+        <td>处理工单 → 命中异常 → 写入待人工接管 → 继续下一单。</td>
+        <td>接管人是谁、多久内接管；默认剩余 1 小时内仍无法闭环即推送钉钉客服人工接管。</td>
+      </tr>
+      <tr>
+        <td>人工接管方式</td>
+        <td>AI 输出接管摘要，人工从待接管列表接手，同一后台继续处理。</td>
+        <td>接管入口放在哪、群通知还是任务列表、接手后是否保留 AI 已完成步骤。</td>
+      </tr>
+      <tr>
+        <td>操作留痕要求</td>
+        <td>记录查询数据、判断依据、点击选项、发送话术、上传凭证、操作时间、异常原因。</td>
+        <td>是否还要补充账号、页面截图、失败原因、人工接管时间。</td>
+      </tr>
+      <tr>
+        <td>试点验收指标</td>
+        <td>自动处理量、节省时长、超时率、误处理率、平台介入/赔付情况、客服驳回原因。</td>
+        <td>试点周期多长、达标阈值是多少、是否按店铺/工单类型分别验收。</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 id="ai-levels" style="font-size:16px;margin:26px 0 8px;color:#343a40;">自动化放开等级</h3>
+  <div class="ai-cols">
+    <div class="ai-card can">
+      <h4>一级放开 · 低风险自动处理</h4>
+      <ul>
+        <li><b>适合直接放开：</b>规则明确、可验证、资损低、提交后争议小的场景。</li>
+        <li>如物流正常更新、已发货/已揽收、明确签收凭证、未出仓/仅揽件且拦截成功的退款、低值品/拦截品特殊规则退款。</li>
+        <li>AI 自动完成查询、判断、话术、选项点击、凭证整理和处理日志。</li>
+      </ul>
+    </div>
+    <div class="ai-card partial">
+      <h4>二级放开 · 规则确认后自动</h4>
+      <ul>
+        <li><b>适合有条件放开：</b>AI 能处理并可自动完结，但需满足数据可读取、凭证齐全、规则已确认。</li>
+        <li>如补发、拒收、召回、买家明确同意退款/补发、未发货改地址、质量/投诉低风险处理、快递/仓库对接结果明确的场景。</li>
+        <li>客服确认关键词、金额、时限、凭证要求后，AI 自动执行并完结；回复不明确、数据异常或剩余 1 小时内仍无法闭环时转人工。</li>
+      </ul>
+    </div>
+    <div class="ai-card cannot">
+      <h4>三级放开 · 高风险需授权</h4>
+      <ul>
+        <li><b>原则上可由 AI 执行，但必须主管授权或客服明确担责：</b>资损、处罚、投诉升级风险较高。</li>
+        <li>如非低值品且未取得拦截/拒收成功凭证的退款、高金额退款、过敏等高风险投诉、平台争议、买家表达不明确。</li>
+        <li>未授权前转人工；授权后 AI 按规则处理，并保留完整判断与操作记录。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 id="ai-sop-fit" style="font-size:16px;margin:26px 0 6px;color:#343a40;">按 SOP 类型的落地判断</h3>
+  <div class="table-scroll">
+  <table class="roadmap">
+    <thead><tr><th style="width:90px">类型</th><th>AI 可处理内容</th><th>主要风险点</th><th style="width:140px">建议优先级</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>物流</td>
+        <td>查订单、查物流、判断正常更新/断更/签收/退回/在途、生成话术、点击低风险选项、发起快递/仓库对接、补发/退款流程跟进。</td>
+        <td>48h 起算点、预计送达日期上限、快递/仓库回复标准、补发规则、退款边界、买家协商判断。</td>
+        <td><span class="phase a">第一批</span></td>
+      </tr>
+      <tr>
+        <td>催发货</td>
+        <td>识别催发货、查 OMS 发货/配货/揽收状态、生成缺货话术、手工配货提醒、优先出库对接、24h 时效预警。</td>
+        <td>缺货原因判断、承诺发货时间上限、买家不同意退款、仓库未实际出库、导单断更需按物流异常/买家诉求/退款状态顺序执行。</td>
+        <td><span class="phase a">第一批</span></td>
+      </tr>
+      <tr>
+        <td>退款</td>
+        <td>查物流状态、判断未出仓/在途/退回/签收、发起拦截/拒收/召回、低风险退款、退款话术和凭证整理。</td>
+        <td>未取得拦截/拒收成功凭证就退款、低值品/拦截品标识误判、高金额退款、退货物流误判、凭证不足。</td>
+        <td><span class="phase b">第二批</span></td>
+      </tr>
+      <tr>
+        <td>售中</td>
+        <td>识别改地址、查订单发货状态、未发货改地址、OMS 地址同步、已发货改址请求、无法改址话术。</td>
+        <td>地址同步错误、已配货未取消、快递改址失败、外包群回复依赖人工确认、买家未明确同意。</td>
+        <td><span class="phase b">第二批</span></td>
+      </tr>
+      <tr>
+        <td>售后</td>
+        <td>识别少发/补寄/质量问题/投诉等场景，查订单、查库存、读聊天、生成话术、整理凭证、创建补发方案；规则明确且凭证满足要求时可自动完结。</td>
+        <td>少发误判、质量凭证判断、补偿金额、低值品/拦截品标识判断、过敏等高风险投诉、实物质检依赖人工。</td>
+        <td><span class="phase c">第三批</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note" style="margin-top:18px;">
+    <b>关键结论：</b>本方案主口径不是"AI 只能辅助"，而是 <b>能让 AI 处理的优先 AI 处理</b>。
+    真正需要提前解决的是责任边界：凡规则明确、数据可读取、凭证满足要求的场景，AI 可以自动执行并完结；责任边界未确认、平台特殊周期、剩余 1 小时内仍无法闭环或异常情况转人工。
+  </div>
+
+</div>
+
+<footer>拼多多工单处理 SOP &amp; AI 落地分析 · 由 XMind 整理生成 · 仅供内部参考</footer>
+
+<script>
+  var STORAGE_KEY='pdd-sop-page-edits-v1';
+  var REPLY_KEY='pdd-sop-replies-v1';
+
+  setupReplyInputs();
+  setupEditableContent();
+  loadSavedEdits();
+  ensureSourceAnchors();
+  normalizeRefLinks();
+  loadReplies();
+  setupEditToolbar();
+
+  // 点击分类标签自动展开对应分类
+  document.querySelectorAll('.nav a').forEach(function(a){
+    a.addEventListener('click',function(){
+      var t=document.querySelector(this.getAttribute('href'));
+      if(t) t.open=true;
+    });
+  });
+
+  // 侧边栏平滑滚动 + 展开对应流程
+  var sideLinks=document.querySelectorAll('.side-nav a');
+  sideLinks.forEach(function(a){
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var openId=this.dataset.open;
+      if(openId){ var d=document.getElementById(openId); if(d) d.open=true; }
+      var t=document.getElementById(this.dataset.target);
+      if(t) setTimeout(function(){t.scrollIntoView({behavior:'smooth',block:'start'});},0);
+    });
+  });
+
+  // 待确定问题中的原文引用：点击关键词后展开对应场景并高亮原文
+  document.querySelectorAll('.ref-link').forEach(function(a){
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var linkText=this.textContent.replace(/\s+/g,' ').trim();
+      var forcedTarget=getForcedRefTarget(linkText);
+      var id=forcedTarget ? forcedTarget.id : this.getAttribute('href').slice(1);
+      var t=forcedTarget || document.getElementById(id);
+      if(!t) return;
+      if(t.tagName && t.tagName.toLowerCase()==='details') t.open=true;
+      var p=t.parentElement;
+      while(p){
+        if(p.tagName && p.tagName.toLowerCase()==='details') p.open=true;
+        p=p.parentElement;
+      }
+      setTimeout(function(){
+        var hit=highlightQuotedText(t,a.textContent.trim());
+        (hit || t).scrollIntoView({behavior:'smooth',block:'center'});
+        if(!hit){
+          t.classList.remove('flash');
+          void t.offsetWidth;
+          t.classList.add('flash');
+        }
+      },0);
+    });
+  });
+
+  function getForcedRefTarget(text){
+    if(text==='客服权限表'){
+      return forceExactSourceAnchor('src-afterservice-1h','客服权限表','src-service-authority-table');
+    }
+    return null;
+  }
+
+  // 若页面曾保存过本地编辑，旧 HTML 可能覆盖新增精确锚点；加载后先补回原文锚点。
+  function ensureSourceAnchors(){
+    [
+      ['src-logistics-48h','捷佑韵达、众邦、简卓圆通、亿哈、铭如','src-logistics-warehouse-list'],
+      ['src-refund-local-warehouse','捷佑韵达、众邦、简卓圆通、亿哈、铭如','src-refund-warehouse-list'],
+      ['src-wait-30min','30 分钟','src-wait-30min-text'],
+      ['src-service-compensation','低值品/拦截品','src-customer-return-monthly'],
+      ['src-service-compensation','1h','src-service-1h'],
+      ['src-afterservice-1h','处理时效 1 小时','src-afterservice-1h-text'],
+      ['src-wait-10min','10 分钟','src-wait-10min-text'],
+      ['src-afterservice-1h','客服权限表','src-service-authority-table'],
+      ['src-refund-return-logistics','无退货物流/物流异常','src-no-return-logistics'],
+      ['src-refusal-4h','4 小时优先','src-refusal-4h-text'],
+      ['src-ship-time','24 小时','src-ship-24h'],
+      ['src-ship-out-of-stock','往后延长承诺发货时间(能延多晚延多晚)','src-ship-extend-time'],
+      ['src-guide-stale-scene','6.18 客服口径','src-guide-check-stock'],
+      ['src-guide-stale-scene','闭环口径','src-guide-not-returned'],
+      ['src-guide-stale-scene','有库存(拦截补发)','src-guide-has-stock'],
+      ['src-guide-stale-scene','无库存(引导退款)','src-guide-no-stock'],
+      ['src-outsourcing-status','已发货 · 外包未同意','src-outsourcing-not-agreed'],
+      ['insale','已发货 · 外包已同意','src-outsourcing-agreed'],
+      ['aftersale','**、**、**','src-placeholder-products'],
+      ['aftersale','有库存','src-stock-has'],
+      ['aftersale','库存不足','src-stock-lack'],
+      ['aftersale','少发 XX 商品','src-placeholder-missing-product'],
+      ['aftersale','XX 元','src-placeholder-money']
+    ].forEach(function(item){
+      wrapFirstPlainText(item[0],item[1],item[2]);
+    });
+  }
+
+  function wrapFirstPlainText(rootId,text,id){
+    if(document.getElementById(id)) return;
+    var root=document.getElementById(rootId) || document.body;
+    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
+      acceptNode:function(node){
+        if(!node.nodeValue || node.nodeValue.indexOf(text)===-1) return NodeFilter.FILTER_REJECT;
+        var p=node.parentElement;
+        while(p){
+          if(p.id===id) return NodeFilter.FILTER_REJECT;
+          if(p.tagName && ['SCRIPT','STYLE','TEXTAREA'].indexOf(p.tagName)>-1) return NodeFilter.FILTER_REJECT;
+          p=p.parentElement;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var node=walker.nextNode();
+    if(!node) return;
+    var idx=node.nodeValue.indexOf(text);
+    var range=document.createRange();
+    range.setStart(node,idx);
+    range.setEnd(node,idx+text.length);
+    var span=document.createElement('span');
+    span.id=id;
+    span.className='source-hit';
+    range.surroundContents(span);
+  }
+
+  function forceExactSourceAnchor(rootId,text,id){
+    var existing=document.getElementById(id);
+    if(existing && existing.textContent.replace(/\s+/g,' ').trim()===text) return existing;
+    if(existing){
+      existing.removeAttribute('id');
+      existing.classList.remove('source-hit','flash');
+    }
+    var root=document.getElementById(rootId);
+    if(root && root.tagName && root.tagName.toLowerCase()==='details') root.open=true;
+    wrapFirstPlainText(rootId,text,id);
+    return document.getElementById(id);
+  }
+
+  // 若页面曾保存过本地编辑，旧的第二部分 HTML 可能覆盖新锚点；加载后统一校正引用。
+  function normalizeRefLinks(){
+    var targetByText={
+      '超 48h 直接记丢件':'#src-logistics-over48',
+      '超 48 小时未更新物流':'#src-logistics-over48',
+      '客服权限表':'#src-service-authority-table',
+      '30min':'#src-wait-30min-text',
+      '30 分钟':'#src-wait-30min-text',
+      '10min':'#src-wait-10min-text',
+      '10 分钟':'#src-wait-10min-text',
+      '1h':'#src-service-1h',
+      '投诉 1h':'#src-service-1h',
+      '催售后 1h':'#src-afterservice-1h-text',
+      '处理时效 1 小时':'#src-afterservice-1h-text',
+      '拒收 4h':'#src-refusal-4h-text',
+      '4 小时优先':'#src-refusal-4h-text',
+      '催发货 24h':'#src-ship-24h',
+      '24 小时':'#src-ship-24h',
+      '每月最新表格':'#src-customer-return-monthly',
+      '客服总群每月最新客退件表格':'#src-customer-return-monthly',
+      '低值品/拦截品':'#src-customer-return-monthly',
+      '货物是否被退回':'#src-guide-not-returned',
+      '货物未被退回':'#src-guide-not-returned',
+      '闭环口径':'#src-guide-not-returned',
+      '无限延长承诺发货时间':'#src-ship-extend-time',
+      '往后延长承诺发货时间':'#src-ship-extend-time',
+      'XX元':'#src-placeholder-money',
+      'XX 元':'#src-placeholder-money',
+      '**、**、**':'#src-placeholder-products',
+      '少发XX商品':'#src-placeholder-missing-product',
+      '少发 XX 商品':'#src-placeholder-missing-product',
+      '无物流信息':'#src-no-return-logistics',
+      '无退货物流/物流异常':'#src-no-return-logistics'
+    };
+    var replaceByText={
+      '有库存 / 库存不足':'<a class="ref-link" href="#src-stock-has">有库存</a> / <a class="ref-link" href="#src-stock-lack">库存不足</a>',
+      '有库存拦截补发 / 无库存退款':'<a class="ref-link" href="#src-guide-has-stock">有库存(拦截补发)</a> / <a class="ref-link" href="#src-guide-no-stock">无库存(引导退款)</a>',
+      '外包未同意 / 已同意':'<a class="ref-link" href="#src-outsourcing-not-agreed">外包未同意</a> / <a class="ref-link" href="#src-outsourcing-agreed">外包已同意</a>',
+      '6 个仓（捷佑、众邦、洁文、简卓、亿哈、铭如）':'6 个仓（<a class="ref-link" href="#src-logistics-warehouse-list">捷佑韵达、众邦、简卓圆通、亿哈、铭如；洁文走微信群</a>）',
+      '5 个（捷佑、亿哈、简卓、铭如、众邦）':'5 个（<a class="ref-link" href="#src-refund-warehouse-list">捷佑韵达、众邦、简卓圆通、亿哈、铭如</a>）'
+    };
+    document.querySelectorAll('#part2 .ref-link').forEach(function(a){
+      var text=a.textContent.replace(/\s+/g,' ').trim();
+      if(replaceByText[text]){
+        a.outerHTML=replaceByText[text];
+      }else if(targetByText[text]){
+        a.setAttribute('href',targetByText[text]);
+      }
+    });
+  }
+
+  function highlightQuotedText(root,text){
+    if(!text) return null;
+    clearInlineHits();
+    var candidates=[text]
+      .concat(text.split('/').map(function(s){return s.trim();}))
+      .concat(text.split(' / ').map(function(s){return s.trim();}))
+      .filter(function(s,i,a){return s.length>=2 && a.indexOf(s)===i;});
+    for(var i=0;i<candidates.length;i++){
+      var node=findTextNode(root,candidates[i]);
+      if(node){
+        var mark=wrapTextNodeMatch(node,candidates[i]);
+        setTimeout(clearInlineHits,5000);
+        return mark;
+      }
+    }
+    return null;
+  }
+  function findTextNode(root,text){
+    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
+      acceptNode:function(node){
+        return node.nodeValue.indexOf(text)>-1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    return walker.nextNode();
+  }
+  function wrapTextNodeMatch(node,text){
+    var idx=node.nodeValue.indexOf(text);
+    if(idx<0) return null;
+    var range=document.createRange();
+    range.setStart(node,idx);
+    range.setEnd(node,idx+text.length);
+    var mark=document.createElement('mark');
+    mark.className='inline-hit';
+    range.surroundContents(mark);
+    return mark;
+  }
+  function clearInlineHits(){
+    document.querySelectorAll('mark.inline-hit').forEach(function(mark){
+      var parent=mark.parentNode;
+      while(mark.firstChild) parent.insertBefore(mark.firstChild,mark);
+      parent.removeChild(mark);
+      parent.normalize();
+    });
+  }
+
+  // 滚动时高亮当前所在区块（含 5 个流程）
+  var ids=['part1','logistics','aftersale','refund','ship','insale',
+           'part2','q1','q2','q3','q5','q6','q7',
+           'part3','ai-solution','ai-principle','ai-levels','ai-sop-fit'];
+  var sections=ids.map(function(id){return document.getElementById(id);});
+  function updateActive(){
+    var pos=window.scrollY+140,cur=ids[0];
+    sections.forEach(function(el){
+      if(el){
+        var top=el.getBoundingClientRect().top+window.scrollY;
+        if(top<=pos) cur=el.id;
+      }
+    });
+    sideLinks.forEach(function(a){
+      a.classList.toggle('active',a.dataset.target===cur);
+    });
+  }
+  window.addEventListener('scroll',updateActive);
+  updateActive();
+
+  function setupReplyInputs(){
+    document.querySelectorAll('.reply-note').forEach(function(input){
+      input.addEventListener('input',saveReplies);
+    });
+  }
+
+  function setupEditableContent(){
+    document.querySelectorAll('header h1,header p,footer,.wrap h2,.wrap h3,.wrap p,.wrap li,.wrap summary,.wrap .step,.wrap .note,.wrap .talk,.wrap .branch-title,.wrap th:not(.reply-head),.wrap td:not(.reply-cell)').forEach(function(el,index){
+      if(el.closest('.side-nav') || el.closest('.edit-toolbar') || el.closest('.reply-cell')) return;
+      el.dataset.editable='true';
+      el.dataset.editId='edit-'+index;
+      el.contentEditable='false';
+      el.addEventListener('input',saveEdits);
+    });
+  }
+
+  function setupEditToolbar(){
+    var editToggle=document.getElementById('editToggle');
+    var saveBtn=document.getElementById('saveEdits');
+    var clearBtn=document.getElementById('clearEdits');
+    editToggle.addEventListener('click',function(){
+      var editing=!document.body.classList.contains('editing');
+      document.body.classList.toggle('editing',editing);
+      document.querySelectorAll('[data-editable="true"]').forEach(function(el){
+        el.contentEditable=editing ? 'true' : 'false';
+      });
+      editToggle.textContent=editing ? '退出编辑' : '编辑页面';
+    });
+    saveBtn.addEventListener('click',function(){
+      saveEdits();
+      saveReplies();
+      saveBtn.textContent='已保存';
+      setTimeout(function(){saveBtn.textContent='保存';},1200);
+    });
+    clearBtn.addEventListener('click',function(){
+      if(!confirm('确认清除本地保存的页面编辑和客服备注吗？')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(REPLY_KEY);
+      location.reload();
+    });
+  }
+
+  function saveEdits(){
+    clearInlineHits();
+    var data={};
+    document.querySelectorAll('[data-editable="true"]').forEach(function(el){
+      data[el.dataset.editId]=el.innerHTML;
+    });
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  }
+
+  function loadSavedEdits(){
+    var raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    try{
+      var data=JSON.parse(raw);
+      Object.keys(data).forEach(function(id){
+        var el=document.querySelector('[data-edit-id="'+id+'"]');
+        if(el) el.innerHTML=data[id];
+      });
+    }catch(e){}
+  }
+
+  function saveReplies(){
+    var data={};
+    document.querySelectorAll('.reply-note').forEach(function(input){
+      data[input.dataset.replyId]=input.value;
+    });
+    localStorage.setItem(REPLY_KEY,JSON.stringify(data));
+  }
+
+  function loadReplies(){
+    var raw=localStorage.getItem(REPLY_KEY);
+    if(!raw) return;
+    try{
+      var data=JSON.parse(raw);
+      Object.keys(data).forEach(function(id){
+        var input=document.querySelector('.reply-note[data-reply-id="'+id+'"]');
+        if(input) input.value=data[id];
+      });
+    }catch(e){}
+  }
+</script>
+</body>
+</html>

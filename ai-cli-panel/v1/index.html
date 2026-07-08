@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI CLI 企业管理面板项目可行性分析报告</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f6f7f9;
+    --text:#1c2128;
+    --text-dim:#57606a;
+    --border:#e3e6ea;
+    --accent:#2f6fed;
+    --accent-soft:#eaf1ff;
+    --good:#1a7f4b;
+    --good-soft:#e8f7ef;
+    --bad:#c23636;
+    --bad-soft:#fdecec;
+    --warn:#9a6400;
+    --warn-soft:#fff6e0;
+    --code-bg:#f2f4f7;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg-soft);
+    color:var(--text);
+    font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+    line-height:1.75;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:56px;
+    width:80%;
+    margin:0 auto;
+    padding:56px 0 120px;
+  }
+  .toc{
+    position:sticky;
+    top:40px;
+    align-self:start;
+    font-size:14px;
+  }
+  .toc .toc-title{
+    font-size:12px;
+    letter-spacing:2px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    margin-bottom:14px;
+    font-weight:700;
+  }
+  .toc a{
+    display:block;
+    color:var(--text-dim);
+    text-decoration:none;
+    padding:7px 0 7px 14px;
+    border-left:2px solid var(--border);
+    transition:.15s;
+  }
+  .toc a:hover, .toc a.active{
+    color:var(--accent);
+    border-left-color:var(--accent);
+    font-weight:600;
+  }
+  .toc .sub-link{
+    padding-left:26px;
+    font-size:13px;
+  }
+
+  .mobile-toc{display:none;}
+  .mobile-toc details{
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--bg-soft);
+    margin-bottom:32px;
+  }
+  .mobile-toc summary{
+    padding:12px 16px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--accent);
+    cursor:pointer;
+    list-style:none;
+  }
+  .mobile-toc summary::-webkit-details-marker{display:none;}
+  .mobile-toc summary::after{content:"▾";float:right;}
+  .mobile-toc details[open] summary::after{content:"▴";}
+  .mobile-toc nav{padding:0 16px 14px;}
+  .mobile-toc a{
+    display:block;
+    color:var(--text-dim);
+    text-decoration:none;
+    padding:6px 0;
+    font-size:13.5px;
+    border-top:1px solid var(--border);
+  }
+  .mobile-toc a:first-child{border-top:none;}
+  .mobile-toc a.sub-link{padding-left:16px;font-size:12.5px;}
+
+  .doc{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:56px 64px;box-shadow:0 1px 3px rgba(20,20,43,0.04);}
+  .doc-header{margin-bottom:8px;}
+  .doc-header .badge-line{margin-bottom:18px;}
+  .doc-header .badge-line span{
+    display:inline-block;
+    font-size:12px;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:4px 12px;
+    border-radius:20px;
+    font-weight:600;
+    letter-spacing:1px;
+  }
+  h1.title{
+    font-size:30px;
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .meta-line{
+    color:var(--text-dim);
+    font-size:14px;
+    margin-bottom:40px;
+    padding-bottom:32px;
+    border-bottom:1px solid var(--border);
+  }
+  .meta-line em{color:var(--text);font-style:normal;font-weight:600;}
+
+  h2{
+    font-size:23px;
+    margin:64px 0 24px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--border);
+    scroll-margin-top:40px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  h2 .idx{
+    color:var(--accent);
+    font-size:15px;
+    font-weight:700;
+    background:var(--accent-soft);
+    padding:2px 10px;
+    border-radius:6px;
+  }
+  h3{
+    font-size:17px;
+    margin:32px 0 14px;
+    scroll-margin-top:40px;
+  }
+  p{margin:0 0 16px;color:var(--text);}
+  ul, ol{margin:0 0 16px;padding-left:22px;}
+  li{margin-bottom:8px;}
+  strong{color:var(--text);font-weight:700;}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;}
+  a:hover{border-bottom-color:var(--accent);}
+  hr{border:none;border-top:1px solid var(--border);margin:40px 0;}
+
+  .callout{
+    border-radius:10px;
+    padding:18px 22px;
+    margin:20px 0;
+    font-size:15px;
+  }
+  .callout.summary{background:var(--accent-soft);border:1px solid #cddffb;}
+  .callout.warn{background:var(--warn-soft);border:1px solid #f2dfa6;}
+  .callout.danger{background:var(--bad-soft);border:1px solid #f3c9c9;}
+  .callout.ok{background:var(--good-soft);border:1px solid #bfe6cf;}
+  .callout .callout-title{font-weight:700;margin-bottom:6px;display:block;}
+
+  .pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0 28px;}
+  .pain-card{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:18px;}
+  .pain-card h4{margin:0 0 8px;font-size:15px;}
+  .pain-card p{margin:0;font-size:13.5px;color:var(--text-dim);}
+
+  .table-wrap{overflow-x:auto;margin:20px 0 28px;border:1px solid var(--border);border-radius:10px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th, td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{background:var(--bg-soft);color:var(--text-dim);font-weight:700;font-size:12.5px;letter-spacing:.5px;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  td.before{color:var(--bad);}
+  td.after{color:var(--good);}
+  .cell-badge{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .cell-badge.no{background:var(--bad-soft);color:var(--bad);}
+  .cell-badge.ok{background:var(--good-soft);color:var(--good);}
+  .cell-badge.warn{background:var(--warn-soft);color:var(--warn);}
+
+  .phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0 28px;}
+  .phase-card{border:1px solid var(--border);border-radius:12px;padding:22px;background:var(--bg-soft);}
+  .phase-card .dur{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:12px;
+  }
+  .phase-card h4{margin:0 0 12px;font-size:17px;}
+  .phase-card ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--text-dim);}
+  .phase-card li{margin-bottom:6px;}
+  .not-do{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed var(--border);
+    font-size:13px;
+    color:var(--text-dim);
+  }
+
+  .risk-card{
+    border-left:4px solid var(--bad);
+    background:var(--bad-soft);
+    border-radius:0 10px 10px 0;
+    padding:16px 20px;
+    margin-bottom:14px;
+  }
+  .risk-card h4{margin:0 0 6px;font-size:15px;color:var(--text);}
+  .risk-card p{margin:0;font-size:13.5px;color:var(--text-dim);}
+
+  .decision-list{list-style:none;padding:0;margin:20px 0;counter-reset:d;}
+  .decision-list li{
+    counter-increment:d;
+    position:relative;
+    padding:16px 20px 16px 54px;
+    background:var(--bg-soft);
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin-bottom:12px;
+  }
+  .decision-list li::before{
+    content:counter(d);
+    position:absolute;
+    left:16px;top:16px;
+    width:26px;height:26px;
+    background:var(--accent);
+    color:#fff;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;
+  }
+
+  code{background:var(--code-bg);padding:2px 6px;border-radius:5px;font-size:0.9em;}
+
+  @media (max-width:1000px){
+    .layout{grid-template-columns:1fr;width:auto;padding:24px 16px 80px;gap:24px;}
+    .toc{display:none;}
+    .mobile-toc{display:block;}
+    .doc{padding:32px 24px;}
+    .pain-grid, .phase-grid{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:600px){
+    .layout{padding:16px 12px 64px;}
+    .doc{padding:24px 16px;border-radius:12px;}
+    h1.title{font-size:22px;line-height:1.5;}
+    .doc-header .badge-line span{font-size:11px;padding:3px 10px;}
+    .meta-line{font-size:12.5px;margin-bottom:28px;padding-bottom:22px;}
+    h2{font-size:19px;margin:44px 0 18px;gap:8px;flex-wrap:wrap;}
+    h2 .idx{font-size:13px;padding:2px 8px;}
+    h3{font-size:15.5px;margin:26px 0 12px;}
+    p, li{font-size:14.5px;}
+    .callout{padding:14px 16px;font-size:13.5px;}
+    .pain-grid{gap:12px;}
+    .pain-card{padding:14px;}
+    th, td{padding:10px 12px;font-size:13px;}
+    .phase-card{padding:16px;}
+    .phase-card h4{font-size:15.5px;}
+    .risk-card{padding:14px 16px;}
+    .decision-list li{padding:14px 16px 14px 46px;font-size:13.5px;}
+    .decision-list li::before{width:22px;height:22px;left:14px;top:14px;font-size:12px;}
+    hr{margin:28px 0;}
+  }
+
+  @media print{
+    body{background:#fff;}
+    .toc{display:none;}
+    .layout{grid-template-columns:1fr;padding:0;}
+    .doc{border:none;box-shadow:none;padding:0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <nav class="toc">
+    <div class="toc-title">目录</div>
+    <a href="#s1" data-target="s1">一、项目背景</a>
+    <a href="#s2" data-target="s2">二、建设目标与核心功能</a>
+    <a href="#s3" data-target="s3">三、开源方案调研</a>
+    <a class="sub-link" href="#s3-2" data-target="s3-2">— agor 项目风险说明</a>
+    <a href="#s4" data-target="s4">四、产品形态与页面规划</a>
+    <a href="#s5" data-target="s5">五、实施路径与阶段规划</a>
+    <a class="sub-link" href="#s5-1" data-target="s5-1">— 阶段一 Demo</a>
+    <a class="sub-link" href="#s5-2" data-target="s5-2">— 阶段二 企业级系统</a>
+    <a href="#s6" data-target="s6">六、资源需求与排期影响</a>
+    <a href="#s7" data-target="s7">七、决策事项</a>
+    <a href="#s8" data-target="s8">附录：实施前后对比</a>
+  </nav>
+
+  <main class="doc">
+
+    <div class="doc-header">
+      <div class="badge-line"><span>可行性分析报告 · 内部提效项目</span></div>
+      <h1 class="title">AI CLI 企业管理面板<br>项目可行性分析报告</h1>
+      <div class="meta-line">
+        参考案例：浪潮中心 Wave Center《AI CLI 企业管理：60天全员上手》 ・ 文档版本：v1.0<br>
+        编写人：数智中心-梦蝶 ・ 编写时间：2026年7月8日
+      </div>
+    </div>
+
+    <div class="mobile-toc">
+      <details>
+        <summary>目录</summary>
+        <nav>
+          <a href="#s1">一、项目背景</a>
+          <a href="#s2">二、建设目标与核心功能</a>
+          <a href="#s3">三、开源方案调研</a>
+          <a class="sub-link" href="#s3-2">— agor 项目风险说明</a>
+          <a href="#s4">四、产品形态与页面规划</a>
+          <a href="#s5">五、实施路径与阶段规划</a>
+          <a class="sub-link" href="#s5-1">— 阶段一 Demo</a>
+          <a class="sub-link" href="#s5-2">— 阶段二 企业级系统</a>
+          <a href="#s6">六、资源需求与排期影响</a>
+          <a href="#s7">七、决策事项</a>
+          <a href="#s8">附录：实施前后对比</a>
+        </nav>
+      </details>
+    </div>
+
+    <h2 id="s1"><span class="idx">01</span>项目背景</h2>
+    <p>当前公司已有部分团队成员在使用 AI CLI 工具（Codex 等）辅助工作，但由于工具入口分散、缺乏统一管理，目前仅少数工程师能够熟练使用，50+ 人团队中大部分岗位（运营、客服、设计、人事、行政等）未能有效使用。</p>
+    <p>参考浪潮中心 Wave Center 的产品思路，拟建设一套企业级 AI CLI 管理面板，将分散的个人工具转化为团队统一管理的生产力资产。</p>
+
+    <div class="callout ok">
+      <span class="callout-title">现有基础条件（可有效压缩项目周期）</span>
+      <ul style="margin-bottom:0;">
+        <li>公司已具备内部账号体系并接入钉钉，账号与组织架构可直接复用，无需重新搭建</li>
+        <li>部分团队成员已在使用 AI CLI，具备真实使用场景基础，无需从零推广</li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <h2 id="s2"><span class="idx">02</span>建设目标与核心功能</h2>
+
+    <h3>项目目标</h3>
+    <p>将 AI CLI 从「个人工具」升级为「团队可控资产」，使各岗位均能在权限可控的前提下安全使用 AI 能力，而非仅限于工程岗位。</p>
+
+    <h3>核心功能规划</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>序号</th><th>功能</th><th>说明</th><th>规划阶段</th></tr>
+        <tr>
+          <td>1</td><td><strong>统一入口</strong></td>
+          <td>接入 Codex（后续扩展至 Claude Code 等），通过公司钉钉账号统一登录，免去多套工具分别登录</td>
+          <td><span class="cell-badge ok">阶段一</span></td>
+        </tr>
+        <tr>
+          <td>2</td><td><strong>会话历史留存</strong></td>
+          <td>按项目、按人员留存使用记录，支持跨人员、跨工具的历史追溯</td>
+          <td><span class="cell-badge ok">阶段一</span></td>
+        </tr>
+        <tr>
+          <td>3</td><td><strong>Key 集中托管</strong></td>
+          <td>API Key 不直接暴露给员工，由系统统一管理、分发、监控异常使用</td>
+          <td><span class="cell-badge ok">阶段一（基础版）</span></td>
+        </tr>
+        <tr>
+          <td>4</td><td><strong>团队技能库</strong></td>
+          <td>将高频提示词沉淀为可复用「技能」（如批量改商品标题、整理客诉原因），非工程岗位可直接调用</td>
+          <td><span class="cell-badge ok">阶段一（固定模板）</span></td>
+        </tr>
+        <tr>
+          <td>5</td><td><strong>权限分级</strong></td>
+          <td>技能按风险等级分类（查询/生成/修改/执行），按角色开放对应权限</td>
+          <td><span class="cell-badge warn">阶段二</span></td>
+        </tr>
+        <tr>
+          <td>6</td><td><strong>用量统计</strong></td>
+          <td>按人员、项目、模型维度统计使用量与成本，支撑管理决策</td>
+          <td><span class="cell-badge warn">阶段二</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <h3>拟解决的核心问题</h3>
+    <div class="callout summary">
+      现阶段 AI CLI 工具能力已经足够强，但仅工程岗位能够熟练且安全地使用，主要受限于以下三点。
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <h4>使用门槛高</h4>
+        <p>工具入口分散，非工程岗位难以判断该使用哪个工具、Key 应如何配置、历史产出如何查找。</p>
+      </div>
+      <div class="pain-card">
+        <h4>管控风险高</h4>
+        <p>Key 一旦泄露或被用于越权操作，缺乏有效的追溯和管控手段。</p>
+      </div>
+      <div class="pain-card">
+        <h4>经验无法沉淀</h4>
+        <p>各自独立使用，优质提示词和经验无法在团队内复用，人员变动后需重新摸索。</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <h2 id="s3"><span class="idx">03</span>开源方案调研</h2>
+    <p>在启动自主研发前，已对市面现有开源项目进行调研，评估是否存在可直接复用的成熟方案。</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>项目</th><th>支持的CLI</th><th>团队/权限能力</th><th>技术栈</th><th>协议</th><th>评估结论</th></tr>
+        <tr>
+          <td><strong><a href="https://github.com/preset-io/agor" target="_blank">preset-io/agor</a></strong></td>
+          <td>Claude Code / Codex / Gemini / Copilot / OpenCode / Cursor</td>
+          <td>多人协同、分支级RBAC+ACL、按人分Key隔离、Token/费用记账、完整会话历史持久化</td>
+          <td>FeathersJS + React + LibSQL/Postgres</td>
+          <td><strong>BSL 1.1</strong>（非纯开源）</td>
+          <td><span class="cell-badge no">不能直接部署</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/Genuifx/claude-code-env-manager" target="_blank">Genuifx/claude-code-env-manager</a>（CCEM）</td>
+          <td>Claude Code / Codex</td>
+          <td>6种权限模式、Key加密存储、团队配置共享（加密传输），但无完整多用户RBAC/分账体系</td>
+          <td>Tauri 2.0 + React + Rust</td>
+          <td>MIT</td>
+          <td><span class="cell-badge warn">可作参考，能力不足以独立支撑</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/mukul975/claude-team-dashboard" target="_blank">mukul975/claude-team-dashboard</a></td>
+          <td>仅Claude Code</td>
+          <td>「团队」指AI Agent团队，非人类多用户团队；仅单密码验证，协作功能尚未落地</td>
+          <td>React + Node.js + Express + WebSocket</td>
+          <td>MIT</td>
+          <td><span class="cell-badge no">不符合需求，排除</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://github.com/siteboon/claudecodeui" target="_blank">siteboon/claudecodeui</a></td>
+          <td>Claude Code / OpenCode / Cursor / Codex</td>
+          <td>未见多用户RBAC支持，定位偏向个人远程访问工具</td>
+          <td>未详查</td>
+          <td>待确认</td>
+          <td><span class="cell-badge no">形态不符，排除</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <h3 id="s3-2">agor 项目风险说明</h3>
+    <p>agor 是目前功能覆盖面与本次需求最为吻合的项目，涵盖多CLI适配、团队协同、分支级权限、按人Key隔离、完整会话记账等能力。但其授权条款存在明确限制，需重点说明：</p>
+    <ul>
+      <li><strong>许可协议</strong>：Business Source License 1.1（标准 MariaDB 模板）</li>
+      <li><strong>Additional Use Grant（额外使用授权）</strong>：<strong>None</strong>——未开放任何生产环境使用豁免，限制程度高于同类 BSL 项目</li>
+      <li><strong>Change Date</strong>：2029-01-15，该日期之前受限，之后自动转为 Apache 2.0 完全开源协议</li>
+      <li><strong>授权范围</strong>：允许复制、修改、创建衍生作品、再分发，以及「非生产用途使用」（如本地代码研究、技术选型评估、Demo验证）；超出该范围需购买商业授权，或不得使用，条款原文为 <code>you must purchase a commercial license from the Licensor... or you must refrain from using the Licensed Work</code></li>
+    </ul>
+
+    <div class="callout danger">
+      <span class="callout-title">需重点澄清</span>
+      BSL 协议中「生产用途（Production Use）」的判定标准并非「是否对外商用」，而是「是否用于支撑真实业务运转」。即便项目仅限公司内部使用、不涉及对外销售，只要 50+ 人团队将其用于日常真实工作，通常已构成 Production Use，与是否对外收费无关。因此「内部提效、不对外商用」不能作为规避该协议限制的依据。
+    </div>
+
+    <p><strong>可行的应对方式：</strong></p>
+    <ol>
+      <li><strong>架构参考、自主实现</strong>——研究其设计思路（分层架构、分支级 RBAC 设计、按人 Key 隔离机制、Token/费用记账数据模型），自主开发实现。参考开源项目的架构思路与直接部署使用二者性质不同，前者不涉及协议合规风险。</li>
+      <li><strong>如需直接使用</strong>，需联系项目作者 Maxime Beauchemin 购买商业授权，或等待 2029-01-15 协议自动转为 Apache 2.0（时间上不具备可行性，不作为选项）。</li>
+      <li><strong>备选参考方案</strong>：CCEM（MIT 协议，无限制）可直接复用其权限模式设计和 Key 加密传输方案作为部分实现参考，但团队账号体系、RBAC、多CLI适配等核心能力仍需自主搭建。</li>
+    </ol>
+
+    <div class="callout ok">
+      <span class="callout-title">结论</span>
+      项目采用「参考 agor 架构、自主研发实现」的路径，不采用直接 fork agor 部署的方式。
+    </div>
+
+    <hr>
+
+    <h2 id="s4"><span class="idx">04</span>产品形态与页面规划</h2>
+    <p>产品形态是网页还是安装包，会直接影响后续开发周期与工作量的评估，因此需要在方案中明确这一点。</p>
+    <p>面板的目标用户覆盖运营、客服、设计、人事、行政等多个非工程岗位，这些岗位的典型任务（改写文案、整理表格、生成素材、处理文档）围绕文本、表格、图片等日常办公产出展开，<strong>不涉及本地代码仓库操作</strong>，这个特点决定了终端形态的选择方向。</p>
+
+    <h3>4.1 Web 端与桌面客户端对比</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>对比维度</th><th>Web 端（网页）</th><th>桌面客户端（安装包）</th></tr>
+        <tr><td>使用门槛</td><td class="after">打开浏览器输入地址即可用，零安装</td><td class="before">需下载安装，推广门槛更高</td></tr>
+        <tr><td>跨平台适配</td><td class="after">天然支持 Windows/Mac，无需额外适配</td><td class="before">需分别打包、签名、维护多平台版本</td></tr>
+        <tr><td>版本管理</td><td class="after">服务端统一更新，员工无感知</td><td class="before">需要自动更新机制，否则版本参差不齐，排查困难</td></tr>
+        <tr><td>本地文件/代码仓库访问</td><td class="before">无法访问，AI任务需在服务端隔离环境执行</td><td class="after">可直接访问本机文件与代码仓库</td></tr>
+        <tr><td>开发成本</td><td class="after">相对较低，适合快速验证</td><td class="before">跨平台打包、签名、自动更新本身是独立工作量</td></tr>
+        <tr><td>离线使用</td><td class="before">不支持</td><td class="after">部分功能可支持</td></tr>
+      </table>
+    </div>
+
+    <h3>4.2 形态建议</h3>
+    <p>结合目标用户的任务特点（处理文本/表格/图片，不涉及本地代码仓库），<strong>阶段一建议采用纯 Web 端形态</strong>，员工通过浏览器访问即可使用，不做安装包。理由：</p>
+    <ul>
+      <li>目标用户以非工程岗位为主，任务本身不需要访问本机文件系统，服务端执行完全能满足需求</li>
+      <li>零安装、跨平台的特性，能最大程度降低非工程岗位的使用门槛，契合「让不熟悉工具的岗位也能用起来」这一核心目标</li>
+      <li>开发成本更低，适合优先验证核心假设，不必在验证阶段投入跨平台打包这类周期较长的工作</li>
+    </ul>
+
+    <div class="callout ok">
+      <span class="callout-title">后续演进方向</span>
+      若 Web 端验证成功，且后续出现「需要访问员工本机文件或代码仓库」的明确需求（例如工程师也希望通过统一入口操作本地项目），再考虑针对性增加一个轻量级本地代理程序，采用「Web 端为主 + 可选本地代理」的混合形态，而非重新开发一套独立的厚重客户端。
+    </div>
+
+    <h3>4.3 阶段一页面规划（基于 Web 端形态）</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>页面</th><th>说明</th></tr>
+        <tr><td><strong>登录页</strong></td><td>对接钉钉扫码/免密跳转登录，不单独开发账号密码体系</td></tr>
+        <tr><td><strong>工作台（核心页）</strong></td><td>选择技能模板或直接输入需求，实时查看 Codex 输出流</td></tr>
+        <tr><td><strong>历史记录页</strong></td><td>按项目、按时间查看历史任务与产出结果</td></tr>
+        <tr><td><strong>技能库页</strong></td><td>浏览、选择团队沉淀的 3-5 条固定技能模板</td></tr>
+      </table>
+    </div>
+    <p>阶段二将在此基础上新增：<strong>管理后台</strong>（用量统计、权限分配、审计日志查看）、<strong>技能编辑页</strong>（供工程师维护和扩展技能库）。</p>
+
+    <hr>
+
+    <h2 id="s5"><span class="idx">05</span>实施路径与阶段规划</h2>
+
+    <div class="phase-grid">
+      <div class="phase-card" id="s5-1">
+        <span class="dur">阶段一 · 约 1 周</span>
+        <h4>Demo / 原型验证</h4>
+        <ul>
+          <li>接入公司钉钉账号，不单独开发登录系统</li>
+          <li>接入 Codex，CLI输出流实时展示于网页端（采用SSE方案）</li>
+          <li>会话按用户与项目维度留存，支持历史记录查询</li>
+          <li>Key 不向用户直接暴露，由系统代管代填（基础版本）</li>
+          <li>提供3-5条团队沉淀的固定「技能」模板，支持点选调用</li>
+        </ul>
+        <div class="not-do"><strong>暂不涉及范围：</strong>角色分级权限、异常告警、审计导出、多CLI统一协议层，规划在阶段二实现。</div>
+      </div>
+      <div class="phase-card" id="s5-2">
+        <span class="dur">阶段二 · 约 6-10 周</span>
+        <h4>企业级系统建设（面向 50+ 人规模）</h4>
+        <ul>
+          <li>钉钉组织架构映射至部门/角色权限体系</li>
+          <li>技能库按4级风险分类，按角色可见范围隔离</li>
+          <li>Key全生命周期管理：发放、轮换、离职自动回收、异常限流</li>
+          <li>会话按项目、人员、模型多维度统计，支撑用量与成本核算</li>
+          <li>审计日志导出</li>
+          <li>多CLI适配层，后续每新增一个CLI仅需开发对应适配器</li>
+        </ul>
+      </div>
+    </div>
+
+    <p><strong>周期压缩依据：</strong>阶段一账号体系直接对接钉钉SSO，无需另行开发登录注册，技术架构可参考agor现有设计，减少技术摸索成本；阶段二账号体系搭建与核心架构摸索两项最耗时工作已省去，参考agor成熟设计可减少弯路。</p>
+
+    <p><strong>阶段一验证目标：</strong>验证非工程岗位能否通过该面板有效使用AI CLI（核心假设），同时验证技术路径（进程管理、流式输出转发、Key加密存储）的可行性。</p>
+
+    <h3>阶段二关键风险提示</h3>
+    <div class="risk-card">
+      <h4>Key 集中托管是最大的安全风险点</h4>
+      <p>若设计不严谨，将由「分散的小风险」转变为「一次性泄露全员Key的单点风险」。该模块需单独进行安全设计评审（加密存储方案、访问审计、最小权限原则），不宜直接套用现成方案上线。</p>
+    </div>
+    <div class="risk-card">
+      <h4>多CLI适配难度存在差异</h4>
+      <p>Codex、Claude Code相对标准化，Cursor CLI、OpenCode的开放程度目前尚未验证，需在技术选型阶段实测确认，列为待确认风险项，避免影响后续排期。</p>
+    </div>
+    <div class="risk-card">
+      <h4>技能库需具备明确边界设计</h4>
+      <p>技能定义应包含适用场景、输入输出格式、禁止事项、失败兜底机制，不能仅存储提示词文本——否则规模化推广速度越快，风险越高。</p>
+    </div>
+
+    <hr>
+
+    <h2 id="s6"><span class="idx">06</span>资源需求与排期影响</h2>
+    <p>以下两项为项目启动前需明确的前置条件，直接影响项目能否按预期周期推进，需提前决策。</p>
+
+    <h3>6.1 中转站 Key 访问问题（研发与业务两类场景需分别处理）</h3>
+    <ul>
+      <li><strong>现状说明</strong>：公司产品开发内部研发团队目前日常开发工作使用的是中转站（第三方API聚合服务）Key访问GPT等模型，存在响应延迟较高的问题，该问题在本项目启动前已经存在，并已对研发团队日常工作效率造成影响，与本项目本身没有直接关系。</li>
+      <li><strong>建议区分处理</strong>：
+        <ul>
+          <li><strong>研发团队（工程侧）</strong>：建议为内部研发团队申请原生 OpenAI API 直连访问权限，用于日常产品开发工作（含本项目的开发过程），解决当前已经存在的效率问题。</li>
+          <li><strong>业务侧 CLI 面板（面向运营、客服等使用者）</strong>：出于成本控制考虑，面板底层模型调用仍走中转站方案，不更换为原生API。</li>
+        </ul>
+      </li>
+    </ul>
+    <div class="callout danger">
+      <span class="callout-title">需要明确的权衡</span>
+      面板的响应速度会受限于中转站本身的速度上限，这是成本与体验之间的取舍。阶段一Demo验证「非工程岗位是否愿意使用」这一核心假设时，需注意区分「因为面板设计不好用」与「因为模型响应慢导致体验不佳」这两种情况，避免把响应速度问题误判为面板设计问题。
+    </div>
+    <div class="callout warn">
+      <span class="callout-title">需明确事项</span>
+      面向研发团队的原生API访问权限，申请责任人及预计到位时间。
+    </div>
+
+    <h3>6.2 现有项目排期影响</h3>
+    <ul>
+      <li><strong>现状说明</strong>：团队当前项目任务已处于满负荷排期状态</li>
+      <li><strong>启动影响</strong>：若启动本项目，将必然占用现有项目的人力与时间资源，需通过实际调整排期腾出对应人力，而非依靠额外加班完成</li>
+    </ul>
+    <div class="callout warn">
+      <span class="callout-title">需决策事项</span>
+      本项目在当前排期体系中的优先级定位——是否插队推进，或排在某一现有项目之后；若延后现有项目，需明确延后的时间幅度。
+    </div>
+
+    <h3>6.3 周期估算说明</h3>
+    <div class="callout danger">
+      <span class="callout-title">工时 ≠ 日历周期</span>
+      前述「阶段一约1周」「阶段二约6-10周」的周期估算，均按<strong>全职投入</strong>的人力工时计算。若实际执行中由工程师在现有项目间穿插推进本项目，<strong>实际日历周期将相应延长</strong>，工时总量不变，但完成时间会因排期冲突而顺延。此项需在汇报材料中明确说明，避免后续对进度产生预期落差。
+    </div>
+
+    <hr>
+
+    <h2 id="s7"><span class="idx">07</span>决策事项</h2>
+    <p>以下事项需明确决策后，项目方可正式启动：</p>
+    <ol class="decision-list">
+      <li><strong>前置资源确认</strong>：面向研发团队的原生API访问权限申请时间安排；本项目在当前排期体系中的优先级定位。以上两项未明确前，后续周期估算不具备执行基础。</li>
+      <li><strong>阶段一启动</strong>：前置资源到位后，投入约1周时间完成阶段一Demo，验证「非工程岗位可用性」这一核心假设，同时完成技术路径验证。</li>
+      <li><strong>阶段二决策依据</strong>：阶段一验证完成后，依据试点部门实际使用率、以及Key托管模块安全设计评审的完成情况，决定是否投入阶段二建设。</li>
+      <li><strong>明确排除方案</strong>：不采用直接fork agor部署上线的方案，原因为BSL许可协议对Production Use的限制，以规避潜在的许可协议合规风险。</li>
+    </ol>
+
+    <hr>
+
+    <h2 id="s8"><span class="idx">附</span>实施前后对比</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>场景</th><th>实施前：个人各自使用CLI</th><th>实施后：企业管理面板</th></tr>
+        <tr><td>安装配置</td><td class="before">各自安装、自行排查问题</td><td class="after">统一入口，按角色开通</td></tr>
+        <tr><td>会话记录</td><td class="before">分散留存于本机与不同工具</td><td class="after">按项目集中沉淀</td></tr>
+        <tr><td>技能复用</td><td class="before">依赖群内转发提示词</td><td class="after">技能库一键调用</td></tr>
+        <tr><td>Key管理</td><td class="before">个人保存，离职后难以回收</td><td class="after">统一托管，按权限分发</td></tr>
+        <tr><td>成本统计</td><td class="before">月末统一核对账单</td><td class="after">按人员、项目、模型分项统计</td></tr>
+        <tr><td>风险控制</td><td class="before">事后追查</td><td class="after">事前限权、事中记录</td></tr>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('.toc a');
+  const targets = Array.from(links).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+
+  function onScroll(){
+    let current = targets[0];
+    const scrollPos = window.scrollY + 120;
+    targets.forEach(t => { if(t.offsetTop <= scrollPos) current = t; });
+    links.forEach(a => a.classList.toggle('active', a.dataset.target === current.id));
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+</script>
+
+</body>
+</html>

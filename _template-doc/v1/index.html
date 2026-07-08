@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>【文档标题】</title>
+<!--
+  ====================================================================
+  使用说明（业务沟通 / 规划类单页文档模板）：
+  1. 把 PROJECT_ID 改成项目标识，格式建议：项目缩写-版本，例如 "pdd-v2"
+  2. 在 #docContent 里写正文内容（可以直接粘贴梦蝶提供的 HTML）
+  3. 这份文档默认不需要在线协作：
+     - 如果不需要 "?edit=mengdie" 在线编辑 或 "待确认事项" 云端同步，
+       把下面标注为【Supabase 可选逻辑】的 <script> 整段和「待确认事项」表格删掉即可，
+       其余部分（样式、正文）保持不变。
+     - 如果需要，保留整段逻辑，只改 PROJECT_ID。
+  ====================================================================
+-->
+<style>
+  /* 把下面的样式替换成你项目的文档样式，或直接复制 pdd/v2/index.html 的样式 */
+  :root {
+    --blue: #2563eb; --text: #16213a; --muted: #5b6678;
+    --line: #e6e9f0; --bg: #f3f6fb; --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .doc-wrap { max-width: 960px; margin: 0 auto; padding: 40px 32px 80px; }
+  #docContent h1 { font-size: 24px; font-weight: 800; margin: 0 0 8px; }
+  #docContent h2 { font-size: 18px; font-weight: 700; margin: 32px 0 12px; }
+  #docContent p { margin: 0 0 14px; font-size: 14.5px; }
+
+  /* 编辑横幅（嵌入模式下不显示）—— 属于【Supabase 可选逻辑】，不需要在线编辑可整段删除样式 */
+  .edit-banner {
+    display: none;
+    background: #fef9c3; border-bottom: 1px solid #fde047;
+    padding: 8px 20px; font-size: 13px; color: #713f12;
+  }
+  .edit-banner.show { display: flex; align-items: center; gap: 10px; }
+  .edit-banner button {
+    padding: 4px 12px; border-radius: 6px; border: 1px solid #ca8a04;
+    background: #fff; cursor: pointer; font-size: 12px;
+  }
+
+  /* 同步状态 —— 属于【Supabase 可选逻辑】 */
+  #docSyncStatus { font-size: 12px; color: var(--muted); }
+
+  /* 待确认问题输入框 —— 属于【Supabase 可选逻辑】 */
+  .answer-input {
+    border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px;
+    font-size: 13px; width: 100%; max-width: 320px; outline: none;
+    transition: border-color .15s;
+  }
+  .answer-input:focus { border-color: var(--blue); }
+  .answer-input.saving { opacity: .6; }
+  .answer-input.saved { border-color: #16a34a; }
+
+  /* 文档头（嵌入 iframe 时隐藏） */
+  .doc-header {
+    background: linear-gradient(135deg, #1d3a8f 0%, #2563eb 60%, #3b82f6 100%);
+    color: #fff; padding: 22px 36px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .doc-header h1 { margin: 0; font-size: 21px; font-weight: 800; }
+</style>
+</head>
+<body>
+
+  <!-- 嵌入 iframe 时由外层 index.html 提供导航，这里的 header 会自动隐藏 -->
+  <div class="doc-header">
+    <h1>【文档标题】</h1>
+    <!-- docSyncStatus 属于【Supabase 可选逻辑】，不需要在线协作可以把这个 span 删掉 -->
+    <span id="docSyncStatus">☁️ 加载中…</span>
+  </div>
+
+  <!-- editBanner 属于【Supabase 可选逻辑】 -->
+  <div class="edit-banner" id="editBanner">
+    ✏️ 编辑模式
+    <button id="docSaveBtn" style="display:none">保存</button>
+    <button id="docExitBtn" style="display:none">取消</button>
+    <button id="docClearBtn" style="display:none">还原</button>
+  </div>
+
+  <div class="doc-wrap">
+    <!-- 编辑按钮（?edit=mengdie 时出现）属于【Supabase 可选逻辑】 -->
+    <button id="docEditBtn" style="display:none; margin-bottom:16px; padding:6px 14px; border-radius:8px; border:1px solid #2563eb; color:#2563eb; background:#fff; cursor:pointer; font-size:13px;">✏️ 编辑文档</button>
+
+    <!-- ===== 正文区域：把梦蝶提供的内容粘贴/编写在这里 ===== -->
+    <div id="docContent">
+
+      <h1>【文档标题】</h1>
+      <p>在这里写正文内容。可以是需求梳理、沟通纪要、季度规划等。如果需要 <code>?edit=mengdie</code> 在线编辑或待确认事项同步，保留下方 Supabase 逻辑；否则可以整段删掉。</p>
+
+      <h2>1. 背景</h2>
+      <p>【填写内容】</p>
+
+      <h2>2. 内容</h2>
+      <p>【填写内容】</p>
+
+      <!-- 待确认问题示例 —— 属于【Supabase 可选逻辑】，不需要就删掉这整块 -->
+      <h2>待确认事项</h2>
+      <table border="1" style="border-collapse:collapse; width:100%; font-size:13px;">
+        <thead>
+          <tr><th>编号</th><th>问题</th><th>回复</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>T01</td>
+            <td>【待确认问题描述】</td>
+            <td><input type="text" class="answer-input" data-answer-id="T01" placeholder="待填写" autocomplete="off"></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       【Supabase 可选逻辑】开始 —— 不需要在线编辑/待确认同步时，把下面这整段
+       <script src=...> 和 <script> 都删掉即可，正文和样式不受影响。
+       ==================================================================== -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 只需改这一行：PROJECT_ID = "项目缩写-版本"，例如 "pdd-v2"
+    const PROJECT_ID = "CHANGE_ME";
+
+    const IS_EMBEDDED = new URLSearchParams(window.location.search).get("embedded") === "true";
+    if (IS_EMBEDDED) {
+      document.querySelector(".doc-header").style.display = "none";
+      document.querySelector(".edit-banner").style.marginTop = "0";
+    }
+
+    const SUPABASE_URL = "https://uqqdfomevnoaqsadhvex.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxcWRmb21ldm5vYXFzYWRodmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjk0ODksImV4cCI6MjA5NzY0NTQ4OX0.Qqs_Z_rZzCkqIRebE2FMkewKuz9kn_3ErYlcbAcVsz8";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const TABLE = "prd_annotations";
+    const DOC_ROW_ID = PROJECT_ID + "-prd-full-content";
+
+    const EDIT_MODE = new URLSearchParams(window.location.search).get("edit") === "mengdie";
+
+    const docContent = document.getElementById("docContent");
+    const docSyncStatus = document.getElementById("docSyncStatus");
+    const docEditBtn = document.getElementById("docEditBtn");
+    const docExitBtn = document.getElementById("docExitBtn");
+    const docSaveBtn = document.getElementById("docSaveBtn");
+    const docClearBtn = document.getElementById("docClearBtn");
+    const editBanner = document.getElementById("editBanner");
+
+    let savedSnapshot = null;
+
+    function setSyncStatus(state) {
+      docSyncStatus.classList.remove("editing");
+      if (state === "syncing") {
+        docSyncStatus.textContent = "☁️ 同步中…";
+      } else if (state === "error") {
+        docSyncStatus.textContent = "⚠️ 同步失败";
+      } else if (state === "editing") {
+        docSyncStatus.textContent = "✏️ 编辑中（未保存）";
+        docSyncStatus.classList.add("editing");
+      } else {
+        docSyncStatus.textContent = "☁️ 已连接";
+      }
+    }
+
+    async function loadDocContent() {
+      if (IS_EMBEDDED) { setSyncStatus("ok"); return; }
+      setSyncStatus("syncing");
+      const { data, error } = await supabaseClient
+        .from(TABLE).select("body").eq("id", DOC_ROW_ID).eq("type", "prd-content").maybeSingle();
+      if (error) { console.warn("加载云端内容失败", error); setSyncStatus("error"); return; }
+      if (data && data.body) docContent.innerHTML = data.body;
+      setSyncStatus("ok");
+    }
+
+    if (EDIT_MODE) docEditBtn.style.display = "";
+
+    docEditBtn.addEventListener("click", () => {
+      docContent.setAttribute("contenteditable", "true");
+      docContent.focus();
+      docEditBtn.style.display = "none";
+      docExitBtn.style.display = "";
+      docSaveBtn.style.display = "";
+      docClearBtn.style.display = "";
+      editBanner.classList.add("show");
+      setSyncStatus("editing");
+    });
+
+    function exitEditUI() {
+      docContent.removeAttribute("contenteditable");
+      docEditBtn.style.display = "";
+      docExitBtn.style.display = "none";
+      docSaveBtn.style.display = "none";
+      docClearBtn.style.display = "none";
+      editBanner.classList.remove("show");
+    }
+
+    docExitBtn.addEventListener("click", () => {
+      docContent.innerHTML = savedSnapshot;
+      bindAnswerInputs(); loadAnswers();
+      exitEditUI(); setSyncStatus("ok");
+    });
+    docClearBtn.addEventListener("click", () => {
+      docContent.innerHTML = savedSnapshot;
+      bindAnswerInputs(); loadAnswers();
+    });
+
+    docSaveBtn.addEventListener("click", async () => {
+      setSyncStatus("syncing");
+      const html = docContent.innerHTML;
+      const { error } = await supabaseClient.from(TABLE).upsert({
+        id: DOC_ROW_ID, type: "prd-content", body: html, updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        console.warn("保存失败", error); setSyncStatus("error");
+        alert("同步失败，请检查网络后重试"); return;
+      }
+      savedSnapshot = html; exitEditUI(); setSyncStatus("ok");
+    });
+
+    async function loadAnswers() {
+      const { data, error } = await supabaseClient
+        .from(TABLE).select("id, body").eq("type", "prd-answer").like("id", PROJECT_ID + "-%");
+      if (error) { console.warn("加载确认回复失败", error); return; }
+      const map = {};
+      (data || []).forEach((row) => { map[row.id.slice(PROJECT_ID.length + 1)] = row.body; });
+      document.querySelectorAll(".answer-input").forEach((input) => {
+        const val = map[input.dataset.answerId];
+        if (val) input.value = val;
+      });
+    }
+
+    async function saveAnswer(input) {
+      input.classList.remove("saved"); input.classList.add("saving");
+      const { error } = await supabaseClient.from(TABLE).upsert({
+        id: PROJECT_ID + "-" + input.dataset.answerId,
+        type: "prd-answer", body: input.value, updated_at: new Date().toISOString(),
+      });
+      input.classList.remove("saving");
+      if (error) { console.warn("保存确认回复失败", error); return; }
+      input.classList.add("saved");
+      setTimeout(() => input.classList.remove("saved"), 1500);
+    }
+
+    let answerSaveTimers = {};
+    function bindAnswerInputs() {
+      document.querySelectorAll(".answer-input").forEach((input) => {
+        input.addEventListener("blur", () => saveAnswer(input));
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); input.blur(); } });
+        input.addEventListener("input", () => {
+          clearTimeout(answerSaveTimers[input.dataset.answerId]);
+          answerSaveTimers[input.dataset.answerId] = setTimeout(() => saveAnswer(input), 1200);
+        });
+      });
+    }
+
+    (async () => {
+      await loadDocContent();
+      savedSnapshot = docContent.innerHTML;
+      bindAnswerInputs();
+      await loadAnswers();
+    })();
+  </script>
+  <!-- 【Supabase 可选逻辑】结束 -->
+
+</body>
+</html>

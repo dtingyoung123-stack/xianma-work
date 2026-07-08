@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>【项目名称】· V1.0 项目资料</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --text: #16213a;
+    --muted: #5b6678;
+    --line: #e6e9f0;
+    --bg: #f3f6fb;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  body { display: flex; flex-direction: column; }
+
+  .topbar {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: linear-gradient(135deg, #1d3a8f 0%, #2563eb 60%, #3b82f6 100%);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(37,99,235,.18);
+    position: relative;
+    z-index: 10;
+  }
+  .topbar h1 { margin: 0; font-size: 16px; font-weight: 800; }
+  .topbar .sub { margin: 0; font-size: 11.5px; opacity: .85; }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(255,255,255,.14);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .tab-btn {
+    border: none;
+    background: transparent;
+    color: #fff;
+    opacity: .8;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .tab-btn.active { background: #fff; color: var(--blue); opacity: 1; }
+
+  .update-bar {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: #eef4ff;
+    border-bottom: 1px solid #c7d9ff;
+    font-size: 12.5px;
+    color: #1e40af;
+    flex-shrink: 0;
+  }
+  .update-bar .left { display: flex; align-items: center; gap: 8px; }
+  .update-bar .dot { width: 7px; height: 7px; border-radius: 50%; background: #2563eb; flex-shrink: 0; }
+  .update-bar .date-tag {
+    font-weight: 700; background: #2563eb; color: #fff;
+    padding: 2px 8px; border-radius: 5px; font-size: 11.5px;
+  }
+  .update-bar .view-btn {
+    border: 1px solid #93c5fd; background: #fff; color: #2563eb;
+    padding: 3px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+  .update-bar .view-btn:hover { background: #eff6ff; }
+
+  .frame-wrap { position: relative; flex: 1; min-height: 0; }
+  .frame-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; visibility: hidden; }
+  .frame-wrap iframe.active { visibility: visible; }
+
+  @media (max-width: 768px) {
+    .topbar { height: auto; flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 16px; }
+    .topbar h1 { font-size: 14px; }
+    .tab-btn { padding: 7px 12px; font-size: 12.5px; }
+    .update-bar { height: auto; flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px 16px; }
+    .update-bar .summary {
+      display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+  }
+
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(16,24,40,.45); z-index: 100;
+    align-items: flex-start; justify-content: center; padding-top: 80px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 16px; width: 620px;
+    max-width: calc(100vw - 40px); max-height: calc(100vh - 120px);
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 60px rgba(16,24,40,.18); overflow: hidden;
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--line); flex-shrink: 0;
+  }
+  .modal-head h2 { margin: 0; font-size: 16px; font-weight: 800; }
+  .modal-head .close-btn {
+    border: none; background: #f3f6fb; color: var(--muted);
+    width: 30px; height: 30px; border-radius: 8px; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-head .close-btn:hover { background: var(--line); }
+  .modal-body { overflow-y: auto; padding: 8px 24px 24px; }
+  .changelog-entry { padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .changelog-entry:last-child { border-bottom: none; }
+  .entry-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .entry-date { font-size: 13px; font-weight: 800; }
+  .entry-tag {
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 5px;
+    background: #eef4ff; color: #2563eb;
+  }
+  .entry-tag.green { background: #eafaf1; color: #16a34a; }
+  .changelog-entry ul { margin: 0; padding-left: 18px; color: #344054; font-size: 13px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div>
+      <!-- 修改项目名称和版本 -->
+      <h1>【项目名称】· V1.0</h1>
+      <p class="sub">PRD 评审版 v1 &nbsp;·&nbsp; 编写人：梦蝶 &nbsp;·&nbsp; 【日期】</p>
+    </div>
+    <div class="tabs">
+      <button type="button" class="tab-btn active" id="tabPrototype">数据看板原型</button>
+      <button type="button" class="tab-btn" id="tabPrd">PRD 文档</button>
+    </div>
+  </div>
+
+  <div class="update-bar">
+    <div class="left">
+      <div class="dot"></div>
+      <!-- 修改最近更新日期和摘要 -->
+      <span class="date-tag">【日期】</span>
+      <span class="summary">【最近更新摘要】</span>
+    </div>
+    <button type="button" class="view-btn" id="openChangelog">查看全部更新 →</button>
+  </div>
+
+  <div class="frame-wrap">
+    <iframe id="frameProtoType" class="active" title="数据看板原型"></iframe>
+    <iframe id="framePrd" title="PRD 文档"></iframe>
+  </div>
+
+  <!-- 更新日志弹窗 -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>更新日志</h2>
+        <button type="button" class="close-btn" id="closeChangelog">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- 复制 changelog-entry 块添加新记录 -->
+        <div class="changelog-entry">
+          <div class="entry-header">
+            <span class="entry-date">【日期】</span>
+            <span class="entry-tag green">v1 首次发布</span>
+          </div>
+          <ul>
+            <li>【更新内容】</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const search = window.location.search;
+    const embedParam = search ? search + "&embedded=true" : "?embedded=true";
+    document.getElementById("frameProtoType").src = "prototype.html" + search;
+    document.getElementById("framePrd").src = "prd.html" + embedParam;
+
+    const tabPrototype = document.getElementById("tabPrototype");
+    const tabPrd = document.getElementById("tabPrd");
+    const frameProtoType = document.getElementById("frameProtoType");
+    const framePrd = document.getElementById("framePrd");
+
+    function showTab(name) {
+      const isProto = name === "prototype";
+      tabPrototype.classList.toggle("active", isProto);
+      tabPrd.classList.toggle("active", !isProto);
+      frameProtoType.classList.toggle("active", isProto);
+      framePrd.classList.toggle("active", !isProto);
+    }
+    tabPrototype.addEventListener("click", () => showTab("prototype"));
+    tabPrd.addEventListener("click", () => showTab("prd"));
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    document.getElementById("openChangelog").addEventListener("click", () => modalBackdrop.classList.add("open"));
+    document.getElementById("closeChangelog").addEventListener("click", () => modalBackdrop.classList.remove("open"));
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("open"); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") modalBackdrop.classList.remove("open"); });
+  </script>
+</body>
+</html>

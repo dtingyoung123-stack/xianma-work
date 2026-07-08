@@ -1,0 +1,2203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拼多多物流工单处理 Agent V1.0 PRD · 评审版</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --blue-2: #eaf1ff;
+    --text: #16213a;
+    --muted: #5b6678;
+    --muted-2: #8a93a6;
+    --line: #e6e9f0;
+    --panel: #ffffff;
+    --panel-soft: #f6f8fc;
+    --bg: #f3f6fb;
+    --red: #e0383f;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .layout {
+    display: flex;
+    max-width: 1480px;
+    margin: 0 auto;
+  }
+
+  /* ===== 侧边目录 ===== */
+  .toc-sidebar {
+    flex: none;
+    width: 260px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    padding: 24px 14px;
+    border-right: 1px solid var(--line);
+    background: var(--panel);
+  }
+  .toc-sidebar .toc-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin: 0 10px 12px;
+  }
+  .toc ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 14px;
+  }
+  .toc > ul { padding-left: 0; }
+  .toc li { margin: 2px 0; }
+  .toc a {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13.5px;
+  }
+  .toc > ul > li > a {
+    font-weight: 700;
+  }
+  .toc a:hover { background: var(--panel-soft); }
+  .toc a.active { background: var(--blue-2); color: var(--blue); font-weight: 700; }
+
+  /* ===== 主内容 ===== */
+  .doc-wrap {
+    flex: 1;
+    min-width: 0;
+    padding: 0 0 80px;
+  }
+
+  .doc-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: linear-gradient(135deg, #1d3a8f 0%, #2563eb 60%, #3b82f6 100%);
+    color: #fff;
+    padding: 22px 36px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, .18);
+  }
+  .doc-header h1 {
+    margin: 0 0 4px;
+    font-size: 21px;
+    font-weight: 800;
+  }
+  .doc-header .sub {
+    margin: 0;
+    font-size: 12.5px;
+    opacity: .85;
+  }
+  .doc-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .doc-btn {
+    border: 1px solid rgba(255,255,255,.5);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .doc-btn:hover { background: rgba(255,255,255,.22); }
+  .doc-btn.primary { background: #fff; color: var(--blue); border-color: #fff; }
+  .doc-btn.danger { background: rgba(224,56,63,.18); border-color: rgba(255,255,255,.5); }
+  .doc-status {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.14);
+  }
+  .doc-status.editing { background: #fff7ed; color: #b45309; }
+
+  .doc-content {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 32px 36px 0;
+  }
+  .doc-content[contenteditable="true"] {
+    outline: 2px dashed #f59e0b;
+    outline-offset: 10px;
+    border-radius: 10px;
+  }
+
+  .doc-content h1 { display: none; }
+  .doc-content h2 {
+    margin: 48px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--blue);
+    font-size: 21px;
+    font-weight: 800;
+    scroll-margin-top: 90px;
+  }
+  .doc-content h2:first-of-type { margin-top: 8px; }
+  .doc-content h3 {
+    margin: 28px 0 12px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--blue);
+    scroll-margin-top: 90px;
+  }
+  .doc-content h4 {
+    margin: 20px 0 10px;
+    font-size: 15px;
+    font-weight: 700;
+    scroll-margin-top: 90px;
+  }
+  .doc-content p { margin: 0 0 14px; color: #344054; }
+  .doc-content ul, .doc-content ol {
+    margin: 0 0 16px;
+    padding-left: 22px;
+    color: #344054;
+  }
+  .doc-content li { margin: 4px 0; }
+  .doc-content strong { color: var(--text); }
+
+  .doc-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 4px 0 22px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--panel);
+  }
+  .doc-table th, .doc-table td {
+    border-bottom: 1px solid var(--line);
+    padding: 9px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .doc-table th {
+    background: var(--panel-soft);
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+  .doc-table tr:last-child td { border-bottom: none; }
+  .doc-table tr:hover td { background: #fafbff; }
+
+  .answer-input {
+    width: 100%;
+    min-width: 140px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: #fffdf6;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .answer-input:focus {
+    outline: none;
+    border-color: var(--blue);
+    background: #fff;
+  }
+  .answer-input.saved {
+    background: #f0fdf4;
+    border-color: #86efac;
+  }
+  .answer-input.saving {
+    background: #eaf1ff;
+    border-color: var(--blue);
+  }
+
+  .doc-content pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: 4px 0 22px;
+  }
+  .doc-content code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .doc-content p code {
+    background: var(--panel-soft);
+    color: var(--blue);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 12.5px;
+  }
+
+  .mermaid {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    margin: 4px 0 22px;
+    text-align: center;
+    overflow-x: auto;
+  }
+
+  hr { border: none; border-top: 1px solid var(--line); margin: 32px 0; }
+
+  .edit-banner {
+    display: none;
+    max-width: 880px;
+    margin: 18px auto 0;
+    padding: 10px 36px 0;
+  }
+  .edit-banner.show { display: block; }
+  .edit-banner .inner {
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #92400e;
+    font-size: 13px;
+  }
+
+  @media (max-width: 980px) {
+    .toc-sidebar { display: none; }
+    .doc-header { padding: 16px 18px; flex-direction: column; }
+    .doc-content { padding: 24px 18px 0; }
+    .edit-banner { padding: 10px 18px 0; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="layout">
+    <aside class="toc-sidebar">
+      <p class="toc-title">目录</p>
+      <div class="toc">
+<ul>
+<li><a href="#agent-v10-prd">拼多多物流工单处理 Agent V1.0 PRD · 评审版</a><ul>
+<li><a href="#1">1. 产品概述</a><ul>
+<li><a href="#11">1.1 项目背景</a></li>
+<li><a href="#12-v10">1.2 V1.0 目标</a></li>
+<li><a href="#13-v10">1.3 V1.0 范围</a><ul>
+<li><a href="#131">1.3.1 本期做什么</a></li>
+<li><a href="#132">1.3.2 本期不做什么</a></li>
+</ul>
+</li>
+<li><a href="#14">1.4 核心原则</a></li>
+</ul>
+</li>
+<li><a href="#2">2. 用户角色与使用场景</a></li>
+<li><a href="#3">3. 整体流程图</a></li>
+<li><a href="#4">4. 功能模块</a><ul>
+<li><a href="#41-agent">4.1 Agent 处理能力</a></li>
+<li><a href="#42">4.2 数据看板</a></li>
+</ul>
+</li>
+<li><a href="#5-agent">5. Agent 功能详细说明</a><ul>
+<li><a href="#51">5.1 物流工单自动处理能力</a></li>
+<li><a href="#52">5.2 七个物流场景处理规则</a></li>
+<li><a href="#53">5.3 外部对接能力</a></li>
+<li><a href="#54">5.4 仓库与对接渠道规则</a></li>
+<li><a href="#55">5.5 退款和补发规则</a></li>
+<li><a href="#56">5.6 低值品/拦截品规则</a></li>
+</ul>
+</li>
+<li><a href="#6">6. 数据看板功能详细说明</a><ul>
+<li><a href="#61">6.1 数据概览</a></li>
+<li><a href="#611">6.1.1 导出规则</a></li>
+<li><a href="#62">6.2 场景汇总</a></li>
+<li><a href="#63">6.3 工单明细列表</a></li>
+<li><a href="#64">6.4 工单详情</a></li>
+<li><a href="#65">6.5 试点健康度说明</a></li>
+<li><a href="#66">6.6 店铺扩展说明</a></li>
+</ul>
+</li>
+<li><a href="#7">7. 数据看板页面线稿图</a></li>
+<li><a href="#8">8. 数据字段要求</a></li>
+<li><a href="#9">9. 状态流转</a></li>
+<li><a href="#10">10. 异常与兜底规则</a></li>
+<li><a href="#11_1">11. 操作日志要求</a></li>
+<li><a href="#12">12. 权限与安全要求</a><ul>
+<li><a href="#121">12.1 试点店铺</a></li>
+<li><a href="#122">12.2 操作权限</a></li>
+<li><a href="#123">12.3 责任边界</a></li>
+<li><a href="#124">12.4 钉钉对接群推送</a></li>
+</ul>
+</li>
+<li><a href="#13">13. 验收标准</a><ul>
+<li><a href="#131_1">13.1 核心指标判定口径</a></li>
+<li><a href="#132_1">13.2 试点价值观察指标</a></li>
+</ul>
+</li>
+<li><a href="#14_1">14. 待确认问题</a><ul>
+<li><a href="#141">14.1 技术待确认事项</a></li>
+<li><a href="#142">14.2 业务待确认事项</a></li>
+</ul>
+</li>
+<li><a href="#15">15. 参考依据</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+    </aside>
+
+    <div class="doc-wrap">
+      <div class="doc-header">
+        <div>
+          <h1>拼多多物流工单处理 Agent V1.0 PRD</h1>
+          <p class="sub">评审版 · 来源：拼多多物流工单处理Agent_V1.0 PRD 评审版 v1</p>
+          <p class="sub">编写人：梦蝶　编写日期：2026年6月22日</p>
+        </div>
+        <div class="doc-header-actions">
+          <span class="doc-status" id="docSyncStatus">☁️ 已连接</span>
+          <button type="button" class="doc-btn primary" id="docEditBtn" style="display:none;">编辑页面</button>
+          <button type="button" class="doc-btn" id="docExitBtn" style="display:none;">退出编辑</button>
+          <button type="button" class="doc-btn primary" id="docSaveBtn" style="display:none;">保存</button>
+          <button type="button" class="doc-btn danger" id="docClearBtn" style="display:none;">清除本地修改</button>
+        </div>
+      </div>
+
+      <div class="edit-banner" id="editBanner">
+        <div class="inner">✏️ 编辑模式已开启——直接点击下方文字即可修改，改完点「保存」会同步给所有人；点「退出编辑」放弃本次未保存的修改。</div>
+      </div>
+
+      <div class="doc-content" id="docContent">
+        <h1 id="agent-v10-prd">拼多多物流工单处理 Agent V1.0 PRD · 评审版</h1>
+<h2 id="1">1. 产品概述</h2>
+<h3 id="11">1.1 项目背景</h3>
+<p>当前拼多多工单主要由客服人工根据 SOP 查询订单、物流、仓库、快递对接结果后，在拼多多工单后台选择处理项、发送话术、上传凭证并完结。物流类工单处理频次高，且大量动作具备明确 SOP：查询订单/物流、判断轨迹状态、对接快递/仓库、提交处理选项、上传凭证、跟进补发或退款。</p>
+<p>本项目 V1.0 目标是在已确认 SOP 范围内建设一个物流工单处理 Agent，让 Agent 像真人客服一样自动操作拼多多工单/订单后台，并结合 OMS、TMS、金山文档等信息源完成可自动化的判断和处理；无法自动处理、规则缺失、系统不可访问或命中高风险时，推送钉钉人工接管。</p>
+<h3 id="12-v10">1.2 V1.0 目标</h3>
+<ol>
+<li>支持 7 个物流类型工单场景的自动识别、自动处理和异常转人工。</li>
+<li>对规则明确、数据可读取、凭证满足要求的工单，优先由 Agent 自动处理到完结。</li>
+<li>对规则缺失、超权限、系统不可达、数据不完整、微信群对接、紧急/临近超时等场景，推送钉钉人工接管。</li>
+<li>建立最小数据看板，支持试点验收、过程监控、转人工追踪和单工单日志追溯。</li>
+<li>保留完整操作日志，用于复盘、追责、规则优化和技术排障。</li>
+</ol>
+<h3 id="13-v10">1.3 V1.0 范围</h3>
+<h4 id="131">1.3.1 本期做什么</h4>
+<p>本期只处理以下 7 个物流类型场景：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>序号</th>
+<th>物流场景</th>
+<th>V1 处理目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>消费者担忧货物无法送达（催促/咨询物流）</td>
+<td>判断物流正常/48h 内未更新/超 48h 未更新，按 SOP 催件、记丢件、补发或完结</td>
+</tr>
+<tr>
+<td>2</td>
+<td>消费者反馈未收到货</td>
+<td>查询签收/送达信息，对接签收未收到，提交送达地址、自取地址或兜底转人工</td>
+</tr>
+<tr>
+<td>3</td>
+<td>物流轨迹已退回，消费者咨询物流问题</td>
+<td>告知退回/异常，按买家诉求协商退款或补发，平台协助后按规则处理</td>
+</tr>
+<tr>
+<td>4</td>
+<td>派件阶段物流断更</td>
+<td>对接快递催件，选择继续派送和预计送达日期，后续更新后完结</td>
+</tr>
+<tr>
+<td>5</td>
+<td>消费者未收到货 · 处理情况跟进</td>
+<td>读取聊天记录，按已收到/未收到分支处理，必要时对接丢件并跟进退款/补发</td>
+</tr>
+<tr>
+<td>6</td>
+<td>召回 / 物流在途退款工单</td>
+<td>判断待揽收、未离开发货地、在途、派件、代收点等状态，按拦截/拒收/召回/退款规则处理；关联规则见 5.6</td>
+</tr>
+<tr>
+<td>7</td>
+<td>物流异常，消费者要求补寄</td>
+<td>判断物流是否恢复，未恢复时拦截原单、创建补发单并填写补发单号；关联规则见 5.6</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="132">1.3.2 本期不做什么</h4>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>不做范围</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>售后类型工单</td>
+<td>如少发、质量问题、承诺补寄、投诉紧急工单等，V1 不纳入自动处理</td>
+</tr>
+<tr>
+<td>催发货类型工单</td>
+<td>如普通催发货、导单断更、异常网点预警、好人好事工单等，V1 不纳入自动处理</td>
+</tr>
+<tr>
+<td>售中类型工单</td>
+<td>如改地址、已签收改地址等，V1 不纳入自动处理</td>
+</tr>
+<tr>
+<td>非上述 7 个场景的退款/售后物流相关工单</td>
+<td>即使涉及物流动作，也不在 V1 范围内</td>
+</tr>
+<tr>
+<td>微信群自动化</td>
+<td>微信群不做自动读取和自动发送；命中微信群对接分支时转钉钉人工</td>
+</tr>
+<tr>
+<td>复杂数据分析</td>
+<td>不做趋势分析、店铺对比、人效测算、SOP 缺口自动分析、复盘报告</td>
+</tr>
+<tr>
+<td>复杂权限后台</td>
+<td>V1 不建设完整权限配置后台，先按固定规则和人工确认项执行</td>
+</tr>
+<tr>
+<td>全量店铺覆盖</td>
+<td>先按试点店铺运行，不直接覆盖全部店铺</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="14">1.4 核心原则</h3>
+<ol>
+<li>能 Agent 自动处理的，不为了简化 MVP 而强制转人工。</li>
+<li>Agent 只按已确认 SOP、权限规则和可读取数据执行。</li>
+<li>未确认规则、判断冲突、关键字段缺失、系统异常、超权限、高风险或微信群对接，统一转钉钉人工。</li>
+<li>补发、退款可以由 Agent 自动执行，但必须满足规则、权限、凭证和数据完整性要求。</li>
+<li>全流程留痕：查询数据、判断依据、执行动作、话术、凭证、状态、失败原因、转人工原因均需记录。</li>
+</ol>
+<h2 id="2">2. 用户角色与使用场景</h2>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>角色</th>
+<th>使用场景</th>
+<th>关注点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>客服人员</td>
+<td>接收 Agent 无法处理或需人工确认的工单</td>
+<td>接管摘要清晰、知道 Agent 已做什么、下一步怎么处理</td>
+</tr>
+<tr>
+<td>客服主管 / 业务负责人</td>
+<td>评审规则、查看处理质量、确认转人工原因</td>
+<td>自动处理是否符合 SOP、是否有资损风险、是否可追溯</td>
+</tr>
+<tr>
+<td>技术 / 开发</td>
+<td>评估系统对接、自动操作、异常处理和日志字段</td>
+<td>字段来源、系统边界、状态流转、失败重试、权限控制</td>
+</tr>
+<tr>
+<td>运营 / 管理者</td>
+<td>查看试点处理量、成功率、失败率、人工接管情况</td>
+<td>看板指标是否支撑试点评估</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3">3. 整体流程图</h2>
+<div class="mermaid" id="flowchartRender" data-flowchart-render="true"></div>
+<script type="text/plain" id="flowchartSource">flowchart TD
+    A["拼多多工单进入 Agent 队列"] --> B{"是否为 V1 物流 7 场景"}
+    B -->|否| S["Agent 跳过，不处理，保留原人工流程"]
+    B -->|是| C["读取工单、订单、物流、OMS 数据"]
+    C --> D{"关键数据是否完整"}
+    D -->|否| H["生成接管摘要并推送钉钉"]
+    D -->|是| E{"是否紧急或剩余 1 小时内临近超时"}
+    E -->|是| H
+    E -->|否| F["按场景 SOP 判断物流状态、仓库、快递、低值品/拦截品、凭证"]
+    F --> G{"是否需要外部对接"}
+    G -->|TMS 可对接| I["提交 TMS/客服物流对接表单并读取结果"]
+    G -->|金山文档可对接| J["提交/读取金山文档结果"]
+    G -->|微信群对接| H
+    G -->|不需要| K["执行拼多多后台/OMS 操作"]
+    I --> L{"对接结果是否明确"}
+    J --> L
+    L -->|否| H
+    L -->|是| K
+    K --> M{"执行是否成功"}
+    M -->|成功| N["记录日志并更新看板"]
+    M -->|失败| O{"是否可重试"}
+    O -->|可重试| K
+    O -->|不可重试/重试失败| H
+    H --> P["生成接管摘要并推送钉钉"]
+    P --> N</script>
+
+<h2 id="4">4. 功能模块</h2>
+<h3 id="41-agent">4.1 Agent 处理能力</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>模块</th>
+<th>功能说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工单识别</td>
+<td>识别是否属于 V1 物流 7 场景；非范围工单跳过，不进入 Agent 自动处理和钉钉转人工</td>
+</tr>
+<tr>
+<td>数据读取</td>
+<td>读取拼多多工单/订单后台、OMS、物流轨迹、TMS、金山文档等必要信息</td>
+</tr>
+<tr>
+<td>规则判断</td>
+<td>按 SOP 判断物流状态、48h 断更、预计送达日期、仓库渠道、低值品/拦截品、退款/补发边界</td>
+</tr>
+<tr>
+<td>自动操作</td>
+<td>自动点击工单选项、发送话术（优先使用系统统一回复；统一回复不符合 SOP 或无统一回复时，按 SOP 自行输入话术文本）、上传凭证、创建补发、填写补发单号、同意退款等</td>
+</tr>
+<tr>
+<td>外部对接</td>
+<td>自动对接 TMS；金山文档视技术可行性自动读写；微信群不自动化</td>
+</tr>
+<tr>
+<td>任务队列</td>
+<td>拉取待处理工单，识别并跳过非 V1 范围工单；V1 范围内工单按倒计时和紧急程度处理</td>
+</tr>
+<tr>
+<td>转人工</td>
+<td>对无法自动完成的工单生成接管摘要，通过钉钉推送到单独对接群（B02 已确认）</td>
+</tr>
+<tr>
+<td>运行监控与失败重试</td>
+<td>系统异常可重试，最多重试 3 次，重试失败转人工，并记录失败原因和重试次数</td>
+</tr>
+<tr>
+<td>基准数据管理</td>
+<td>使用地址表、权限表作为判断依据；版本过期、格式异常、字段缺失时转人工</td>
+</tr>
+<tr>
+<td>日志留痕</td>
+<td>记录所有读取、判断、操作、失败、转人工和人工接管信息</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="42">4.2 数据看板</h3>
+<p>V1 看板只做试点上线必需能力：</p>
+<ol>
+<li>全局范围控制：顶部选择时间范围、店铺范围后点击查询，决定整页统计口径；V1 不放顶部状态筛选。</li>
+<li>当前范围汇总：展示当前筛选范围内的工单总量、非物流类工单数、今日处理数、累计处理数、自动成功数、转人工数、处理失败数、Agent 平均响应时长、响应时长缩短比。</li>
+<li>场景汇总：按 7 个物流场景展示当前范围内的总数、自动成功数、转人工数、失败/异常数。</li>
+<li>工单明细：按工单维度展示店铺、订单、运单、场景、处理状态、结果、转人工原因等。</li>
+<li>工单详情：展示 Agent 判断依据、执行动作、话术、凭证、失败/转人工原因和操作日志。</li>
+<li>明细查询：按工单号、订单号、运单号、子场景、是否转人工、失败/转人工原因查询明细。</li>
+<li>导出：导出当前查询范围内的工单明细，V1 不导出汇总统计。</li>
+<li>试点健康度：展示应自动处理成功率、应转人工正确率、转人工原因完整率、日志完整率等辅助观察项。</li>
+<li>UI 要求：布局简洁、大气、高级，信息密度适中，优先保证评审和试点监控可读性。</li>
+</ol>
+<h2 id="5-agent">5. Agent 功能详细说明</h2>
+<h3 id="51">5.1 物流工单自动处理能力</h3>
+<p><strong>功能描述</strong>：<br />
+Agent 自动识别 V1 范围内的物流工单，读取拼多多后台、OMS、物流轨迹和外部对接结果，按已确认 SOP 自动选择处理项、发送话术、上传凭证、创建补发/同意退款；无法自动处理时转钉钉人工。</p>
+<p><strong>触发条件</strong>：</p>
+<ol>
+<li>新工单进入拼多多工单后台。</li>
+<li>工单类型命中 V1 物流 7 场景。</li>
+<li>店铺属于试点店铺范围。</li>
+<li>Agent 账号具备读取和操作权限。</li>
+</ol>
+<p><strong>输入数据</strong>：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>数据类型</th>
+<th>关键字段/信息</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工单信息</td>
+<td>工单编号、店铺、工单类型、子场景、倒计时、平台可选项、工单要求</td>
+<td>拼多多工单后台</td>
+</tr>
+<tr>
+<td>订单信息</td>
+<td>订单号、订单状态、买家信息、商品、实付金额</td>
+<td>拼多多订单后台 / OMS</td>
+</tr>
+<tr>
+<td>物流信息</td>
+<td>运单号、快递公司、轨迹节点、最近轨迹时间、签收/退回/派送/代收点状态</td>
+<td>拼多多后台 / OMS / 快递轨迹</td>
+</tr>
+<tr>
+<td>仓库信息</td>
+<td>发货仓库、仓库类型、仓库发货地址、对接渠道</td>
+<td>OMS / 代发仓发货地址.xlsx / SOP</td>
+</tr>
+<tr>
+<td>权限信息</td>
+<td>低值品/拦截品标识、补偿/退款权限、高风险阈值</td>
+<td>OMS / 拼多多权限表0617.xlsx</td>
+</tr>
+<tr>
+<td>外部对接信息</td>
+<td>TMS 处理结果、金山文档回复、凭证截图</td>
+<td>TMS / 金山文档</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>处理逻辑</strong>：</p>
+<ol>
+<li>判断是否为 V1 范围内 7 个物流场景；非范围工单直接跳过，保留原人工流程处理。</li>
+<li>对 V1 范围内工单读取工单、订单、物流、OMS 数据。</li>
+<li>判断是否紧急、是否剩余 1 小时内临近超时；若是，转钉钉人工。</li>
+<li>按场景规则判断下一步动作。</li>
+<li>若需外部对接：
+<ul>
+<li>筑越仓：走 TMS 系统/客服物流对接表单。</li>
+<li>金山文档渠道：技术确认可读写后自动提交和读取。</li>
+<li>微信群渠道：V1 不自动化，转钉钉人工。</li>
+</ul>
+</li>
+<li>满足自动处理条件时，Agent 自动执行后台操作：发送话术时优先匹配系统统一回复；统一回复不符合当前场景 SOP 或无统一回复时，Agent 按 SOP 自行输入话术文本。</li>
+<li>执行完成后记录日志并更新看板。</li>
+</ol>
+<p><strong>自动处理边界</strong>：</p>
+<ol>
+<li>规则明确。</li>
+<li>数据完整。</li>
+<li>系统可访问。</li>
+<li>操作项在 Agent 授权范围内。</li>
+<li>外部对接结果可读取且结果明确。</li>
+<li>补发/退款满足 SOP、凭证和权限要求。</li>
+</ol>
+<p><strong>转人工条件</strong>：</p>
+<p>转人工只适用于已识别为 V1 物流 7 场景、但 Agent 无法继续自动处理的工单。</p>
+<ol>
+<li>紧急工单或剩余 1 小时内临近超时工单。</li>
+<li>关键字段缺失，如订单号、运单号、发货仓库、物流轨迹缺失。</li>
+<li>拼多多后台、OMS、TMS、金山文档不可访问。</li>
+<li>金山文档技术不可读取/写入，且该分支依赖文档结果。</li>
+<li>命中微信群对接渠道。</li>
+<li>买家表达不明确、无明确同意退款/补发、聊天语义无法判断。</li>
+<li>超出权限、责任边界未确认、涉及高风险资损。</li>
+<li>Agent 操作失败且重试 3 次后仍失败。</li>
+</ol>
+<p><strong>输出结果</strong>：</p>
+<ol>
+<li>工单自动处理成功。</li>
+<li>工单处理失败并记录原因。</li>
+<li>工单转钉钉人工接管并附接管摘要。</li>
+<li>非 V1 范围工单已跳过，不进入看板核心指标。</li>
+<li>看板与操作日志同步更新。</li>
+</ol>
+<h3 id="52">5.2 七个物流场景处理规则</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>场景</th>
+<th>触发条件</th>
+<th>Agent 必读数据</th>
+<th>自动处理动作</th>
+<th>转人工条件</th>
+<th>输出结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>消费者担忧货物无法送达</td>
+<td>工单诉求为催促/咨询物流，担忧无法送达</td>
+<td>最近物流轨迹、最近轨迹时间、订单号、运单号、发货仓库、仓库渠道</td>
+<td>物流正常更新时选择“物流已正常更新”；48h 内未更新时对接催件，选择“需联系物流核实”并延后轨迹更新日期 2 天；超 48h 未更新时对接记丢件并进入补发流程</td>
+<td>无轨迹、48h 起算点无法判断、需微信群对接、补发所需仓库/库存/单号无法获取</td>
+<td>完结、跟进、补发成功或转人工</td>
+</tr>
+<tr>
+<td>消费者反馈未收到货</td>
+<td>买家反馈签收后未收到或未收到货</td>
+<td>签收状态、送达地址、电话、物流轨迹、仓库渠道、对接凭证</td>
+<td>对接“签收未收到”，填写送达地址和电话，上传凭证；可自取时填写自取地址；无自取选项时选择可送到指定地址</td>
+<td>对接结果不明确、凭证无法获取、微信群对接、地址/电话缺失</td>
+<td>提交承诺核实、完结或转人工</td>
+</tr>
+<tr>
+<td>物流轨迹已退回</td>
+<td>物流轨迹显示退回/异常，买家咨询</td>
+<td>退回轨迹、买家诉求、聊天记录、是否申请退款、补发条件</td>
+<td>留言告知退回/异常并协商；买家同意补发时创建补发单并填写单号；买家同意退款时选择协商一致已退款并上传聊天记录；平台代申请退款后可同意</td>
+<td>买家无明确诉求、聊天记录无法判断、补发/退款条件不满足</td>
+<td>补发、退款、平台协助或转人工</td>
+</tr>
+<tr>
+<td>派件阶段物流断更</td>
+<td>物流处于派件阶段但长时间未更新</td>
+<td>派件轨迹、最近轨迹时间、发货仓库、可选预计送达日期</td>
+<td>对接快递催件，选择“与消费者协商一致继续派送”，预计送达日期最多延后三天，物流更新后选择正常更新完结</td>
+<td>预计日期不可选、对接结果不明确、剩余 1 小时临近超时</td>
+<td>跟进派送、完结或转人工</td>
+</tr>
+<tr>
+<td>消费者未收到货 · 处理情况跟进</td>
+<td>已有未收到货相关处理，需跟进结果</td>
+<td>聊天记录、买家是否反馈已收到、物流状态、仓库渠道</td>
+<td>买家反馈已收到时上传聊天记录并确认拿到快递；买家反馈未收到时对接丢件，留言协商退款/补发，买家回复后选择对应结果</td>
+<td>聊天语义不明确、买家未回复、需微信群对接、补发/退款条件不满足</td>
+<td>确认收到、协商退款/补发或转人工</td>
+</tr>
+<tr>
+<td>召回 / 物流在途退款工单</td>
+<td>买家申请退款或平台要求召回/拦截/拒收</td>
+<td>物流阶段、是否未离开发货地、是否到达买家当地、发货仓库、低值品/拦截品标识、拦截/拒收凭证</td>
+<td>待揽收/未离开发货地时拦截成功后退款；在途时核实低值品/拦截品，符合规则或未出当地且拦截成功可退款；派件/代收点时拒收成功后退款，否则跟进召回</td>
+<td>无成功凭证、非低值品且拦截/拒收失败、当地判断缺失、超权限/高风险</td>
+<td>退款成功、召回跟进或转人工</td>
+</tr>
+<tr>
+<td>物流异常，消费者要求补寄</td>
+<td>买家要求补寄且物流异常</td>
+<td>物流是否恢复、原单轨迹、仓库渠道、库存/补发条件、补发单号</td>
+<td>物流已恢复时选择“物流轨迹已恢复更新”；未恢复时原单物流对接拦截，OMS 创建补发单，手工配货并填写补发单号</td>
+<td>无库存、补发单创建失败、原单拦截结果不明确、需微信群对接</td>
+<td>物流恢复完结、补发成功或转人工</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="53">5.3 外部对接能力</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>对接对象</th>
+<th>V1 自动化要求</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>拼多多工单/订单后台</td>
+<td>必须自动读取和自动操作</td>
+<td>Agent 需像真人客服一样完成查询、点击、提交、发送话术、上传凭证</td>
+</tr>
+<tr>
+<td>OMS</td>
+<td>必须读取；补发/手工配货能力按技术评估实现</td>
+<td>读取订单状态、仓库、低值品/拦截品、库存、补发单等</td>
+</tr>
+<tr>
+<td>TMS / 客服物流对接表单</td>
+<td>V1 需自动提交和读取结果</td>
+<td>主要用于筑越仓物流问题</td>
+</tr>
+<tr>
+<td>金山文档</td>
+<td>技术可行性待确认；可读写则自动化</td>
+<td>若不可获取，需考虑可访问表单/API/中间表；否则转人工</td>
+</tr>
+<tr>
+<td>微信群</td>
+<td>V1 不自动化</td>
+<td>命中微信群对接渠道时转钉钉人工</td>
+</tr>
+<tr>
+<td>钉钉</td>
+<td>推送到单独对接群（B02 已确认）</td>
+<td>接管响应时限 30 分钟（B04 已确认，V1 仅作管理口径）</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="54">5.4 仓库与对接渠道规则</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>仓库/渠道</th>
+<th>处理规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>筑越仓</td>
+<td>物流问题走 TMS 系统/客服物流对接表单；补发/配货相关可走钉钉筑越仓客服群，若需群处理则转人工</td>
+</tr>
+<tr>
+<td>金山文档渠道</td>
+<td>捷佑韵达、众邦、简卓圆通、亿哈、铭如</td>
+</tr>
+<tr>
+<td>微信群渠道</td>
+<td>捷佑中通/顺丰、简卓邮政、洁文及其他未列代发仓</td>
+</tr>
+<tr>
+<td>代发仓当地判断</td>
+<td>按《代发仓发货地址.xlsx》中的仓库发货地址所在市区判断是否已出当地</td>
+</tr>
+<tr>
+<td>OMS 仓库名称</td>
+<td>代发仓在 OMS 中通常为“代发聚水潭-仓库名称-共享”，如“代发聚水潭-铭如-共享”</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="55">5.5 退款和补发规则</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>动作</th>
+<th>自动执行条件</th>
+<th>转人工条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>同意退款</td>
+<td>规则明确、订单/物流/权限数据完整、符合低值品/拦截品规则，或非低值品未出当地且已拿到拦截成功凭证</td>
+<td>无成功凭证、超权限、物流状态不清、买家诉求不明、规则冲突</td>
+</tr>
+<tr>
+<td>拒收/拦截后退款</td>
+<td>拿到拒收/拦截成功凭证后执行；低值品/拦截品按特殊规则执行</td>
+<td>未拿到成功凭证、需微信群对接、凭证无法上传</td>
+</tr>
+<tr>
+<td>创建补发单</td>
+<td>买家明确同意补发，库存/仓库/商品信息完整，补发规则明确</td>
+<td>买家未明确同意、库存不足且无替代方案、手工配货失败</td>
+</tr>
+<tr>
+<td>填写补发单号</td>
+<td>补发单已创建并获取补发运单号</td>
+<td>补发单号未出、仓库需微信群催单、单号异常</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="56">5.6 低值品/拦截品规则</h3>
+<ol>
+<li>以 OMS 是否标记“低值品/拦截品”为统一判断依据。</li>
+<li>筑越仓低值品：在 TMS 登记弃件处理后，可按规则处理仅退款。</li>
+<li>代发仓低值品/拦截品：按 OMS 标识对接拦截/拒收后处理退款。</li>
+<li>普通拦截/拒收场景：原则上需拿到拦截成功或拒收成功凭证后再退款。</li>
+<li>非低值品若物流未出当地且已拿到拦截成功凭证，可直接退款。</li>
+</ol>
+<h2 id="6">6. 数据看板功能详细说明</h2>
+<h3 id="61">6.1 数据概览</h3>
+<p><strong>功能描述</strong>：同一个看板页面内，先通过顶部筛选确定查看范围，再展示该范围下的数据。默认查看“全部已接入店铺”，V1 阶段即全部试点店铺；选择单个店铺后，汇总指标、场景汇总和工单明细同步切换到该店铺。<br />
+<strong>目标用户</strong>：客服主管、业务负责人、技术、运营。<br />
+<strong>展示指标</strong>：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>指标</th>
+<th>含义</th>
+<th>数据来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>今日处理工单数</td>
+<td>今日进入 Agent 且属于 V1 物流 7 场景的工单数，包含待重试、处理中、等待外部结果、处理成功、处理失败、已转人工；不包含待处理和已跳过工单</td>
+<td>Agent 日志</td>
+</tr>
+<tr>
+<td>累计处理工单数</td>
+<td>自 V1 试点开始日起，累计进入 Agent 且属于 V1 物流 7 场景的工单数；不包含已跳过工单</td>
+<td>Agent 日志</td>
+</tr>
+<tr>
+<td>自动处理成功数</td>
+<td>Agent 自动完成并提交成功的工单数</td>
+<td>Agent 状态</td>
+</tr>
+<tr>
+<td>转人工数</td>
+<td>Agent 推送钉钉人工接管的工单数</td>
+<td>Agent 状态 / 钉钉推送记录</td>
+</tr>
+<tr>
+<td>处理失败数</td>
+<td>Agent 操作失败且最终仍停留在失败状态的工单数；重试失败后已成功转人工的工单不双算，只计入转人工数，不计入处理失败数</td>
+<td>Agent 日志</td>
+</tr>
+<tr>
+<td>Agent 平均响应时长</td>
+<td>自动成功工单从工单进入 Agent 队列到 Agent 开始处理的平均时长（响应速度）</td>
+<td>工单进入队列时间 / Agent 开始处理时间</td>
+</tr>
+<tr>
+<td>响应时长缩短比</td>
+<td>相比人工基准响应时长（30～60 分钟，业务口径，依据不足仅供参考）的缩短比例</td>
+<td>Agent 日志 + 人工基准响应时长</td>
+</tr>
+<tr>
+<td>工单总量</td>
+<td>当前筛选范围内 Agent 扫描到的全部工单数，含 V1 物流范围和非物流类跳过工单；等于 V1 物流工单数 + 非物流类工单数</td>
+<td>Agent 日志（含跳过记录）</td>
+</tr>
+<tr>
+<td>非物流类工单数</td>
+<td>当前筛选范围内，Agent 识别为非 V1 范围并跳过的工单数；不进入自动成功率、转人工率等核心指标分母</td>
+<td>Agent 跳过日志</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>顶部范围控制</strong>：时间范围、店铺范围、查询按钮。店铺默认“全部已接入店铺”；V1 中“全部已接入店铺”等同于全部试点店铺，不代表全部 80 家历史店铺。用户选完时间和店铺后点击“查询”，整页汇总、场景和明细按当前条件刷新。<br />
+<strong>明细查询条件</strong>：工单号、订单号、运单号、物流子场景、是否转人工、失败/转人工原因。明细查询只影响工单明细列表，不反向改变上方汇总指标和场景汇总口径。<br />
+<strong>刷新规则</strong>：看板数据建议每 5 分钟自动刷新；单工单处理状态在 Agent 完成、失败、转人工后目标 1 分钟内可见；支持手动刷新；最终口径由技术评审确认。<br />
+<strong>异常状态</strong>：看板顶部展示同步提示条，仅在出现异常时提示。提示内容包括：日志延迟、钉钉推送回执待同步、数据同步失败、看板刷新失败。其触发规则如下：</p>
+<ol>
+<li><code>失败类异常</code> 一旦发生立即提示。</li>
+<li><code>延迟类异常</code> 超过 1 个刷新周期仍未同步时提示，V1 刷新周期按 5 分钟计算。</li>
+<li>提示条展示于顶部全局筛选下方，作为常驻告警区域；无异常时不占位。</li>
+<li>异常恢复后，下一次自动刷新或手动刷新时自动消失，V1 不做人工确认关闭。</li>
+<li>提示文案以简短汇总为主，例如“同步提示：当前存在 2 条日志延迟、1 条钉钉推送回执待同步。”
+<strong>价值指标说明</strong>：响应时长缩短比用于判断 Agent 是否产生实际响应效率价值，V1 需在看板展示。人工基准响应时长（工单生成到人工开始处理）为 30～60 分钟（业务口径，依据不足仅供参考）。</li>
+</ol>
+<h3 id="611">6.1.1 导出规则</h3>
+<p>导出用于评审复盘和试点分析，V1 默认只导出当前查询范围内的工单明细，不导出汇总统计，不做独立账号权限管理。</p>
+<ol>
+<li>导出对象：当前查询范围内可见的工单明细。</li>
+<li>导出内容：工单编号、店铺名称、订单号、运单号、物流子场景、Agent 状态、处理结果、是否转人工、转人工/失败原因、开始处理时间、完成时间、处理耗时、备注。</li>
+<li>导出结果：用于复盘、汇报、问题排查；不改变当前页面筛选和统计口径。</li>
+<li>权限说明：V1 默认仅内部项目相关人员使用，不做独立账号和权限管理；后续如开放给更多角色，再补充权限控制。</li>
+</ol>
+<h3 id="62">6.2 场景汇总</h3>
+<p>场景汇总用于查看当前范围内 7 个物流场景的处理分布。当前范围由顶部的时间范围、店铺范围和查询动作共同决定。V1 只做基础汇总，不做趋势分析、店铺排行或人效分析。</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>物流子场景</td>
+<td>V1 范围内 7 个物流场景</td>
+</tr>
+<tr>
+<td>工单总数</td>
+<td>当前筛选条件下该场景工单总量</td>
+</tr>
+<tr>
+<td>自动成功数</td>
+<td>Agent 自动处理成功数量</td>
+</tr>
+<tr>
+<td>转人工数</td>
+<td>Agent 转人工数量</td>
+</tr>
+<tr>
+<td>失败/异常数</td>
+<td>Agent 处理失败或异常数量</td>
+</tr>
+<tr>
+<td>主要转人工原因</td>
+<td>当前场景下高频转人工原因摘要</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>总数口径</strong>：场景汇总中的”工单总数”统计当前查询范围内已进入 Agent 且属于 V1 物流 7 场景的全部工单，包含待处理、待重试、处理中、等待外部结果、处理成功、处理失败、已转人工；不包含已跳过工单。注意：此总数含”待处理”，与顶部”今日处理工单数”（不含待处理）口径不同，两者统计维度不同，数字不要求相等；筛选范围（时间+店铺）保持一致即可。</p>
+<h3 id="63">6.3 工单明细列表</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工单编号</td>
+<td>平台工单唯一标识</td>
+</tr>
+<tr>
+<td>店铺名称</td>
+<td>工单所属店铺；全部已接入店铺视图下必须展示，单店铺视图下可保留用于核对</td>
+</tr>
+<tr>
+<td>订单号</td>
+<td>关联订单</td>
+</tr>
+<tr>
+<td>运单号</td>
+<td>关联物流单号</td>
+</tr>
+<tr>
+<td>物流子场景</td>
+<td>7 个物流场景之一</td>
+</tr>
+<tr>
+<td>Agent 状态</td>
+<td>待处理、处理中、处理成功、处理失败、已转人工（明细列表只展示 V1 范围内工单；"等待外部结果"和"待重试"合并展示为"处理中"；已跳过工单不进明细列表，见数据概览"非物流类工单数"；完整状态定义见第 9 节）</td>
+</tr>
+<tr>
+<td>处理结果</td>
+<td>完结、补发、退款、跟进、转人工等</td>
+</tr>
+<tr>
+<td>是否转人工</td>
+<td>是/否</td>
+</tr>
+<tr>
+<td>转人工/失败原因</td>
+<td>结构化原因</td>
+</tr>
+<tr>
+<td>开始处理时间</td>
+<td>Agent 开始处理时间</td>
+</tr>
+<tr>
+<td>完成时间</td>
+<td>Agent 完成/转人工时间</td>
+</tr>
+<tr>
+<td>处理耗时</td>
+<td>完成时间 - 开始时间</td>
+</tr>
+<tr>
+<td>备注</td>
+<td>系统自动生成的补充说明，用于解释处理结果、失败原因或转人工原因；V1 不支持人工编辑</td>
+</tr>
+<tr>
+<td>详情入口</td>
+<td>查看单工单详情</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="64">6.4 工单详情</h3>
+<ol>
+<li>点击工单明细行的“详情入口”打开详情抽屉，不跳转新页面。</li>
+<li>详情内容只读，不改变当前汇总口径和列表筛选。</li>
+<li>详情需优先展示 Agent 判断依据、执行动作、失败/转人工原因和完整日志，便于复盘。</li>
+</ol>
+<p>详情页/抽屉展示：</p>
+<ol>
+<li>工单基础信息。</li>
+<li>订单/物流/OMS 关键数据。</li>
+<li>Agent 判断结果。</li>
+<li>Agent 判断依据。</li>
+<li>执行动作。</li>
+<li>发送话术。</li>
+<li>上传凭证。</li>
+<li>外部对接结果。</li>
+<li>失败或转人工原因。</li>
+<li>完整操作日志时间线。</li>
+</ol>
+<h3 id="65">6.5 试点健康度说明</h3>
+<p>健康度用于辅助判断 V1 试点是否稳定，属于观察项，不作为强验收主指标。健康度中的自动处理和转人工指标需与第 13.1 节核心指标判定口径保持一致，不另设一套计算口径。</p>
+<p>建议展示项与计算口径：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>指标</th>
+<th>计算公式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应自动处理成功率</td>
+<td>应自动处理且最终自动处理成功的工单数 / 应自动处理工单数</td>
+<td>衡量 Agent 对本应自动处理工单的实际完成能力</td>
+</tr>
+<tr>
+<td>应转人工正确率</td>
+<td>应转人工且实际已转人工的工单数 / 应转人工工单数</td>
+<td>衡量 Agent 对本应转人工工单的边界判断能力</td>
+</tr>
+<tr>
+<td>转人工原因完整率</td>
+<td>已记录转人工原因工单数 / 转人工工单数</td>
+<td>衡量转人工是否可复盘</td>
+</tr>
+<tr>
+<td>日志完整率</td>
+<td>日志完整工单数 / 当前范围 V1 工单总数</td>
+<td>衡量处理过程是否可追溯</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="66">6.6 店铺扩展说明</h3>
+<p>V1 店铺选择只覆盖已接入 Agent 的试点店铺，“全部已接入店铺”不是全部 80 家历史店铺。后续扩展到 80 家店铺时，店铺选择器需要支持搜索、分组、分页或远程查询；工单明细需要分页加载，避免一次加载全部数据。本期不建设复杂店铺管理后台，但字段和筛选口径不得写死为 5 家店铺。</p>
+<h2 id="7">7. 数据看板页面线稿图</h2>
+<pre><code class="language-text">┌──────────────────────────────────────────────────────────────────────┐
+│ 拼多多物流工单 Agent 看板       [时间范围] [店铺：全部已接入店铺 v] [查询] [导出] │
+├──────────────────────────────────────────────────────────────────────┤
+│ 当前范围汇总                                                         │
+│ 工单总量 │ 非物流类 │ 今日处理数 │ 累计处理数 │ 自动成功数 │ 转人工数 │ 失败数 │ 平均响应时长 │ 响应缩短比 │
+│ 健康度：应自动处理成功率 / 应转人工正确率 / 转人工原因完整率 / 日志完整率 │
+├──────────────────────────────────────────────────────────────────────┤
+│ 当前范围 · 场景汇总                                                   │
+│ ┌──────────────────────┬────────┬────────┬────────┬────────────┐    │
+│ │ 物流子场景            │ 总数   │ 自动成功 │ 转人工 │ 失败/异常    │    │
+│ ├──────────────────────┼────────┼────────┼────────┼────────────┤    │
+│ │ 消费者担忧无法送达    │ ...    │ ...    │ ...    │ ...        │    │
+│ │ 召回/物流在途退款     │ ...    │ ...    │ ...    │ ...        │    │
+│ └──────────────────────┴────────┴────────┴────────┴────────────┘    │
+├──────────────────────────────────────────────────────────────────────┤
+│ 明细查询：工单编号 / 订单号 / 运单号 / 物流子场景 / 是否转人工 / 原因 │
+├──────────────────────────────────────────────────────────────────────┤
+│ 工单明细列表                                                          │
+│ ┌────────┬──────┬──────┬──────┬────────┬────────┬──────┬──────┐     │
+│ │ 工单号 │ 店铺 │ 订单 │ 运单 │ 子场景 │ 状态   │ 耗时 │ 详情 │     │
+│ ├────────┼──────┼──────┼──────┼────────┼────────┼──────┼──────┤     │
+│ │ ...    │ ...  │ ...  │ ...  │ ...    │ ...    │ ...  │ 查看 │     │
+│ └────────┴──────┴──────┴──────┴────────┴────────┴──────┴──────┘     │
+├──────────────────────────────────────────────────────────────────────┤
+│ 详情抽屉 / 弹窗                                                       │
+│ 工单基础信息 | 订单/物流信息 | Agent 判断依据 | 执行动作 | 失败原因   │
+│ 外部对接结果 | 发送话术 | 上传凭证 | 操作日志时间线                    │
+└──────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p>UI 设计要求：</p>
+<ol>
+<li>整体风格大气、高级、清晰，避免花哨营销化。</li>
+<li>顶部时间、店铺和查询动作决定整页统计范围；下方指标、场景汇总和明细列表联动刷新。</li>
+<li>核心指标区突出处理效率和风险状态。</li>
+<li>明细列表适合客服主管快速扫描。</li>
+<li>详情抽屉重点展示 Agent 为什么这么判断、做了什么、失败/转人工原因是什么。</li>
+<li>导出按钮用于导出当前查询范围内的工单明细，导出后不改变页面筛选。</li>
+<li>转人工和失败原因需高可见，便于试点复盘。</li>
+</ol>
+<h2 id="8">8. 数据字段要求</h2>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>字段名</th>
+<th>字段含义</th>
+<th>数据来源</th>
+<th>是否必填</th>
+<th>用途</th>
+<th>缺失时处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工单编号</td>
+<td>平台工单唯一标识</td>
+<td>拼多多工单后台</td>
+<td>是</td>
+<td>工单识别、日志追溯</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>店铺名称</td>
+<td>工单所属店铺</td>
+<td>拼多多后台</td>
+<td>是</td>
+<td>权限、顶部范围筛选、明细归属展示、后续多店铺权限扩展</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>工单类型</td>
+<td>平台工单类型</td>
+<td>拼多多工单后台</td>
+<td>是</td>
+<td>判断是否 V1 范围</td>
+<td>无法判断范围时转人工核实；明确非范围时跳过</td>
+</tr>
+<tr>
+<td>物流子场景</td>
+<td>7 个物流场景之一</td>
+<td>Agent 识别 / 平台字段</td>
+<td>是</td>
+<td>场景规则匹配</td>
+<td>无法判断是否属于 7 场景时转人工核实；明确非 7 场景时跳过</td>
+</tr>
+<tr>
+<td>工单倒计时</td>
+<td>剩余处理时间</td>
+<td>拼多多工单后台</td>
+<td>是</td>
+<td>临近超时转人工</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>订单号</td>
+<td>关联订单编号</td>
+<td>拼多多后台 / OMS</td>
+<td>是</td>
+<td>查询订单/仓库/商品</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>运单号</td>
+<td>物流单号</td>
+<td>拼多多后台 / OMS</td>
+<td>视场景必填</td>
+<td>查询物流轨迹、对接快递</td>
+<td>缺失则按场景判断，无法判断转人工</td>
+</tr>
+<tr>
+<td>快递公司</td>
+<td>承运快递</td>
+<td>拼多多后台 / OMS</td>
+<td>是</td>
+<td>对接渠道、凭证上传</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>物流轨迹</td>
+<td>物流节点和时间</td>
+<td>拼多多后台 / 快递轨迹</td>
+<td>是</td>
+<td>判断正常、断更、退回、签收、派件</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>最近轨迹时间</td>
+<td>最近一条物流轨迹时间</td>
+<td>物流轨迹</td>
+<td>是</td>
+<td>48h 起算点</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>发货仓库</td>
+<td>订单发货仓库</td>
+<td>OMS</td>
+<td>是</td>
+<td>判断对接渠道、当地市区</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>仓库类型</td>
+<td>筑越仓/代发仓</td>
+<td>OMS / SOP</td>
+<td>是</td>
+<td>决定 TMS/金山/微信群</td>
+<td>V1 范围内缺失时转人工</td>
+</tr>
+<tr>
+<td>仓库发货地址</td>
+<td>代发仓地址</td>
+<td>代发仓发货地址.xlsx</td>
+<td>视场景必填</td>
+<td>判断是否已出当地</td>
+<td>缺失转人工</td>
+</tr>
+<tr>
+<td>低值品/拦截品标识</td>
+<td>OMS 订单标识</td>
+<td>OMS</td>
+<td>视场景必填</td>
+<td>退款/弃件/拒收判断</td>
+<td>缺失按普通规则；仍不明确转人工</td>
+</tr>
+<tr>
+<td>买家聊天记录</td>
+<td>买家诉求和协商记录</td>
+<td>拼多多后台</td>
+<td>视场景必填</td>
+<td>判断是否明确同意退款/补发/已收到</td>
+<td>语义不明转人工</td>
+</tr>
+<tr>
+<td>对接渠道</td>
+<td>TMS/金山/微信/钉钉</td>
+<td>SOP / 仓库规则</td>
+<td>是</td>
+<td>决定是否可自动外部对接</td>
+<td>微信渠道转人工</td>
+</tr>
+<tr>
+<td>对接结果</td>
+<td>催件/丢件/拦截/拒收/签收未收到结果</td>
+<td>TMS / 金山文档 / 人工</td>
+<td>视场景必填</td>
+<td>后续处理判断</td>
+<td>结果不明转人工</td>
+</tr>
+<tr>
+<td>凭证截图</td>
+<td>对接、签收、聊天、退款、补发凭证</td>
+<td>系统截图/上传文件</td>
+<td>视场景必填</td>
+<td>平台提交和追溯</td>
+<td>缺失转人工</td>
+</tr>
+<tr>
+<td>补发单号</td>
+<td>补发物流单号</td>
+<td>OMS / 仓库</td>
+<td>补发场景必填</td>
+<td>填写工单补发结果</td>
+<td>缺失转人工</td>
+</tr>
+<tr>
+<td>Agent 状态</td>
+<td>Agent 当前处理流程状态</td>
+<td>Agent 系统</td>
+<td>是</td>
+<td>看板筛选、过程监控、异常定位</td>
+<td>系统自动生成，不允许为空</td>
+</tr>
+<tr>
+<td>处理结果</td>
+<td>Agent 对工单给出的业务处理结论</td>
+<td>Agent 系统</td>
+<td>是</td>
+<td>明细展示、导出、复盘</td>
+<td>系统自动生成；未形成结论时为空或显示处理中</td>
+</tr>
+<tr>
+<td>备注</td>
+<td>对处理结果、失败原因、转人工原因的人工可读补充说明</td>
+<td>Agent 系统</td>
+<td>否</td>
+<td>明细展示、导出、辅助理解</td>
+<td>V1 由系统自动生成，不支持人工编辑</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Agent 状态与处理结果区分</strong>：</p>
+<ol>
+<li><code>Agent 状态</code> 表示系统流程状态，例如待处理、处理中、等待外部结果、处理成功、处理失败、已转人工、已跳过、待重试。</li>
+<li><code>处理结果</code> 表示业务处理结论，例如完结、跟进、补发成功、退款成功、确认收到、转人工。</li>
+<li>同一个 <code>Agent 状态</code> 可能对应不同 <code>处理结果</code>。例如 <code>处理成功</code> 可对应完结、补发成功、退款成功、确认收到；<code>已转人工</code> 的处理结果为转人工。</li>
+</ol>
+<p><strong>处理结果枚举值</strong>：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>枚举值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完结</td>
+<td>工单已按规则完成并提交</td>
+</tr>
+<tr>
+<td>跟进</td>
+<td>已提交外部对接或需等待后续结果</td>
+</tr>
+<tr>
+<td>补发成功</td>
+<td>已完成补发相关操作并提交补发结果</td>
+</tr>
+<tr>
+<td>退款成功</td>
+<td>已按规则完成退款处理</td>
+</tr>
+<tr>
+<td>确认收到</td>
+<td>买家已反馈收到，Agent 已按规则提交</td>
+</tr>
+<tr>
+<td>转人工</td>
+<td>Agent 判断不能继续自动处理，已推送人工接管</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="9">9. 状态流转</h2>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+<th>进入条件</th>
+<th>下一步</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>待处理</td>
+<td>工单已进入 Agent 队列</td>
+<td>新工单同步成功</td>
+<td>处理中 / 已跳过 / 已转人工</td>
+</tr>
+<tr>
+<td>处理中</td>
+<td>Agent 正在读取、判断或执行</td>
+<td>Agent 开始处理</td>
+<td>处理成功 / 待重试 / 处理失败 / 已转人工</td>
+</tr>
+<tr>
+<td>等待外部结果</td>
+<td>已提交 TMS/金山文档对接，等待结果</td>
+<td>需要外部物流/仓库回复</td>
+<td>处理中 / 已转人工 / 处理失败</td>
+</tr>
+<tr>
+<td>处理成功</td>
+<td>Agent 已完成本次处理</td>
+<td>自动提交成功，工单完结或进入合规跟进状态</td>
+<td>记录日志并更新看板</td>
+</tr>
+<tr>
+<td>处理失败</td>
+<td>Agent 执行失败且重试 3 次后仍失败</td>
+<td>系统异常、页面异常、操作失败、重试耗尽</td>
+<td>已转人工（若钉钉推送失败则停留在处理失败，计入处理失败数）</td>
+</tr>
+<tr>
+<td>已跳过</td>
+<td>工单不属于 V1 物流 7 场景，Agent 不处理</td>
+<td>工单识别为非 V1 范围</td>
+<td>保留原人工流程处理</td>
+</tr>
+<tr>
+<td>已转人工</td>
+<td>Agent 不再继续自动处理</td>
+<td>V1 范围内规则缺失、超权限、微信群、系统不可达等</td>
+<td>人工接管</td>
+</tr>
+<tr>
+<td>待重试</td>
+<td>暂时性失败等待重试</td>
+<td>网络/页面短暂异常</td>
+<td>处理中 / 已转人工</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10">10. 异常与兜底规则</h2>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>异常类型</th>
+<th>处理规则</th>
+<th>看板展示</th>
+<th>日志要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非 V1 范围工单</td>
+<td>Agent 跳过，不处理、不推送钉钉、不转人工，保留原人工流程处理</td>
+<td>已跳过</td>
+<td>记录店铺名称、工单编号、工单类型、跳过原因；不进入看板核心指标；用于支持按店铺和时间范围统计非物流类工单数</td>
+</tr>
+<tr>
+<td>紧急/临近超时</td>
+<td>剩余 1 小时内临近超时或紧急工单转人工</td>
+<td>已转人工</td>
+<td>记录剩余时长和工单标签</td>
+</tr>
+<tr>
+<td>关键字段缺失</td>
+<td>无法补齐则转人工</td>
+<td>已转人工</td>
+<td>记录缺失字段</td>
+</tr>
+<tr>
+<td>业务规则缺失/冲突</td>
+<td>转人工</td>
+<td>已转人工</td>
+<td>记录冲突规则</td>
+</tr>
+<tr>
+<td>拼多多后台异常</td>
+<td>最多重试 3 次；重试失败转人工</td>
+<td>处理失败/已转人工</td>
+<td>记录页面、错误、重试次数</td>
+</tr>
+<tr>
+<td>OMS 数据读取失败</td>
+<td>最多重试 3 次；重试失败转人工</td>
+<td>处理失败/已转人工</td>
+<td>记录接口/页面错误</td>
+</tr>
+<tr>
+<td>TMS 失败</td>
+<td>最多重试 3 次；仍失败转人工</td>
+<td>处理失败/已转人工</td>
+<td>记录提交内容和失败原因</td>
+</tr>
+<tr>
+<td>金山文档不可读写</td>
+<td>技术不可行或读取失败时转人工；可选替代方案为中间表/API</td>
+<td>已转人工</td>
+<td>记录文档、字段、失败原因</td>
+</tr>
+<tr>
+<td>钉钉对接群推送失败</td>
+<td>最多重试 3 次；仍失败记录告警，由人工排查（B03 已确认无备用接管）</td>
+<td>处理失败</td>
+<td>记录群推送时间、失败原因、重试次数</td>
+</tr>
+<tr>
+<td>微信群对接</td>
+<td>V1 不自动化，转人工</td>
+<td>已转人工</td>
+<td>记录命中的仓库/快递和应对接群</td>
+</tr>
+<tr>
+<td>买家表达不明确</td>
+<td>转人工</td>
+<td>已转人工</td>
+<td>记录待判断聊天片段摘要</td>
+</tr>
+<tr>
+<td>补发/退款超权限</td>
+<td>转人工</td>
+<td>已转人工</td>
+<td>记录金额、规则、超权限原因</td>
+</tr>
+<tr>
+<td>基准数据过期或不一致</td>
+<td>《代发仓发货地址.xlsx》《拼多多权限表0617.xlsx》等基准数据疑似过期、格式异常、版本不一致时转人工</td>
+<td>已转人工</td>
+<td>记录读取到的文件版本、更新时间、异常内容</td>
+</tr>
+<tr>
+<td>凭证缺失</td>
+<td>转人工</td>
+<td>已转人工</td>
+<td>记录缺失凭证类型</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="11_1">11. 操作日志要求</h2>
+<p>Agent 每次处理必须记录：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>日志字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工单编号</td>
+<td>平台工单 ID</td>
+</tr>
+<tr>
+<td>店铺名称</td>
+<td>试点店铺</td>
+</tr>
+<tr>
+<td>订单号</td>
+<td>关联订单</td>
+</tr>
+<tr>
+<td>运单号</td>
+<td>关联物流</td>
+</tr>
+<tr>
+<td>工单类型 / 子场景</td>
+<td>V1 物流场景</td>
+</tr>
+<tr>
+<td>工单进入队列时间</td>
+<td>工单同步进入 Agent 待处理队列的时间，用于计算 Agent 平均响应时长</td>
+</tr>
+<tr>
+<td>Agent 开始处理时间</td>
+<td>开始读取/判断时间</td>
+</tr>
+<tr>
+<td>Agent 完成时间</td>
+<td>成功、失败或转人工时间</td>
+</tr>
+<tr>
+<td>响应时长</td>
+<td>Agent 开始处理时间 - 工单进入队列时间；用于看板响应时长缩短比计算</td>
+</tr>
+<tr>
+<td>处理耗时</td>
+<td>完成时间 - 开始处理时间；用于单工单操作时长参考</td>
+</tr>
+<tr>
+<td>读取到的关键数据</td>
+<td>订单、物流、仓库、低值品/拦截品、外部结果</td>
+</tr>
+<tr>
+<td>判断结果</td>
+<td>当前分支判断</td>
+</tr>
+<tr>
+<td>处理前预判分类</td>
+<td>Agent 执行关键动作前记录：应自动处理 / 应转人工 / 非 V1 跳过</td>
+</tr>
+<tr>
+<td>判断依据</td>
+<td>SOP 规则、字段、凭证</td>
+</tr>
+<tr>
+<td>执行动作</td>
+<td>点击选项、发送话术、上传凭证、创建补发、同意退款</td>
+</tr>
+<tr>
+<td>发送话术</td>
+<td>实际发送内容</td>
+</tr>
+<tr>
+<td>话术来源</td>
+<td>系统统一回复模板 / Agent 按 SOP 生成</td>
+</tr>
+<tr>
+<td>上传凭证</td>
+<td>凭证类型和文件/截图引用</td>
+</tr>
+<tr>
+<td>外部对接记录</td>
+<td>TMS/金山提交内容和返回结果</td>
+</tr>
+<tr>
+<td>处理状态</td>
+<td>成功、失败、转人工、待重试</td>
+</tr>
+<tr>
+<td>处理结果</td>
+<td>完结、跟进、补发成功、退款成功、确认收到、转人工</td>
+</tr>
+<tr>
+<td>失败原因</td>
+<td>系统、字段、规则、权限、凭证等</td>
+</tr>
+<tr>
+<td>转人工原因</td>
+<td>结构化原因</td>
+</tr>
+<tr>
+<td>备注</td>
+<td>系统自动生成的补充说明，不支持人工编辑</td>
+</tr>
+<tr>
+<td>接管目标</td>
+<td>单独对接群（钉钉群，B02 已确认）</td>
+</tr>
+<tr>
+<td>接管群钉钉标识</td>
+<td>PDD工单推送群，钉钉群号 179525024697</td>
+</tr>
+<tr>
+<td>钉钉通知发送时间</td>
+<td>推送时间</td>
+</tr>
+<tr>
+<td>钉钉通知发送状态</td>
+<td>发送成功、发送失败、重试成功</td>
+</tr>
+<tr>
+<td>推送失败原因</td>
+<td>钉钉接口或权限失败原因</td>
+</tr>
+<tr>
+<td>地址表版本/更新时间</td>
+<td>读取到的代发仓地址表版本信息</td>
+</tr>
+<tr>
+<td>权限表版本/更新时间</td>
+<td>读取到的权限表版本信息</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="12">12. 权限与安全要求</h2>
+<h3 id="121">12.1 试点店铺</h3>
+<p>以下 5 家店铺为 V1 试点范围（B01 已确认）：</p>
+<ol>
+<li>PANAPOPO医疗旗舰店</li>
+<li>PANAPOPO旗舰店（众创）</li>
+<li>PANAPOPO医疗器械旗舰店</li>
+<li>PANAPOPO保健按摩旗舰店</li>
+<li>PANAPOPO器械保健官方旗舰店</li>
+</ol>
+<h3 id="122">12.2 操作权限</h3>
+<ol>
+<li>Agent 仅允许处理 V1 范围内物流 7 场景。</li>
+<li>Agent 账号需具备拼多多工单后台读取、提交、发送话术、上传凭证权限。</li>
+<li>Agent 账号需具备 OMS 查询订单、物流、仓库、低值品/拦截品、库存、补发相关权限。</li>
+<li>涉及退款、补发、凭证上传等动作必须记录操作日志。</li>
+<li>超出规则或权限的动作不得自动执行。</li>
+</ol>
+<h3 id="123">12.3 责任边界</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>类型</th>
+<th>责任边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SOP 已确认且 Agent 按规则执行</td>
+<td>业务/客服负责人承担规则确认责任，技术承担系统按规则执行责任</td>
+</tr>
+<tr>
+<td>Agent 未按规则执行</td>
+<td>技术侧排查修复并复盘</td>
+</tr>
+<tr>
+<td>规则不明确或责任边界未确认</td>
+<td>不自动执行，转人工</td>
+</tr>
+<tr>
+<td>退款/补发/平台判责等高风险动作</td>
+<td>必须符合已确认规则；否则转人工</td>
+</tr>
+</tbody>
+</table></div>
+<p>B02（接管目标：单独对接群）、B04（响应时限：30 分钟，V1 仅作管理口径）、B06（责任边界按本节执行）均已在评审会确认。</p>
+<h3 id="124">12.4 钉钉对接群推送</h3>
+<p>V1 人工接管方案采用钉钉推送到单独对接群（B02 已确认）。接管群：<strong>PDD工单推送群</strong>，钉钉群号：<code>179525024697</code>。推送内容为接管摘要，不承载完整操作日志；完整工单信息、Agent 判断依据、执行动作和日志均通过拼多多工单直达链接查看（T05 已确认：推送拼多多工单链接，不另建看板详情跳转）。</p>
+<p>钉钉推送字段（产品已补充；T09 待技术确认群消息是否支持结构化展示，不支持时降级为纯文本拼接）：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工单编号</td>
+<td>拼多多工单唯一标识</td>
+</tr>
+<tr>
+<td>店铺名称</td>
+<td>工单所属店铺</td>
+</tr>
+<tr>
+<td>物流子场景</td>
+<td>7 个场景之一</td>
+</tr>
+<tr>
+<td>转人工原因</td>
+<td>结构化转人工原因</td>
+</tr>
+<tr>
+<td>工单倒计时</td>
+<td>剩余处理时间，辅助判断优先级</td>
+</tr>
+<tr>
+<td>拼多多工单直达链接</td>
+<td>点击直接跳转至拼多多工单处理页</td>
+</tr>
+</tbody>
+</table></div>
+<p>V1 暂不做接管倒计时、人工确认接管按钮、超时自动升级、响应时限考核。</p>
+<h2 id="13">13. 验收标准</h2>
+<p>以下为 V1.0 试点验收标准：</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>验收项</th>
+<th>建议指标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>试运行周期</td>
+<td>连续 5 个工作日</td>
+</tr>
+<tr>
+<td>样本量</td>
+<td>累计处理 V1 物流工单不少于 100 单</td>
+</tr>
+<tr>
+<td>工单类型识别准确率</td>
+<td>≥85%</td>
+</tr>
+<tr>
+<td>应自动处理工单中的实际自动成功率</td>
+<td>≥60%</td>
+</tr>
+<tr>
+<td>应转人工工单中的正确转人工率</td>
+<td>≥95%</td>
+</tr>
+<tr>
+<td>自动处理结果人工抽检准确率</td>
+<td>≥85%</td>
+</tr>
+<tr>
+<td>转人工原因记录完整率</td>
+<td>≥95%</td>
+</tr>
+<tr>
+<td>操作日志完整率</td>
+<td>≥95%</td>
+</tr>
+<tr>
+<td>超权限/高风险/规则缺失工单拦截准确率</td>
+<td>≥95%</td>
+</tr>
+<tr>
+<td>看板可用性</td>
+<td>能通过顶部时间、店铺和查询按钮控制切换范围，并联动刷新汇总指标、场景汇总、明细列表</td>
+</tr>
+<tr>
+<td>看板刷新</td>
+<td>看板 5 分钟内自动刷新；单工单状态目标 1 分钟内可见；支持手动刷新</td>
+</tr>
+<tr>
+<td>导出可用性</td>
+<td>能导出当前查询范围内的明细数据，导出字段与 PRD 定义一致</td>
+</tr>
+<tr>
+<td>详情可用性</td>
+<td>能从工单明细打开详情抽屉，查看判断依据、执行动作、凭证和日志</td>
+</tr>
+<tr>
+<td>关键错误</td>
+<td>未经规则允许的退款/补发、漏转人工导致资损、错误提交平台关键结论为 0 容忍；出现即暂停对应规则并复盘</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="131_1">13.1 核心指标判定口径</h3>
+<p><code>应自动处理工单</code> 和 <code>应转人工工单</code> 必须由 Agent 在执行关键动作前，基于当前已读取的数据和已确认 SOP 规则做出预判并写入日志，不能在处理完成后倒推归类。</p>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>指标口径</th>
+<th>定义</th>
+<th>判定时点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应自动处理工单</td>
+<td>工单属于 V1 物流 7 场景，且规则明确、必需数据完整、未命中转人工条件，Agent 应继续自动处理</td>
+<td>执行平台提交、退款、补发、上传凭证等关键动作前</td>
+</tr>
+<tr>
+<td>应转人工工单</td>
+<td>工单属于 V1 物流 7 场景，但命中规则不明确、关键字段缺失、超权限、微信群对接、系统不可达等转人工条件，Agent 应停止自动处理并推送人工</td>
+<td>执行转人工推送前</td>
+</tr>
+<tr>
+<td>非 V1 跳过工单</td>
+<td>工单不属于 V1 物流 7 场景，Agent 跳过，不纳入核心看板指标和自动/转人工成功率分母</td>
+<td>场景识别完成后</td>
+</tr>
+</tbody>
+</table></div>
+<p>对应计算：</p>
+<pre><code class="language-text">应自动处理工单中的实际自动成功率 = 应自动处理且最终自动处理成功的工单数 / 应自动处理工单数
+应转人工工单中的正确转人工率 = 应转人工且实际已转人工的工单数 / 应转人工工单数
+</code></pre>
+<h3 id="132_1">13.2 试点价值观察指标</h3>
+<p>响应时长缩短比用于衡量 Agent 相比人工的响应速度提升，V1 纳入看板展示，作为试点价值观察指标，不作为强验收指标。该指标按当前顶部筛选范围统计。</p>
+<p><strong>人工基准响应时长：30～60 分钟</strong>（工单生成到人工开始处理的等待时长；业务部门经验估算，依据不足，仅供参考）。</p>
+<pre><code class=”language-text”>响应时长缩短比 = (人工基准响应时长 - Agent 平均响应时长) / 人工基准响应时长
+</code></pre>
+<p>口径说明：</p>
+<ol>
+<li>Agent 平均响应时长：自动成功工单从工单进入 Agent 队列到 Agent 开始处理的平均时长。</li>
+<li>人工基准响应时长：30～60 分钟（工单生成到人工开始处理的等待时长，业务估算，依据不足仅供参考）。</li>
+<li>看板展示单一估算值（以 60 分钟为基准计算），依据不足，仅供参考。</li>
+<li>转人工工单不纳入 Agent 平均响应时长统计。</li>
+<li>看板展示该指标时，需同时展示人工基准响应时长和 Agent 平均响应时长，便于业务理解计算依据。</li>
+<li>如试点期间能采集到更精确的人工响应时长样本，可更新基准值。</li>
+</ol>
+<p>功能性验收：</p>
+<ol>
+<li>Agent 能识别 V1 范围内 7 个物流场景。</li>
+<li>Agent 能识别非 V1 范围工单并跳过，不处理、不推送钉钉、不影响原人工处理流程。</li>
+<li>Agent 能读取拼多多后台、OMS、物流轨迹等必要数据。</li>
+<li>Agent 能按规则执行低风险和规则明确的自动处理动作。</li>
+<li>Agent 能在 TMS 自动提交/读取物流对接结果。</li>
+<li>金山文档可行时，Agent 能自动提交/读取；不可行时能转人工并记录原因。</li>
+<li>微信群对接分支不自动处理，能转人工。</li>
+<li>处理失败或转人工时必须记录原因。</li>
+<li>每个处理工单均可在看板查看详情和操作日志。</li>
+<li>看板支持导出当前查询范围数据。</li>
+</ol>
+<h2 id="14_1">14. 待确认问题</h2>
+<h3 id="141">14.1 技术待确认事项</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+<thead>
+<tr>
+<th>编号</th>
+<th>确认事项</th>
+<th>需要确认的具体内容</th>
+<th>确认方</th>
+<th>影响范围</th>
+<th>确认回复</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T01</td>
+<td>金山文档读写能力</td>
+<td>技术确认是否能稳定读取/写入金山文档；如果不能，V1 采用中间表、API，还是直接转人工</td>
+<td>技术</td>
+<td>代发仓催件、丢件、拦截、拒收自动处理比例</td>
+<td><input type="text" class="answer-input" data-answer-id="T01" placeholder="待填写" autocomplete="off"></td>
+</tr>
+<tr>
+<td>T02</td>
+<td>后台自动操作能力</td>
+<td>确认拼多多后台、OMS、TMS 是否支持 Agent 自动登录、读取、点击、提交、上传凭证</td>
+<td>技术</td>
+<td>Agent 自动处理范围和实现方式</td>
+<td><input type="text" class="answer-input" data-answer-id="T02" placeholder="待填写" autocomplete="off"></td>
+</tr>
+<tr>
+<td>T06</td>
+<td>看板刷新能力</td>
+<td>确认看板 5 分钟自动刷新、单工单状态 1 分钟内可见、手动刷新是否可实现</td>
+<td>技术</td>
+<td>试点监控实时性</td>
+<td><input type="text" class="answer-input" data-answer-id="T06" placeholder="待填写" autocomplete="off"></td>
+</tr>
+<tr>
+<td>T09</td>
+<td>钉钉群推送内容支持</td>
+<td>确认钉钉群消息能否结构化展示以下字段：工单编号、店铺名称、物流子场景、转人工原因、工单倒计时、拼多多工单直达链接；如不支持结构化，确认降级方案（纯文本拼接或仅发链接）</td>
+<td>技术</td>
+<td>转人工通知信息完整性和接管人可读性</td>
+<td><input type="text" class="answer-input" data-answer-id="T09" placeholder="待填写" autocomplete="off"></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="142">14.2 业务待确认事项</h3>
+<p>当前无待确认业务事项。</p>
+<h2 id="15">15. 参考依据</h2>
+<ol>
+<li><code>02_产品输出/6.18/工单SOP需求梳理-6.18更新.html</code></li>
+<li><code>01_业务输入/拼多多工单SOP.618更新版.xmind</code></li>
+<li><code>01_业务输入/代发仓发货地址.xlsx</code></li>
+<li><code>01_业务输入/拼多多权限表0617.xlsx</code></li>
+</ol>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>!
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+
+    const IS_EMBEDDED = new URLSearchParams(window.location.search).get("embedded") === "true";
+
+    // 嵌入 iframe 时隐藏自带 header，由外层 index.html 负责导航；TOC 侧边栏保留
+    if (IS_EMBEDDED) {
+      document.querySelector(".doc-header").style.display = "none";
+      document.querySelector(".edit-banner").style.marginTop = "0";
+    }
+
+    const SUPABASE_URL = "https://uqqdfomevnoaqsadhvex.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxcWRmb21ldm5vYXFzYWRodmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjk0ODksImV4cCI6MjA5NzY0NTQ4OX0.Qqs_Z_rZzCkqIRebE2FMkewKuz9kn_3ErYlcbAcVsz8";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const TABLE = "prd_annotations";
+    const PROJECT_ID = "pdd-v1";
+    const PRD_ROW_ID = PROJECT_ID + "-prd-full-content";
+
+    const EDIT_MODE = new URLSearchParams(window.location.search).get("edit") === "mengdie";
+
+    const docContent = document.getElementById("docContent");
+    const docSyncStatus = document.getElementById("docSyncStatus");
+    const docEditBtn = document.getElementById("docEditBtn");
+    const docExitBtn = document.getElementById("docExitBtn");
+    const docSaveBtn = document.getElementById("docSaveBtn");
+    const docClearBtn = document.getElementById("docClearBtn");
+    const editBanner = document.getElementById("editBanner");
+
+    let savedSnapshot = null;
+
+    function setSyncStatus(state) {
+      docSyncStatus.classList.remove("editing");
+      if (state === "syncing") {
+        docSyncStatus.textContent = "☁️ 同步中…";
+      } else if (state === "error") {
+        docSyncStatus.textContent = "⚠️ 同步失败";
+      } else if (state === "editing") {
+        docSyncStatus.textContent = "✏️ 编辑中（未保存）";
+        docSyncStatus.classList.add("editing");
+      } else {
+        docSyncStatus.textContent = "☁️ 已连接";
+      }
+    }
+
+    async function loadPrdContent() {
+      // 嵌入模式直接用文件 HTML，不从 Supabase 加载，避免旧存档覆盖正确内容
+      if (IS_EMBEDDED) {
+        setSyncStatus("ok");
+        return;
+      }
+      setSyncStatus("syncing");
+      const { data, error } = await supabaseClient
+        .from(TABLE)
+        .select("body")
+        .eq("id", PRD_ROW_ID)
+        .eq("type", "prd-content")
+        .maybeSingle();
+      if (error) {
+        console.warn("加载云端PRD内容失败，使用页面默认内容", error);
+        setSyncStatus("error");
+        return;
+      }
+      if (data && data.body) {
+        docContent.innerHTML = data.body;
+      }
+      setSyncStatus("ok");
+    }
+
+    // 流程图单独渲染：源码固定存在 #flowchartSource（不会被整页编辑/保存逻辑污染），
+    // 只在目标容器为空时才渲染一次，避免对"已经渲染成SVG"的内容重复解析导致报错。
+    async function ensureFlowchartRendered() {
+      const target = document.getElementById("flowchartRender");
+      const srcEl = document.getElementById("flowchartSource");
+      if (!target || !srcEl) return;
+      if (target.innerHTML.trim()) return;
+      const src = srcEl.textContent;
+      try {
+        const { svg } = await mermaid.render("flowchartSvg", src);
+        target.innerHTML = svg;
+      } catch (e) {
+        console.warn("流程图渲染失败", e);
+        target.innerHTML = '<p style="color:#b91c1c;font-size:13px;">流程图渲染失败，请联系产品确认（' + e.message + '）</p>';
+      }
+    }
+
+    if (EDIT_MODE) {
+      docEditBtn.style.display = "";
+    }
+
+    docEditBtn.addEventListener("click", () => {
+      docContent.setAttribute("contenteditable", "true");
+      docContent.focus();
+      docEditBtn.style.display = "none";
+      docExitBtn.style.display = "";
+      docSaveBtn.style.display = "";
+      docClearBtn.style.display = "";
+      editBanner.classList.add("show");
+      setSyncStatus("editing");
+    });
+
+    function exitEditUI() {
+      docContent.removeAttribute("contenteditable");
+      docEditBtn.style.display = "";
+      docExitBtn.style.display = "none";
+      docSaveBtn.style.display = "none";
+      docClearBtn.style.display = "none";
+      editBanner.classList.remove("show");
+    }
+
+    docExitBtn.addEventListener("click", () => {
+      docContent.innerHTML = savedSnapshot;
+      bindAnswerInputs();
+      loadAnswers();
+      exitEditUI();
+      setSyncStatus("ok");
+    });
+
+    docClearBtn.addEventListener("click", () => {
+      docContent.innerHTML = savedSnapshot;
+      bindAnswerInputs();
+      loadAnswers();
+    });
+
+    docSaveBtn.addEventListener("click", async () => {
+      setSyncStatus("syncing");
+      const html = docContent.innerHTML;
+      const { error } = await supabaseClient.from(TABLE).upsert({
+        id: PRD_ROW_ID,
+        type: "prd-content",
+        body: html,
+        updated_at: new Date().toISOString(),
+      });
+      if (error) {
+        console.warn("保存失败", error);
+        setSyncStatus("error");
+        alert("同步失败，请检查网络后重试（你的修改还没丢，留在页面上，可以重新点保存）");
+        return;
+      }
+      savedSnapshot = html;
+      exitEditUI();
+      setSyncStatus("ok");
+    });
+
+    document.querySelectorAll(".toc a").forEach((a) => {
+      a.addEventListener("click", (e) => {
+        const id = a.getAttribute("href").slice(1);
+        const target = document.getElementById(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+
+    // ---- 待确认问题的"确认回复"输入框：所有人可填，不受编辑暗号限制，逐格自动保存 ----
+    async function loadAnswers() {
+      const { data, error } = await supabaseClient
+        .from(TABLE)
+        .select("id, body")
+        .eq("type", "prd-answer")
+        .like("id", PROJECT_ID + "-%");
+      if (error) { console.warn("加载确认回复失败", error); return; }
+      const map = {};
+      (data || []).forEach((row) => { map[row.id.slice(PROJECT_ID.length + 1)] = row.body; });
+      document.querySelectorAll(".answer-input").forEach((input) => {
+        const val = map[input.dataset.answerId];
+        if (val) input.value = val;
+      });
+    }
+
+    async function saveAnswer(input) {
+      input.classList.remove("saved");
+      input.classList.add("saving");
+      const { error } = await supabaseClient.from(TABLE).upsert({
+        id: PROJECT_ID + "-" + input.dataset.answerId,
+        type: "prd-answer",
+        body: input.value,
+        updated_at: new Date().toISOString(),
+      });
+      input.classList.remove("saving");
+      if (error) {
+        console.warn("保存确认回复失败", error);
+        return;
+      }
+      input.classList.add("saved");
+      setTimeout(() => input.classList.remove("saved"), 1500);
+    }
+
+    let answerSaveTimers = {};
+    function bindAnswerInputs() {
+      document.querySelectorAll(".answer-input").forEach((input) => {
+        input.addEventListener("blur", () => saveAnswer(input));
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+        });
+        // 停止输入 1.2 秒后也自动保存一次，避免用户一直不切走焦点导致内容丢失
+        input.addEventListener("input", () => {
+          clearTimeout(answerSaveTimers[input.dataset.answerId]);
+          answerSaveTimers[input.dataset.answerId] = setTimeout(() => saveAnswer(input), 1200);
+        });
+      });
+    }
+
+    // 初始化顺序很重要：
+    // 1. 先加载/替换整页内容（确定最终DOM结构）
+    // 2. 渲染流程图（只在容器为空时渲染一次，避免重复解析已渲染的SVG）
+    // 3. 流程图渲染完成后才记录"已保存快照"，否则退出编辑/清除修改时会把流程图清空
+    // 4. 最后绑定输入框事件、回填已保存的确认回复
+    (async () => {
+      await loadPrdContent();
+      await ensureFlowchartRendered();
+      savedSnapshot = docContent.innerHTML;
+      bindAnswerInputs();
+      await loadAnswers();
+    })();
+  </script>
+</body>
+</html>

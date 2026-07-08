@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>文档入口</title>
+<script>
+  // 版本路由:默认跳转到最新版,保留 URL 参数
+  // 新版本发布后把 latest 改成新版本号即可,例如 "v2"
+  const latest = "v1";
+  const s = window.location.search;
+  window.location.replace(latest + "/" + (s || ""));
+</script>
+</head>
+<body></body>
+</html>

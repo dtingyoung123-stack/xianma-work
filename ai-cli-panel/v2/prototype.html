@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI CLI 企业管理面板 · 原型</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; background: #f3f6fb; color: #16213a; }
+
+  /* 标注角标 */
+  .prd-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #2563eb; color: #fff; font-size: 10px; font-weight: 700;
+    cursor: pointer; vertical-align: super; margin-left: 3px;
+    user-select: none; flex-shrink: 0;
+  }
+  .prd-badge:hover { background: #1d4ed8; }
+
+  .custom-pin {
+    position: absolute; width: 24px; height: 24px; border-radius: 50%;
+    background: #f59e0b; border: 2px solid #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff; font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+  .custom-pin-layer { position: absolute; inset: 0; pointer-events: none; }
+  .custom-pin-layer .custom-pin { pointer-events: all; }
+
+  .prd-popover {
+    display: none; position: fixed; z-index: 200;
+    background: #fff; border-radius: 14px; width: 320px;
+    box-shadow: 0 8px 32px rgba(16,24,40,.14); border: 1px solid #e6e9f0;
+    overflow: hidden;
+  }
+  .prd-popover.show { display: block; }
+  .prd-popover-backdrop { display: none; position: fixed; inset: 0; z-index: 199; }
+  .prd-popover-backdrop.show { display: block; }
+  .pop-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 10px; border-bottom: 1px solid #e6e9f0;
+  }
+  .pop-tag { font-size: 11px; font-weight: 700; color: #2563eb; background: #eef4ff; padding: 2px 8px; border-radius: 5px; }
+  .pop-close {
+    border: none; background: #f3f6fb; color: #5b6678;
+    width: 26px; height: 26px; border-radius: 7px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .pop-body { padding: 12px 16px 16px; }
+  .pop-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .pop-desc { font-size: 13px; color: #5b6678; line-height: 1.65; }
+
+  .anno-toolbar {
+    position: fixed; bottom: 20px; right: 20px; z-index: 300;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .anno-toolbar button {
+    padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 700; background: #2563eb; color: #fff;
+  }
+  .anno-toolbar button:hover { background: #1d4ed8; }
+  #annoSyncStatus { font-size: 12px; color: #5b6678; background: #fff; padding: 7px 12px; border-radius: 8px; border: 1px solid #e6e9f0; }
+
+  /* ============ 原型主体样式 ============ */
+  .app { position: relative; min-height: 100vh; }
+
+  /* ---- 登录页 ---- */
+  .login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse 70% 60% at 50% -10%, rgba(37,99,235,.14), transparent 60%), #f3f6fb;
+  }
+  .login-card {
+    width: 380px; background: #fff; border-radius: 20px; padding: 44px 36px;
+    box-shadow: 0 24px 64px rgba(16,24,40,.1); text-align: center;
+  }
+  .login-logo {
+    width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, #1d3a8f 0%, #2563eb 60%, #3b82f6 100%);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .login-title { font-size: 19px; font-weight: 800; margin-bottom: 6px; }
+  .login-sub { font-size: 13px; color: #5b6678; margin-bottom: 32px; }
+  .dingtalk-btn {
+    width: 100%; padding: 13px; border-radius: 12px; border: none; cursor: pointer;
+    background: #1677ff; color: #fff; font-size: 14.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .15s;
+  }
+  .dingtalk-btn:hover { background: #0e5fd8; }
+  .login-foot { margin-top: 18px; font-size: 12px; color: #9aa4b8; }
+
+  /* ---- 应用外壳:侧边栏 + 主内容 ---- */
+  .shell { display: none; min-height: 100vh; }
+  .shell.show { display: flex; }
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: #10182c; color: #cbd5e1;
+    display: flex; flex-direction: column; padding: 20px 14px;
+  }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 6px 10px 22px; }
+  .sidebar-logo .mark {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: linear-gradient(135deg, #1d3a8f 0%, #2563eb 60%, #3b82f6 100%);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .sidebar-logo .name { font-size: 13.5px; font-weight: 800; color: #fff; line-height: 1.4; }
+  .sidebar-user {
+    display: flex; align-items: center; gap: 10px; padding: 10px;
+    background: rgba(255,255,255,.05); border-radius: 12px; margin-bottom: 18px;
+  }
+  .sidebar-user .avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: #2563eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .sidebar-user .info { min-width: 0; }
+  .sidebar-user .info .u-name { font-size: 13px; font-weight: 700; color: #fff; }
+  .sidebar-user .info .u-dept { font-size: 11.5px; color: #94a3b8; }
+  .nav-list { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 600; cursor: pointer; color: #cbd5e1;
+    border: none; background: transparent; text-align: left; width: 100%;
+  }
+  .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+  .nav-item.active { background: #2563eb; color: #fff; }
+  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
+  .sidebar-logout {
+    margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 12.5px;
+    color: #94a3b8; cursor: pointer; background: transparent; border: none; text-align: left;
+  }
+  .sidebar-logout:hover { color: #fff; background: rgba(255,255,255,.06); }
+
+  .main { flex: 1; min-width: 0; padding: 32px 40px; max-width: 980px; }
+  .view { display: none; }
+  .view.show { display: block; }
+  .view-head { margin-bottom: 22px; }
+  .view-head h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .view-head p { font-size: 13px; color: #5b6678; }
+
+  /* ---- 工作台 ---- */
+  .skill-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .skill-chip {
+    padding: 7px 14px; border-radius: 20px; border: 1px solid #dbe3f0; background: #fff;
+    font-size: 12.5px; font-weight: 600; color: #344054; cursor: pointer;
+  }
+  .skill-chip:hover { border-color: #93c5fd; color: #2563eb; background: #eff6ff; }
+  .workspace-input-card {
+    background: #fff; border: 1px solid #e6e9f0; border-radius: 16px; padding: 18px;
+    margin-bottom: 20px;
+  }
+  .workspace-input-card textarea {
+    width: 100%; min-height: 78px; border: none; outline: none; resize: vertical;
+    font-family: inherit; font-size: 14px; color: #16213a; line-height: 1.6;
+  }
+  .workspace-input-card textarea::placeholder { color: #9aa4b8; }
+  .input-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 12px; border-top: 1px solid #f0f2f7; }
+  .input-hint { font-size: 12px; color: #9aa4b8; }
+  .run-btn {
+    padding: 9px 22px; border-radius: 10px; border: none; cursor: pointer;
+    background: #2563eb; color: #fff; font-size: 13.5px; font-weight: 700;
+  }
+  .run-btn:hover { background: #1d4ed8; }
+  .run-btn:disabled { background: #b6c6e8; cursor: not-allowed; }
+
+  .output-card {
+    background: #0f1626; border-radius: 16px; padding: 20px 22px; min-height: 220px;
+    font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px; color: #d1d9ec; line-height: 1.8;
+  }
+  .output-empty { color: #5c6a8a; font-size: 13px; }
+  .output-line-user { color: #7dd3fc; margin-bottom: 10px; }
+  .output-cursor { display: inline-block; width: 7px; height: 15px; background: #93c5fd; vertical-align: text-bottom; animation: blink 1s step-start infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---- 历史记录 ---- */
+  .history-item {
+    background: #fff; border: 1px solid #e6e9f0; border-radius: 14px; padding: 16px 18px;
+    margin-bottom: 12px; cursor: pointer;
+  }
+  .history-item:hover { border-color: #c7d9ff; }
+  .history-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .history-title { font-size: 14px; font-weight: 700; }
+  .history-time { font-size: 12px; color: #9aa4b8; }
+  .history-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #5b6678; }
+  .history-tag { padding: 2px 9px; border-radius: 6px; background: #eef4ff; color: #2563eb; font-weight: 700; font-size: 11px; }
+  .history-detail {
+    display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e6e9f0;
+    font-size: 12.5px; color: #5b6678; line-height: 1.8;
+  }
+  .history-item.open .history-detail { display: block; }
+
+  /* ---- 技能库 ---- */
+  .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .skill-card {
+    background: #fff; border: 1px solid #e6e9f0; border-radius: 16px; padding: 20px;
+    display: flex; flex-direction: column;
+  }
+  .skill-card .s-icon {
+    width: 40px; height: 40px; border-radius: 12px; background: #eef4ff;
+    display: flex; align-items: center; justify-content: center; font-size: 19px; margin-bottom: 12px;
+  }
+  .skill-card .s-name { font-size: 14.5px; font-weight: 700; margin-bottom: 6px; }
+  .skill-card .s-desc { font-size: 12.5px; color: #5b6678; line-height: 1.6; margin-bottom: 12px; flex: 1; }
+  .skill-card .s-tag {
+    align-self: flex-start; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 5px;
+    margin-bottom: 12px;
+  }
+  .s-tag.query { background: #eafaf1; color: #16a34a; }
+  .s-tag.generate { background: #fff7e0; color: #b45309; }
+  .skill-card .s-use {
+    padding: 8px; border-radius: 9px; border: 1px solid #2563eb; background: #fff; color: #2563eb;
+    font-size: 12.5px; font-weight: 700; cursor: pointer;
+  }
+  .skill-card .s-use:hover { background: #eff6ff; }
+</style>
+</head>
+<body>
+
+<div class="anno-toolbar">
+  <span id="annoSyncStatus">☁️ 加载中…</span>
+  <button id="annoAddBtn" style="display:none">📍 添加标注</button>
+</div>
+
+<div class="prd-popover-backdrop" id="prdPopBackdrop"></div>
+<div class="prd-popover" id="prdPopover">
+  <div class="pop-head">
+    <span class="pop-tag" id="popTag">PRD 说明</span>
+    <button class="pop-close" id="popClose">✕</button>
+  </div>
+  <div id="prdPopView">
+    <div class="pop-body">
+      <div class="pop-title" id="popTitle"></div>
+      <div class="pop-desc" id="popBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="appRoot">
+  <div class="custom-pin-layer" id="customPinLayer"></div>
+
+  <!-- ===== 登录页 ===== -->
+  <div class="login-screen" id="viewLogin">
+    <div class="login-card">
+      <div class="login-logo">🤖</div>
+      <div class="login-title">AI CLI 企业管理面板</div>
+      <div class="login-sub">让每个岗位都能安全地用上 AI</div>
+      <button class="dingtalk-btn" id="btnDingtalkLogin">
+        使用钉钉账号登录
+        <span class="prd-badge" data-prd="login-method" tabindex="0">1</span>
+      </button>
+      <div class="login-foot">首次登录将自动读取钉钉组织架构信息</div>
+    </div>
+  </div>
+
+  <!-- ===== 应用外壳(登录后) ===== -->
+  <div class="shell" id="viewShell">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="mark">🤖</div>
+        <div class="name">AI CLI<br>企业管理面板</div>
+      </div>
+      <div class="sidebar-user">
+        <div class="avatar">张</div>
+        <div class="info">
+          <div class="u-name">张三</div>
+          <div class="u-dept">运营部</div>
+        </div>
+      </div>
+      <div class="nav-list">
+        <button class="nav-item active" data-nav="workspace"><span class="icon">💬</span>工作台</button>
+        <button class="nav-item" data-nav="history"><span class="icon">🕘</span>历史记录</button>
+        <button class="nav-item" data-nav="skills"><span class="icon">✨</span>技能库</button>
+      </div>
+      <button class="sidebar-logout" id="btnLogout">← 退出登录</button>
+    </div>
+
+    <div class="main">
+
+      <!-- ---- 工作台 ---- -->
+      <div class="view show" id="pageWorkspace">
+        <div class="view-head">
+          <h2>工作台</h2>
+          <p>选择一个技能模板,或直接描述你的需求<span class="prd-badge" data-prd="skill-quick-select" tabindex="0">2</span></p>
+        </div>
+        <div class="skill-chips" id="skillChips">
+          <button class="skill-chip" data-skill="商品标题批量改写:请帮我把这批女装T恤的商品标题改写得更符合618大促调性,突出材质和折扣信息">📝 商品标题批量改写</button>
+          <button class="skill-chip" data-skill="客诉原因归类整理:请把本周的客诉工单按原因分类,统计每类占比">📋 客诉原因归类整理</button>
+          <button class="skill-chip" data-skill="会议纪要生成:请根据以下会议录音转写文本,整理成结构化会议纪要">🗒️ 会议纪要生成</button>
+        </div>
+        <div class="workspace-input-card">
+          <textarea id="taskInput" placeholder="例如:帮我把这批商品标题改写得更简洁,突出核心卖点..."></textarea>
+          <div class="input-foot">
+            <span class="input-hint">API Key 由系统统一管理,无需手动配置<span class="prd-badge" data-prd="key-hosting" tabindex="0">3</span></span>
+            <button class="run-btn" id="btnRun">开始执行</button>
+          </div>
+        </div>
+        <div class="output-card" id="outputCard">
+          <span class="output-empty">输出结果将实时显示在这里<span class="prd-badge" data-prd="streaming-output" tabindex="0">4</span></span>
+        </div>
+      </div>
+
+      <!-- ---- 历史记录 ---- -->
+      <div class="view" id="pageHistory">
+        <div class="view-head">
+          <h2>历史记录</h2>
+          <p>按项目、按时间查看历史任务与产出结果<span class="prd-badge" data-prd="history-scope" tabindex="0">5</span></p>
+        </div>
+        <div class="history-item">
+          <div class="history-top">
+            <div class="history-title">618大促女装T恤标题优化</div>
+            <div class="history-time">2026-07-08 14:20</div>
+          </div>
+          <div class="history-meta">
+            <span class="history-tag">商品标题批量改写</span>
+            <span>张三 · 运营部</span>
+          </div>
+          <div class="history-detail">已处理 32 条商品标题,平均字数从 41 字精简至 28 字,补充折扣与材质关键词。</div>
+        </div>
+        <div class="history-item">
+          <div class="history-top">
+            <div class="history-title">7月第一周客诉工单分类</div>
+            <div class="history-time">2026-07-07 10:05</div>
+          </div>
+          <div class="history-meta">
+            <span class="history-tag">客诉原因归类整理</span>
+            <span>李四 · 客服部</span>
+          </div>
+          <div class="history-detail">共 156 条工单,物流延误占比 38%、商品质量占比 24%、客服响应占比 19%,其余 19%。</div>
+        </div>
+        <div class="history-item">
+          <div class="history-top">
+            <div class="history-title">产品需求评审会纪要</div>
+            <div class="history-time">2026-07-05 16:40</div>
+          </div>
+          <div class="history-meta">
+            <span class="history-tag">会议纪要生成</span>
+            <span>王五 · 行政部</span>
+          </div>
+          <div class="history-detail">已生成结构化纪要,含 5 项待办事项及负责人,已同步至工作台历史记录。</div>
+        </div>
+      </div>
+
+      <!-- ---- 技能库 ---- -->
+      <div class="view" id="pageSkills">
+        <div class="view-head">
+          <h2>技能库</h2>
+          <p>团队沉淀的固定技能模板,点选即用<span class="prd-badge" data-prd="skill-risk-level" tabindex="0">6</span></p>
+        </div>
+        <div class="skill-grid">
+          <div class="skill-card">
+            <div class="s-icon">📝</div>
+            <div class="s-name">商品标题批量改写</div>
+            <span class="s-tag generate">生成型</span>
+            <div class="s-desc">按大促节点、平台规则批量改写商品标题,突出卖点与折扣信息。</div>
+            <button class="s-use" data-skill="商品标题批量改写:请帮我把这批女装T恤的商品标题改写得更符合618大促调性,突出材质和折扣信息">使用该技能 →</button>
+          </div>
+          <div class="skill-card">
+            <div class="s-icon">📋</div>
+            <div class="s-name">客诉原因归类整理</div>
+            <span class="s-tag query">查询型</span>
+            <div class="s-desc">批量分析客诉工单文本,自动归类原因并统计占比。</div>
+            <button class="s-use" data-skill="客诉原因归类整理:请把本周的客诉工单按原因分类,统计每类占比">使用该技能 →</button>
+          </div>
+          <div class="skill-card">
+            <div class="s-icon">🗒️</div>
+            <div class="s-name">会议纪要生成</div>
+            <span class="s-tag generate">生成型</span>
+            <div class="s-desc">根据会议录音转写文本,自动整理成结构化会议纪要与待办事项。</div>
+            <button class="s-use" data-skill="会议纪要生成:请根据以下会议录音转写文本,整理成结构化会议纪要">使用该技能 →</button>
+          </div>
+          <div class="skill-card">
+            <div class="s-icon">📊</div>
+            <div class="s-name">数据表格清洗校验</div>
+            <span class="s-tag query">查询型</span>
+            <div class="s-desc">检查表格数据格式、重复值、缺失字段,输出校验报告。</div>
+            <button class="s-use" data-skill="数据表格清洗校验:请检查这份表格的格式问题、重复值和缺失字段">使用该技能 →</button>
+          </div>
+          <div class="skill-card">
+            <div class="s-icon">🎨</div>
+            <div class="s-name">文案多版本生成</div>
+            <span class="s-tag generate">生成型</span>
+            <div class="s-desc">针对同一素材生成多个风格版本的推广文案,供选用对比。</div>
+            <button class="s-use" data-skill="文案多版本生成:请针对这款商品生成3个不同风格的推广文案">使用该技能 →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const PROJECT_ID = "ai-cli-panel-v2";
+
+  const PRD_NOTES_DEFAULT = {
+    "login-method": { tag: "登录方式", title: "钉钉扫码 / 免密登录", body: "对接公司钉钉账号体系,不单独开发账号密码系统。首次登录自动读取钉钉组织架构信息(部门、姓名),用于后续权限分级(阶段二)。" },
+    "key-hosting": { tag: "Key 托管", title: "API Key 不向用户暴露", body: "员工不会看到、也不需要配置任何 API Key。系统在后端统一持有并代为调用,前端只负责发起任务和展示结果。" },
+    "streaming-output": { tag: "实时输出", title: "SSE 流式展示", body: "Codex 的输出通过 SSE(Server-Sent Events)实时推送到网页,用户能看到结果逐步生成的过程,而不是等待整体返回后一次性显示。" },
+    "skill-quick-select": { tag: "技能快捷入口", title: "工作台顶部技能速选", body: "工作台顶部展示 3 个最高频技能供快速点选,完整技能库(5条)在左侧「技能库」页面浏览。点击后自动填充到下方输入框,用户可编辑后再执行。" },
+    "history-scope": { tag: "历史记录范围", title: "按用户 + 项目维度留存", body: "阶段一 Demo 按当前登录用户展示其个人历史记录;阶段二会在此基础上增加按项目/部门维度的跨人员历史查看(需配合权限体系)。" },
+    "skill-risk-level": { tag: "技能风险分级", title: "阶段一为固定模板,风险分级在阶段二", body: "阶段一提供的 3-5 条技能均为查询型/生成型,不含修改型、执行型等高风险操作,因此本阶段暂不需要角色化的风险分级界面。风险分级 UI 与权限控制在阶段二随「修改型/执行型」技能一起上线。" },
+  };
+
+  const EDIT_MODE = new URLSearchParams(window.location.search).get("edit") === "mengdie";
+
+  const SUPABASE_URL = "https://uqqdfomevnoaqsadhvex.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxcWRmb21ldm5vYXFzYWRodmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjk0ODksImV4cCI6MjA5NzY0NTQ4OX0.Qqs_Z_rZzCkqIRebE2FMkewKuz9kn_3ErYlcbAcVsz8";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const TABLE = "prd_annotations";
+  const ID_PREFIX = PROJECT_ID + "-";
+
+  const syncStatusEl = document.getElementById("annoSyncStatus");
+  function setSyncStatus(state) {
+    if (state === "syncing") { syncStatusEl.textContent = "☁️ 同步中…"; }
+    else if (state === "error") { syncStatusEl.textContent = "⚠️ 同步失败"; }
+    else { syncStatusEl.textContent = "☁️ 已连接"; }
+  }
+
+  let annoState = { overrides: {}, custom: [] };
+
+  async function loadAnnotationsFromCloud() {
+    setSyncStatus("syncing");
+    const { data, error } = await supabaseClient.from(TABLE).select("*").like("id", ID_PREFIX + "%");
+    if (error) { console.warn("加载云端标注失败", error); setSyncStatus("error"); return; }
+    annoState.overrides = {}; annoState.custom = [];
+    (data || []).forEach((row) => {
+      if (row.type === "override") {
+        const key = row.id.slice(ID_PREFIX.length);
+        annoState.overrides[key] = { title: row.title, body: row.body };
+      } else if (row.type === "custom") {
+        annoState.custom.push({ id: row.id, xPct: row.x_pct, yPct: row.y_pct, title: row.title, body: row.body });
+      }
+    });
+    setSyncStatus("ok");
+    renderAllCustomPins();
+  }
+
+  async function upsertOverrideToCloud(key, title, body) {
+    setSyncStatus("syncing");
+    const { error } = await supabaseClient.from(TABLE).upsert({
+      id: ID_PREFIX + key, type: "override", title, body, updated_at: new Date().toISOString(),
+    });
+    setSyncStatus(error ? "error" : "ok");
+    return !error;
+  }
+
+  async function upsertCustomToCloud(item) {
+    setSyncStatus("syncing");
+    const { error } = await supabaseClient.from(TABLE).upsert({
+      id: item.id, type: "custom", title: item.title, body: item.body,
+      x_pct: item.xPct, y_pct: item.yPct, updated_at: new Date().toISOString(),
+    });
+    setSyncStatus(error ? "error" : "ok");
+    return !error;
+  }
+
+  const prdPopover = document.getElementById("prdPopover");
+  const prdPopBackdrop = document.getElementById("prdPopBackdrop");
+  const popTitle = document.getElementById("popTitle");
+  const popBody = document.getElementById("popBody");
+  const popTag = document.getElementById("popTag");
+  let currentKey = null;
+
+  function getEffectiveNote(key) {
+    if (!key) return null;
+    if (key.startsWith(ID_PREFIX + "custom-")) {
+      const item = annoState.custom.find((c) => c.id === key);
+      if (!item) return null;
+      return { tag: "自定义标注", title: item.title, body: item.body, isCustom: true };
+    }
+    const base = PRD_NOTES_DEFAULT[key];
+    if (!base) return null;
+    const override = annoState.overrides[key];
+    return { tag: base.tag, title: override?.title || base.title, body: override?.body || base.body, isCustom: false };
+  }
+
+  function renderPopoverView() {
+    const note = getEffectiveNote(currentKey);
+    if (!note) { closePrdPopover(); return; }
+    popTag.textContent = note.tag;
+    popTitle.textContent = note.title;
+    popBody.textContent = note.body;
+  }
+
+  function openPopoverAt(el, key) {
+    currentKey = key;
+    renderPopoverView();
+    prdPopover.classList.add("show");
+    prdPopBackdrop.classList.add("show");
+    const rect = el.getBoundingClientRect();
+    let top = rect.bottom + 8;
+    let left = rect.left;
+    if (left + 320 > window.innerWidth - 12) left = window.innerWidth - 332;
+    if (left < 12) left = 12;
+    if (top + 200 > window.innerHeight - 12) top = rect.top - 208;
+    prdPopover.style.top = top + "px";
+    prdPopover.style.left = left + "px";
+  }
+
+  function closePrdPopover() {
+    prdPopover.classList.remove("show");
+    prdPopBackdrop.classList.remove("show");
+    if (currentKey && currentKey.startsWith(ID_PREFIX + "custom-")) {
+      const item = annoState.custom.find((c) => c.id === currentKey);
+      if (item && item.isNew) {
+        annoState.custom = annoState.custom.filter((c) => c.id !== currentKey);
+        const pinEl = document.querySelector(`.custom-pin[data-prd="${currentKey}"]`);
+        if (pinEl) pinEl.remove();
+      }
+    }
+    currentKey = null;
+  }
+
+  document.getElementById("popClose").addEventListener("click", closePrdPopover);
+  prdPopBackdrop.addEventListener("click", closePrdPopover);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePrdPopover(); });
+
+  document.addEventListener("click", (e) => {
+    const badge = e.target.closest(".prd-badge, .custom-pin");
+    if (badge) {
+      e.stopPropagation();
+      const key = badge.dataset.prd;
+      if (currentKey === key && prdPopover.classList.contains("show")) { closePrdPopover(); return; }
+      openPopoverAt(badge, key);
+    }
+  });
+
+  const pinLayer = document.getElementById("customPinLayer");
+  function renderCustomPin(item) {
+    const pin = document.createElement("button");
+    pin.type = "button"; pin.className = "custom-pin";
+    pin.dataset.prd = item.id;
+    pin.style.left = item.xPct + "%"; pin.style.top = item.yPct + "%";
+    pin.textContent = "+";
+    pin.setAttribute("aria-label", item.title || "自定义标注");
+    pinLayer.appendChild(pin);
+    return pin;
+  }
+  function renderAllCustomPins() { pinLayer.innerHTML = ""; annoState.custom.forEach(renderCustomPin); }
+
+  const addMarkBtn = document.getElementById("annoAddBtn");
+  if (EDIT_MODE) addMarkBtn.style.display = "";
+  let placingMark = false;
+  addMarkBtn.addEventListener("click", () => {
+    placingMark = !placingMark;
+    addMarkBtn.classList.toggle("active", placingMark);
+    addMarkBtn.textContent = placingMark ? "✕ 退出标注模式" : "📍 添加标注";
+  });
+
+  document.getElementById("appRoot").addEventListener("click", (event) => {
+    if (!EDIT_MODE || !placingMark) return;
+    if (event.target.closest(".prd-badge, .custom-pin, .prd-popover, .anno-toolbar, button, a, input, select, textarea")) return;
+    const appRect = document.getElementById("appRoot").getBoundingClientRect();
+    const xPct = ((event.clientX - appRect.left) / appRect.width) * 100;
+    const yPct = ((event.clientY - appRect.top) / appRect.height) * 100;
+    const id = ID_PREFIX + "custom-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+    const item = { id, xPct: Math.round(xPct * 100) / 100, yPct: Math.round(yPct * 100) / 100, title: "", body: "", isNew: true };
+    annoState.custom.push(item);
+    const pin = renderCustomPin(item);
+    openPopoverAt(pin, id);
+    placingMark = false;
+    addMarkBtn.classList.remove("active");
+    addMarkBtn.textContent = "📍 添加标注";
+  });
+
+  loadAnnotationsFromCloud();
+
+  // ============ 原型交互逻辑(纯前端模拟,不涉及真实后端) ============
+
+  const viewLogin = document.getElementById("viewLogin");
+  const viewShell = document.getElementById("viewShell");
+
+  document.getElementById("btnDingtalkLogin").addEventListener("click", (e) => {
+    if (e.target.closest(".prd-badge")) return;
+    viewLogin.style.display = "none";
+    viewShell.classList.add("show");
+  });
+  document.getElementById("btnLogout").addEventListener("click", () => {
+    viewShell.classList.remove("show");
+    viewLogin.style.display = "flex";
+  });
+
+  const navItems = document.querySelectorAll(".nav-item");
+  const pages = {
+    workspace: document.getElementById("pageWorkspace"),
+    history: document.getElementById("pageHistory"),
+    skills: document.getElementById("pageSkills"),
+  };
+  function switchPage(name) {
+    navItems.forEach((n) => n.classList.toggle("active", n.dataset.nav === name));
+    Object.entries(pages).forEach(([key, el]) => el.classList.toggle("show", key === name));
+  }
+  navItems.forEach((n) => n.addEventListener("click", () => switchPage(n.dataset.nav)));
+
+  const taskInput = document.getElementById("taskInput");
+  function fillSkill(raw) {
+    const parts = raw.split(":");
+    taskInput.value = parts.slice(1).join(":");
+    switchPage("workspace");
+    taskInput.focus();
+  }
+  document.querySelectorAll("[data-skill]").forEach((el) => {
+    el.addEventListener("click", () => fillSkill(el.dataset.skill));
+  });
+
+  const outputCard = document.getElementById("outputCard");
+  const btnRun = document.getElementById("btnRun");
+  const MOCK_OUTPUT = "已收到任务,正在分析商品标题结构…\n\n识别到 32 条待处理标题,原标题平均长度 41 字,存在关键词堆砌情况。\n\n按「材质 + 版型 + 促销点」结构重新组织,示例:\n  原标题:2026新款夏季女装宽松显瘦纯棉短袖T恤上衣百搭chic\n  新标题:纯棉宽松显瘦T恤 · 618大促直降30 · 百搭chic夏装\n\n已完成全部 32 条标题改写,平均字数精简至 28 字,补充折扣与材质关键词,可在右侧下载结果表格。";
+
+  btnRun.addEventListener("click", () => {
+    const text = taskInput.value.trim();
+    if (!text) { taskInput.focus(); return; }
+    btnRun.disabled = true;
+    btnRun.textContent = "执行中…";
+    outputCard.innerHTML = `<div class="output-line-user">→ ${text.replace(/</g, "&lt;")}</div><span id="streamTarget"></span><span class="output-cursor"></span>`;
+    const target = document.getElementById("streamTarget");
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i >= MOCK_OUTPUT.length) {
+        clearInterval(timer);
+        btnRun.disabled = false;
+        btnRun.textContent = "开始执行";
+        document.querySelector(".output-cursor")?.remove();
+        return;
+      }
+      target.textContent += MOCK_OUTPUT[i];
+      i++;
+      outputCard.scrollTop = outputCard.scrollHeight;
+    }, 18);
+  });
+
+  document.querySelectorAll(".history-item").forEach((item) => {
+    item.addEventListener("click", () => item.classList.toggle("open"));
+  });
+</script>
+</body>
+</html>

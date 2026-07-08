@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>先马 AI 设计平台 — 产品规划方案（2026 下半年）</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text: #2d3436;
+    --text-secondary: #636e72;
+    --border: #e0e4e8;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --p0: #dc2626;
+    --p0-bg: #fef2f2;
+    --p1: #f59e0b;
+    --p1-bg: #fffbeb;
+    --tag-green: #10b981;
+    --tag-green-bg: #ecfdf5;
+    --tag-orange: #f59e0b;
+    --tag-orange-bg: #fffbeb;
+    --code-bg: #1e293b;
+    --code-text: #e2e8f0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75;
+    padding: 20px; padding-left: 260px;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
+    background: #fff; border-right: 1px solid var(--border);
+    padding: 24px 0; overflow-y: auto; z-index: 100;
+    box-shadow: 1px 0 4px rgba(0,0,0,0.04);
+  }
+  .sidebar .nav-title {
+    font-size: 13px; font-weight: 700; color: #111; padding: 0 20px 16px;
+    border-bottom: 1px solid var(--border); margin-bottom: 8px;
+  }
+  .sidebar nav a {
+    display: block; padding: 8px 20px; font-size: 13px; color: var(--text-secondary);
+    text-decoration: none; border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .sidebar nav a:hover { color: var(--accent); background: var(--accent-light); }
+  .sidebar nav a.active {
+    color: var(--accent); background: var(--accent-light);
+    border-left-color: var(--accent); font-weight: 600;
+  }
+  .sidebar nav .sub { padding-left: 36px; font-size: 12px; color: #94a3b8; }
+  .sidebar nav .sub:hover { color: var(--accent); }
+
+  /* Header */
+  .header {
+    background: var(--card-bg); border-radius: 12px; padding: 32px 36px;
+    margin-bottom: 24px; border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .header h1 { font-size: 26px; font-weight: 700; margin-bottom: 12px; color: #111; }
+  .header .meta { display: flex; gap: 24px; flex-wrap: wrap; font-size: 14px; color: var(--text-secondary); }
+  .header .meta span { display: flex; align-items: center; gap: 4px; }
+  .header .meta strong { color: var(--text); }
+  .version-switch {
+    max-width: 960px; margin: 0 auto 16px;
+    display: flex; justify-content: flex-end; gap: 8px;
+  }
+  .version-switch a {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 58px; padding: 7px 14px; border-radius: 999px;
+    border: 1px solid var(--border); background: #fff;
+    color: var(--text-secondary); text-decoration: none;
+    font-size: 13px; font-weight: 700;
+  }
+  .version-switch a:hover { color: var(--accent); border-color: #bfdbfe; background: var(--accent-light); }
+  .version-switch a.active { color: #fff; background: var(--accent); border-color: var(--accent); }
+
+  /* Section */
+  .section {
+    background: var(--card-bg); border-radius: 12px; padding: 28px 36px;
+    margin-bottom: 20px; border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .section h2 {
+    font-size: 20px; font-weight: 700; margin-bottom: 20px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--accent);
+    color: #111;
+  }
+  .section h3 { font-size: 16px; font-weight: 600; margin: 20px 0 10px; color: #333; }
+  .section h4 { font-size: 14px; font-weight: 600; margin: 14px 0 8px; color: #555; }
+
+  /* Paragraphs & lists */
+  .section p { margin-bottom: 10px; font-size: 15px; }
+  .section ul { margin: 8px 0 12px 20px; }
+  .section li { margin-bottom: 4px; font-size: 15px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 14px; }
+  th {
+    background: #f1f5f9; text-align: left; padding: 10px 14px;
+    font-weight: 600; border-bottom: 2px solid var(--border); font-size: 13px;
+    color: #475569; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafbfc; }
+
+  /* Priority badges */
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .badge-p0 { background: var(--p0-bg); color: var(--p0); }
+  .badge-p1 { background: var(--p1-bg); color: var(--p1); }
+  .badge-done { background: var(--tag-green-bg); color: var(--tag-green); }
+  .badge-new { background: var(--tag-orange-bg); color: var(--tag-orange); }
+
+  /* Blockquote */
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--accent-light);
+    padding: 10px 16px; margin: 12px 0; border-radius: 0 6px 6px 0;
+    font-size: 14px; color: #1e40af;
+  }
+
+  /* Code / pre blocks */
+  pre {
+    background: var(--code-bg); color: var(--code-text); padding: 16px 20px;
+    border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    margin: 10px 0 16px; font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  }
+
+  /* Monthly cards */
+  .month-card {
+    border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px;
+    margin: 16px 0; background: #fafbfc;
+  }
+  .month-card h4 { margin-top: 0; font-size: 17px; }
+  .month-card .month-tagline { color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; }
+
+  /* Dependency chain */
+  .dep-chain {
+    background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;
+    padding: 16px 20px; margin: 12px 0; font-size: 14px;
+  }
+  .dep-chain code { background: #e0f2fe; padding: 1px 6px; border-radius: 3px; font-size: 13px; }
+
+  /* Risk table */
+  .risk-high { color: var(--p0); font-weight: 600; }
+  .risk-mid { color: var(--p1); font-weight: 600; }
+
+  /* Timeline */
+  .timeline {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+    margin: 12px 0 16px; font-size: 13px;
+  }
+  .timeline .tl-month {
+    background: #f1f5f9; border-radius: 8px; padding: 12px 10px; text-align: center;
+    border-top: 3px solid var(--accent);
+  }
+  .timeline .tl-month strong { display: block; font-size: 15px; margin-bottom: 6px; }
+  .timeline .tl-month span { display: block; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+
+  /* Footer */
+  .footer {
+    text-align: center; color: var(--text-secondary); font-size: 13px;
+    padding: 20px; margin-top: 8px;
+  }
+
+  /* Meeting notes */
+  .meeting-notes { margin-top: 20px; }
+  .meeting-notes label { font-size: 14px; font-weight: 600; color: #333; display: block; margin-bottom: 6px; }
+  .meeting-notes textarea {
+    width: 100%; min-height: 140px; padding: 12px 14px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; line-height: 1.7;
+    resize: vertical; background: #fafbfc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .meeting-notes textarea:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: #fff;
+  }
+  .meeting-notes .note-actions {
+    display: flex; align-items: center; gap: 12px; margin-top: 8px;
+  }
+  .meeting-notes .btn-save {
+    padding: 7px 18px; background: var(--accent); color: #fff;
+    border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .meeting-notes .btn-save:hover { opacity: 0.85; }
+  .meeting-notes .save-hint { font-size: 12px; color: var(--text-secondary); }
+  .meeting-notes .save-hint.saved { color: #10b981; }
+
+  /* Floating record panel */
+  .record-launcher {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    z-index: 120;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 14px 34px rgba(37,99,235,0.28);
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+  }
+  .record-launcher:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 42px rgba(37,99,235,0.34);
+  }
+  .record-panel {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    z-index: 130;
+    width: min(380px, calc(100vw - 32px));
+    height: min(560px, calc(100vh - 48px));
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(15,23,42,0.22);
+  }
+  .record-panel.open { display: flex; }
+  .record-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+  }
+  .record-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+  }
+  .record-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .record-tool-btn {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: #fff;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .record-tool-btn:hover { color: var(--accent); border-color: #bfdbfe; background: var(--accent-light); }
+  .record-close {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .record-close:hover { color: var(--accent); border-color: #bfdbfe; background: var(--accent-light); }
+  .record-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    background: #f8fafc;
+  }
+  .record-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 24px;
+  }
+  .record-item {
+    margin-bottom: 10px;
+    padding: 12px 13px;
+    border: 1px solid #dbeafe;
+    border-radius: 14px 14px 4px 14px;
+    background: #fff;
+  }
+  .record-time {
+    margin-bottom: 6px;
+    color: var(--accent);
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .record-content {
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .record-compose {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: #fff;
+  }
+  .record-input {
+    width: 100%;
+    min-height: 88px;
+    max-height: 150px;
+    resize: vertical;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: #fafbfc;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+    outline: none;
+  }
+  .record-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    background: #fff;
+  }
+  .record-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 9px;
+  }
+  .record-hint {
+    min-height: 18px;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+  .record-save {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .record-save:hover { opacity: 0.88; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    body { padding-left: 20px; }
+    .container { max-width: 100%; }
+    .version-switch { max-width: 100%; justify-content: flex-start; }
+    .section { padding: 20px; }
+    .timeline { grid-template-columns: repeat(3, 1fr); }
+    table { font-size: 13px; }
+    th, td { padding: 8px 10px; }
+    .record-launcher { right: 18px; bottom: 18px; }
+    .record-panel {
+      right: 16px;
+      bottom: 16px;
+      width: calc(100vw - 32px);
+      height: min(540px, calc(100vh - 32px));
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar">
+  <div class="nav-title">📋 文档导航</div>
+  <nav>
+    <a href="#sec1">一、产品概述</a>
+    <a href="#sec1-1" class="sub">1.1 产品定位</a>
+    <a href="#sec1-2" class="sub">1.2 核心价值</a>
+    <a href="#sec1-3" class="sub">1.3 目标用户</a>
+    <a href="#sec1-4" class="sub">1.4 平台当前现状</a>
+    <a href="#sec2">二、产品架构</a>
+    <a href="#sec2-1" class="sub">2.1 总体架构</a>
+    <a href="#sec2-2" class="sub">2.2 三层架构说明</a>
+    <a href="#sec3">三、核心功能模块</a>
+    <a href="#sec3-1" class="sub">3.1 模型集成引擎</a>
+    <a href="#sec3-2" class="sub">3.2 双模式设计引擎</a>
+    <a href="#sec3-3" class="sub">3.3 场景化生图模块</a>
+    <a href="#sec3-4" class="sub">3.4 自助生图 + 模板库</a>
+    <a href="#sec3-5" class="sub">3.5 垂直场景模块</a>
+    <a href="#sec3-6" class="sub">3.6 AI 图片评审引擎</a>
+    <a href="#sec3-7" class="sub">3.7 AI 营销文案生成</a>
+    <a href="#sec3-8" class="sub">3.8 AI 评论生成</a>
+    <a href="#sec3-9" class="sub">3.9 视频生成与切片</a>
+    <a href="#sec3-10" class="sub">3.10 无限画布</a>
+    <a href="#sec3-11" class="sub">3.11 一键发布</a>
+    <a href="#sec4">四、下半年月度里程碑</a>
+    <a href="#sec4-0" class="sub">整体节奏</a>
+    <a href="#sec4-last" class="sub">年底平台状态</a>
+    <a href="#sec5">五、项目风险</a>
+    <a href="#sec5-1" class="sub">5.1 项目级风险</a>
+    <a href="#sec6">六、效果衡量体系</a>
+    <a href="#sec6-1" class="sub">6.1 为什么建</a>
+    <a href="#sec6-2" class="sub">6.2 关注哪些指标</a>
+    <a href="#sec6-3" class="sub">6.3 怎么落地</a>
+    <a href="#sec7">七、核心亮点</a>
+  </nav>
+</aside>
+
+<div class="container">
+
+<div class="version-switch" aria-label="版本切换">
+  <a class="active" href="../v1/">V1</a>
+  <a href="../v2/">V2</a>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <h1>先马 AI 设计平台 — 产品规划方案（2026 下半年）</h1>
+  <div class="meta">
+    <span><strong>整理人：</strong>梦蝶</span>
+    <span><strong>整理时间：</strong>2026-06-28</span>
+    <span><strong>文档性质：</strong>产品规划 · 内部讨论稿</span>
+    <span><strong>基于：</strong>新戈 v3.0 原方案 + 下半年落地计划补充</span>
+  </div>
+</div>
+
+<!-- 一、产品概述 -->
+<div class="section" id="sec1">
+  <h2>一、产品概述</h2>
+
+  <h3 id="sec1-1">1.1 产品定位</h3>
+  <p>打造<strong>先马电商团队的内部 AI 视觉生产平台</strong>：以效率提升和品牌标准管控为核心目标，整合国内主流 AI 图片/视频生成模型，服务设计部门和运营部门的日常视觉内容生产需求，提供从素材生成、设计排版、平台适配、AI 评审到一键发布的全流程设计服务，将生成结果沉淀为可复用的团队素材资产，逐步减少对外部工具和外包的依赖。</p>
+
+  <h3 id="sec1-2">1.2 核心价值</h3>
+  <table>
+    <tr><th style="width:120px">价值</th><th>说明</th></tr>
+    <tr><td><strong>降本增效</strong></td><td>设计/运营日常出图效率提升 3-5 倍，减少重复性精修和改图工时</td></tr>
+    <tr><td><strong>品牌管控</strong></td><td>内置先马品牌标准，AI 评审引擎自动筛查不合规内容，减少人工审图</td></tr>
+    <tr><td><strong>场景化零门槛</strong></td><td>针对先马主营品类（大护具等穿戴式护具）定制场景模板，普通运营无需提示词也能一键生成</td></tr>
+    <tr><td><strong>素材沉淀</strong></td><td>历史记录 + 素材库打通，生成结果自动归档，形成可复用团队视觉资产</td></tr>
+    <tr><td><strong>数据安全</strong></td><td>商品图、品牌素材在内部平台流转，明确第三方模型数据传输边界</td></tr>
+    <tr><td><strong>全链路</strong></td><td>素材生成 → 设计排版 → 平台适配 → AI 评审 → 一键发布</td></tr>
+    <tr><td><strong>双模式</strong></td><td>标准模式（场景化一键生成）+ 自助模式（专业自定义），同一页面内切换</td></tr>
+    <tr><td><strong>内容配套</strong></td><td>图片 + 评论 + 文案一站式产出，运营可独立完成图文内容组合</td></tr>
+  </table>
+
+  <h3 id="sec1-3">1.3 目标用户</h3>
+  <table>
+    <tr><th>用户类型</th><th>使用场景</th><th>核心需求</th></tr>
+    <tr><td>普通运营/客服</td><td>日常图片修改、买家秀生成、基础海报</td><td>零门槛、一键生成、场景化</td></tr>
+    <tr><td>专业设计师</td><td>商品主图、详情页、品牌海报</td><td>高阶能力、自定义、批量处理</td></tr>
+    <tr><td>内容运营</td><td>多平台内容发布、标准评审、素材沉淀</td><td>标准管控、AI 评审、数据资产</td></tr>
+  </table>
+
+  <h3 id="sec1-4">1.4 平台当前现状</h3>
+  <ul>
+    <li>已有高频功能入口：一键改字、主体替换、产品微调、批量美颜、AI 买家秀、AI 提示词、AI 多角度、AI 区域重绘</li>
+    <li>已形成基础闭环：素材库、历史记录、结果预览、结果下载、历史继续编辑、单图/整条加入素材库、积分展示、模型切换</li>
+    <li>历史记录已支持我的记录/所有记录、日期筛选、功能筛选、复制提示词、查看详情、继续编辑、整条加入素材库</li>
+    <li>素材库已支持个人/公共素材库、上传素材、类目筛选、标签筛选、来源筛选</li>
+    <li>视频能力已有实验性入口，但稳定性和闭环不完整</li>
+    <li>无限画布 V1.0 开发中，保存草稿和导出功能暂未开放</li>
+    <li>内部测试用户约 600 人，核心用户约 200 人（设计部门 + 运营部门）</li>
+  </ul>
+</div>
+
+<!-- 二、产品架构 -->
+<div class="section" id="sec2">
+  <h2>二、产品架构</h2>
+  <h3 id="sec2-1">2.1 总体架构</h3>
+  <pre>┌─────────────────────────────────────────────────────────┐
+│              一站式 AI 自助设计生成平台                    │
+│                                                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │  基础能力层   │  │  核心功能层   │  │  场景应用层   │  │
+│  │              │  │              │  │              │  │
+│  │ • 模型集成 ✓ │  │ • 图片生成 ✓ │  │ • 商品主图 ✓ │  │
+│  │ • 视频解析 △ │  │ • 视频生成 △ │  │ • 详情页   △ │  │
+│  │ • 平台适配 ✓ │  │ • 文案生成 △ │  │ • 买家秀   ✓ │  │
+│  │ • AI 评审 △ │  │ • AI 评审 △ │  │ • 海报     △ │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+│                                                         │
+│  ✓ = 已有   △ = 下半年新建/完善                          │
+│                                                         │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │           双模式引擎（贯穿全平台）                  │   │
+│  │  标准模式（场景化一键生成）│ 自助模式（专业自定义） │   │
+│  └──────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘</pre>
+
+  <h3 id="sec2-2">2.2 三层架构说明</h3>
+  <table>
+    <tr><th>层级</th><th>模块</th><th>说明</th><th>状态</th></tr>
+    <tr>
+      <td>基础能力层</td><td>模型集成、视频解析、平台适配、AI 评审</td>
+      <td>底层 AI 能力和基础设施</td>
+      <td>模型集成/平台适配<span class="badge badge-done">已有</span>，视频解析/AI评审<span class="badge badge-new">下半年建</span></td>
+    </tr>
+    <tr>
+      <td>核心功能层</td><td>图片生成、视频生成、文案生成、AI 评审</td>
+      <td>核心设计能力</td>
+      <td>图片生成<span class="badge badge-done">已有</span>，其余<span class="badge badge-new">下半年建</span></td>
+    </tr>
+    <tr>
+      <td>场景应用层</td><td>商品主图、详情页、买家秀、海报 banner</td>
+      <td>面向具体场景的封装</td>
+      <td>商品主图/买家秀<span class="badge badge-done">已有</span>，其余<span class="badge badge-new">下半年建</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- 三、核心功能模块 -->
+<div class="section" id="sec3">
+  <h2>三、核心功能模块</h2>
+
+  <h3 id="sec3-1">3.1 模型集成引擎</h3>
+  <p>集成国内主流图片/视频生成模型，统一接入，统一调用。</p>
+  <table>
+    <tr><th>类型</th><th>说明</th></tr>
+    <tr><td>图片生成</td><td>文生图、图生图、参考图生成</td></tr>
+    <tr><td>视频生成</td><td>文生视频、图生视频、视频编辑</td></tr>
+    <tr><td>多模态</td><td>图文理解、视频理解</td></tr>
+  </table>
+  <p><strong>模型调度策略：</strong></p>
+  <ul>
+    <li>多模型智能调度，根据场景选择最优模型</li>
+    <li>模型能力互补，支持模型组合使用</li>
+    <li>模型版本管理，支持升级和回滚</li>
+  </ul>
+  <blockquote>具体模型选型和成本对比，需技术对齐时确认。</blockquote>
+
+  <h3 id="sec3-2">3.2 双模式设计引擎</h3>
+  <p>每个功能模块提供两种模式，满足不同用户需求。</p>
+  <table>
+    <tr><th colspan="2">标准模式（场景化一键生成）</th></tr>
+    <tr><td>场景化封装</td><td>按场景预设完整设计流程</td></tr>
+    <tr><td>零提示词</td><td>用户无需编写提示词，选择场景即可</td></tr>
+    <tr><td>一键生成</td><td>选择场景 → 上传素材 → 一键生成</td></tr>
+    <tr><td>适用人群</td><td>普通运营、客服</td></tr>
+  </table>
+  <br>
+  <table>
+    <tr><th colspan="2">自助模式（专业自定义）</th></tr>
+    <tr><td>参数自定义</td><td>提示词、风格、尺寸、比例等自由调整</td></tr>
+    <tr><td>参考图模式</td><td>上传参考图，AI 参考生成</td></tr>
+    <tr><td>高级控制</td><td>支持高级参数调节</td></tr>
+    <tr><td>适用人群</td><td>专业设计师</td></tr>
+  </table>
+
+  <h3 id="sec3-3">3.3 场景化生图模块（电商套图）</h3>
+  <p>按电商场景打包生成整套图片：主图、场景图、卖点图、细节图、多角度图等，一次生成 3-5 张套图，支持批量生成。</p>
+  <p><strong>标准模式</strong>：选择品类 → 一键生成完整套图<br>
+  <strong>自助模式</strong>：自定义参数 → 灵活调整每张图</p>
+
+  <h3 id="sec3-4">3.4 自助生图 + 提示词模板库</h3>
+  <p>专业设计师自由创作入口，支持完整参数控制（提示词、风格、尺寸、比例、模型选择、参考图角色等）。设计师调好的参数可沉淀为模板，运营和客服直接复用，降低使用门槛。</p>
+
+  <h3 id="sec3-5">3.5 垂直场景模块</h3>
+  <p>按垂直场景开发专项生图功能，每个场景对应一套完整的设计流程。先搭建通用垂直场景框架，再按平台逐个铺开。</p>
+  <table>
+    <tr><th>平台</th><th>说明</th><th>计划</th></tr>
+    <tr><td>买家秀</td><td>模拟真实买家秀图片，场景模板 + 批量生成</td><td><span class="badge badge-p0">9月</span></td></tr>
+    <tr><td>淘宝</td><td>主图/详情页尺寸规范，商品图风格</td><td><span class="badge badge-p0">9月</span>（复用买家秀框架）</td></tr>
+    <tr><td>小红书</td><td>3:4 比例、封面图、种草风格</td><td><span class="badge badge-p0">11月</span></td></tr>
+    <tr><td>天猫</td><td>品牌旗舰店规范，主图/详情页标准</td><td><span class="badge badge-p0">11月</span>（复用框架）</td></tr>
+    <tr><td>抖音</td><td>封面图、短视频封面、带货风</td><td><span class="badge badge-p0">12月</span></td></tr>
+    <tr><td>跨境</td><td>亚马逊/速卖通常用尺寸和风格</td><td><span class="badge badge-p0">12月</span></td></tr>
+    <tr><td>私域</td><td>朋友圈配图、社群海报、公众号封面</td><td><span class="badge badge-p0">12月</span></td></tr>
+  </table>
+
+  <h3 id="sec3-6">3.6 AI 图片评审引擎</h3>
+  <p>AI 根据企业内置标准评审生成的图片，确保输出质量。</p>
+  <p><strong>评审流程：</strong></p>
+  <pre>AI 生成图片 → 多维度评分 → 符合标准？
+                              ├─ 是 → 通过 → 发布/下载
+                              └─ 否 → 重新生成 → 再次评审</pre>
+  <table>
+    <tr><th>维度</th><th>评审内容</th><th>权重</th></tr>
+    <tr><td>图片质量</td><td>清晰度、构图、色彩、光影</td><td>30%</td></tr>
+    <tr><td>品牌一致性</td><td>Logo 使用、色调、风格统一性</td><td>25%</td></tr>
+    <tr><td>平台规范</td><td>尺寸、比例、内容合规性</td><td>25%</td></tr>
+    <tr><td>营销效果</td><td>吸引力、信息传达</td><td>20%</td></tr>
+  </table>
+  <p><strong>企业标准库：</strong>企业可自定义评审标准，支持多品牌/多产品线管理，标准可配置、可迭代。</p>
+
+  <h3 id="sec3-7">3.7 AI 营销文案生成</h3>
+  <p>根据生成的图片自动书写营销文案，文案与图片内容匹配。</p>
+  <table>
+    <tr><th>能力</th><th>说明</th></tr>
+    <tr><td>图片理解</td><td>AI 理解图片内容、风格</td></tr>
+    <tr><td>文案生成</td><td>根据图片自动生成匹配文案</td></tr>
+    <tr><td>多平台适配</td><td>小红书种草风、抖音带货风、天猫促销风</td></tr>
+    <tr><td>二次创作</td><td>支持文案修改、风格切换、多版本生成</td></tr>
+  </table>
+  <br>
+  <table>
+    <tr><th>场景</th><th>文案类型</th><th>平台风格</th></tr>
+    <tr><td>商品主图</td><td>产品卖点文案</td><td>天猫/抖音带货风</td></tr>
+    <tr><td>买家秀</td><td>种草文案</td><td>小红书种草风</td></tr>
+    <tr><td>海报/Banner</td><td>促销文案</td><td>全平台适配</td></tr>
+    <tr><td>社交媒体配图</td><td>互动文案</td><td>小红书/朋友圈风</td></tr>
+  </table>
+
+  <h3 id="sec3-8">3.8 AI 评论生成</h3>
+  <p>基于商品信息、卖点和使用场景，生成多条买家口吻评论，支持数量、语气风格选择和复制使用。与营销文案生成共用底层能力。</p>
+
+  <h3 id="sec3-9">3.9 视频生成与切片</h3>
+  <p><strong>视频生成：</strong>文生视频、图生视频，覆盖产品短视频和种草内容。<br>
+  <strong>视频切片：</strong>上传视频 → 关键帧提取 → 场景识别 → 素材分流（图片/视频片段分类）→ 生成主图、海报素材、GIF 等。</p>
+  <table>
+    <tr><th>场景</th><th>输入</th><th>输出</th></tr>
+    <tr><td>产品视频拆解</td><td>产品宣传视频</td><td>商品主图、卖点图</td></tr>
+    <tr><td>宣传视频拆解</td><td>品牌宣传视频</td><td>海报素材、Banner 素材</td></tr>
+    <tr><td>动态内容生成</td><td>产品视频</td><td>GIF 动图、短视频片段</td></tr>
+  </table>
+
+  <h3 id="sec3-10">3.10 无限画布</h3>
+  <p>专业设计模块，支持画布自由编排、节点连接、多素材组合。设计师可在画布上灵活组合生成结果，进行二次创作。</p>
+
+  <h3 id="sec3-11">3.11 一键发布（待确认）</h3>
+  <p>针对小红书、抖音等平台，实现从生成到发布的全链路。需提前调研各平台 API 开放情况和账号授权可行性。如果接口不支持，降级为"发布包导出"（将图片、标题、正文、标签打包，人工发布）。</p>
+</div>
+
+<!-- 四、下半年月度里程碑 -->
+<div class="section" id="sec4">
+  <h2>四、2026 下半年月度里程碑</h2>
+
+  <h3 id="sec4-0">整体节奏</h3>
+  <div class="timeline">
+    <div class="tl-month"><strong>7月</strong><span>地基<br>无限画布</span></div>
+    <div class="tl-month"><strong>8月</strong><span>套图+评论<br>自助生图<br>素材库</span></div>
+    <div class="tl-month"><strong>9月</strong><span>买家秀+淘宝</span></div>
+    <div class="tl-month"><strong>10月</strong><span>京东<br>视频+视频切片</span></div>
+    <div class="tl-month"><strong>11月</strong><span>小红书+天猫<br>营销文案<br>图片评审(争取)<br>一键发布调研</span></div>
+    <div class="tl-month"><strong>12月</strong><span>抖音+跨境+私域<br>看板+权限+复盘</span></div>
+  </div>
+
+  <!-- 7月 -->
+  <div class="month-card">
+    <h4>7月 — 地基月</h4>
+    <p class="month-tagline">不动新功能，把平台基础设施理顺。</p>
+
+    <p><strong>IA 重组背景</strong>：当前平台功能已基本覆盖，但入口分散、归属模糊，用户路径不够清晰。前期为快速响应需求，功能持续叠加，导致页面布局偏散、UI 也不够统一。现在需要从产品侧牵头，做一次系统性的梳理。不只是体验优化，更直接影响下半年场景化的推进 —— 功能组织不理顺，场景模块就找不到清晰的承载位置。趁现在体量不大，7 月是理顺 IA 的最佳时期，等新功能叠加后再做优化成本会成倍增加。因此 7 月主线是先搭架子：导航体系、布局结构、交互流统一，及日常业务部门的零散需求。</p>
+
+    <table>
+      <tr><th style="width:70px">优先级</th><th>事项</th><th>说明</th></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>IA 重组</td><td>导航/入口统一整理，归拢创作中心</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>测试环境 + 发布流程 + 回滚</td><td>开发不直接上生产</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>积分扣费规则确认</td><td>扣多少、失败退不退</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>核心链路稳定性排查</td><td>改字/替换/微调/买家秀报错率</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>无限画布上线</td><td>当前 V1.0 开发中，7 月完成保存草稿和导出，交付可用版本</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>设计工具真实链路</td><td>补齐或标注"即将上线"</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>基础埋点</td><td>先能看基础数据</td></tr>
+    </table>
+  </div>
+
+  <!-- 8月 -->
+  <div class="month-card">
+    <h4>8月 — 内容生成月</h4>
+    <p class="month-tagline">套图、评论、自助生图同步推进，把内容生产能力拉起来。</p>
+    <table>
+      <tr><th style="width:70px">优先级</th><th>事项</th><th>说明</th></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>电商套图 1.0</td><td>固定结构（主图+场景图+卖点图+细节图+多角度图），1-2 个品类，支持批量</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>AI 评论生成</td><td>基于商品信息生成多条买家口吻评论，支持数量、风格选择，可复制</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>自助生图完善 + 提示词模板库</td><td>专家模式整理，模板沉淀复用</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>历史记录 + 素材库收尾</td><td>字段统一、参数回填、批量管理</td></tr>
+    </table>
+    <blockquote>如果资源只够保 2 项 P0：优先保套图 + 评论，自助生图（已有专家模式可用）缓一缓。</blockquote>
+  </div>
+
+  <!-- 9月 -->
+  <div class="month-card">
+    <h4>9月 — 垂直场景起步</h4>
+    <p class="month-tagline">买家秀作为第一个垂直场景跑通，验证通用框架，淘宝复用。</p>
+    <table>
+      <tr><th style="width:70px">优先级</th><th>事项</th><th>说明</th></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>买家秀垂直框架搭建</td><td>通用框架 + 场景模板 + 批量生成</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>淘宝专属模板</td><td>复用买家秀框架，主图/详情页尺寸规范</td></tr>
+    </table>
+  </div>
+
+  <!-- 10月 -->
+  <div class="month-card">
+    <h4>10月 — 京东+视频</h4>
+    <p class="month-tagline">视频能力集中建设。</p>
+    <table>
+      <tr><th style="width:70px">优先级</th><th>事项</th><th>说明</th></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>视频生成稳定版</td><td>已有试用，优先解决稳定性和准确率</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>视频切片 v1</td><td>关键帧提取 → 素材分流</td></tr>
+    </table>
+   
+  </div>
+
+  <!-- 11月 -->
+  <div class="month-card">
+    <h4>11月 — 垂直场景扩展 + 文案</h4>
+    <p class="month-tagline">小红书、天猫上线，营销文案生成落地。</p>
+    <table>
+      <tr><th style="width:70px">优先级</th><th>事项</th><th>说明</th></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>小红书模块</td><td>3:4 比例、封面图、种草风格</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>天猫专属模板</td><td>复用框架，品牌旗舰店规范</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>营销文案生成</td><td>基于图片自动写标题/正文/卖点，多平台口吻</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>AI 图片评审 v1</td><td>多维度评分 + 品牌标准库初版</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>一键发布调研</td><td>小红书/抖音 API 可行性判断</td></tr>
+    </table>
+    <blockquote>如果资源只够保 3 项 P0：保小红书 + 天猫 + 营销文案，图片评审暂缓。</blockquote>
+  </div>
+
+  <!-- 12月 -->
+  <div class="month-card">
+    <h4>12月 — 垂直场景收尾 + 复盘</h4>
+    <p class="month-tagline">抖音、跨境、私域上线，全年数据复盘。</p>
+    <table>
+      <tr><th style="width:70px">优先级</th><th>事项</th><th>说明</th></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>抖音模块</td><td>封面图、短视频封面、带货风</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>跨境模块</td><td>亚马逊/速卖通常用尺寸和风格</td></tr>
+      <tr><td><span class="badge badge-p0">P0</span></td><td>私域模块</td><td>朋友圈配图、社群海报、公众号封面</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>埋点看板完善</td><td>全年数据可看</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>权限边界收口</td><td>公共素材规则、类目管理</td></tr>
+      <tr><td><span class="badge badge-p1">P1</span></td><td>下半年数据复盘</td><td>2027 方向讨论</td></tr>
+    </table>
+  </div>
+
+  <h3 id="sec4-last">年底平台状态</h3>
+  <p>到 12 月底，平台完成从"单点出图工具"到"标准化设计生产平台"的升级：</p>
+  <ul>
+    <li><strong>覆盖 7 个垂直场景</strong>：买家秀、淘宝、小红书、天猫、抖音、跨境、私域</li>
+    <li><strong>内容生产能力完整</strong>：套图一键生成、评论自动生成、营销文案自动书写</li>
+    <li><strong>视频能力上线</strong>：视频生成稳定可用，视频切片初步落地</li>
+    <li><strong>专业设计闭环</strong>：无限画布上线，设计师可自由编排和二次创作</li>
+    <li><strong>资产沉淀闭环</strong>：历史记录和素材库统一，设计师参数沉淀为模板，运营可独立复用</li>
+    <li><strong>地基稳固</strong>：测试环境、发布流程、积分规则、基础埋点全部到位</li>
+  </ul>
+</div>
+
+<!-- 五、项目风险 -->
+<div class="section" id="sec5">
+  <h2>五、项目风险</h2>
+
+  <h3 id="sec5-1">5.1 项目级风险</h3>
+  <table>
+    <tr><th>风险</th><th>影响</th><th>需要谁参与</th><th>建议应对</th></tr>
+    <tr><td><span class="risk-high">团队资源被分流</span></td><td>下半年计划依赖团队持续投入，如果被其他项目分流，整体交付顺延</td><td>管理层</td><td>会上明确下半年资源投入范围和优先级</td></tr>
+    <tr><td><span class="risk-high">一键发布依赖外部平台</span></td><td>小红书/抖音 API 是否开放、账号授权是否可行、发布结果能否回传、平台审核规则是否影响发布，都不是产品侧能单独决定</td><td>业务 + 研发</td><td>先做可行性调研，再决定是"一键发布"还是"发布包导出"</td></tr>
+    <tr><td><span class="risk-high">外部 AI 模型供应商依赖</span></td><td>核心能力依赖第三方模型，存在模型不可用、成本上涨、供应商策略变化、数据合规等风险</td><td>研发 + 管理层</td><td>确认可用的模型供应商范围、数据安全边界，建立备用模型切换机制</td></tr>
+    <tr><td><span class="risk-mid">AI 评审标准不明确</span></td><td>品牌标准、评分维度、达标口径需要设计团队/管理层共同制定，产品侧无法独立定义</td><td>设计团队 + 管理层</td><td>会前先拉设计对齐初版标准，会上确认</td></tr>
+    <tr><td><span class="risk-high">数据安全与素材合规</span></td><td>商品图、品牌素材、模特图通过第三方模型处理时，需要明确数据传输边界和可用模型范围</td><td>管理层 + 研发</td><td>明确哪些素材可以走外部模型、哪些只能内部处理</td></tr>
+  </table>
+
+  <div class="meeting-notes">
+    <label for="risk-notes">会议沟通记录：</label>
+    <textarea id="risk-notes" placeholder="会后在此记录讨论结论、待办、决策……"></textarea>
+    <div class="note-actions">
+      <button class="btn-save" onclick="saveNotes()">保存</button>
+      <span class="save-hint" id="save-hint"></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- 六、效果衡量体系 -->
+<div class="section" id="sec6">
+  <h2>六、效果衡量体系</h2>
+
+  <h3 id="sec6-1">6.1 为什么建</h3>
+  <p>建指标体系就一个目的：用数据体现出平台和团队的价值。具体落到三个层面——</p>
+  <ul>
+    <li><strong>平台价值</strong>：到底帮业务省了多少时间、提了多少效率</li>
+    <li><strong>AI 战队价值</strong>：我们做的事有没有产生实际效果</li>
+    <li><strong>效率与成本数据</strong>：投入了多少，产出了多少</li>
+  </ul>
+  <p>同时，这套数据也是明年方向的依据——通过数据说明哪些做得好、哪些不行，后续怎么迭代优化。</p>
+
+  <h3 id="sec6-2">6.2 关注哪些指标</h3>
+  <table>
+    <tr><th>维度</th><th>指标</th><th>为什么看这个</th></tr>
+    <tr><td rowspan="2"><strong>使用情况</strong></td><td>目标用户渗透率</td><td>目标用户里实际有多少人在用？没用的卡在哪？</td></tr>
+    <tr><td>周活跃复用率</td><td>用一次就扔还是变成日常工具？</td></tr>
+    <tr><td rowspan="2"><strong>效率提升</strong></td><td>单任务耗时对比</td><td>做一张主图以前多久、现在多久？提效最硬的证据</td></tr>
+    <tr><td>运营自助率</td><td>不靠设计师、运营自己完成出图的比例，直接对应人力节省</td></tr>
+    <tr><td rowspan="2"><strong>AI 质量</strong></td><td>生成采纳率</td><td>AI 出的图用户直接用了还是放弃重来？</td></tr>
+    <tr><td>核心链路成功率</td><td>改字/替换/微调/买家秀，点了多少次、成了多少次</td></tr>
+    <tr><td><strong>成本收益</strong></td><td>人均生成成本</td><td>单次生图消耗积分/费用，趋势往上还是往下</td></tr>
+    <tr><td><strong>资产价值</strong></td><td>素材沉淀量 + 复用率</td><td>生成的东西有没有沉淀成可复用的资产</td></tr>
+  </table>
+
+  <h3 id="sec6-3">6.3 怎么落地</h3>
+  <table>
+    <tr><th>阶段</th><th>时间</th><th>做什么</th><th>产出</th></tr>
+    <tr>
+      <td><strong>埋点基建</strong></td><td>7 月</td>
+      <td>基础埋点上线，核心链路数据可采。同步把每个指标的定义口径定清楚</td>
+      <td>数据可用 + 指标口径文档</td>
+    </tr>
+    <tr>
+      <td><strong>基线建立</strong></td><td>8-9 月</td>
+      <td>攒 2 个月数据，拿到第一版基线，知道"现在是什么水平"</td>
+      <td>基线数据</td>
+    </tr>
+    <tr>
+      <td><strong>持续跟踪</strong></td><td>10-12 月</td>
+      <td>逐月跟踪，发现问题及时调，年底用数据做全年复盘</td>
+      <td>月度数据 + 复盘依据</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 七、核心亮点 -->
+<div class="section" id="sec7">
+  <h2>七、核心亮点</h2>
+  <table>
+    <tr><th>亮点</th><th>说明</th></tr>
+    <tr><td>套图批量生成</td><td>按电商场景一键生成整套餐图，覆盖主图/场景图/卖点图/细节图/多角度图</td></tr>
+    <tr><td>评论 + 文案自动生成</td><td>买家口吻评论 + 多平台营销文案，图文内容一站式产出</td></tr>
+    <tr><td>视频切片</td><td>上传产品视频，自动提取关键帧生成主图和海报素材</td></tr>
+    <tr><td>7 平台垂直覆盖</td><td>买家秀、淘宝、小红书、天猫、抖音、跨境、私域，一套框架全部适配</td></tr>
+    <tr><td>无限画布</td><td>专业设计师自由编排，多素材组合二次创作</td></tr>
+    <tr><td>素材沉淀闭环</td><td>生成结果自动归档，历史可查、参数可复用、模板可共享</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  文档版本：2026-06-28 &nbsp;|&nbsp; 下次更新：周一会后
+</div>
+
+</div>
+
+<button class="record-launcher" id="recordLauncher" type="button">记录</button>
+
+<section class="record-panel" id="recordPanel" aria-label="记录浮窗">
+  <div class="record-head">
+    <div class="record-title">记录</div>
+    <div class="record-tools">
+      <button class="record-tool-btn" id="recordExport" type="button">导出 MD</button>
+      <button class="record-close" id="recordClose" type="button" aria-label="收起记录">×</button>
+    </div>
+  </div>
+  <div class="record-list" id="recordList"></div>
+  <div class="record-compose">
+    <textarea class="record-input" id="recordInput" placeholder="写下需要记录的内容..."></textarea>
+    <div class="record-actions">
+      <div class="record-hint" id="recordHint">内容会保存在当前浏览器本地</div>
+      <button class="record-save" id="recordSave" type="button">保存</button>
+    </div>
+  </div>
+</section>
+
+<script>
+// Scroll spy — highlight active nav item (sections + sub-items)
+(function() {
+  var nav = document.querySelectorAll('.sidebar nav a');
+  // Build list of all targets from nav hrefs
+  var targets = [];
+  nav.forEach(function(a) {
+    var id = a.getAttribute('href').replace('#', '');
+    var el = document.getElementById(id);
+    if (el) targets.push({id: id, el: el});
+  });
+  function onScroll() {
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    var current = '';
+    for (var i = 0; i < targets.length; i++) {
+      if (targets[i].el.offsetTop - 80 <= scrollY) current = targets[i].id;
+    }
+    nav.forEach(function(a) {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', onScroll, {passive: true});
+  onScroll();
+})();
+
+// Meeting notes — save/load via localStorage
+var NOTES_KEY = 'hermes_risk_notes';
+var ta = document.getElementById('risk-notes');
+var hint = document.getElementById('save-hint');
+if (ta) {
+  var saved = localStorage.getItem(NOTES_KEY);
+  if (saved) ta.value = saved;
+  ta.addEventListener('input', function() { hint.className = 'save-hint'; hint.textContent = '有未保存的修改'; });
+}
+function saveNotes() {
+  if (!ta) return;
+  localStorage.setItem(NOTES_KEY, ta.value);
+  hint.className = 'save-hint saved';
+  hint.textContent = '已保存 ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+  setTimeout(function() { hint.textContent = ''; }, 3000);
+}
+
+// Floating records — save/load via localStorage
+(function() {
+  var recordKey = 'xianma_ai_plan_records';
+  var recordLauncher = document.getElementById('recordLauncher');
+  var recordPanel = document.getElementById('recordPanel');
+  var recordClose = document.getElementById('recordClose');
+  var recordInput = document.getElementById('recordInput');
+  var recordSave = document.getElementById('recordSave');
+  var recordList = document.getElementById('recordList');
+  var recordHint = document.getElementById('recordHint');
+  var recordExport = document.getElementById('recordExport');
+
+  function getRecords() {
+    try {
+      return JSON.parse(localStorage.getItem(recordKey)) || [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function setRecords(records) {
+    localStorage.setItem(recordKey, JSON.stringify(records));
+  }
+
+  function formatRecordTime(dateValue) {
+    var date = new Date(dateValue);
+    var pad = function(value) { return String(value).padStart(2, '0'); };
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) +
+      ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+  }
+
+  function escapeHtml(value) {
+    return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function renderRecords() {
+    var records = getRecords();
+    if (!records.length) {
+      recordList.innerHTML = '<div class="record-empty">暂无记录<br>可以在下方输入后保存</div>';
+      return;
+    }
+
+    recordList.innerHTML = records.map(function(record) {
+      return '<article class="record-item">' +
+        '<div class="record-time">' + formatRecordTime(record.createdAt) + '</div>' +
+        '<div class="record-content">' + escapeHtml(record.content) + '</div>' +
+      '</article>';
+    }).join('');
+  }
+
+  function openRecordPanel() {
+    recordPanel.classList.add('open');
+    recordLauncher.style.display = 'none';
+    renderRecords();
+    setTimeout(function() { recordInput.focus(); }, 80);
+  }
+
+  function closeRecordPanel() {
+    recordPanel.classList.remove('open');
+    recordLauncher.style.display = 'inline-flex';
+  }
+
+  function saveRecord() {
+    var content = recordInput.value.trim();
+    if (!content) {
+      recordHint.textContent = '请输入记录内容';
+      recordInput.focus();
+      return;
+    }
+
+    var records = getRecords();
+    records.unshift({
+      id: Date.now().toString(),
+      content: content,
+      createdAt: new Date().toISOString()
+    });
+    setRecords(records);
+    recordInput.value = '';
+    recordHint.textContent = '已保存到当前浏览器本地';
+    renderRecords();
+  }
+
+  function exportRecords() {
+    var records = getRecords();
+    if (!records.length) {
+      recordHint.textContent = '暂无记录可导出';
+      return;
+    }
+
+    var markdown = '# 先马 AI 设计平台记录\n\n' + records.map(function(record) {
+      return '## ' + formatRecordTime(record.createdAt) + '\n\n' + record.content;
+    }).join('\n\n');
+    var blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = '先马AI设计平台记录.md';
+    link.click();
+    URL.revokeObjectURL(url);
+    recordHint.textContent = '已导出 Markdown';
+  }
+
+  recordLauncher.addEventListener('click', openRecordPanel);
+  recordClose.addEventListener('click', closeRecordPanel);
+  recordSave.addEventListener('click', saveRecord);
+  recordExport.addEventListener('click', exportRecords);
+  recordInput.addEventListener('input', function() {
+    recordHint.textContent = '内容会保存在当前浏览器本地';
+  });
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && recordPanel.classList.contains('open')) {
+      closeRecordPanel();
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

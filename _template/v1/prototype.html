@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>【项目名称】原型</title>
+<!--
+  ====================================================================
+  使用说明：
+  1. 把 PROJECT_ID 改成你的项目标识，与 prd.html 保持一致
+  2. 在 .app 区域里写你的原型 HTML 内容
+  3. 标注角标：在任意元素上加 data-prd="key" 即可挂载标注弹窗
+  ====================================================================
+-->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; background: #f3f6fb; }
+
+  /* 标注角标 */
+  .prd-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #2563eb; color: #fff; font-size: 10px; font-weight: 700;
+    cursor: pointer; vertical-align: super; margin-left: 3px;
+    user-select: none; flex-shrink: 0;
+  }
+  .prd-badge:hover { background: #1d4ed8; }
+
+  /* 自定义标注点 */
+  .custom-pin {
+    position: absolute; width: 24px; height: 24px; border-radius: 50%;
+    background: #f59e0b; border: 2px solid #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff; font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+  .custom-pin-layer { position: absolute; inset: 0; pointer-events: none; }
+  .custom-pin-layer .custom-pin { pointer-events: all; }
+
+  /* 标注弹窗 */
+  .prd-popover {
+    display: none; position: fixed; z-index: 200;
+    background: #fff; border-radius: 14px; width: 320px;
+    box-shadow: 0 8px 32px rgba(16,24,40,.14); border: 1px solid #e6e9f0;
+    overflow: hidden;
+  }
+  .prd-popover.show { display: block; }
+  .prd-popover-backdrop { display: none; position: fixed; inset: 0; z-index: 199; }
+  .prd-popover-backdrop.show { display: block; }
+  .pop-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 10px; border-bottom: 1px solid #e6e9f0;
+  }
+  .pop-tag { font-size: 11px; font-weight: 700; color: #2563eb; background: #eef4ff; padding: 2px 8px; border-radius: 5px; }
+  .pop-close {
+    border: none; background: #f3f6fb; color: #5b6678;
+    width: 26px; height: 26px; border-radius: 7px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .pop-body { padding: 12px 16px 16px; }
+  .pop-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .pop-desc { font-size: 13px; color: #5b6678; line-height: 1.65; }
+
+  /* 编辑工具栏 */
+  .anno-toolbar {
+    position: fixed; bottom: 20px; right: 20px; z-index: 300;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .anno-toolbar button {
+    padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 700; background: #2563eb; color: #fff;
+  }
+  .anno-toolbar button:hover { background: #1d4ed8; }
+  #annoSyncStatus { font-size: 12px; color: #5b6678; background: #fff; padding: 7px 12px; border-radius: 8px; border: 1px solid #e6e9f0; }
+
+  /* 主内容区 */
+  .app { position: relative; min-height: 100vh; padding: 32px; }
+</style>
+</head>
+<body>
+
+<!-- 工具栏（编辑模式下可见） -->
+<div class="anno-toolbar">
+  <span id="annoSyncStatus">☁️ 加载中…</span>
+  <button id="annoAddBtn" style="display:none">📍 添加标注</button>
+</div>
+
+<!-- 标注弹窗 -->
+<div class="prd-popover-backdrop" id="prdPopBackdrop"></div>
+<div class="prd-popover" id="prdPopover">
+  <div class="pop-head">
+    <span class="pop-tag" id="popTag">PRD 说明</span>
+    <button class="pop-close" id="popClose">✕</button>
+  </div>
+  <div id="prdPopView">
+    <div class="pop-body">
+      <div class="pop-title" id="popTitle"></div>
+      <div class="pop-desc" id="popBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 原型主内容区 ===== -->
+<div class="app" id="appRoot">
+  <div class="custom-pin-layer" id="customPinLayer"></div>
+
+  <!-- 在这里写你的原型 HTML -->
+  <h1>【项目名称】原型<span class="prd-badge" data-prd="overview" tabindex="0">1</span></h1>
+  <p>在 .app 区域内写你的原型内容。给任意元素加 data-prd="key" 挂载角标说明。</p>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ====================================================================
+  // 只需改这一行：PROJECT_ID = "项目缩写-版本"，与 prd.html 保持一致
+  // ====================================================================
+  const PROJECT_ID = "CHANGE_ME";
+
+  // PRD 角标默认说明（在这里写每个 data-prd 对应的默认标题和内容）
+  const PRD_NOTES_DEFAULT = {
+    "overview": { tag: "功能说明", title: "总览", body: "在这里写对应的 PRD 说明。" },
+    // 继续添加更多 key: { tag, title, body }
+  };
+
+  const EDIT_MODE = new URLSearchParams(window.location.search).get("edit") === "mengdie";
+
+  // ---- Supabase 连接配置 ----
+  const SUPABASE_URL = "https://uqqdfomevnoaqsadhvex.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxcWRmb21ldm5vYXFzYWRodmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNjk0ODksImV4cCI6MjA5NzY0NTQ4OX0.Qqs_Z_rZzCkqIRebE2FMkewKuz9kn_3ErYlcbAcVsz8";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const TABLE = "prd_annotations";
+  const ID_PREFIX = PROJECT_ID + "-";
+
+  const syncStatusEl = document.getElementById("annoSyncStatus");
+  function setSyncStatus(state) {
+    syncStatusEl.classList.remove("error", "syncing");
+    if (state === "syncing") { syncStatusEl.classList.add("syncing"); syncStatusEl.textContent = "☁️ 同步中…"; }
+    else if (state === "error") { syncStatusEl.classList.add("error"); syncStatusEl.textContent = "⚠️ 同步失败"; }
+    else { syncStatusEl.textContent = "☁️ 已连接"; }
+  }
+
+  let annoState = { overrides: {}, custom: [] };
+
+  async function loadAnnotationsFromCloud() {
+    setSyncStatus("syncing");
+    const { data, error } = await supabaseClient.from(TABLE).select("*").like("id", ID_PREFIX + "%");
+    if (error) { console.warn("加载云端标注失败", error); setSyncStatus("error"); return; }
+    annoState.overrides = {}; annoState.custom = [];
+    (data || []).forEach((row) => {
+      if (row.type === "override") {
+        const key = row.id.slice(ID_PREFIX.length);
+        annoState.overrides[key] = { title: row.title, body: row.body };
+      } else if (row.type === "custom") {
+        annoState.custom.push({ id: row.id, xPct: row.x_pct, yPct: row.y_pct, title: row.title, body: row.body });
+      }
+    });
+    setSyncStatus("ok");
+    renderAllCustomPins();
+  }
+
+  async function upsertOverrideToCloud(key, title, body) {
+    setSyncStatus("syncing");
+    const { error } = await supabaseClient.from(TABLE).upsert({
+      id: ID_PREFIX + key, type: "override", title, body, updated_at: new Date().toISOString(),
+    });
+    setSyncStatus(error ? "error" : "ok");
+    return !error;
+  }
+
+  async function deleteOverrideFromCloud(key) {
+    setSyncStatus("syncing");
+    const { error } = await supabaseClient.from(TABLE).delete().eq("id", ID_PREFIX + key).eq("type", "override");
+    setSyncStatus(error ? "error" : "ok");
+    return !error;
+  }
+
+  async function upsertCustomToCloud(item) {
+    setSyncStatus("syncing");
+    const { error } = await supabaseClient.from(TABLE).upsert({
+      id: item.id, type: "custom", title: item.title, body: item.body,
+      x_pct: item.xPct, y_pct: item.yPct, updated_at: new Date().toISOString(),
+    });
+    setSyncStatus(error ? "error" : "ok");
+    return !error;
+  }
+
+  async function deleteCustomFromCloud(id) {
+    setSyncStatus("syncing");
+    const { error } = await supabaseClient.from(TABLE).delete().eq("id", id).eq("type", "custom");
+    setSyncStatus(error ? "error" : "ok");
+    return !error;
+  }
+
+  // ---- 弹窗逻辑 ----
+  const prdPopover = document.getElementById("prdPopover");
+  const prdPopBackdrop = document.getElementById("prdPopBackdrop");
+  const popTitle = document.getElementById("popTitle");
+  const popBody = document.getElementById("popBody");
+  const popTag = document.getElementById("popTag");
+  let currentKey = null;
+
+  function getEffectiveNote(key) {
+    if (!key) return null;
+    if (key.startsWith(ID_PREFIX + "custom-")) {
+      const item = annoState.custom.find((c) => c.id === key);
+      if (!item) return null;
+      return { tag: "自定义标注", title: item.title, body: item.body, isCustom: true };
+    }
+    const base = PRD_NOTES_DEFAULT[key];
+    if (!base) return null;
+    const override = annoState.overrides[key];
+    return { tag: base.tag, title: override?.title || base.title, body: override?.body || base.body, isCustom: false };
+  }
+
+  function renderPopoverView() {
+    const note = getEffectiveNote(currentKey);
+    if (!note) { closePrdPopover(); return; }
+    popTag.textContent = note.tag;
+    popTitle.textContent = note.title;
+    popBody.textContent = note.body;
+  }
+
+  function openPopoverAt(el, key) {
+    currentKey = key;
+    renderPopoverView();
+    prdPopover.classList.add("show");
+    prdPopBackdrop.classList.add("show");
+    const rect = el.getBoundingClientRect();
+    let top = rect.bottom + 8;
+    let left = rect.left;
+    if (left + 320 > window.innerWidth - 12) left = window.innerWidth - 332;
+    if (left < 12) left = 12;
+    if (top + 200 > window.innerHeight - 12) top = rect.top - 208;
+    prdPopover.style.top = top + "px";
+    prdPopover.style.left = left + "px";
+  }
+
+  function closePrdPopover() {
+    prdPopover.classList.remove("show");
+    prdPopBackdrop.classList.remove("show");
+    if (currentKey && currentKey.startsWith(ID_PREFIX + "custom-")) {
+      const item = annoState.custom.find((c) => c.id === currentKey);
+      if (item && item.isNew) {
+        annoState.custom = annoState.custom.filter((c) => c.id !== currentKey);
+        const pinEl = document.querySelector(`.custom-pin[data-prd="${currentKey}"]`);
+        if (pinEl) pinEl.remove();
+      }
+    }
+    currentKey = null;
+  }
+
+  document.getElementById("popClose").addEventListener("click", closePrdPopover);
+  prdPopBackdrop.addEventListener("click", closePrdPopover);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePrdPopover(); });
+
+  document.addEventListener("click", (e) => {
+    const badge = e.target.closest(".prd-badge, .custom-pin");
+    if (badge) {
+      e.stopPropagation();
+      const key = badge.dataset.prd;
+      if (currentKey === key && prdPopover.classList.contains("show")) { closePrdPopover(); return; }
+      openPopoverAt(badge, key);
+    }
+  });
+
+  // ---- 自定义标注点 ----
+  const pinLayer = document.getElementById("customPinLayer");
+  function renderCustomPin(item) {
+    const pin = document.createElement("button");
+    pin.type = "button"; pin.className = "custom-pin";
+    pin.dataset.prd = item.id;
+    pin.style.left = item.xPct + "%"; pin.style.top = item.yPct + "%";
+    pin.textContent = "+";
+    pin.setAttribute("aria-label", item.title || "自定义标注");
+    pinLayer.appendChild(pin);
+  }
+  function renderAllCustomPins() { pinLayer.innerHTML = ""; annoState.custom.forEach(renderCustomPin); }
+
+  const addMarkBtn = document.getElementById("annoAddBtn");
+  if (!EDIT_MODE) addMarkBtn.style.display = "none";
+  let placingMark = false;
+  addMarkBtn.addEventListener("click", () => {
+    placingMark = !placingMark;
+    document.body.classList.toggle("placing-mark", placingMark);
+    addMarkBtn.classList.toggle("active", placingMark);
+    addMarkBtn.textContent = placingMark ? "✕ 退出标注模式" : "📍 添加标注";
+  });
+
+  document.getElementById("appRoot").addEventListener("click", (event) => {
+    if (!EDIT_MODE || !placingMark) return;
+    if (event.target.closest(".prd-badge, .custom-pin, .prd-popover, .anno-toolbar, button, a, input, select, textarea")) return;
+    const appRect = document.getElementById("appRoot").getBoundingClientRect();
+    const xPct = ((event.clientX - appRect.left) / appRect.width) * 100;
+    const yPct = ((event.clientY - appRect.top) / appRect.height) * 100;
+    const id = ID_PREFIX + "custom-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+    const item = { id, xPct: Math.round(xPct * 100) / 100, yPct: Math.round(yPct * 100) / 100, title: "", body: "", isNew: true };
+    annoState.custom.push(item);
+    const pin = renderCustomPin(item);
+    openPopoverAt(pin, id);
+    placingMark = false;
+    document.body.classList.remove("placing-mark");
+    addMarkBtn.classList.remove("active");
+    addMarkBtn.textContent = "📍 添加标注";
+  });
+
+  loadAnnotationsFromCloud();
+</script>
+</body>
+</html>
