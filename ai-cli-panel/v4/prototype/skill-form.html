@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>先马·Centaur 技能参数表单原型</title>
+<style>
+  :root{
+    --bg-page:#e9eaec;
+    --bg-window:#ffffff;
+    --bg-sidebar:#f7f7f8;
+    --text:#1c2128;
+    --text-dim:#6b7280;
+    --text-faint:#9aa0a6;
+    --border:#e5e7eb;
+    --accent:#e0231a;
+    --accent-soft:#fdeceb;
+    --hover:#eceef0;
+    --active:#eef0f2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:var(--bg-page);
+    font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+  }
+  .window{
+    width:1280px;height:820px;background:var(--bg-window);border-radius:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.18);overflow:hidden;display:flex;flex-direction:column;
+  }
+  .titlebar{height:36px;display:flex;align-items:center;padding:0 16px;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .dot{width:12px;height:12px;border-radius:50%;}
+  .dot.red{background:#ff5f57;} .dot.yellow{background:#febc2e;} .dot.green{background:#28c840;}
+  .body{flex:1;display:flex;min-height:0;}
+
+  .sidebar{width:260px;flex-shrink:0;background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px;}
+  .brand{display:flex;align-items:center;gap:8px;padding:4px 8px 16px;}
+  .brand img{width:24px;height:24px;object-fit:contain;}
+  .brand span{font-size:14px;font-weight:600;color:var(--text);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;color:var(--text);cursor:pointer;}
+  .nav-item:hover{background:var(--hover);}
+  .nav-item .icon{width:18px;text-align:center;font-size:15px;}
+  .nav-item .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;line-height:1;padding:3px 6px;border-radius:20px;}
+  .section-label{font-size:12px;color:var(--text-faint);padding:18px 10px 6px;}
+  .project-group{margin-bottom:4px;}
+  .project-title{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;}
+  .project-title:hover{background:var(--hover);}
+  .history-list{padding-left:8px;}
+  .history-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;color:var(--text-dim);cursor:pointer;white-space:nowrap;overflow:hidden;}
+  .history-item:hover{background:var(--hover);}
+  .history-item .title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .history-item .time{flex-shrink:0;font-size:11px;color:var(--text-faint);margin-left:8px;}
+  .expand-link{padding:6px 10px;font-size:12px;color:var(--text-faint);cursor:pointer;}
+  .sidebar-spacer{flex:1;}
+  .account{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;}
+  .account:hover{background:var(--hover);}
+  .account .avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .account .who{display:flex;flex-direction:column;}
+  .account .who .name{font-size:13px;color:var(--text);}
+  .account .who .sub{font-size:11px;color:var(--text-faint);}
+
+  /* 通用交互:toast / 账户菜单 / 设置面板 */
+  .toast-host{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+  .toast{background:rgba(28,33,40,.92);color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);opacity:0;transform:translateY(-8px);transition:opacity .2s ease,transform .2s ease;}
+  .toast.show{opacity:1;transform:translateY(0);}
+  .account-wrap{position:relative;}
+  .acct-menu{position:absolute;left:0;bottom:calc(100% + 6px);width:210px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.16);padding:6px;display:none;z-index:60;}
+  .acct-menu.open{display:block;}
+  .acct-menu .am-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:13.5px;color:var(--text);cursor:pointer;}
+  .acct-menu .am-item:hover{background:var(--hover);}
+  .acct-menu .am-item.danger{color:var(--accent);}
+  .acct-menu .am-item .am-ic{width:18px;text-align:center;}
+  .acct-menu .am-sep{height:1px;background:var(--border);margin:4px 2px;}
+  .st-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:200;}
+  .st-overlay.show{display:flex;}
+  .settings-panel{width:520px;max-width:92vw;background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.28);overflow:hidden;}
+  .sp-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .sp-head h3{margin:0;font-size:16px;font-weight:600;color:var(--text);}
+  .sp-close{cursor:pointer;color:var(--text-faint);font-size:20px;line-height:1;}
+  .sp-close:hover{color:var(--text);}
+  .sp-body{padding:20px 22px;}
+  .sp-row{margin-bottom:20px;}.sp-row:last-child{margin-bottom:0;}
+  .sp-row .sp-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;}
+  .sp-row .sp-hint{font-size:12px;color:var(--text-faint);margin-top:6px;}
+  .sp-seg{display:flex;gap:8px;flex-wrap:wrap;}
+  .sp-pill{padding:7px 14px;border:1px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;color:var(--text-dim);}
+  .sp-pill.selected{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+  .sp-input{width:100%;height:40px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13.5px;color:var(--text);outline:none;}
+  .sp-input:focus{border-color:var(--accent);}
+  .sp-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--border);}
+  .sp-btn{height:38px;padding:0 18px;border-radius:8px;border:none;font-size:13.5px;cursor:pointer;}
+  .sp-btn.ghost{background:var(--hover);color:var(--text-dim);}
+  .sp-btn.primary{background:var(--text);color:#fff;}
+
+  .main{flex:1;overflow-y:auto;padding:36px 48px;}
+  .back-link{font-size:13px;color:var(--text-dim);cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-bottom:18px;}
+  .back-link:hover{color:var(--text);}
+
+  .form-header{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+  .form-header .fh-icon{
+    width:44px;height:44px;border-radius:10px;background:var(--accent-soft);
+    color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+  }
+  .form-header h1{font-size:22px;font-weight:700;color:var(--text);margin:0;}
+  .form-subtitle{font-size:13px;color:var(--text-dim);margin:2px 0 30px 58px;}
+
+  .form-card{max-width:520px;}
+  .field{margin-bottom:22px;}
+  .field-label{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:8px;}
+  .field-hint{font-size:12px;color:var(--text-faint);margin-top:4px;}
+
+  .option-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .option-pill{
+    padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+    font-size:13px;color:var(--text-dim);cursor:pointer;background:#fff;
+  }
+  .option-pill.selected{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;}
+  .option-pill:hover{border-color:var(--accent);}
+
+  .file-picker{
+    display:flex;align-items:center;gap:10px;
+    border:1px dashed var(--border);border-radius:10px;
+    padding:16px;cursor:pointer;background:#fafafa;
+  }
+  .file-picker:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .file-picker .fp-icon{font-size:18px;color:var(--text-dim);}
+  .file-picker .fp-text{font-size:13px;color:var(--text-dim);}
+
+  textarea.text-input{
+    width:100%;border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;font-size:14px;font-family:inherit;color:var(--text);
+    outline:none;resize:vertical;min-height:90px;
+  }
+  textarea.text-input:focus{border-color:var(--accent);}
+  textarea.text-input::placeholder{color:var(--text-faint);}
+
+  .toggle-row{display:flex;align-items:center;gap:10px;}
+  .toggle-row label{font-size:13px;color:var(--text-dim);}
+
+  .form-actions{display:flex;gap:10px;margin-top:8px;}
+  .btn{
+    height:42px;border-radius:9px;border:none;font-size:14px;font-weight:500;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0 22px;
+  }
+  .btn-cancel{background:var(--hover);color:var(--text-dim);}
+  .btn-cancel:hover{background:#e2e4e6;}
+  .btn-submit{background:var(--accent);color:#fff;}
+  .btn-submit:hover{background:#c81e16;}
+
+  .note{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:12px;color:#9aa0a6;}
+/* 历史对话删除按钮 */
+  .history-item{position:relative;}
+  .history-item .hist-del{flex-shrink:0;margin-left:6px;width:18px;height:18px;border-radius:5px;display:none;align-items:center;justify-content:center;font-size:13px;line-height:1;color:var(--text-faint);}
+  .history-item:hover .hist-del{display:flex;}
+  .history-item:hover .time{display:none;}
+  .history-item .hist-del:hover{background:var(--accent-soft);color:var(--accent);}
+</style>
+</head>
+<body>
+
+<div class="window">
+  <div class="titlebar">
+    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+  </div>
+
+  <div class="body">
+    <div class="sidebar">
+      <div class="brand">
+        <img src="icon.png" alt="先马·Centaur">
+        <span>先马·Centaur</span>
+      </div>
+      <div class="nav-item" onclick="location.href='main.html'"><span class="icon">✎</span> 新对话</div>
+      <div class="nav-item" onclick="location.href='search.html'"><span class="icon">🔍</span> 搜索</div>
+      <div class="nav-item" onclick="location.href='scheduled.html'"><span class="icon">🕐</span> 已安排</div>
+      <div class="nav-item" onclick="location.href='skills.html'"><span class="icon">⚡</span> 技能 <span class="badge">4</span></div>
+
+      <div class="section-label">项目</div>
+      <div class="project-group">
+        <div class="project-title">📁 运营部</div>
+        <div class="history-list">
+          <div class="history-item" onclick="location.href='result.html?skill=weekly'"><span class="title">本周周报生成</span><span class="time">刚刚</span></div>
+          <div class="history-item" onclick="location.href='result.html?skill=copywriting'"><span class="title">618活动文案润色</span><span class="time">2小时</span></div>
+          <div class="history-item" onclick="location.href='result.html?skill=meeting'"><span class="title">周会会议记录整理</span><span class="time">昨天</span></div>
+        </div>
+      </div>
+      <div class="project-group">
+        <div class="project-title">📁 设计部</div>
+        <div class="history-list">
+          <div class="history-item" onclick="location.href='result.html?skill=image'"><span class="title">产品图批量去背景</span><span class="time">1周</span></div>
+          <div class="history-item" onclick="location.href='result.html?skill=image'"><span class="title">详情页图片格式转换</span><span class="time">1周</span></div>
+        </div>
+      </div>
+      <div class="expand-link" onclick="toast('已展开:原型仅展示部分历史')">展开显示</div>
+      <div class="sidebar-spacer"></div>
+      <div class="account-wrap">
+        <div class="acct-menu" id="acct-menu">
+          <div class="am-item" onclick="closeAcctMenu();openSettings()"><span class="am-ic">⚙️</span> 设置</div>
+          <div class="am-item" onclick="toast('账户:梦蝶 · 数智中心')"><span class="am-ic">👤</span> 账户信息</div>
+          <div class="am-sep"></div>
+          <div class="am-item danger" onclick="logout()"><span class="am-ic">↩</span> 退出登录</div>
+        </div>
+        <div class="account" onclick="toggleAcctMenu(event)">
+          <div class="avatar">梦</div>
+          <div class="who"><div class="name">梦蝶</div><div class="sub">设置 · 账户</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="back-link" onclick="location.href='skills.html'">‹ 返回技能列表</div>
+
+      <div class="form-header">
+        <div class="fh-icon" id="fh-icon"></div>
+        <h1 id="fh-title"></h1>
+      </div>
+      <div class="form-subtitle" id="fh-subtitle"></div>
+
+      <div class="form-card" id="form-fields"></div>
+    </div>
+  </div>
+</div>
+
+<div class="note">原型 · 仅用于内部方案评审,非最终UI</div>
+
+<div class="toast-host" id="toast-host"></div>
+<div class="st-overlay" id="st-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-panel">
+    <div class="sp-head"><h3>设置</h3><div class="sp-close" onclick="closeSettings()">×</div></div>
+    <div class="sp-body">
+      <div class="sp-row"><div class="sp-label">外观主题</div><div class="sp-seg"><div class="sp-pill selected" onclick="pickPill(this)">浅色</div><div class="sp-pill" onclick="pickPill(this)">深色</div><div class="sp-pill" onclick="pickPill(this)">跟随系统</div></div></div>
+      <div class="sp-row"><div class="sp-label">工作区目录</div><input class="sp-input" value="~/先马Centaur/工作区" readonly><div class="sp-hint">Agent 的读写操作被限定在此目录内(原型展示)</div></div>
+      <div class="sp-row"><div class="sp-label">默认模型</div><div class="sp-seg"><div class="sp-pill selected" onclick="pickPill(this)">标准</div><div class="sp-pill" onclick="pickPill(this)">高性能</div></div></div>
+    </div>
+    <div class="sp-foot"><button class="sp-btn ghost" onclick="closeSettings()">取消</button><button class="sp-btn primary" onclick="closeSettings();toast('设置已保存')">保存</button></div>
+  </div>
+</div>
+
+<script>
+  function toast(msg){
+    const host=document.getElementById('toast-host');
+    const t=document.createElement('div');t.className='toast';t.textContent=msg;
+    host.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));
+    setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),200);},2200);
+  }
+  function toggleAcctMenu(e){e&&e.stopPropagation();document.getElementById('acct-menu').classList.toggle('open');}
+  function closeAcctMenu(){const m=document.getElementById('acct-menu');m&&m.classList.remove('open');}
+  function openSettings(){document.getElementById('st-overlay').classList.add('show');}
+  function closeSettings(){document.getElementById('st-overlay').classList.remove('show');}
+  function pickPill(el){el.parentNode.querySelectorAll('.sp-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');}
+  function logout(){location.href='index.html';}
+document.addEventListener('click',closeAcctMenu);
+
+  /* 历史对话删除:hover 出×,点×删除该条,不触发条目跳转 */
+  function initHistDelete(){
+    document.querySelectorAll('.history-item').forEach(item=>{
+      if(item.querySelector('.hist-del')) return;
+      const del=document.createElement('span');
+      del.className='hist-del';del.textContent='×';del.title='删除这条对话';
+      del.addEventListener('click',e=>{
+        e.stopPropagation();
+        const name=(item.querySelector('.title')||{}).textContent||'该对话';
+        item.remove();
+        if(typeof toast==='function') toast('已删除:'+name);
+      });
+      item.appendChild(del);
+    });
+  }
+  initHistDelete();
+</script>
+
+<script>
+  const SKILLS = {
+    weekly:{
+      icon:'📅', title:'日报 / 周报生成', subtitle:'选定时间范围,自动整理内容并按模板排版输出',
+      fields:`
+        <div class="field">
+          <div class="field-label">时间范围</div>
+          <div class="option-row" data-single>
+            <div class="option-pill selected">今日</div>
+            <div class="option-pill">本周</div>
+            <div class="option-pill">自定义</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">内容来源</div>
+          <div class="file-picker" onclick="toast('原型演示:文件选择暂未接入')">
+            <span class="fp-icon">📎</span>
+            <span class="fp-text">点击选择文件或文件夹,也可以直接在对话框里粘贴文字</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">输出格式</div>
+          <div class="option-row" data-single>
+            <div class="option-pill selected">Word</div>
+            <div class="option-pill">纯文本</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">语气风格</div>
+          <div class="option-row" data-single>
+            <div class="option-pill selected">简洁</div>
+            <div class="option-pill">详细</div>
+          </div>
+        </div>
+      `
+    },
+    image:{
+      icon:'🖼️', title:'P图 / 图片处理', subtitle:'批量去背景、加水印、调整尺寸或转换格式',
+      fields:`
+        <div class="field">
+          <div class="field-label">选择图片</div>
+          <div class="file-picker" onclick="toast('原型演示:文件选择暂未接入')">
+            <span class="fp-icon">🖼️</span>
+            <span class="fp-text">点击选择图片,支持多选</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">处理类型</div>
+          <div class="option-row">
+            <div class="option-pill selected">去背景</div>
+            <div class="option-pill">调整尺寸</div>
+            <div class="option-pill">加水印</div>
+            <div class="option-pill">格式转换</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">输出格式</div>
+          <div class="option-row">
+            <div class="option-pill selected">PNG</div>
+            <div class="option-pill">JPG</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">输出位置</div>
+          <div class="file-picker" onclick="toast('原型演示:文件选择暂未接入')">
+            <span class="fp-icon">📁</span>
+            <span class="fp-text">点击选择保存文件夹</span>
+          </div>
+        </div>
+      `
+    },
+    copywriting:{
+      icon:'✍️', title:'文案润色 / 改写', subtitle:'调整语气、精简或扩写一段文字',
+      fields:`
+        <div class="field">
+          <div class="field-label">输入内容</div>
+          <textarea class="text-input" placeholder="粘贴要润色的文字,也可以点击右下角选择文件"></textarea>
+        </div>
+        <div class="field">
+          <div class="field-label">目标语气</div>
+          <div class="option-row">
+            <div class="option-pill selected">正式</div>
+            <div class="option-pill">口语化</div>
+            <div class="option-pill">精炼</div>
+            <div class="option-pill">生动</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">目标长度</div>
+          <div class="option-row">
+            <div class="option-pill selected">保持原长</div>
+            <div class="option-pill">精简</div>
+            <div class="option-pill">扩写</div>
+          </div>
+        </div>
+      `
+    },
+    meeting:{
+      icon:'📝', title:'会议记录整理', subtitle:'输入文字或转写稿,生成摘要与待办事项清单',
+      fields:`
+        <div class="field">
+          <div class="field-label">输入内容</div>
+          <textarea class="text-input" placeholder="粘贴会议记录文字,也可以点击右下角选择录音或转写文件"></textarea>
+        </div>
+        <div class="field">
+          <div class="field-label">输出重点</div>
+          <div class="option-row">
+            <div class="option-pill selected">摘要</div>
+            <div class="option-pill selected">待办事项清单</div>
+          </div>
+          <div class="field-hint">可多选</div>
+        </div>
+      `
+    },
+    custom:{
+      icon:'💬', title:'自由对话', subtitle:'没有匹配到具体技能,将直接进入自由对话执行',
+      fields:`<div class="field"><div class="field-hint">这条任务将按你在输入框里描述的内容直接执行,不需要额外填写参数。</div></div>`
+    }
+  };
+
+  function getParam(name){
+    const url = new URL(window.location.href);
+    return url.searchParams.get(name);
+  }
+
+  function init(){
+    const skillId = getParam('skill') || 'weekly';
+    const skill = SKILLS[skillId] || SKILLS.weekly;
+
+    document.getElementById('fh-icon').textContent = skill.icon;
+    document.getElementById('fh-title').textContent = skill.title;
+    document.getElementById('fh-subtitle').textContent = skill.subtitle;
+
+    const container = document.getElementById('form-fields');
+    container.innerHTML = skill.fields + `
+      <div class="form-actions">
+        <button type="button" class="btn btn-cancel" onclick="location.href='main.html'">取消</button>
+        <button type="button" class="btn btn-submit" onclick="location.href='result.html?skill=${skillId}'">开始生成</button>
+      </div>
+    `;
+
+    // 选项点击:data-single 行单选(始终保留一个选中),其余多选
+    container.querySelectorAll('.option-pill').forEach(pill=>{
+      pill.addEventListener('click', ()=>{
+        const row = pill.closest('.option-row');
+        if(row && row.hasAttribute('data-single')){
+          row.querySelectorAll('.option-pill').forEach(p=>p.classList.remove('selected'));
+          pill.classList.add('selected');
+        } else {
+          pill.classList.toggle('selected');
+        }
+      });
+    });
+  }
+
+  init();
+</script>
+
+</body>
+</html>
