@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>先马·Centaur 技能列表页原型</title>
+<title>先马·Centaur 技能参数表单原型</title>
 <style>
   :root{
     --bg-page:#e9eaec;
@@ -33,14 +33,12 @@
   .dot.red{background:#ff5f57;} .dot.yellow{background:#febc2e;} .dot.green{background:#28c840;}
   .body{flex:1;display:flex;min-height:0;}
 
-  /* 侧边栏(与主对话页一致) */
   .sidebar{width:260px;flex-shrink:0;background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px;}
   .brand{display:flex;align-items:center;gap:8px;padding:4px 8px 16px;}
   .brand img{width:24px;height:24px;object-fit:contain;}
   .brand span{font-size:14px;font-weight:600;color:var(--text);}
   .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;color:var(--text);cursor:pointer;}
   .nav-item:hover{background:var(--hover);}
-  .nav-item.current{background:var(--active);font-weight:600;}
   .nav-item .icon{width:18px;text-align:center;font-size:15px;}
   .nav-item .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;line-height:1;padding:3px 6px;border-radius:20px;}
   .section-label{font-size:12px;color:var(--text-faint);padding:18px 10px 6px;}
@@ -94,44 +92,60 @@
   .sp-btn.ghost{background:var(--hover);color:var(--text-dim);}
   .sp-btn.primary{background:var(--text);color:#fff;}
 
-  /* 主区域 */
   .main{flex:1;overflow-y:auto;padding:36px 48px;}
-  h1{font-size:28px;font-weight:700;color:var(--text);margin:0 0 6px;}
-  .subtitle{font-size:14px;color:var(--text-dim);margin:0 0 24px;}
+  .back-link{font-size:13px;color:var(--text-dim);cursor:pointer;display:inline-flex;align-items:center;gap:4px;margin-bottom:18px;}
+  .back-link:hover{color:var(--text);}
 
-  .search-box{
-    display:flex;align-items:center;gap:8px;
-    border:1px solid var(--border);border-radius:10px;
-    padding:10px 14px;max-width:480px;margin-bottom:32px;background:#fff;
-  }
-  .search-box input{border:none;outline:none;font-size:14px;flex:1;color:var(--text);}
-  .search-box input::placeholder{color:var(--text-faint);}
-
-  .section-title{font-size:13px;font-weight:600;color:var(--text-faint);letter-spacing:.5px;margin-bottom:14px;}
-
-  .skill-grid{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
-    gap:16px;
-    max-width:920px;
-  }
-  .skill-card{
-    border:1px solid var(--border);border-radius:14px;background:#fff;
-    padding:20px;display:flex;flex-direction:column;gap:12px;
-  }
-  .skill-card .sc-top{display:flex;align-items:flex-start;gap:12px;}
-  .skill-card .sc-icon{
+  .form-header{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+  .form-header .fh-icon{
     width:44px;height:44px;border-radius:10px;background:var(--accent-soft);
     color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
   }
-  .skill-card .sc-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
-  .skill-card .sc-desc{font-size:13px;color:var(--text-dim);line-height:1.5;}
-  .skill-card .sc-use{
-    align-self:flex-start;
-    padding:7px 16px;border-radius:8px;border:1px solid var(--border);
-    font-size:13px;color:var(--text);background:#fff;cursor:pointer;text-decoration:none;
+  .form-header h1{font-size:22px;font-weight:700;color:var(--text);margin:0;}
+  .form-subtitle{font-size:13px;color:var(--text-dim);margin:2px 0 30px 58px;}
+
+  .form-card{max-width:520px;}
+  .field{margin-bottom:22px;}
+  .field-label{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:8px;}
+  .field-hint{font-size:12px;color:var(--text-faint);margin-top:4px;}
+
+  .option-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .option-pill{
+    padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+    font-size:13px;color:var(--text-dim);cursor:pointer;background:#fff;
   }
-  .skill-card .sc-use:hover{background:var(--hover);}
+  .option-pill.selected{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600;}
+  .option-pill:hover{border-color:var(--accent);}
+
+  .file-picker{
+    display:flex;align-items:center;gap:10px;
+    border:1px dashed var(--border);border-radius:10px;
+    padding:16px;cursor:pointer;background:#fafafa;
+  }
+  .file-picker:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .file-picker .fp-icon{font-size:18px;color:var(--text-dim);}
+  .file-picker .fp-text{font-size:13px;color:var(--text-dim);}
+
+  textarea.text-input{
+    width:100%;border:1px solid var(--border);border-radius:10px;
+    padding:12px 14px;font-size:14px;font-family:inherit;color:var(--text);
+    outline:none;resize:vertical;min-height:90px;
+  }
+  textarea.text-input:focus{border-color:var(--accent);}
+  textarea.text-input::placeholder{color:var(--text-faint);}
+
+  .toggle-row{display:flex;align-items:center;gap:10px;}
+  .toggle-row label{font-size:13px;color:var(--text-dim);}
+
+  .form-actions{display:flex;gap:10px;margin-top:8px;}
+  .btn{
+    height:42px;border-radius:9px;border:none;font-size:14px;font-weight:500;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0 22px;
+  }
+  .btn-cancel{background:var(--hover);color:var(--text-dim);}
+  .btn-cancel:hover{background:#e2e4e6;}
+  .btn-submit{background:var(--accent);color:#fff;}
+  .btn-submit:hover{background:#c81e16;}
 
   .note{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:12px;color:#9aa0a6;}
 /* 历史对话删除按钮 */
@@ -158,7 +172,7 @@
       <div class="nav-item" onclick="location.href='main.html'"><span class="icon">✎</span> 新对话</div>
       <div class="nav-item" onclick="location.href='search.html'"><span class="icon">🔍</span> 搜索</div>
       <div class="nav-item" onclick="location.href='prompts.html'"><span class="icon">💡</span> 提示词库</div>
-      <div class="nav-item current"><span class="icon">⚡</span> 技能</div>
+      <div class="nav-item" onclick="location.href='skills.html'"><span class="icon">⚡</span> 技能</div>
       <div class="nav-item" onclick="location.href='scheduled.html'"><span class="icon">🕐</span> 已安排</div>
 
       <div class="section-label">项目</div>
@@ -194,60 +208,15 @@
     </div>
 
     <div class="main">
-      <h1>技能</h1>
-      <p class="subtitle">选一个技能快速开始,或者直接在对话框里描述你的需求</p>
+      <div class="back-link" onclick="location.href='skills.html'">‹ 返回技能列表</div>
 
-      <div class="search-box">
-        <span>🔍</span>
-        <input type="text" placeholder="搜索技能" onkeydown="if(event.key==='Enter')toast('搜索“'+(this.value||'')+'”:原型演示中暂未接入')">
+      <div class="form-header">
+        <div class="fh-icon" id="fh-icon"></div>
+        <h1 id="fh-title"></h1>
       </div>
+      <div class="form-subtitle" id="fh-subtitle"></div>
 
-      <div class="section-title">常用技能</div>
-      <div class="skill-grid">
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">📅</div>
-            <div>
-              <div class="sc-name">日报 / 周报生成</div>
-              <div class="sc-desc">选定时间范围,自动整理内容并按模板排版输出</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=weekly">使用</a>
-        </div>
-
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">🖼️</div>
-            <div>
-              <div class="sc-name">P图 / 图片处理</div>
-              <div class="sc-desc">批量去背景、加水印、调整尺寸或转换格式</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=image">使用</a>
-        </div>
-
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">✍️</div>
-            <div>
-              <div class="sc-name">文案润色 / 改写</div>
-              <div class="sc-desc">调整语气、精简或扩写一段文字</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=copywriting">使用</a>
-        </div>
-
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">📝</div>
-            <div>
-              <div class="sc-name">会议记录整理</div>
-              <div class="sc-desc">输入文字或转写稿,生成摘要与待办事项清单</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=meeting">使用</a>
-        </div>
-      </div>
+      <div class="form-card" id="form-fields"></div>
     </div>
   </div>
 </div>
@@ -298,6 +267,164 @@ document.addEventListener('click',closeAcctMenu);
     });
   }
   initHistDelete();
+</script>
+
+<script>
+  const SKILLS = {
+    weekly:{
+      icon:'📅', title:'日报 / 周报生成', subtitle:'选定时间范围,自动整理内容并按模板排版输出',
+      fields:`
+        <div class="field">
+          <div class="field-label">时间范围</div>
+          <div class="option-row" data-single>
+            <div class="option-pill selected">今日</div>
+            <div class="option-pill">本周</div>
+            <div class="option-pill">自定义</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">内容来源</div>
+          <div class="file-picker" onclick="toast('原型演示:文件选择暂未接入')">
+            <span class="fp-icon">📎</span>
+            <span class="fp-text">点击选择文件或文件夹,也可以直接在对话框里粘贴文字</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">输出格式</div>
+          <div class="option-row" data-single>
+            <div class="option-pill selected">Word</div>
+            <div class="option-pill">纯文本</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">语气风格</div>
+          <div class="option-row" data-single>
+            <div class="option-pill selected">简洁</div>
+            <div class="option-pill">详细</div>
+          </div>
+        </div>
+      `
+    },
+    image:{
+      icon:'🖼️', title:'P图 / 图片处理', subtitle:'批量去背景、加水印、调整尺寸或转换格式',
+      fields:`
+        <div class="field">
+          <div class="field-label">选择图片</div>
+          <div class="file-picker" onclick="toast('原型演示:文件选择暂未接入')">
+            <span class="fp-icon">🖼️</span>
+            <span class="fp-text">点击选择图片,支持多选</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">处理类型</div>
+          <div class="option-row">
+            <div class="option-pill selected">去背景</div>
+            <div class="option-pill">调整尺寸</div>
+            <div class="option-pill">加水印</div>
+            <div class="option-pill">格式转换</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">输出格式</div>
+          <div class="option-row">
+            <div class="option-pill selected">PNG</div>
+            <div class="option-pill">JPG</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">输出位置</div>
+          <div class="file-picker" onclick="toast('原型演示:文件选择暂未接入')">
+            <span class="fp-icon">📁</span>
+            <span class="fp-text">点击选择保存文件夹</span>
+          </div>
+        </div>
+      `
+    },
+    copywriting:{
+      icon:'✍️', title:'文案润色 / 改写', subtitle:'调整语气、精简或扩写一段文字',
+      fields:`
+        <div class="field">
+          <div class="field-label">输入内容</div>
+          <textarea class="text-input" placeholder="粘贴要润色的文字,也可以点击右下角选择文件"></textarea>
+        </div>
+        <div class="field">
+          <div class="field-label">目标语气</div>
+          <div class="option-row">
+            <div class="option-pill selected">正式</div>
+            <div class="option-pill">口语化</div>
+            <div class="option-pill">精炼</div>
+            <div class="option-pill">生动</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">目标长度</div>
+          <div class="option-row">
+            <div class="option-pill selected">保持原长</div>
+            <div class="option-pill">精简</div>
+            <div class="option-pill">扩写</div>
+          </div>
+        </div>
+      `
+    },
+    meeting:{
+      icon:'📝', title:'会议记录整理', subtitle:'输入文字或转写稿,生成摘要与待办事项清单',
+      fields:`
+        <div class="field">
+          <div class="field-label">输入内容</div>
+          <textarea class="text-input" placeholder="粘贴会议记录文字,也可以点击右下角选择录音或转写文件"></textarea>
+        </div>
+        <div class="field">
+          <div class="field-label">输出重点</div>
+          <div class="option-row">
+            <div class="option-pill selected">摘要</div>
+            <div class="option-pill selected">待办事项清单</div>
+          </div>
+          <div class="field-hint">可多选</div>
+        </div>
+      `
+    },
+    custom:{
+      icon:'💬', title:'自由对话', subtitle:'没有匹配到具体技能,将直接进入自由对话执行',
+      fields:`<div class="field"><div class="field-hint">这条任务将按你在输入框里描述的内容直接执行,不需要额外填写参数。</div></div>`
+    }
+  };
+
+  function getParam(name){
+    const url = new URL(window.location.href);
+    return url.searchParams.get(name);
+  }
+
+  function init(){
+    const skillId = getParam('skill') || 'weekly';
+    const skill = SKILLS[skillId] || SKILLS.weekly;
+
+    document.getElementById('fh-icon').textContent = skill.icon;
+    document.getElementById('fh-title').textContent = skill.title;
+    document.getElementById('fh-subtitle').textContent = skill.subtitle;
+
+    const container = document.getElementById('form-fields');
+    container.innerHTML = skill.fields + `
+      <div class="form-actions">
+        <button type="button" class="btn btn-cancel" onclick="location.href='main.html'">取消</button>
+        <button type="button" class="btn btn-submit" onclick="location.href='result.html?skill=${skillId}'">开始生成</button>
+      </div>
+    `;
+
+    // 选项点击:data-single 行单选(始终保留一个选中),其余多选
+    container.querySelectorAll('.option-pill').forEach(pill=>{
+      pill.addEventListener('click', ()=>{
+        const row = pill.closest('.option-row');
+        if(row && row.hasAttribute('data-single')){
+          row.querySelectorAll('.option-pill').forEach(p=>p.classList.remove('selected'));
+          pill.classList.add('selected');
+        } else {
+          pill.classList.toggle('selected');
+        }
+      });
+    });
+  }
+
+  init();
 </script>
 
 </body>

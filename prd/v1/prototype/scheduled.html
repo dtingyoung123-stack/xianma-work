@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>先马·Centaur 技能列表页原型</title>
+<title>先马·Centaur 已安排任务页原型</title>
 <style>
   :root{
     --bg-page:#e9eaec;
@@ -17,6 +17,8 @@
     --accent-soft:#fdeceb;
     --hover:#eceef0;
     --active:#eef0f2;
+    --good:#1a7f4b;
+    --good-soft:#e8f7ef;
   }
   *{box-sizing:border-box;}
   body{
@@ -94,44 +96,39 @@
   .sp-btn.ghost{background:var(--hover);color:var(--text-dim);}
   .sp-btn.primary{background:var(--text);color:#fff;}
 
-  /* 主区域 */
+  /* 主区域:已安排任务 */
   .main{flex:1;overflow-y:auto;padding:36px 48px;}
+  .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;}
   h1{font-size:28px;font-weight:700;color:var(--text);margin:0 0 6px;}
-  .subtitle{font-size:14px;color:var(--text-dim);margin:0 0 24px;}
-
-  .search-box{
-    display:flex;align-items:center;gap:8px;
-    border:1px solid var(--border);border-radius:10px;
-    padding:10px 14px;max-width:480px;margin-bottom:32px;background:#fff;
+  .subtitle{font-size:14px;color:var(--text-dim);margin:0;}
+  .sched-list{display:flex;flex-direction:column;gap:12px;max-width:860px;}
+  .sched-card{
+    display:flex;align-items:center;gap:16px;
+    border:1px solid var(--border);border-radius:14px;background:#fff;padding:18px 20px;
   }
-  .search-box input{border:none;outline:none;font-size:14px;flex:1;color:var(--text);}
-  .search-box input::placeholder{color:var(--text-faint);}
-
-  .section-title{font-size:13px;font-weight:600;color:var(--text-faint);letter-spacing:.5px;margin-bottom:14px;}
-
-  .skill-grid{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
-    gap:16px;
-    max-width:920px;
-  }
-  .skill-card{
-    border:1px solid var(--border);border-radius:14px;background:#fff;
-    padding:20px;display:flex;flex-direction:column;gap:12px;
-  }
-  .skill-card .sc-top{display:flex;align-items:flex-start;gap:12px;}
-  .skill-card .sc-icon{
+  .sched-card .sc-icon{
     width:44px;height:44px;border-radius:10px;background:var(--accent-soft);
     color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
   }
-  .skill-card .sc-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
-  .skill-card .sc-desc{font-size:13px;color:var(--text-dim);line-height:1.5;}
-  .skill-card .sc-use{
-    align-self:flex-start;
-    padding:7px 16px;border-radius:8px;border:1px solid var(--border);
-    font-size:13px;color:var(--text);background:#fff;cursor:pointer;text-decoration:none;
-  }
-  .skill-card .sc-use:hover{background:var(--hover);}
+  .sched-card .sc-main{flex:1;min-width:0;}
+  .sched-card .sc-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+  .sched-card .sc-meta{font-size:13px;color:var(--text-dim);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .sched-card .sc-cron{background:var(--hover);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--text-dim);}
+  .sched-card .sc-next{font-size:12px;color:var(--text-faint);}
+  .badge-on{background:var(--good-soft);color:var(--good);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;}
+  .badge-off{background:var(--hover);color:var(--text-faint);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;}
+  /* 开关 */
+  .switch{position:relative;width:40px;height:22px;flex-shrink:0;cursor:pointer;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider{position:absolute;inset:0;background:#cfd2d6;border-radius:22px;transition:.2s;}
+  .slider::before{content:"";position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .switch input:checked + .slider{background:var(--good);}
+  .switch input:checked + .slider::before{transform:translateX(18px);}
+  .row-actions{display:flex;align-items:center;gap:14px;flex-shrink:0;}
+  .link-btn{font-size:12.5px;color:var(--text-dim);cursor:pointer;}
+  .link-btn:hover{color:var(--accent);text-decoration:underline;}
+
+  .empty{border:1px dashed var(--border);border-radius:14px;padding:48px;text-align:center;color:var(--text-faint);font-size:13.5px;max-width:860px;}
 
   .note{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:12px;color:#9aa0a6;}
 /* 历史对话删除按钮 */
@@ -158,8 +155,8 @@
       <div class="nav-item" onclick="location.href='main.html'"><span class="icon">✎</span> 新对话</div>
       <div class="nav-item" onclick="location.href='search.html'"><span class="icon">🔍</span> 搜索</div>
       <div class="nav-item" onclick="location.href='prompts.html'"><span class="icon">💡</span> 提示词库</div>
-      <div class="nav-item current"><span class="icon">⚡</span> 技能</div>
-      <div class="nav-item" onclick="location.href='scheduled.html'"><span class="icon">🕐</span> 已安排</div>
+      <div class="nav-item" onclick="location.href='skills.html'"><span class="icon">⚡</span> 技能</div>
+      <div class="nav-item current"><span class="icon">🕐</span> 已安排</div>
 
       <div class="section-label">项目</div>
       <div class="project-group">
@@ -194,60 +191,14 @@
     </div>
 
     <div class="main">
-      <h1>技能</h1>
-      <p class="subtitle">选一个技能快速开始,或者直接在对话框里描述你的需求</p>
-
-      <div class="search-box">
-        <span>🔍</span>
-        <input type="text" placeholder="搜索技能" onkeydown="if(event.key==='Enter')toast('搜索“'+(this.value||'')+'”:原型演示中暂未接入')">
-      </div>
-
-      <div class="section-title">常用技能</div>
-      <div class="skill-grid">
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">📅</div>
-            <div>
-              <div class="sc-name">日报 / 周报生成</div>
-              <div class="sc-desc">选定时间范围,自动整理内容并按模板排版输出</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=weekly">使用</a>
-        </div>
-
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">🖼️</div>
-            <div>
-              <div class="sc-name">P图 / 图片处理</div>
-              <div class="sc-desc">批量去背景、加水印、调整尺寸或转换格式</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=image">使用</a>
-        </div>
-
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">✍️</div>
-            <div>
-              <div class="sc-name">文案润色 / 改写</div>
-              <div class="sc-desc">调整语气、精简或扩写一段文字</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=copywriting">使用</a>
-        </div>
-
-        <div class="skill-card">
-          <div class="sc-top">
-            <div class="sc-icon">📝</div>
-            <div>
-              <div class="sc-name">会议记录整理</div>
-              <div class="sc-desc">输入文字或转写稿,生成摘要与待办事项清单</div>
-            </div>
-          </div>
-          <a class="sc-use" href="skill-form.html?skill=meeting">使用</a>
+      <div class="page-head">
+        <div>
+          <h1>已安排</h1>
+          <p class="subtitle">让技能按固定时间或触发条件自动执行,无需每次手动发起</p>
         </div>
       </div>
+
+      <div class="sched-list" id="sched-list"></div>
     </div>
   </div>
 </div>
@@ -264,6 +215,58 @@
       <div class="sp-row"><div class="sp-label">默认模型</div><div class="sp-seg"><div class="sp-pill selected" onclick="pickPill(this)">标准</div><div class="sp-pill" onclick="pickPill(this)">高性能</div></div></div>
     </div>
     <div class="sp-foot"><button class="sp-btn ghost" onclick="closeSettings()">取消</button><button class="sp-btn primary" onclick="closeSettings();toast('设置已保存')">保存</button></div>
+  </div>
+</div>
+
+<!-- 编辑定时任务弹窗 -->
+<div class="st-overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="settings-panel">
+    <div class="sp-head"><h3>编辑定时任务</h3><div class="sp-close" onclick="closeEdit()">×</div></div>
+    <div class="sp-body">
+      <div class="sp-row">
+        <div class="sp-label">任务名称</div>
+        <input class="sp-input" id="edit-name" placeholder="给这个定时任务起个名字">
+      </div>
+      <div class="sp-row">
+        <div class="sp-label">执行频率</div>
+        <div class="sp-seg" id="edit-freq">
+          <div class="sp-pill" data-freq="每天" onclick="pickFreq(this)">每天</div>
+          <div class="sp-pill" data-freq="每周" onclick="pickFreq(this)">每周</div>
+          <div class="sp-pill" data-freq="每月" onclick="pickFreq(this)">每月</div>
+        </div>
+      </div>
+      <div class="sp-row" id="edit-weekday-row">
+        <div class="sp-label">星期几</div>
+        <div class="sp-seg" id="edit-weekday">
+          <div class="sp-pill" data-day="一" onclick="pickPill(this)">周一</div>
+          <div class="sp-pill" data-day="二" onclick="pickPill(this)">周二</div>
+          <div class="sp-pill" data-day="三" onclick="pickPill(this)">周三</div>
+          <div class="sp-pill" data-day="四" onclick="pickPill(this)">周四</div>
+          <div class="sp-pill" data-day="五" onclick="pickPill(this)">周五</div>
+          <div class="sp-pill" data-day="六" onclick="pickPill(this)">周六</div>
+          <div class="sp-pill" data-day="日" onclick="pickPill(this)">周日</div>
+        </div>
+      </div>
+      <div class="sp-row" id="edit-monthday-row">
+        <div class="sp-label">每月几号</div>
+        <input class="sp-input" id="edit-monthday" type="number" min="1" max="31" value="1" style="max-width:120px;">
+      </div>
+      <div class="sp-row">
+        <div class="sp-label">执行时间</div>
+        <input class="sp-input" id="edit-time" type="time" value="09:00" style="max-width:160px;">
+      </div>
+      <div class="sp-row">
+        <div class="sp-label">状态</div>
+        <div class="sp-seg" id="edit-state">
+          <div class="sp-pill" data-on="1" onclick="pickPill(this)">启用</div>
+          <div class="sp-pill" data-on="0" onclick="pickPill(this)">暂停</div>
+        </div>
+      </div>
+    </div>
+    <div class="sp-foot">
+      <button class="sp-btn ghost" onclick="closeEdit()">取消</button>
+      <button class="sp-btn primary" onclick="saveEdit()">保存</button>
+    </div>
   </div>
 </div>
 
@@ -298,6 +301,107 @@ document.addEventListener('click',closeAcctMenu);
     });
   }
   initHistDelete();
+
+  /* ---- 已安排任务数据(结构化,便于编辑) ---- */
+  const TASKS=[
+    {icon:'📅',name:'每周上周周报自动生成',freq:'每周',weekday:'一',monthday:1,time:'09:00',on:true,url:'result.html?skill=weekly'},
+    {icon:'📝',name:'周会纪要自动整理',freq:'每周',weekday:'五',monthday:1,time:'17:30',on:true,url:'result.html?skill=meeting'},
+    {icon:'🖼️',name:'新品图批量去背景',freq:'每天',weekday:'一',monthday:1,time:'20:00',on:false,url:'result.html?skill=image'},
+    {icon:'✍️',name:'活动文案定时润色校对',freq:'每月',weekday:'一',monthday:1,time:'10:00',on:false,url:'result.html?skill=copywriting'}
+  ];
+
+  /* 根据结构化字段生成 cron 文案与下次运行文案 */
+  function cronText(t){
+    if(t.freq==='每天') return `每天 ${t.time}`;
+    if(t.freq==='每周') return `每周${t.weekday} ${t.time}`;
+    return `每月 ${t.monthday} 日 ${t.time}`;
+  }
+  function nextText(t){
+    if(t.freq==='每天') return `下次运行:今天 ${t.time}`;
+    if(t.freq==='每周') return `下次运行:周${t.weekday} ${t.time}`;
+    return `下次运行:${t.monthday}日 ${t.time}`;
+  }
+
+  function render(){
+    const box=document.getElementById('sched-list');
+    if(!TASKS.length){box.innerHTML='<div class="empty">还没有安排任何定时任务</div>';return;}
+    box.innerHTML=TASKS.map((t,i)=>`
+      <div class="sched-card">
+        <div class="sc-icon">${t.icon}</div>
+        <div class="sc-main" onclick="location.href='${t.url}'" style="cursor:pointer;">
+          <div class="sc-name">${t.name}</div>
+          <div class="sc-meta">
+            <span class="sc-cron">🕐 ${cronText(t)}</span>
+            <span class="${t.on?'badge-on':'badge-off'}">${t.on?'运行中':'已暂停'}</span>
+            <span class="sc-next">${t.on?nextText(t):'已暂停,不会自动运行'}</span>
+          </div>
+        </div>
+        <div class="row-actions">
+          <span class="link-btn" onclick="runNow(${i})">立即运行</span>
+          <span class="link-btn" onclick="openEdit(${i})">编辑</span>
+          <label class="switch"><input type="checkbox" ${t.on?'checked':''} onchange="toggleTask(${i},this.checked)"><span class="slider"></span></label>
+        </div>
+      </div>`).join('');
+  }
+  function toggleTask(i,on){TASKS[i].on=on;render();toast(on?`已启用:${TASKS[i].name}`:`已暂停:${TASKS[i].name}`);}
+  function runNow(i){location.href=TASKS[i].url;}
+
+  /* ---- 编辑定时任务 ---- */
+  let editIndex=-1;
+  function openEdit(i){
+    editIndex=i;
+    const t=TASKS[i];
+    document.getElementById('edit-name').value=t.name;
+    // 频率
+    document.querySelectorAll('#edit-freq .sp-pill').forEach(p=>{
+      p.classList.toggle('selected',p.getAttribute('data-freq')===t.freq);
+    });
+    applyFreqRows(t.freq);
+    // 星期
+    document.querySelectorAll('#edit-weekday .sp-pill').forEach(p=>{
+      p.classList.toggle('selected',p.getAttribute('data-day')===t.weekday);
+    });
+    // 每月几号
+    document.getElementById('edit-monthday').value=t.monthday;
+    // 时间
+    document.getElementById('edit-time').value=t.time;
+    // 状态
+    document.querySelectorAll('#edit-state .sp-pill').forEach(p=>{
+      p.classList.toggle('selected',p.getAttribute('data-on')===(t.on?'1':'0'));
+    });
+    document.getElementById('edit-overlay').classList.add('show');
+  }
+  function closeEdit(){document.getElementById('edit-overlay').classList.remove('show');editIndex=-1;}
+  /* 频率切换时,显示对应的星期/号选择行 */
+  function applyFreqRows(freq){
+    document.getElementById('edit-weekday-row').style.display=(freq==='每周')?'':'none';
+    document.getElementById('edit-monthday-row').style.display=(freq==='每月')?'':'none';
+  }
+  function pickFreq(el){
+    el.parentNode.querySelectorAll('.sp-pill').forEach(p=>p.classList.remove('selected'));
+    el.classList.add('selected');
+    applyFreqRows(el.getAttribute('data-freq'));
+  }
+  function saveEdit(){
+    if(editIndex<0) return;
+    const t=TASKS[editIndex];
+    const name=document.getElementById('edit-name').value.trim();
+    if(!name){toast('请填写任务名称');return;}
+    const freqEl=document.querySelector('#edit-freq .sp-pill.selected');
+    const dayEl=document.querySelector('#edit-weekday .sp-pill.selected');
+    const stateEl=document.querySelector('#edit-state .sp-pill.selected');
+    t.name=name;
+    t.freq=freqEl?freqEl.getAttribute('data-freq'):t.freq;
+    if(t.freq==='每周'&&dayEl) t.weekday=dayEl.getAttribute('data-day');
+    if(t.freq==='每月') t.monthday=parseInt(document.getElementById('edit-monthday').value)||1;
+    t.time=document.getElementById('edit-time').value||t.time;
+    t.on=stateEl?stateEl.getAttribute('data-on')==='1':t.on;
+    render();
+    closeEdit();
+    toast('已保存:'+t.name);
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEdit();});
+  render();
 </script>
 
 </body>
