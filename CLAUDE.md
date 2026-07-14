@@ -189,6 +189,44 @@ npx vercel --prod --scope dfffovos-projects
 
 **梦蝶提供文件时**：直接给内容 HTML，告知类型（原型+PRD / 业务沟通 / 规划）和是否需要角标/待确认协作功能，AI 据此决定选哪个模板、是否补入 Supabase 逻辑。
 
+## PRD 制作规范（重要，以后在 work 做 PRD 都要遵循）
+
+> 这套规范针对「用 Markdown 写正文 + 网页渲染 + 顶部切换原型」这种 PRD 形态（首个落地案例：`prd/v1/` 先马·Centaur）。它和上面 `_template/` 的「prd.html + prototype.html 双 HTML 文件」是两条并行路线——**当 PRD 正文较长、需要用 skill 系统化撰写时，走这套 Markdown 方案；简单原型评审仍可用 `_template/`。**
+
+### 1. PRD 正文必须用 prd-writer skill 撰写
+
+- skill 路径：`/Users/dengting/Documents/AI/AI-PM-Skills/纯PRD/prd-writer-master/SKILL.md`
+- 做 PRD 前先读该 skill，按它的完整模板结构写，不能只套壳、内容缺斤少两
+- 必须覆盖的章节：产品概述 / 用户画像与场景 / 核心用户动线（Mermaid 流程图，含异常分支）/ 功能清单（树状+优先级 🔴🟡⚪）/ 关键页面布局（ASCII 线框图）/ 功能详细描述（每个核心功能含交互流程+接口+异常处理表+验收标准）/ 数据结构 / 技术方案 / 非功能性需求 / 风险与应对 / 里程碑与验收 / 后续规划
+- 正文单独存为 `PRD.md`，不要内嵌进 HTML
+
+### 2. 页面结构（`prd/vN/`）
+
+```
+prd/vN/
+├── index.html      ← 主入口：顶部 Tab 切换（PRD 文档 ↔ 交互原型）+ 左侧目录导航 + 导出按钮
+├── PRD.md          ← PRD 正文（Markdown，由 prd-writer skill 产出）
+└── prototype/      ← 交互原型（整套自包含 HTML，入口 main.html 或 index.html）
+```
+
+- `index.html` 用 `marked.js`（CDN）渲染 `PRD.md`，通过 `fetch('PRD.md')` 加载
+  - ⚠️ 本地 `file://` 打开会 CORS 报错，必须起本地服务器验证：`cd prd/vN && python3 -m http.server 8899`
+  - 部署到 Vercel 后 `fetch` 相对路径正常，无 CORS 问题
+- 顶部 Tab：「PRD 文档」+「交互原型」（原型用 iframe 嵌入，原型模式下 iframe 铺满、去掉外围灰底/圆角/阴影，靠 `body.proto-mode` 类控制）
+- 左侧目录导航：仅 PRD 模式显示，点击平滑滚动到章节锚点，当前项高亮
+
+### 3. 固定规则（每次都要有）
+
+- **布局**：整体内容宽度 `width:80%; margin:0 auto`（左右各留 10% 空白），banner/changelog/主体都对齐这个宽度
+- **「⬇ 导出 MD」按钮**：浮在 PRD 内容区右上角（`position:absolute` 定位在 `.prd-container` 内），点击 fetch `PRD.md` → 生成 Blob → 触发下载（文件名如 `产品名-PRD-版本.md`）。注意：markdown 渲染只更新内部 `#prd-body` 子容器，避免覆盖掉按钮
+- **顶部 Banner**：紫色渐变（`linear-gradient(135deg,#667eea,#764ba2)`），含产品名+版本+编写人+日期
+- **状态标注**：PRD 头部标注状态（待开发/开发中/已上线）
+
+### 4. 部署与首页卡片
+
+- 部署方式同其他项目（`cd work && npx vercel --prod --scope dfffovos-projects`）
+- 首页 `work/index.html` 加卡片，类型标签用 `🔧 原型+PRD`，指向 `./prd/vN/`
+
 ## 技术信息
 
 - 托管：Vercel（项目名：`work`，团队：`dfffovos-projects`）

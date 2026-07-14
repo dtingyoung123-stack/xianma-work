@@ -9,16 +9,17 @@
 :root{--primary:#667eea;--text:#1f2937;--text-dim:#6b7280;--bg:#f9fafb;--border:#e5e7eb;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--bg);}
-.top-banner{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:20px 40px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.banner-content{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.top-banner{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:20px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.banner-content{width:80%;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
 .banner-left h1{font-size:24px;font-weight:600;margin-bottom:4px;}
 .banner-left .meta{font-size:13px;opacity:0.9;}
 .banner-right{display:flex;gap:12px;}
 .tab-btn{padding:8px 20px;border-radius:6px;font-size:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;transition:all .2s;}
 .tab-btn:hover{background:rgba(255,255,255,0.2);}
 .tab-btn.active{background:#fff;color:#667eea;border:none;font-weight:600;}
-.changelog-bar{background:#fff3cd;border-bottom:1px solid #ffc107;padding:10px 40px;font-size:13px;color:#856404;}
-.main-container{max-width:1400px;margin:0 auto;padding:24px 40px;display:flex;gap:24px;}
+.changelog-bar{background:#fff3cd;border-bottom:1px solid #ffc107;padding:10px 0;font-size:13px;color:#856404;}
+.changelog-inner{width:80%;margin:0 auto;}
+.main-container{width:80%;margin:0 auto;padding:24px 0;display:flex;gap:24px;}
 .sidebar{width:240px;flex-shrink:0;position:sticky;top:100px;height:fit-content;background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);max-height:calc(100vh - 140px);overflow-y:auto;}
 .sidebar-title{font-size:14px;font-weight:600;color:var(--text-dim);margin-bottom:12px;}
 .nav-item{padding:8px 12px;border-radius:6px;font-size:14px;color:var(--text);cursor:pointer;transition:all .2s;margin-bottom:4px;}
@@ -48,6 +49,10 @@ iframe{width:100%;height:calc(100vh - 140px);border:none;background:#fff;border-
 .prd-container blockquote{border-left:4px solid var(--primary);padding:8px 16px;margin:16px 0;color:var(--text-dim);background:var(--bg);border-radius:0 6px 6px 0;}
 .prd-container hr{border:none;border-top:1px solid var(--border);margin:32px 0;}
 .hidden{display:none;}
+/* 导出 MD 按钮 */
+.prd-container{position:relative;}
+.export-btn{position:absolute;top:32px;right:40px;z-index:10;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-size:14px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text-dim);transition:all .2s;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+.export-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
 /* 原型模式:iframe 铺满,去掉外围灰底/padding/圆角 */
 body.proto-mode .main-container{padding:0;max-width:100%;}
 body.proto-mode .content-wrapper{margin:0;}
@@ -70,7 +75,8 @@ body.proto-mode iframe{height:calc(100vh - 105px);border-radius:0;box-shadow:non
 </div>
 
 <div class="changelog-bar">
-  ● <strong>2026-07-14</strong> 补充完整版 PRD · 增加 Mermaid 流程图、ASCII 线框图、详细交互说明、异常处理、验收标准
+  <div class="changelog-inner">● <strong>2026-07-14</strong> 补充完整版 PRD · 增加 Mermaid 流程图、ASCII 线框图、详细交互说明、异常处理、验收标准
+  </div>
 </div>
 
 <div class="main-container">
@@ -100,7 +106,8 @@ body.proto-mode iframe{height:calc(100vh - 105px);border-radius:0;box-shadow:non
   <div class="content-wrapper">
     <iframe id="content-prototype" class="hidden" src="prototype/main.html"></iframe>
     <div id="content-prd" class="prd-container">
-      <p style="text-align:center;color:#9ca3af;padding:40px;">加载中...</p>
+      <div class="export-btn" onclick="exportMD()">⬇ 导出 MD</div>
+      <div id="prd-body"><p style="text-align:center;color:#9ca3af;padding:40px;">加载中...</p></div>
     </div>
   </div>
 </div>
@@ -129,6 +136,24 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(hash==='prototype'){switchTab('prototype');}
   else{switchTab('prd');loadPRD();}
 });
+async function exportMD(){
+  try{
+    const resp=await fetch('PRD.md');
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const md=await resp.text();
+    const blob=new Blob([md],{type:'text/markdown;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='先马Centaur-PRD-V1.0.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }catch(e){
+    alert('导出失败：'+e.message);
+  }
+}
 async function loadPRD(){
   try{
     const resp=await fetch('PRD.md');
@@ -155,9 +180,9 @@ async function loadPRD(){
       .replace(/<h2>9\. /,'<h2 id="section-9">9. ')
       .replace(/<h2>10\. /,'<h2 id="section-10">10. ')
       .replace(/<h2>11\. /,'<h2 id="section-11">11. ');
-    document.getElementById('content-prd').innerHTML=html;
+    document.getElementById('prd-body').innerHTML=html;
   }catch(e){
-    document.getElementById('content-prd').innerHTML='<p style="color:red;text-align:center;padding:40px;">PRD 加载失败：'+e.message+'<br>请通过 HTTP 服务器访问</p>';
+    document.getElementById('prd-body').innerHTML='<p style="color:red;text-align:center;padding:40px;">PRD 加载失败：'+e.message+'<br>请通过 HTTP 服务器访问</p>';
   }
 }
 </script>
