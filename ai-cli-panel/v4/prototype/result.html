@@ -249,6 +249,55 @@
   }
   .send-btn:hover{background:#c81e16;}
 
+  /* 模型选择器 */
+  .model-select{
+    position:relative;
+    margin-right:10px;
+  }
+  .model-btn{
+    height:32px;
+    padding:0 10px 0 12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#fff;
+    display:flex;align-items:center;gap:6px;
+    font-size:13px;
+    color:var(--text-dim);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .model-btn:hover{background:var(--hover);}
+  .model-btn .arrow{font-size:10px;opacity:.6;}
+  .model-dropdown{
+    position:absolute;
+    bottom:calc(100% + 6px);
+    right:0;
+    width:200px;
+    max-height:320px;
+    overflow-y:auto;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    box-shadow:0 12px 32px rgba(0,0,0,.16);
+    padding:6px;
+    display:none;
+    z-index:100;
+  }
+  .model-dropdown.open{display:block;}
+  .model-option{
+    padding:9px 12px;
+    border-radius:8px;
+    font-size:13.5px;
+    color:var(--text);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .model-option:hover{background:var(--hover);}
+  .model-option.selected{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+  .model-option .check{font-size:14px;}
+
   /* 高风险操作确认弹窗 */
   .modal-overlay{
     position:fixed;inset:0;background:rgba(20,22,26,0.35);
@@ -298,8 +347,9 @@
       </div>
       <div class="nav-item" onclick="location.href='main.html'"><span class="icon">✎</span> 新对话</div>
       <div class="nav-item" onclick="location.href='search.html'"><span class="icon">🔍</span> 搜索</div>
-      <div class="nav-item" onclick="location.href='scheduled.html'"><span class="icon">🕐</span> 已安排</div>
+      <div class="nav-item" onclick="location.href='prompts.html'"><span class="icon">💡</span> 提示词库</div>
       <div class="nav-item" onclick="location.href='skills.html'"><span class="icon">⚡</span> 技能 <span class="badge">4</span></div>
+      <div class="nav-item" onclick="location.href='scheduled.html'"><span class="icon">🕐</span> 已安排</div>
 
       <div class="section-label">项目</div>
       <div class="project-group">
@@ -388,6 +438,21 @@
             <div class="input-toolbar">
               <div class="icon-btn" id="plus-btn" title="引用技能 / 上传文件" onclick="toggleFlyout()">+</div>
               <div class="toolbar-spacer"></div>
+              <div class="model-select">
+                <div class="model-btn" onclick="toggleModelDropdown(event)">
+                  <span id="current-model">5.5</span>
+                  <span class="arrow">▼</span>
+                </div>
+                <div class="model-dropdown" id="model-dropdown">
+                  <div class="model-option" onclick="selectModel('5.6 Sol')">5.6 Sol</div>
+                  <div class="model-option" onclick="selectModel('5.6 Terra')">5.6 Terra</div>
+                  <div class="model-option" onclick="selectModel('5.6 Luna')">5.6 Luna</div>
+                  <div class="model-option selected" onclick="selectModel('5.5')">5.5 <span class="check">✓</span></div>
+                  <div class="model-option" onclick="selectModel('5.4')">5.4</div>
+                  <div class="model-option" onclick="selectModel('5.4 Mini')">5.4 Mini</div>
+                  <div class="model-option" onclick="selectModel('5.2')">5.2</div>
+                </div>
+              </div>
               <div class="send-btn" onclick="sendFollow()">↑</div>
             </div>
           </div>
@@ -489,6 +554,28 @@
     ).join('');
   }
 document.addEventListener('click',closeAcctMenu);
+
+  /* 模型选择器 */
+  function toggleModelDropdown(e){
+    e.stopPropagation();
+    document.getElementById('model-dropdown').classList.toggle('open');
+  }
+  function selectModel(name){
+    document.getElementById('current-model').textContent=name;
+    document.querySelectorAll('.model-option').forEach(opt=>{
+      const isSelected=(opt.getAttribute('onclick')||'').includes("'"+name+"'");
+      opt.classList.toggle('selected',isSelected);
+      const check=opt.querySelector('.check');
+      if(check) check.remove();
+      if(isSelected) opt.innerHTML+=` <span class="check">✓</span>`;
+    });
+    document.getElementById('model-dropdown').classList.remove('open');
+    toast('已切换模型:'+name);
+  }
+  document.addEventListener('click',()=>{
+    const dropdown=document.getElementById('model-dropdown');
+    if(dropdown) dropdown.classList.remove('open');
+  });
 
   /* 历史对话删除:hover 出×,点×删除该条,不触发条目跳转 */
   function initHistDelete(){
