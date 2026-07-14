@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI CLI 企业管理面板技术方案(OpenClaw 版)</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f6f7f9;
+    --text:#1c2128;
+    --text-dim:#57606a;
+    --border:#e3e6ea;
+    --accent:#2f6fed;
+    --accent-soft:#eaf1ff;
+    --good:#1a7f4b;
+    --good-soft:#e8f7ef;
+    --bad:#c23636;
+    --bad-soft:#fdecec;
+    --warn:#9a6400;
+    --warn-soft:#fff6e0;
+    --code-bg:#f2f4f7;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg-soft);
+    color:var(--text);
+    font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+    line-height:1.75;
+  }
+  .layout{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:56px;
+    width:80%;
+    margin:0 auto;
+    padding:56px 0 120px;
+  }
+  .toc{
+    position:sticky;
+    top:40px;
+    align-self:start;
+    font-size:14px;
+  }
+  .toc .toc-title{
+    font-size:12px;
+    letter-spacing:2px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    margin-bottom:14px;
+    font-weight:700;
+  }
+  .toc a{
+    display:block;
+    color:var(--text-dim);
+    text-decoration:none;
+    padding:7px 0 7px 14px;
+    border-left:2px solid var(--border);
+    transition:.15s;
+  }
+  .toc a:hover, .toc a.active{
+    color:var(--accent);
+    border-left-color:var(--accent);
+    font-weight:600;
+  }
+
+  .mobile-toc{display:none;}
+  .mobile-toc details{
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--bg-soft);
+    margin-bottom:32px;
+  }
+  .mobile-toc summary{
+    padding:12px 16px;
+    font-size:14px;
+    font-weight:700;
+    color:var(--accent);
+    cursor:pointer;
+    list-style:none;
+  }
+  .mobile-toc summary::-webkit-details-marker{display:none;}
+  .mobile-toc summary::after{content:"▾";float:right;}
+  .mobile-toc details[open] summary::after{content:"▴";}
+  .mobile-toc nav{padding:0 16px 14px;}
+  .mobile-toc a{
+    display:block;
+    color:var(--text-dim);
+    text-decoration:none;
+    padding:6px 0;
+    font-size:13.5px;
+    border-top:1px solid var(--border);
+  }
+  .mobile-toc a:first-child{border-top:none;}
+
+  .doc{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:56px 64px;box-shadow:0 1px 3px rgba(20,20,43,0.04);}
+  .doc-header{margin-bottom:8px;}
+  .doc-header .badge-line{margin-bottom:18px;}
+  .doc-header .badge-line span{
+    display:inline-block;
+    font-size:12px;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:4px 12px;
+    border-radius:20px;
+    font-weight:600;
+    letter-spacing:1px;
+  }
+  h1.title{
+    font-size:28px;
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .meta-line{
+    color:var(--text-dim);
+    font-size:14px;
+    margin-bottom:40px;
+    padding-bottom:32px;
+    border-bottom:1px solid var(--border);
+  }
+  .meta-line .ref-line{
+    display:block;
+    margin-bottom:8px;
+    padding:10px 14px;
+    background:var(--accent-soft);
+    border-radius:8px;
+    font-size:13px;
+  }
+
+  h2{
+    font-size:22px;
+    margin:64px 0 24px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--border);
+    scroll-margin-top:40px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  h2 .idx{
+    color:var(--accent);
+    font-size:15px;
+    font-weight:700;
+    background:var(--accent-soft);
+    padding:2px 10px;
+    border-radius:6px;
+  }
+  h3{
+    font-size:17px;
+    margin:32px 0 14px;
+    scroll-margin-top:40px;
+  }
+  p{margin:0 0 16px;color:var(--text);}
+  ul, ol{margin:0 0 16px;padding-left:22px;}
+  li{margin-bottom:8px;}
+  strong{color:var(--text);font-weight:700;}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;}
+  a:hover{border-bottom-color:var(--accent);}
+  hr{border:none;border-top:1px solid var(--border);margin:40px 0;}
+
+  .callout{
+    border-radius:10px;
+    padding:18px 22px;
+    margin:20px 0;
+    font-size:15px;
+  }
+  .callout.summary{background:var(--accent-soft);border:1px solid #cddffb;}
+  .callout.warn{background:var(--warn-soft);border:1px solid #f2dfa6;}
+  .callout.danger{background:var(--bad-soft);border:1px solid #f3c9c9;}
+  .callout.ok{background:var(--good-soft);border:1px solid #bfe6cf;}
+  .callout .callout-title{font-weight:700;margin-bottom:6px;display:block;}
+
+  .table-wrap{overflow-x:auto;margin:20px 0 28px;border:1px solid var(--border);border-radius:10px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th, td{padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{background:var(--bg-soft);color:var(--text-dim);font-weight:700;font-size:12.5px;letter-spacing:.5px;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  .cell-badge{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .cell-badge.no{background:var(--bad-soft);color:var(--bad);}
+  .cell-badge.ok{background:var(--good-soft);color:var(--good);}
+  .cell-badge.warn{background:var(--warn-soft);color:var(--warn);}
+
+  .phase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0 28px;}
+  .phase-card{border:1px solid var(--border);border-radius:12px;padding:20px;background:var(--bg-soft);}
+  .phase-card .dur{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:4px 12px;
+    border-radius:20px;
+    margin-bottom:12px;
+  }
+  .phase-card h4{margin:0 0 10px;font-size:16px;}
+  .phase-card ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--text-dim);}
+  .phase-card li{margin-bottom:6px;}
+  .phase-card .goal{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px dashed var(--border);
+    font-size:12.5px;
+    color:var(--text-dim);
+  }
+
+  .ver-card{
+    border:1px solid var(--border);
+    border-left:4px solid var(--accent);
+    border-radius:0 12px 12px 0;
+    padding:18px 22px;
+    margin-bottom:16px;
+    background:var(--bg-soft);
+  }
+  .ver-card h4{margin:0 0 12px;font-size:16px;display:flex;align-items:center;gap:10px;}
+  .ver-card h4 .tag{
+    font-size:12px;
+    font-weight:700;
+    color:#fff;
+    background:var(--accent);
+    padding:2px 10px;
+    border-radius:20px;
+  }
+  .ver-card.v2{border-left-color:var(--good);}
+  .ver-card.v2 h4 .tag{background:var(--good);}
+  .ver-card.v3{border-left-color:var(--warn);}
+  .ver-card.v3 h4 .tag{background:var(--warn);}
+  .ver-card ul{margin:0;padding-left:20px;font-size:14px;}
+  .ver-card li{margin-bottom:7px;}
+
+  .risk-card{
+    border-left:4px solid var(--bad);
+    background:var(--bad-soft);
+    border-radius:0 10px 10px 0;
+    padding:16px 20px;
+    margin-bottom:14px;
+  }
+  .risk-card h4{margin:0 0 6px;font-size:15px;color:var(--text);}
+  .risk-card p{margin:0;font-size:13.5px;color:var(--text-dim);}
+  .risk-card.exclude{border-left-color:var(--warn);background:var(--warn-soft);}
+
+  .arch-diagram{
+    background:#0f1626;
+    color:#d1d9ec;
+    border-radius:14px;
+    padding:24px;
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+    font-size:12.5px;
+    line-height:1.6;
+    overflow-x:auto;
+    margin:20px 0 28px;
+    white-space:pre;
+  }
+
+  code{background:var(--code-bg);padding:2px 6px;border-radius:5px;font-size:0.9em;}
+
+  @media (max-width:1000px){
+    .layout{grid-template-columns:1fr;width:auto;padding:24px 16px 80px;gap:24px;}
+    .toc{display:none;}
+    .mobile-toc{display:block;}
+    .doc{padding:32px 24px;}
+    .phase-grid{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:600px){
+    .layout{padding:16px 12px 64px;}
+    .doc{padding:24px 16px;border-radius:12px;}
+    h1.title{font-size:20px;line-height:1.5;}
+    .doc-header .badge-line span{font-size:11px;padding:3px 10px;}
+    .meta-line{font-size:12.5px;margin-bottom:28px;padding-bottom:22px;}
+    h2{font-size:18px;margin:44px 0 18px;gap:8px;flex-wrap:wrap;}
+    h2 .idx{font-size:13px;padding:2px 8px;}
+    h3{font-size:15px;margin:26px 0 12px;}
+    p, li{font-size:14.5px;}
+    .callout{padding:14px 16px;font-size:13.5px;}
+    th, td{padding:10px 12px;font-size:13px;}
+    .phase-card{padding:14px;}
+    .risk-card{padding:14px 16px;}
+    .ver-card{padding:14px 16px;}
+    .arch-diagram{font-size:10.5px;padding:16px;}
+    hr{margin:28px 0;}
+  }
+
+  @media print{
+    body{background:#fff;}
+    .toc{display:none;}
+    .layout{grid-template-columns:1fr;padding:0;}
+    .doc{border:none;box-shadow:none;padding:0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <nav class="toc">
+    <div class="toc-title">目录</div>
+    <a href="#s1" data-target="s1">一、背景与决策脉络</a>
+    <a href="#s2" data-target="s2">二、技术选型</a>
+    <a href="#s3" data-target="s3">三、整体架构</a>
+    <a href="#s4" data-target="s4">四、核心模块</a>
+    <a href="#s5" data-target="s5">五、分阶段推进</a>
+    <a href="#s6" data-target="s6">六、产品版本规划</a>
+    <a href="#s7" data-target="s7">七、管理后台建设内容</a>
+    <a href="#s8" data-target="s8">八、风险与排除项</a>
+    <a href="#s9" data-target="s9">九、与先马AI工作室的关系</a>
+    <a href="#s10" data-target="s10">十、与原报告的差异</a>
+  </nav>
+
+  <main class="doc">
+
+    <div class="doc-header">
+      <div class="badge-line"><span>技术方案 · 内部提效项目</span></div>
+      <h1 class="title">AI CLI 企业管理面板技术方案<br>(OpenClaw 版)</h1>
+      <div class="meta-line">
+        <span class="ref-line">关联文档:《AI CLI 企业管理面板项目可行性分析报告》(2026年7月8日)—— 本文档不修改原报告,作为技术路径调整后的独立分析产出</span>
+        文档版本:V2 ・ 编写人:数智中心-梦蝶 ・ 编写时间:2026年7月8日
+      </div>
+    </div>
+
+    <div class="mobile-toc">
+      <details>
+        <summary>目录</summary>
+        <nav>
+          <a href="#s1">一、背景与决策脉络</a>
+          <a href="#s2">二、技术选型</a>
+          <a href="#s3">三、整体架构</a>
+          <a href="#s4">四、核心模块</a>
+          <a href="#s5">五、分阶段推进</a>
+          <a href="#s6">六、产品版本规划</a>
+          <a href="#s7">七、管理后台建设内容</a>
+          <a href="#s8">八、风险与排除项</a>
+          <a href="#s9">九、与先马AI工作室的关系</a>
+          <a href="#s10">十、与原报告的差异</a>
+        </nav>
+      </details>
+    </div>
+
+    <h2 id="s1"><span class="idx">01</span>背景与决策脉络</h2>
+    <p>《AI CLI 企业管理面板项目可行性分析报告》完成后,在推进落地过程中,针对产品形态和技术选型出现了新的关键信息,需要重新论证技术路径,因此单独成篇说明,不改动原报告。</p>
+    <p><strong>调整的关键节点:</strong></p>
+    <ul>
+      <li>原报告的阶段一建议采用纯 Web 端形态,由服务器端沙箱环境执行 Codex CLI 任务,理由是目标用户(运营/客服/设计/人事/行政)的典型任务不涉及本地文件操作</li>
+      <li>排查发现公司内部已有"先马AI工作室"——一个基于对话式 LLM 应用的内部工具,具备内容生成、翻译、润色等能力,已上线并有真实用户</li>
+      <li>经确认,先马AI工作室与本项目要解决的问题<strong>不是同一件事</strong>:先马AI工作室是"聊天类"应用,而本项目的核心诉求是让员工用上 Codex/Claude Code/OpenClaw 这类<strong>具备实际执行能力(读写文件、执行代码、多步骤自主任务)的 Agent</strong>,这是聊天工具无法覆盖的能力层级,两者互补而非替代</li>
+      <li>进一步明确了核心诉求:员工通过统一入口方便使用、API Key 由公司统一管理、员工不需要自行申请或配置调用凭证</li>
+      <li>基于以上确认,技术路径从"服务器端沙箱执行 + Web 访问"调整为"开源 Agent 内核本地执行 + 客户端封装 + 公司网关统一管理 Key",本文档就调整后的方案做完整说明</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="s2"><span class="idx">02</span>技术选型:为什么是 OpenClaw</h2>
+    <p>企业做 AI CLI,本质上是想做一个"能听懂人话的命令行智能体(Agent)"——员工用自然语言描述需求,CLI 负责理解意图、拆解任务、自动调用企业内部脚本或 API 完成执行。OpenClaw 作为开源 Agent 底层框架,正是为这一场景设计,核心依据:</p>
+    <ol>
+      <li><strong>强大的工具调用(Tool Call)管理</strong>。OpenClaw 的强项在于封装底层架构,可稳定地把企业内部指令、云服务 API、数据库查询封装成 AI 可精准调用的"武器库"(Tools)。这正是"让非工程岗位员工也能驱动 Agent 完成实际任务"所需要的底层能力。</li>
+      <li><strong>企业级权限与安全控制的可定制性</strong>。作为底层框架,便于在其之上定制企业所需的安全边界——审计日志(记录 AI 实际执行了哪些命令)、敏感操作的人工二次确认(Human-in-the-loop)等,与本方案设计的"高风险操作弹确认框、按角色放行"能力天然契合。</li>
+      <li><strong>架构灵活、模型不绑定</strong>。OpenClaw 是"底盘",上层对接哪个大模型可自由决定——本地私有化部署的模型或闭源的 GPT/Claude 均可,不受供应商绑定。这使得"模型调用指向公司自建网关、Key 由公司统一管理、员工不接触真实凭证"的设计在本地执行架构下依然成立。</li>
+      <li><strong>可承载"技能库"设计</strong>。基于框架的 Agent/技能定义机制,可将团队沉淀的常用任务预置为可分发的技能配置,直接承载本方案的"技能库",不需要另行搭建一套技能模板系统。</li>
+    </ol>
+
+    <div class="callout warn">
+      <span class="callout-title">需要留意的风险</span>
+      作为开源项目,OpenClaw 的社区活跃度、版本稳定性、组织治理需要持续关注,不代表当前不可用,但在长期依赖评估中应纳入考量。此外,本文档对 OpenClaw 具体接口形态(无头服务模式、官方 SDK、技能定义机制的落地方式)的描述,需在阶段一技术验证 Spike 中以官方文档和实测为准确认,不应在验证前当作既定事实排期。
+    </div>
+
+    <hr>
+
+    <h2 id="s3"><span class="idx">03</span>整体架构</h2>
+
+    <div class="arch-diagram">员工电脑
+┌───────────────────────────────────┐
+│  桌面客户端(Tauri 外壳)            │
+│  ┌────────────┐    ┌─────────────┐│
+│  │ 自研前端UI  │───▶│ OpenClaw CLI ││
+│  │登录/工作台/ │    │(无头服务     ││
+│  │历史/技能库  │◀───│ 模式)        ││
+│  └────────────┘    └──────┬──────┘│
+└───────────────────────────┼───────┘
+                             │ HTTPS
+                             ▼
+                 ┌─────────────────────┐
+                 │   公司内部 AI 网关    │
+                 │ - 持有真实 API Key   │
+                 │ - 钉钉 SSO 鉴权      │
+                 │ - 用量计量/审计日志  │
+                 │ - 按角色下发权限     │
+                 └──────────┬──────────┘
+                             ▼
+                  OpenAI / Anthropic 等模型供应商</div>
+
+    <p><strong>核心设计逻辑</strong>:OpenClaw 运行在员工电脑本地,以具备完整读写文件、执行 shell 命令能力的 Agent 模式运行,真正体现"能执行代码、操作文件"的 Agent 级能力,这是与先马AI工作室(纯聊天)的根本区别所在。但 OpenClaw 的模型调用并不直连官方 API,而是配置指向公司内部网关——真实的模型供应商 API Key 只存放在网关这一层,员工电脑上只会出现一个可控、可随时吊销的短期访问令牌。这个设计让"本地执行"与"Key 不向员工暴露"两个目标同时成立,不互相冲突。</p>
+
+    <hr>
+
+    <h2 id="s4"><span class="idx">04</span>核心模块</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>模块</th><th>说明</th></tr>
+        <tr><td><strong>客户端外壳</strong></td><td>采用 Tauri(优先于 Electron,理由:体积更小、基于 Rust,启动快、适合分发);首个版本支持 macOS + Windows;内置自动更新检测机制</td></tr>
+        <tr><td><strong>登录与身份</strong></td><td>钉钉扫码/免密登录 → 换取短期 JWT 访问令牌 → 客户端本地安全存储;令牌而非明文 Key,可控可吊销</td></tr>
+        <tr><td><strong>网关代理层</strong>(新建,核心模块)</td><td>验证客户端令牌;按角色与用量策略决定是否放行调用;转发请求至真实模型供应商;记录调用元数据(人员、时间、消耗)用于审计</td></tr>
+        <tr><td><strong>技能库</strong></td><td>基于 OpenClaw 的 Agent/技能定义机制(Markdown + YAML 配置),将团队沉淀的常用任务预置为可分发的技能配置,随客户端分发;客户端 UI 提供技能库页面供选择调用</td></tr>
+        <tr><td><strong>会话历史</strong></td><td>本地留存任务记录,并将关键元数据同步至公司后端,支撑跨设备查看、审计与成本核算</td></tr>
+        <tr><td><strong>UI 层</strong></td><td>复用此前已产出的原型界面(登录页/工作台/历史记录/技能库),将模拟输出替换为真实调用 OpenClaw 服务接口的结果</td></tr>
+      </table>
+    </div>
+
+    <hr>
+
+    <h2 id="s5"><span class="idx">05</span>分阶段推进</h2>
+    <div class="phase-grid">
+      <div class="phase-card">
+        <span class="dur">阶段一 · 3-5 天</span>
+        <h4>技术验证 Spike</h4>
+        <ul>
+          <li>本地跑通 OpenClaw 的无头服务模式与调用接口,验证程序化发起任务、获取流式/结构化输出</li>
+          <li>验证自定义 baseURL / 模型端点配置的连通性(先接一个本地模拟网关)</li>
+          <li>验证 Agent(技能)定义机制的实际效果</li>
+        </ul>
+        <div class="goal">目的:在投入后续开发资源前,把技术路径中不确定的部分先行验证清楚,避免重蹈"未验证技术可行性就排期"的问题。</div>
+      </div>
+      <div class="phase-card">
+        <span class="dur">阶段二 · 2-3 周</span>
+        <h4>内部 Demo</h4>
+        <ul>
+          <li>网关层最小实现:钉钉登录换令牌、基础调用转发、简单用量记录</li>
+          <li>Tauri 客户端外壳接入真实 OpenClaw 调用,复用已有 UI 原型</li>
+          <li>提供 2-3 条预置技能</li>
+        </ul>
+        <div class="goal">验证核心假设:非工程岗位能否通过该客户端有效使用 Agent 能力。</div>
+      </div>
+      <div class="phase-card">
+        <span class="dur">阶段三 · 验证通过后排期</span>
+        <h4>企业级完善</h4>
+        <ul>
+          <li>权限分级(技能按风险等级、按角色开放)</li>
+          <li>完整审计日志、异常用量告警</li>
+          <li>会话历史多端同步、跨人员/跨项目查看</li>
+        </ul>
+      </div>
+    </div>
+
+    <hr>
+
+    <h2 id="s6"><span class="idx">06</span>产品版本规划(1.0 / 2.0 / 3.0)</h2>
+    <div class="callout summary">
+      上一节的"阶段一/二/三"是<strong>工程交付节奏</strong>(先验证技术、再做内部 Demo、最后企业级完善);本节的"1.0/2.0/3.0"是<strong>面向员工的产品能力分期</strong>——两者是同一条路线的两个视角。总目标是做到"像 Codex 一样"的完整体验,但分三个版本落地,不追求一次做全。
+    </div>
+
+    <div class="ver-card v1">
+      <h4><span class="tag">1.0</span>跑起来,验证核心闭环</h4>
+      <ul>
+        <li><strong>登录</strong>:钉钉免登 / 钉钉扫码 / 账号密码(复用公司现有账号体系),三种方式都在 1.0 范围内;员工全程不接触真实 API Key</li>
+        <li><strong>Key 与调用统一走公司网关</strong>,做鉴权 + 基础用量记录</li>
+        <li><strong>客户端图形界面</strong>(参考 Codex/Typeless 风格,浅色主题),自由对话为主入口,员工不接触命令行</li>
+        <li><strong>本地执行能力落地</strong>:读写文件、跑代码,通过系统原生文件选择器由员工自选本次任务的操作对象</li>
+        <li><strong>执行过程轻量可见</strong>:把工具调用事件翻译成简短状态文案(如"正在读取文件""正在生成内容")滚动展示,不暴露原始命令与日志</li>
+        <li><strong>高风险操作弹确认框</strong>:覆盖删除文件、覆盖已有文件、外发内容(发邮件/发钉钉消息)三类</li>
+        <li><strong>内置 4 类通用技能卡</strong>:日报/周报生成、P 图/图片处理、文案润色改写、会议记录整理(只做全员通用能力,不做绑定部门 SOP 的垂直场景)</li>
+        <li><strong>管理端复用公司已有后台</strong>:数智中心查看用量、管理技能库配置等操作挂进现有管理后台,不单独为本项目做一套;并提供管理员模式解锁完整无限制执行,用于调试与处理技能库外的任务</li>
+      </ul>
+    </div>
+
+    <div class="ver-card v2">
+      <h4><span class="tag">2.0</span>从"能用"到"好用、可控"</h4>
+      <ul>
+        <li>角色权限精细化:技能库按部门/岗位打标签,客户端按角色过滤展示</li>
+        <li>技能库自主配置:业务侧自己能新增/编辑技能卡,不用每次找数智中心加代码</li>
+        <li>多步骤任务链:技能卡之间可串联(如"生成报表→自动排版→发到钉钉群")</li>
+        <li>审计升级:除用量外,增加操作内容级别的留痕(为合规/复盘做准备)</li>
+        <li>用户反馈机制:员工可给技能卡结果打分,反哺技能库迭代</li>
+      </ul>
+    </div>
+
+    <div class="ver-card v3">
+      <h4><span class="tag">3.0</span>打通企业系统,变成基础设施</h4>
+      <ul>
+        <li>打通企业内部系统数据源(ERP、工单系统、内部文档库),Agent 直接查数据而非员工手动喂</li>
+        <li>跨部门协作任务:一个任务链可串联多个部门的技能</li>
+        <li>内容/成本治理:按部门做用量成本核算,支持精细化的模型调用策略(不同任务用不同档次的模型)</li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <h2 id="s7"><span class="idx">07</span>管理后台建设内容</h2>
+    <p>管理后台不单独为本项目新建一套,而是将相关功能挂进公司已有的管理后台,以减少开发量。按产品版本分期落地:1.0 只建"最小必要集",2.0、3.0 再逐步增量。</p>
+
+    <div class="ver-card v1">
+      <h4><span class="tag">1.0</span>要做的(最小必要集)</h4>
+      <p style="margin:0 0 12px;font-size:14px;color:var(--text-dim);">1.0 阶段管理后台只需实现以下五项,其余推至后续版本,避免后台开发挤占核心闭环:</p>
+      <ol style="margin:0;">
+        <li><strong>Key 托管 + 令牌签发/吊销</strong>——真实供应商 API Key 集中托管、轮换、吊销(员工不可见);客户端短期令牌的签发、有效期与主动吊销(离职/异常一键断)。这是"员工不接触真实 Key"这一安全模型的底线,缺此则整体方案不成立</li>
+        <li><strong>员工开通/停用</strong>——同步钉钉组织架构、复用公司账号(不新建);角色分配(普通员工/管理员)</li>
+        <li><strong>基础用量查看</strong>——调用量与 Token 消耗看板,可看到谁用了多少即可</li>
+        <li><strong>技能库配置</strong>——技能卡增删改、上下架、参数表单配置,由数智中心手动维护(含底层 skill 与"技能卡↔skill"映射)</li>
+        <li><strong>基础操作日志</strong>——谁、何时、发起什么任务、动了哪些文件;含高风险操作(删除/覆盖/外发)的确认与执行记录</li>
+      </ol>
+    </div>
+
+    <div class="callout danger">
+      <span class="callout-title">安全提示</span>
+      第 1 项(Key 与令牌治理)本质是网关层的一部分,集中承载公司真实 API Key,其风险等级与"查看用量、配置技能卡"这类普通后台功能不在一个量级,须纳入第八节所述的安全设计评审,不能作为普通 CRUD 功能顺带实现。
+    </div>
+
+    <div class="ver-card v2">
+      <h4><span class="tag">2.0</span>增量</h4>
+      <ul>
+        <li>角色权限精细化:技能库按部门/岗位打标签,客户端按角色/部门过滤展示</li>
+        <li>技能库业务侧自助配置:业务管理员可自行新增/编辑技能卡,不必每次找数智中心</li>
+        <li>员工反馈查看:员工对技能卡结果的评分/反馈,反哺技能迭代</li>
+        <li>审计升级:在操作日志基础上增加内容级留痕(输入/输出摘要),为合规复盘准备</li>
+      </ul>
+    </div>
+
+    <div class="ver-card v3">
+      <h4><span class="tag">3.0</span>增量</h4>
+      <ul>
+        <li>用量成本治理:按部门做成本核算报表,支撑内部分摊</li>
+        <li>模型调用策略:按角色/部门配置配额与模型档次(不同任务用不同档次的模型)</li>
+        <li>企业数据源接入管理:ERP、工单系统、内部文档库等连接的配置与管理</li>
+      </ul>
+    </div>
+
+    <hr>
+
+    <h2 id="s8"><span class="idx">08</span>风险与明确排除项</h2>
+    <div class="risk-card">
+      <h4>OpenClaw 作为开源项目存在组织与版本层面的不确定性</h4>
+      <p>社区活跃度、版本稳定性、组织治理需要持续关注,评估长期依赖的稳定性,不建议将其视为零风险的选择。此外,本文档对 OpenClaw 具体接口能力的描述需在阶段一 Spike 中以官方文档和实测确认,验证前不作为既定事实。</p>
+    </div>
+    <div class="risk-card">
+      <h4>网关代理层是新增的攻击面和单点故障点</h4>
+      <p>它集中持有公司的真实 API Key,一旦设计不严谨,风险等级不亚于此前可行性分析报告中提示的"Key 集中托管"风险,需要单独进行安全设计评审,不能与业务功能一起顺带实现。</p>
+    </div>
+    <div class="risk-card">
+      <h4>桌面客户端的跨平台打包、签名、自动更新是真实工作量</h4>
+      <p>这在此前的可行性分析报告中已提示过,即便采用 Tauri 这类相对轻量的方案,也需要单独排期,不是界面开发的附属工作。</p>
+    </div>
+    <div class="risk-card exclude">
+      <h4>明确排除:浏览器访问、电脑操作(computer use)类工具</h4>
+      <p>这类能力(让 AI 像人一样操作鼠标键盘、控制屏幕、访问已登录的浏览器会话)风险等级与本方案设计的"沙箱化 Agent 执行"完全不在一个量级,一旦开放,员工电脑上的任意应用、任意已登录账号都可能被触及。本方案不包含这部分能力,如后续确有业务需求,应作为独立项目单独立项,进行专项的安全设计评估,不与本方案合并推进。</p>
+    </div>
+
+    <hr>
+
+    <h2 id="s9"><span class="idx">09</span>与先马AI工作室的关系</h2>
+    <p>先马AI工作室(对话式 LLM 应用)与本方案(Agent 级能力封装)服务的是不同的任务层级,不建议合并为同一套架构:</p>
+    <ul>
+      <li>先马AI工作室适合低风险、低延迟的日常内容生成任务(翻译、润色、写作、PPT/图片生成),继续保留,不做替换</li>
+      <li>本方案面向需要实际执行代码、操作文件、完成多步骤自动化任务的场景,是先马AI工作室能力的补充,而非替代</li>
+      <li>两者可以共享的基础设施:钉钉 SSO 账号体系、网关层的 Key/额度治理能力。是否要让先马AI工作室也接入同一套网关统一管理 Key,可作为后续可选项评估,不是本方案的必须项</li>
+    </ul>
+
+    <div class="callout ok">
+      是否废弃先马AI工作室,应在本方案上线并观察真实使用数据后再判断,不应在方案设计阶段预设结论。
+    </div>
+
+    <hr>
+
+    <h2 id="s10"><span class="idx">10</span>与原可行性分析报告的关键差异</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>原报告(2026-07-08)</th><th>本方案</th></tr>
+        <tr><td>产品形态</td><td>纯 Web 端</td><td>桌面客户端(Tauri)</td></tr>
+        <tr><td>执行位置</td><td>服务器端沙箱环境</td><td>员工电脑本地</td></tr>
+        <tr><td>底层 Agent</td><td>未指定,以 Codex 为例</td><td>明确选定 OpenClaw(开源 Agent 底层框架、擅长工具调用管理与权限定制)</td></tr>
+        <tr><td>Key 管理方式</td><td>Key 全程留在服务器,不下发到客户端</td><td>Key 留在公司网关层,客户端仅持有短期可吊销令牌</td></tr>
+        <tr><td>技能库实现方式</td><td>需自建技能模板系统</td><td>复用 OpenClaw 的 Agent/技能定义机制</td></tr>
+        <tr><td>核心技术风险</td><td>Codex CLI 能否被程序化包装,未经验证</td><td>以 OpenClaw 的无头/程序化调用能力为路径,具体接口需阶段一 Spike 实测确认</td></tr>
+      </table>
+    </div>
+
+    <p>差异产生的根本原因:原报告基于"目标用户不需要操作本地文件"的假设设计,而后续确认领导需要的是真正的 Agent 级执行能力(读写文件、执行代码),这在纯 Web 端沙箱模式下难以自然实现,因此调整为本地客户端架构。</p>
+
+  </main>
+</div>
+
+<script>
+  const links = document.querySelectorAll('.toc a');
+  const targets = Array.from(links).map(a => document.getElementById(a.dataset.target)).filter(Boolean);
+
+  function onScroll(){
+    let current = targets[0];
+    const scrollPos = window.scrollY + 120;
+    targets.forEach(t => { if(t.offsetTop <= scrollPos) current = t; });
+    links.forEach(a => a.classList.toggle('active', a.dataset.target === current.id));
+  }
+  window.addEventListener('scroll', onScroll);
+  onScroll();
+</script>
+
+</body>
+</html>

@@ -101,9 +101,6 @@
   .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;}
   h1{font-size:28px;font-weight:700;color:var(--text);margin:0 0 6px;}
   .subtitle{font-size:14px;color:var(--text-dim);margin:0;}
-  .new-btn{flex-shrink:0;padding:9px 16px;border-radius:8px;border:none;background:var(--text);color:#fff;font-size:13.5px;cursor:pointer;}
-  .new-btn:hover{background:#333944;}
-
   .sched-list{display:flex;flex-direction:column;gap:12px;max-width:860px;}
   .sched-card{
     display:flex;align-items:center;gap:16px;
@@ -158,7 +155,7 @@
       <div class="nav-item" onclick="location.href='main.html'"><span class="icon">✎</span> 新对话</div>
       <div class="nav-item" onclick="location.href='search.html'"><span class="icon">🔍</span> 搜索</div>
       <div class="nav-item" onclick="location.href='prompts.html'"><span class="icon">💡</span> 提示词库</div>
-      <div class="nav-item" onclick="location.href='skills.html'"><span class="icon">⚡</span> 技能 <span class="badge">4</span></div>
+      <div class="nav-item" onclick="location.href='skills.html'"><span class="icon">⚡</span> 技能</div>
       <div class="nav-item current"><span class="icon">🕐</span> 已安排</div>
 
       <div class="section-label">项目</div>
@@ -199,7 +196,6 @@
           <h1>已安排</h1>
           <p class="subtitle">让技能按固定时间或触发条件自动执行,无需每次手动发起</p>
         </div>
-        <button class="new-btn" onclick="toast('新建定时任务:原型演示中暂未接入')">+ 新建定时任务</button>
       </div>
 
       <div class="sched-list" id="sched-list"></div>
@@ -219,6 +215,58 @@
       <div class="sp-row"><div class="sp-label">默认模型</div><div class="sp-seg"><div class="sp-pill selected" onclick="pickPill(this)">标准</div><div class="sp-pill" onclick="pickPill(this)">高性能</div></div></div>
     </div>
     <div class="sp-foot"><button class="sp-btn ghost" onclick="closeSettings()">取消</button><button class="sp-btn primary" onclick="closeSettings();toast('设置已保存')">保存</button></div>
+  </div>
+</div>
+
+<!-- 编辑定时任务弹窗 -->
+<div class="st-overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="settings-panel">
+    <div class="sp-head"><h3>编辑定时任务</h3><div class="sp-close" onclick="closeEdit()">×</div></div>
+    <div class="sp-body">
+      <div class="sp-row">
+        <div class="sp-label">任务名称</div>
+        <input class="sp-input" id="edit-name" placeholder="给这个定时任务起个名字">
+      </div>
+      <div class="sp-row">
+        <div class="sp-label">执行频率</div>
+        <div class="sp-seg" id="edit-freq">
+          <div class="sp-pill" data-freq="每天" onclick="pickFreq(this)">每天</div>
+          <div class="sp-pill" data-freq="每周" onclick="pickFreq(this)">每周</div>
+          <div class="sp-pill" data-freq="每月" onclick="pickFreq(this)">每月</div>
+        </div>
+      </div>
+      <div class="sp-row" id="edit-weekday-row">
+        <div class="sp-label">星期几</div>
+        <div class="sp-seg" id="edit-weekday">
+          <div class="sp-pill" data-day="一" onclick="pickPill(this)">周一</div>
+          <div class="sp-pill" data-day="二" onclick="pickPill(this)">周二</div>
+          <div class="sp-pill" data-day="三" onclick="pickPill(this)">周三</div>
+          <div class="sp-pill" data-day="四" onclick="pickPill(this)">周四</div>
+          <div class="sp-pill" data-day="五" onclick="pickPill(this)">周五</div>
+          <div class="sp-pill" data-day="六" onclick="pickPill(this)">周六</div>
+          <div class="sp-pill" data-day="日" onclick="pickPill(this)">周日</div>
+        </div>
+      </div>
+      <div class="sp-row" id="edit-monthday-row">
+        <div class="sp-label">每月几号</div>
+        <input class="sp-input" id="edit-monthday" type="number" min="1" max="31" value="1" style="max-width:120px;">
+      </div>
+      <div class="sp-row">
+        <div class="sp-label">执行时间</div>
+        <input class="sp-input" id="edit-time" type="time" value="09:00" style="max-width:160px;">
+      </div>
+      <div class="sp-row">
+        <div class="sp-label">状态</div>
+        <div class="sp-seg" id="edit-state">
+          <div class="sp-pill" data-on="1" onclick="pickPill(this)">启用</div>
+          <div class="sp-pill" data-on="0" onclick="pickPill(this)">暂停</div>
+        </div>
+      </div>
+    </div>
+    <div class="sp-foot">
+      <button class="sp-btn ghost" onclick="closeEdit()">取消</button>
+      <button class="sp-btn primary" onclick="saveEdit()">保存</button>
+    </div>
   </div>
 </div>
 
@@ -254,37 +302,105 @@ document.addEventListener('click',closeAcctMenu);
   }
   initHistDelete();
 
-  /* ---- 已安排任务数据 ---- */
+  /* ---- 已安排任务数据(结构化,便于编辑) ---- */
   const TASKS=[
-    {icon:'📅',name:'每周上周周报自动生成',cron:'每周一 09:00',next:'下次运行:周一 09:00',on:true,url:'result.html?skill=weekly'},
-    {icon:'📝',name:'周会纪要自动整理',cron:'每周五 17:30',next:'下次运行:周五 17:30',on:true,url:'result.html?skill=meeting'},
-    {icon:'🖼️',name:'新品图批量去背景',cron:'每天 20:00',next:'下次运行:今天 20:00',on:false,url:'result.html?skill=image'},
-    {icon:'✍️',name:'活动文案定时润色校对',cron:'每月 1 日 10:00',next:'下次运行:8月1日 10:00',on:false,url:'result.html?skill=copywriting'}
+    {icon:'📅',name:'每周上周周报自动生成',freq:'每周',weekday:'一',monthday:1,time:'09:00',on:true,url:'result.html?skill=weekly'},
+    {icon:'📝',name:'周会纪要自动整理',freq:'每周',weekday:'五',monthday:1,time:'17:30',on:true,url:'result.html?skill=meeting'},
+    {icon:'🖼️',name:'新品图批量去背景',freq:'每天',weekday:'一',monthday:1,time:'20:00',on:false,url:'result.html?skill=image'},
+    {icon:'✍️',name:'活动文案定时润色校对',freq:'每月',weekday:'一',monthday:1,time:'10:00',on:false,url:'result.html?skill=copywriting'}
   ];
+
+  /* 根据结构化字段生成 cron 文案与下次运行文案 */
+  function cronText(t){
+    if(t.freq==='每天') return `每天 ${t.time}`;
+    if(t.freq==='每周') return `每周${t.weekday} ${t.time}`;
+    return `每月 ${t.monthday} 日 ${t.time}`;
+  }
+  function nextText(t){
+    if(t.freq==='每天') return `下次运行:今天 ${t.time}`;
+    if(t.freq==='每周') return `下次运行:周${t.weekday} ${t.time}`;
+    return `下次运行:${t.monthday}日 ${t.time}`;
+  }
 
   function render(){
     const box=document.getElementById('sched-list');
-    if(!TASKS.length){box.innerHTML='<div class="empty">还没有安排任何定时任务<br>点击右上角「新建定时任务」开始</div>';return;}
+    if(!TASKS.length){box.innerHTML='<div class="empty">还没有安排任何定时任务</div>';return;}
     box.innerHTML=TASKS.map((t,i)=>`
       <div class="sched-card">
         <div class="sc-icon">${t.icon}</div>
         <div class="sc-main" onclick="location.href='${t.url}'" style="cursor:pointer;">
           <div class="sc-name">${t.name}</div>
           <div class="sc-meta">
-            <span class="sc-cron">🕐 ${t.cron}</span>
+            <span class="sc-cron">🕐 ${cronText(t)}</span>
             <span class="${t.on?'badge-on':'badge-off'}">${t.on?'运行中':'已暂停'}</span>
-            <span class="sc-next">${t.on?t.next:'已暂停,不会自动运行'}</span>
+            <span class="sc-next">${t.on?nextText(t):'已暂停,不会自动运行'}</span>
           </div>
         </div>
         <div class="row-actions">
           <span class="link-btn" onclick="runNow(${i})">立即运行</span>
-          <span class="link-btn" onclick="toast('编辑定时任务:原型演示中暂未接入')">编辑</span>
+          <span class="link-btn" onclick="openEdit(${i})">编辑</span>
           <label class="switch"><input type="checkbox" ${t.on?'checked':''} onchange="toggleTask(${i},this.checked)"><span class="slider"></span></label>
         </div>
       </div>`).join('');
   }
   function toggleTask(i,on){TASKS[i].on=on;render();toast(on?`已启用:${TASKS[i].name}`:`已暂停:${TASKS[i].name}`);}
   function runNow(i){location.href=TASKS[i].url;}
+
+  /* ---- 编辑定时任务 ---- */
+  let editIndex=-1;
+  function openEdit(i){
+    editIndex=i;
+    const t=TASKS[i];
+    document.getElementById('edit-name').value=t.name;
+    // 频率
+    document.querySelectorAll('#edit-freq .sp-pill').forEach(p=>{
+      p.classList.toggle('selected',p.getAttribute('data-freq')===t.freq);
+    });
+    applyFreqRows(t.freq);
+    // 星期
+    document.querySelectorAll('#edit-weekday .sp-pill').forEach(p=>{
+      p.classList.toggle('selected',p.getAttribute('data-day')===t.weekday);
+    });
+    // 每月几号
+    document.getElementById('edit-monthday').value=t.monthday;
+    // 时间
+    document.getElementById('edit-time').value=t.time;
+    // 状态
+    document.querySelectorAll('#edit-state .sp-pill').forEach(p=>{
+      p.classList.toggle('selected',p.getAttribute('data-on')===(t.on?'1':'0'));
+    });
+    document.getElementById('edit-overlay').classList.add('show');
+  }
+  function closeEdit(){document.getElementById('edit-overlay').classList.remove('show');editIndex=-1;}
+  /* 频率切换时,显示对应的星期/号选择行 */
+  function applyFreqRows(freq){
+    document.getElementById('edit-weekday-row').style.display=(freq==='每周')?'':'none';
+    document.getElementById('edit-monthday-row').style.display=(freq==='每月')?'':'none';
+  }
+  function pickFreq(el){
+    el.parentNode.querySelectorAll('.sp-pill').forEach(p=>p.classList.remove('selected'));
+    el.classList.add('selected');
+    applyFreqRows(el.getAttribute('data-freq'));
+  }
+  function saveEdit(){
+    if(editIndex<0) return;
+    const t=TASKS[editIndex];
+    const name=document.getElementById('edit-name').value.trim();
+    if(!name){toast('请填写任务名称');return;}
+    const freqEl=document.querySelector('#edit-freq .sp-pill.selected');
+    const dayEl=document.querySelector('#edit-weekday .sp-pill.selected');
+    const stateEl=document.querySelector('#edit-state .sp-pill.selected');
+    t.name=name;
+    t.freq=freqEl?freqEl.getAttribute('data-freq'):t.freq;
+    if(t.freq==='每周'&&dayEl) t.weekday=dayEl.getAttribute('data-day');
+    if(t.freq==='每月') t.monthday=parseInt(document.getElementById('edit-monthday').value)||1;
+    t.time=document.getElementById('edit-time').value||t.time;
+    t.on=stateEl?stateEl.getAttribute('data-on')==='1':t.on;
+    render();
+    closeEdit();
+    toast('已保存:'+t.name);
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEdit();});
   render();
 </script>
 
