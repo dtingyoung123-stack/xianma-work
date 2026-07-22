@@ -1,0 +1,3208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI买家秀场景化输出页</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --text: #0f172a;
+      --muted: #526176;
+      --soft: #86909c;
+      --line: rgba(15, 23, 42, .08);
+      --blue: #2563eb;
+      --navy: #0f2f6f;
+      --card: rgba(255,255,255,.92);
+      --green: #0f766e;
+      --orange: #f97316;
+      --danger: #dc2626;
+      --shadow: 0 16px 44px rgba(72,102,137,.13);
+    }
+    html, body { margin: 0; min-width: 1280px; width: 100%; height: 100%; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 82% 4%, rgba(196, 247, 246, .55) 0, rgba(196, 247, 246, 0) 330px),
+        radial-gradient(circle at 26% 13%, rgba(217, 231, 255, .75) 0, rgba(217, 231, 255, 0) 390px),
+        linear-gradient(180deg, #f8fbff 0%, #eef4fb 52%, #f5f8fc 100%);
+    }
+    button, input, textarea, select { font: inherit; }
+    button { border: 0; background: transparent; padding: 0; cursor: pointer; color: inherit; }
+    input, textarea {
+      width: 100%;
+      border: 1px solid #dbe4f0;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+      color: #334155;
+      outline: none;
+    }
+    textarea { min-height: 72px; resize: vertical; line-height: 1.55; }
+    .app { width: 100%; min-width: 1280px; height: 100vh; overflow: hidden; }
+    .topbar {
+      position: fixed; z-index: 20; top: 0; left: 0; right: 0; height: 56px; min-width: 1280px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff; border-bottom: 1px solid #E4E7EC;
+    }
+    .brand { height: 56px; padding-left: 20px; display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 32px; height: 32px; border-radius: 8px; }
+    .brand-title { display: block; font-size: 15px; font-weight: 700; line-height: 1.1; color: #101828; }
+    .brand-sub { display: block; margin-top: 2px; color: #667085; font-size: 12px; }
+    .nav { display: flex; justify-content: center; align-items: center; gap: 4px; background: #F2F4F7; border-radius: 20px; padding: 0 3px; height: 38px; }
+    .nav-link { height: 34px; padding: 0 14px; border-radius: 8px; display: flex; align-items: center; font-size: 14px; font-weight: 500; color: #667085; border-bottom: 2px solid transparent; }
+    .nav-link.active { color: #2563EB; border-bottom-color: #2563EB; background: transparent; box-shadow: none; }
+    .nav-link.active:after { display: none; }
+    .account-top { display: flex; align-items: center; gap: 12px; padding-right: 20px; }
+    .credits-pill { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(37,99,235,.08); color: #2563EB; font-size: 13px; font-weight: 500; }
+    .avatar { width: 32px; height: 32px; border-radius: 999px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px; background: #2563EB; box-shadow: none; }
+    .account-name { display: block; font-weight: 600; font-size: 14px; color: #101828; line-height: 1.2; }
+    .account-sub { display: block; color: #667085; font-size: 12px; }
+    .sidebar {
+      position: fixed; z-index: 15; top: 56px; bottom: 0; left: 0; width: 240px; padding: 16px 12px;
+      background: #fff; border-right: 1px solid #E4E7EC; overflow: auto;
+    }
+    .side-label { margin: 0 0 12px; font-size: 12px; font-weight: 500; color: #667085; padding: 0 12px; }
+    .side-section { margin-bottom: 18px; }
+    .side-row, .side-link { height: 36px; display: flex; align-items: center; gap: 10px; color: #344054; font-size: 14px; font-weight: 500; white-space: nowrap; padding: 0 12px; border-radius: 8px; }
+    .side-row { justify-content: space-between; }
+    .side-row:hover, .side-link:hover { background: #F2F4F7; }
+    .side-main { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+    .side-title { overflow: hidden; text-overflow: ellipsis; }
+    .side-link.active, .side-row.active { background: rgba(37,99,235,.08); color: #2563EB; font-weight: 600; }
+    .icon { width: 16px; height: 16px; display: inline-grid; place-items: center; color: #667085; font-size: 14px; flex: 0 0 16px; }
+    .badge { min-width: 22px; height: 22px; padding: 0 7px; display: inline-grid; place-items: center; border-radius: 999px; background: #EFF6FF; color: #2563EB; font-size: 12px; font-weight: 700; }
+    .branch { position: relative; margin: 2px 0 12px 0; padding-left: 20px; }
+    .branch:before { content: ""; position: absolute; top: 0; bottom: 0; left: 6px; width: 1px; background: #E4E7EC; }
+    .branch .side-link { position: relative; height: 34px; color: #667085; font-size: 13px; }
+    .branch .side-link.active { color: #2563EB; font-weight: 600; background: rgba(37,99,235,.08); }
+    .branch .side-link:before { content: ""; position: absolute; left: -15px; width: 7px; height: 7px; border-radius: 50%; background: #fff; border: 1.5px solid #E4E7EC; }
+    .divider { height: 1px; background: #E4E7EC; margin: 16px 0 14px; }
+    .main {
+      position: fixed; top: 56px; right: 0; bottom: 0; left: 240px;
+      padding: 0 24px 0 24px; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .topline { flex: 0 0 auto; }
+    .workspace {
+      flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 7fr); gap: 14px; align-items: stretch;
+      padding-bottom: 20px;
+    }
+    .config-panel, .output-panel { padding: 0; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+    .config-panel { position: relative; }
+    .config-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: grid; gap: 10px; align-content: start; }
+    .config-foot { flex: 0 0 auto; display: flex; gap: 10px; justify-content: center; align-items: center; padding: 12px 16px 14px; border-top: 1px solid #eef2f7; background: #fff; }
+    .config-foot .primary-btn { flex: 1 1 auto; min-height: 46px; border-radius: 12px; font-size: 15px; font-weight: 800; box-shadow: 0 10px 22px rgba(29,78,216,.26); }
+    .output-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; }
+    .output-panel .output-head, .output-panel .task-panel { flex: 0 0 auto; }
+    .card { border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+    .ghost-btn, .primary-btn, .soft-btn {
+      min-height: 36px; padding: 0 17px; border-radius: 999px; border: 1px solid var(--line);
+      background: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-weight: 800; box-shadow: 0 8px 18px rgba(15,23,42,.06);
+    }
+    .primary-btn { color: #fff; border-color: #14327d; background: linear-gradient(180deg,#1d4ed8,#0f2f6f); }
+    .soft-btn { background: #eef6ff; color: #1d4ed8; border-color: rgba(37,99,235,.15); box-shadow: none; }
+    .eyebrow { color: var(--blue); font-size: 13px; font-weight: 900; letter-spacing: .03em; margin-bottom: 12px; }
+    .desc { color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .topline-inline {
+      padding: 10px 16px; min-height: auto;
+      display: flex; align-items: center; gap: 12px; justify-content: flex-start;
+      border: 1px solid rgba(15,23,42,.08); border-radius: 14px;
+      background: rgba(255,255,255,.92); box-shadow: 0 16px 44px rgba(72,102,137,.10);
+    }
+    .crumb { text-align: center; color: #64748b; font-weight: 800; }
+    .crumb span { margin: 0 8px; color: #cbd5e1; }
+    .crumb strong { color: var(--text); }
+    .crumb em { margin-left: 10px; padding: 4px 8px; border-radius: 999px; color: #2563EB; background: #EFF6FF; font-size: 12px; font-style: normal; }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+    .prd-dl-btn { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 18px; border-radius:999px; background:#1d4ed8; border:1px solid #1d4ed8; color:#fff; font-weight:800; font-size:14px; text-decoration:none; box-shadow:0 8px 18px rgba(29,78,216,.22); transition:background .12s ease; }
+    .prd-dl-btn:hover { background:#1746c0; }
+    .prd-dl-btn .ic { font-size:15px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 10px 0 4px; }
+    .panel-title { margin: 0; font-size: 20px; line-height: 1.2; font-weight: 900; }
+    .eyebrow { margin-bottom: 6px; }
+    .module { border: 1px solid #e5edf6; border-radius: 14px; background: #fff; padding: 12px; }
+    .module-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .module-title strong { font-size: 15px; }
+    .module-title span { color: var(--soft); font-size: 12px; font-weight: 700; }
+    .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .upload-card {
+      min-height: 64px; border: 1px solid #dbe4f0; border-radius: 12px; background: #f8fbff; padding: 12px;
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left;
+    }
+    .upload-card strong { font-size: 14px; margin-bottom: 7px; }
+    .upload-card span { color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .selected-product {
+      margin-top: 10px; display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center;
+      padding: 9px; border-radius: 12px; background: #f8fafc; border: 1px solid #edf2f7;
+    }
+    .selected-product img { width: 64px; height: 50px; object-fit: cover; border-radius: 9px; background: #e2e8f0; }
+    .selected-product strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .selected-product span { color: var(--muted); font-size: 12px; }
+    .scene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .scene-card {
+      position: relative; min-height: 74px; padding: 12px; border: 1px solid #dbe4f0; border-radius: 12px;
+      background: #fff; text-align: left; overflow: hidden;
+    }
+    .scene-card.active { border-color: rgba(37,99,235,.42); background: linear-gradient(180deg, #f5f9ff, #fff); box-shadow: 0 10px 24px rgba(37,99,235,.08); }
+    .scene-card strong { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; margin-bottom: 6px; }
+    .scene-card em { color: var(--green); font-style: normal; font-size: 12px; }
+    .scene-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .rule-box {
+      min-height: 96px;
+      border: 1px solid rgba(37,99,235,.16);
+      background: #f8fbff;
+    }
+    .param-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .select-card {
+      width: 100%; min-height: 58px; border: 1px solid #dbe4f0; border-radius: 12px; background: #fff;
+      padding: 10px 12px; text-align: left; display: flex; flex-direction: column; justify-content: center;
+    }
+    .select-card span { color: var(--soft); font-size: 12px; margin-bottom: 6px; }
+    .select-card strong { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wide { width: 100%; min-height: 42px; }
+    .output-head {
+      display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; margin-bottom: 12px;
+    }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tab {
+      min-height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid #dbe4f0; background: #fff;
+      color: #334155; font-size: 13px; font-weight: 900;
+    }
+    .tab.active { color: #1d4ed8; background: #eef6ff; border-color: rgba(37,99,235,.28); }
+    .task-panel { border: 1px solid #e5edf6; border-radius: 14px; background: #fff; padding: 12px; }
+    .task-toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: nowrap; }
+    .task-toolbar .small-input { flex: 1; min-width: 0; height: 34px; padding: 0 12px; border-radius: 999px; }
+    .task-toolbar .small-btn { flex-shrink: 0; }
+    .task-list { display: grid; gap: 10px; max-height: calc(100vh - 248px); overflow: auto; padding-right: 4px; }
+    .task-card {
+      border: 1px solid #dbe4f0; border-radius: 14px; background: #fff; padding: 14px 12px; text-align: left;
+      display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; align-items: start;
+    }
+    .task-thumbs { display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; margin-top: 8px; }
+    .task-thumbs img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; background: #e8eef7; flex-shrink: 0; }
+    .task-card.active { border-color: rgba(37,99,235,.42); background: #f8fbff; box-shadow: 0 10px 24px rgba(37,99,235,.08); }
+    .task-thumb-main {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      object-fit: cover;
+      background: #e8eef7;
+      display: block;
+      align-self: start;
+    }
+    .task-main {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+    .task-title-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .task-title-line strong {
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .task-title-line span {
+      flex: 0 0 auto;
+      max-width: 190px;
+      color: #94a3b8;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .task-model-line {
+      color: #64748b;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .task-meta-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    .task-status-pill {
+      min-height: 26px;
+      padding: 0 11px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #16a34a;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .task-status-pill.pending {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+    .task-status-pill.stopped {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+    .task-meta-right {
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .task-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .progress { height: 4px; border-radius: 999px; background: #e8eef7; overflow: hidden; }
+    .progress b { display: block; height: 100%; width: var(--p, 100%); background: #2563eb; }
+    .history-empty {
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed #dbe4f0;
+      border-radius: 14px;
+      background: #fbfdff;
+      color: var(--muted);
+      text-align: center;
+      padding: 24px;
+    }
+    .history-empty strong { display: block; font-size: 18px; color: var(--text); margin-bottom: 8px; }
+    .comment-reserve {
+      margin-top: 12px; border-radius: 14px; border: 1px dashed rgba(37,99,235,.24); background: #f8fbff; padding: 12px 14px;
+      display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    }
+    .comment-reserve h3 { margin: 0 0 4px; font-size: 15px; }
+    .comment-reserve p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .small-btn {
+      min-height: 30px; padding: 0 10px; border-radius: 999px; border: 1px solid #dbe4f0; background: #fff;
+      color: #334155; font-size: 12px; font-weight: 900;
+    }
+    .small-btn.primary { color: #fff; border-color: #1d4ed8; background: #1d4ed8; }
+    .small-btn.danger { color: var(--danger); border-color: rgba(220,38,38,.2); background: #fff5f5; }
+    .small-btn.soft { color: #1d4ed8; border-color: rgba(37,99,235,.16); background: #eef6ff; }
+    .small-btn[disabled] {
+      opacity: .45;
+      cursor: not-allowed;
+      box-shadow: none;
+      color: #64748b;
+      background: #f8fafc;
+      border-color: #dbe4f0;
+    }
+    .modal-mask {
+      position: fixed; inset: 0; background: rgba(15,23,42,.42); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 60; padding: 28px;
+    }
+    .modal-mask.show { display: flex; }
+    .dropdown-panel {
+      position: absolute;
+      z-index: 40;
+      left: 0;
+      right: 0;
+      top: auto;
+      bottom: calc(100% + 8px);
+      max-height: 60vh;
+      overflow-y: auto;
+      border: 1px solid #dbe4f0;
+      border-radius: 18px;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 18px 42px rgba(15,23,42,.14);
+      padding: 12px;
+      display: none;
+    }
+    .dropdown-panel.show { display: block; }
+    .param-dropdown-anchor { position: relative; }
+    .modal {
+      width: min(1180px, calc(100vw - 80px));
+      height: min(760px, calc(100vh - 72px));
+      max-height: calc(100vh - 72px);
+      overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.4);
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 28px 80px rgba(15,23,42,.24);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal.small { width: min(960px, calc(100vw - 120px)); }
+    .modal-head {
+      flex: 0 0 auto;
+      padding: 18px 22px;
+      border-bottom: 1px solid #edf2f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .modal-head h3 { margin: 0 0 6px; font-size: 22px; }
+    .modal-actions { display: flex; gap: 8px; align-items: center; }
+    .modal-body { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 22px 22px; }
+    .status-pill { min-height: 28px; padding: 0 10px; border-radius: 999px; background: #ecfdf5; color: #047857; font-size: 12px; font-weight: 900; display: inline-flex; align-items: center; }
+    .scene-summary {
+      min-height: 46px; padding: 10px 12px; margin-bottom: 14px; border-radius: 12px; background: #f8fbff;
+      border: 1px solid rgba(37,99,235,.16); display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .scene-summary strong { font-size: 14px; }
+    .scene-summary span { color: var(--muted); font-size: 12px; }
+    .section-title {
+      display: flex; justify-content: space-between; gap: 10px; align-items: center;
+      margin: 16px 0 10px;
+    }
+    .section-title strong { font-size: 15px; }
+    .section-title span { color: var(--soft); font-size: 12px; font-weight: 700; }
+    .storyboard { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+    .shot { border: 1px solid #e6edf5; border-radius: 12px; background: #fff; padding: 10px; min-height: 88px; }
+    .shot b { display: block; color: #1d4ed8; font-size: 12px; margin-bottom: 7px; }
+    .shot strong { display: block; font-size: 13px; margin-bottom: 6px; }
+    .shot span { color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .result-grid { display: flex; flex-wrap: wrap; gap: 12px; align-items: start; justify-content: flex-start; }
+    .result-card {
+      width: 180px; flex-shrink: 0; border: 1px solid #dbe4f0; border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 10px 26px rgba(72,102,137,.08);
+    }
+    .result-card.selected { border-color: rgba(37,99,235,.45); box-shadow: 0 14px 30px rgba(37,99,235,.12); }
+    .result-image { position: relative; aspect-ratio: 4 / 3; background: #e9eef6; overflow: hidden; }
+    .result-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .result-badge {
+      position: absolute; left: 8px; top: 8px; min-height: 22px; padding: 0 7px; border-radius: 999px;
+      background: rgba(15,23,42,.76); color: #fff; display: inline-flex; align-items: center; font-size: 11px; font-weight: 900;
+    }
+    .result-body { padding: 10px; }
+    .result-title { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+    .result-title strong { font-size: 14px; }
+    .result-title span { color: var(--green); font-size: 12px; font-weight: 900; white-space: nowrap; }
+    .result-body p { margin: 0 0 10px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .image-summary {
+      margin: 0 0 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e6edf5;
+      display: grid;
+      gap: 4px;
+      font-size: 11px;
+      color: #334155;
+    }
+    .image-summary b { color: var(--soft); font-weight: 800; }
+    .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .detail-tabs {
+      display: flex; gap: 6px; margin: 0 0 14px; padding: 4px; border-radius: 12px; background: #f3f4f6;
+    }
+    .detail-tab {
+      min-height: 36px; padding: 0 16px; border-radius: 9px; color: #475569; font-size: 13px; font-weight: 900;
+    }
+    .detail-tab.active { color: #1d4ed8; background: #fff; box-shadow: 0 6px 14px rgba(15,23,42,.08); }
+    .review-panel { display: grid; gap: 14px; }
+    .review-config {
+      display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, .8fr); gap: 14px;
+      padding: 14px; border: 1px solid #e5edf6; border-radius: 14px; background: #fbfdff;
+    }
+    .review-field { display: grid; gap: 8px; }
+    .review-field:last-child { align-content: start; }
+    .review-field label { color: #334155; font-size: 13px; font-weight: 900; }
+    .review-field textarea { min-height: 76px; }
+    .review-counts {
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px;
+      padding: 4px; border-radius: 14px; background: #f1f2f5;
+    }
+    .review-count-btn {
+      min-height: 38px; border: 0; border-radius: 10px; background: transparent;
+      color: #4e5969; font-size: 13px; font-weight: 900;
+      transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+    }
+    .review-count-btn.active { color: #111827; background: #fff; box-shadow: 0 5px 14px rgba(15,23,42,.1); }
+    .custom-count-row {
+      width: min(220px, 100%); justify-self: end;
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center;
+    }
+    .custom-count-row input { min-height: 38px; padding: 8px 10px; }
+    .custom-count-row span { color: var(--soft); font-size: 12px; white-space: nowrap; }
+    #batchGenerateReviewsBtn { justify-self: end; min-width: 118px; min-height: 34px; padding: 0 14px; }
+    .review-actions { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .review-actions-left, .review-actions-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .review-actions .desc { font-size: 12px; }
+    .review-list { display: grid; gap: 10px; }
+    .review-card {
+      display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 12px; align-items: start;
+      padding: 12px; border: 1px solid #dbe4f0; border-radius: 14px; background: #fff;
+    }
+    .review-thumb { width: 76px; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #e8eef7; }
+    .review-main { min-width: 0; }
+    .review-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 7px; color: var(--soft); font-size: 11px; }
+    .review-meta b { color: #1d4ed8; font-size: 12px; }
+    .review-text {
+      min-height: 66px; padding: 9px 10px; border-radius: 10px; color: #334155; font-size: 13px; line-height: 1.55;
+    }
+    .review-side { display: grid; gap: 7px; justify-items: stretch; min-width: 78px; }
+    .review-empty {
+      min-height: 220px; display: grid; place-items: center; padding: 24px; border: 1px dashed #dbe4f0;
+      border-radius: 14px; background: #fbfdff; color: var(--muted); text-align: center;
+    }
+    .review-empty strong { display: block; margin-bottom: 7px; color: var(--text); font-size: 16px; }
+    .edit-layout {
+      display: grid;
+      grid-template-columns: 360px minmax(420px, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .preview-panel, .editor-panel, .candidate-panel {
+      border: 1px solid #e5edf6;
+      border-radius: 16px;
+      background: #fff;
+      padding: 14px;
+    }
+    .preview-large {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #e8eef7;
+      margin-bottom: 12px;
+    }
+    .preview-large img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .quick-action {
+      min-height: 58px;
+      border-radius: 12px;
+      border: 1px solid #dbe4f0;
+      background: #fff;
+      padding: 10px;
+      text-align: left;
+    }
+    .quick-action.active { border-color: rgba(37,99,235,.35); background: #eef6ff; color: #1d4ed8; }
+    .quick-action strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .quick-action span { color: inherit; opacity: .85; font-size: 12px; line-height: 1.4; }
+    .inherit-box {
+      margin: 12px 0;
+      padding: 12px;
+      border-radius: 12px;
+      background: #f8fbff;
+      border: 1px solid rgba(37,99,235,.16);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .candidate-panel { margin-top: 16px; }
+    .candidate-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .candidate-card {
+      border: 1px solid #dbe4f0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .candidate-card.selected { border-color: rgba(37,99,235,.42); box-shadow: 0 12px 28px rgba(37,99,235,.12); }
+    .candidate-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #e8eef7; }
+    .candidate-body { padding: 12px; }
+    .candidate-body strong { display: block; font-size: 13px; margin-bottom: 6px; }
+    .candidate-body p { margin: 0 0 10px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .option-list { display: grid; gap: 10px; }
+    .option-card {
+      width: 100%;
+      border: 1px solid #dbe4f0;
+      border-radius: 16px;
+      background: #fff;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      text-align: left;
+    }
+    .option-card.active {
+      border-color: rgba(37,99,235,.45);
+      background: #eef5ff;
+      box-shadow: 0 14px 32px rgba(37,99,235,.12);
+    }
+    .option-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid #dbe4f0;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      font-weight: 900;
+      color: #111827;
+    }
+    .option-copy strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .option-copy span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .option-side {
+      display: grid;
+      justify-items: end;
+      gap: 10px;
+    }
+    .option-time {
+      min-width: 72px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(249,115,22,.28);
+      color: #f97316;
+      background: #fff7ed;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .option-status {
+      min-width: 64px;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .param-section { margin-bottom: 14px; }
+    .param-section:last-child { margin-bottom: 0; }
+    .param-section h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      padding: 6px;
+      border-radius: 14px;
+      background: #f3f4f6;
+    }
+    .segment {
+      min-height: 44px;
+      border-radius: 12px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: #475569;
+    }
+    .segment.active {
+      background: #fff;
+      color: #0f172a;
+      box-shadow: 0 8px 18px rgba(15,23,42,.08);
+    }
+    .ratio-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 6px;
+      border-radius: 14px;
+      background: #f3f4f6;
+    }
+    .ratio-card {
+      min-height: 80px;
+      border-radius: 12px;
+      background: transparent;
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 6px;
+      color: #475569;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .ratio-card.active {
+      background: #fff;
+      color: #0f172a;
+      box-shadow: 0 8px 18px rgba(15,23,42,.08);
+    }
+    .ratio-icon {
+      border: 3px solid currentColor;
+      border-radius: 4px;
+    }
+    .ratio-square { width: 28px; height: 28px; }
+    .ratio-vertical { width: 24px; height: 38px; }
+    .ratio-horizontal { width: 38px; height: 24px; }
+    .ratio-smart {
+      width: 24px;
+      height: 32px;
+      position: relative;
+      border: 3px solid currentColor;
+      border-radius: 4px;
+    }
+    .ratio-smart:after {
+      content: "";
+      position: absolute;
+      right: -14px;
+      top: 4px;
+      width: 20px;
+      height: 14px;
+      border: 3px solid currentColor;
+      border-radius: 4px;
+    }
+    .count-grid {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 6px;
+      padding: 6px;
+      border-radius: 14px;
+      background: #f3f4f6;
+    }
+    .count-card {
+      min-height: 46px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: #475569;
+      background: transparent;
+    }
+    .count-card.active {
+      background: #fff;
+      color: #0f172a;
+      box-shadow: 0 8px 18px rgba(15,23,42,.08);
+    }
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 90;
+      min-width: 240px;
+      max-width: 420px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(15,23,42,.92);
+      color: #fff;
+      box-shadow: 0 20px 48px rgba(15,23,42,.28);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* AI 润色弹窗（与商品套图一致） */
+    .polish-scrim { position: absolute; left: 0; right: 0; bottom: 100%; z-index: 60; display: flex; align-items: flex-end; justify-content: center; padding: 0 16px 8px; }
+    .polish-modal { width: 100%; margin-top: 8px; display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 16px; border-radius: 14px; background: #fff; box-shadow: 0 18px 44px rgba(15,23,42,.18); border: 1px solid #eef2f7; }
+    .polish-head { display: flex; align-items: center; justify-content: space-between; }
+    .polish-head strong { font-size: 15px; font-weight: 800; }
+    .polish-head .polish-status { font-size: 13px; font-weight: 700; color: #2f6bff; }
+    .polish-body { color: #334155; font-size: 14px; line-height: 1.9; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 40vh; overflow-y: auto; }
+    .polish-foot { display: flex; justify-content: flex-end; gap: 10px; }
+    /* 点赞/倒赞图标按钮 */
+    .thumb-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid #dbe4f0; background: #fff; font-size: 16px; display: inline-grid; place-items: center; cursor: pointer; transition: .12s; }
+    .thumb-btn:hover { background: #f1f5f9; }
+    .thumb-btn.up.active { background: #dcfce7; border-color: #86efac; color: #16a34a; }
+    .thumb-btn.down.active { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+    .hidden { display: none !important; }
+    .lib-tabs { display: flex; gap: 6px; margin-bottom: 10px; padding: 4px; border-radius: 12px; background: #f3f4f6; }
+    .lib-tab {
+      flex: 1; min-height: 34px; border-radius: 9px; background: transparent;
+      font-size: 13px; font-weight: 800; color: #475569; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .lib-tab.active { background: #fff; color: #0f172a; box-shadow: 0 6px 14px rgba(15,23,42,.08); }
+    .lib-tab .badge { background: #eef4fb; }
+    .scene-sub-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; font-weight: 800; color: #334155; margin-bottom: 8px;
+    }
+    .scene-sub-label span { color: var(--soft); font-size: 12px; font-weight: 700; }
+    .rule-readonly {
+      min-height: 96px; border: 1px solid #e5edf6; border-radius: 12px; background: #f8fafc;
+      padding: 12px; color: var(--muted); font-size: 12px; line-height: 1.55; white-space: pre-line;
+    }
+    .rule-readonly .rule-base { color: #0f172a; font-weight: 700; }
+    .rule-dim-list { display: grid; gap: 8px; }
+    .rule-dim-row { display: grid; grid-template-columns: 84px 1fr; gap: 10px; align-items: start; }
+    .rule-dim-row b { color: var(--blue); font-weight: 800; }
+    .base-rule-box {
+      margin-top: 10px; border-radius: 10px; border: 1px solid #e6edf5; background: #f8fafc;
+      padding: 10px 12px; color: #334155; font-size: 12px; line-height: 1.5; white-space: pre-line;
+    }
+    .base-rule-box b { color: var(--soft); font-weight: 800; }
+    .lib-empty { grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--muted); font-size: 13px; border: 1px dashed #dbe4f0; border-radius: 12px; background: #fbfdff; }
+    .dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .dim-field { display: grid; gap: 6px; }
+    .dim-field label { font-size: 13px; font-weight: 800; color: #334155; display: flex; align-items: center; gap: 6px; }
+    .dim-field label i { font-style: normal; color: var(--soft); font-size: 11px; font-weight: 600; }
+    .dim-field textarea { min-height: 60px; }
+    .form-field { display: grid; gap: 6px; margin-bottom: 14px; }
+    .form-field label { font-size: 13px; font-weight: 800; color: #334155; }
+    .form-field .hint { color: var(--soft); font-size: 12px; }
+    .badge-tag { min-height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; }
+    .badge-tag.public { background: #ecfdf5; color: #047857; }
+    .badge-tag.mine { background: #eff6ff; color: #2563eb; }
+    .manage-layout { display: grid; grid-template-columns: 300px minmax(420px, 1fr); gap: 16px; align-items: start; }
+    .manage-side { border: 1px solid #e5edf6; border-radius: 14px; background: #fbfdff; padding: 12px; }
+    .manage-side h4 { margin: 0; font-size: 13px; color: var(--soft); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .manage-cat-list { display: grid; gap: 6px; margin-bottom: 0; }
+    .manage-cat-item {
+      width: 100%; border: 1px solid #dbe4f0; border-radius: 10px; background: #fff; padding: 9px 10px;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left; font-size: 13px; font-weight: 700; color: #334155;
+    }
+    .manage-scene-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .manage-scene-head strong { font-size: 13px; }
+    .manage-scene-head span { color: var(--soft); font-size: 12px; }
+    .manage-icon-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid #e2e8f0; background: #fff; font-size: 13px; display: inline-grid; place-items: center; cursor: pointer; transition: .12s; color: #64748b; }
+    .manage-icon-btn:hover { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
+    .manage-icon-btn.danger:hover { color: #dc2626; border-color: #fecaca; background: #fff1f2; }
+    .manage-icon-btn.publish:hover { color: #2563eb; border-color: #bfdbfe; background: #eff6ff; }
+    .manage-icon-btn.add { color: #2563eb; border-color: #bfdbfe; background: #eff6ff; }
+    .manage-icon-btn.add:hover { background: #2563eb; color: #fff; }
+    .manage-cat-item.active { border-color: rgba(37,99,235,.42); background: #eef6ff; color: #1d4ed8; }
+    .manage-scene-list { display: grid; gap: 8px; }
+    .manage-scene-item {
+      border: 1px solid #dbe4f0; border-radius: 12px; background: #fff; padding: 10px 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    }
+    .manage-scene-item.active { border-color: rgba(37,99,235,.42); background: #f8fbff; }
+    .manage-scene-item strong { font-size: 13px; }
+    .manage-scene-item span { color: var(--soft); font-size: 11px; }
+    .manage-scene-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    @media (max-width: 1500px) {
+      .workspace { grid-template-columns: minmax(580px, 1fr) minmax(580px, 1fr); }
+      .storyboard { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .edit-layout { grid-template-columns: 320px minmax(420px, 1fr); }
+    }
+    /* ===== PRD 标注层样式 ===== */
+    .prd-badge{display:inline-flex;align-items:center;justify-content:center;height:14px;min-width:14px;padding:0 3px;margin-left:3px;border-radius:3px;border:1.5px solid #2563eb;color:#2563eb;background:#fff;font-size:10px;font-weight:700;font-style:normal;line-height:1;cursor:pointer;vertical-align:super;white-space:nowrap;transition:background .12s ease,color .12s ease;}
+    .prd-badge:hover{background:#2563eb;color:#fff;}
+    .prd-badge-corner{position:absolute;top:-2px;right:-18px;margin-left:0;vertical-align:baseline;z-index:2;}
+    .prd-anchor{position:relative;display:inline-flex;}
+    .prd-pop-backdrop{display:none;position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,.32);}
+    .prd-pop-backdrop.show{display:block;}
+    .prd-popover{display:none;position:fixed;z-index:9999;width:420px;max-width:calc(100vw - 32px);max-height:70vh;overflow:auto;border-radius:12px;background:#fff;border:1px solid #e6e9f0;box-shadow:0 24px 60px rgba(20,28,50,.22);padding:16px 18px 18px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;}
+    .prd-popover.show{display:block;}
+    .prd-pop-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;}
+    .prd-pop-tag{display:inline-block;margin-bottom:6px;padding:2px 8px;border-radius:999px;background:#eaf1ff;color:#2563eb;font-size:11px;font-weight:700;}
+    .prd-pop-title{margin:0;font-size:14px;font-weight:700;color:#16213a;line-height:1.4;}
+    .prd-pop-close{flex:none;width:22px;height:22px;border:0;border-radius:6px;background:#f6f8fc;color:#5b6678;font-size:14px;line-height:1;cursor:pointer;}
+    .prd-pop-body{margin-top:10px;font-size:13px;line-height:1.7;color:#344054;white-space:pre-wrap;}
+    .prd-pop-source{margin-top:12px;padding-top:10px;border-top:1px dashed #e6e9f0;color:#8a93a6;font-size:11.5px;}
+    .prd-pop-actions{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px dashed #e6e9f0;}
+    .prd-pop-actions button{flex:none;padding:6px 12px;border-radius:7px;border:1px solid #e6e9f0;background:#fff;color:#16213a;font-size:12.5px;font-weight:600;cursor:pointer;}
+    .prd-pop-actions button.primary{border-color:#2563eb;background:#2563eb;color:#fff;}
+    .prd-pop-actions button.danger{border-color:#fca5a5;color:#e0383f;background:#fff;}
+    .prd-pop-actions .spacer{flex:1;}
+    .prd-pop-edit-field{display:block;margin-bottom:8px;}
+    .prd-pop-edit-field input,.prd-pop-edit-field textarea{width:100%;border:1px solid #e6e9f0;border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;color:#16213a;background:#fbfcfe;resize:vertical;}
+    .prd-pop-edit-field textarea{min-height:140px;line-height:1.6;}
+    .prd-pop-edited-tag{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;background:#fff7ed;color:#b45309;font-size:10.5px;font-weight:700;vertical-align:middle;}
+    .custom-pin{position:absolute;width:18px;height:18px;margin:0;padding:0;transform:translate(-50%,-50%);border-radius:50%;border:1.5px solid #16a34a;background:#fff;color:#15803d;font-size:10px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;z-index:30;box-shadow:0 2px 6px rgba(22,163,74,.3);}
+    .custom-pin:hover{background:#16a34a;color:#fff;}
+    .custom-pin-layer{position:absolute;inset:0;pointer-events:none;}
+    .custom-pin-layer .custom-pin{pointer-events:auto;}
+    body.placing-mark{cursor:crosshair;}
+    .placing-hint{display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9990;padding:8px 16px;border-radius:999px;background:#16a34a;color:#fff;font-size:13px;font-weight:600;box-shadow:0 10px 24px rgba(22,163,74,.35);}
+    body.placing-mark .placing-hint{display:block;}
+    .anno-toolbar{position:fixed;right:22px;bottom:22px;z-index:9970;display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+    .anno-fab{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:999px;border:1px solid #e6e9f0;background:#fff;color:#16213a;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(15,23,42,.16);font-family:inherit;}
+    .anno-fab.active{border-color:#16a34a;background:#16a34a;color:#fff;}
+    .anno-fab.copy{border-color:#2563eb;background:#2563eb;color:#fff;}
+    .anno-toast{position:fixed;bottom:90px;right:22px;z-index:9980;background:#16213a;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;pointer-events:none;}
+    .anno-toast.show{opacity:1;transform:translateY(0);}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/logo.png" alt="先马 AI设计平台">
+        <span><strong class="brand-title">先马 AI设计平台</strong><span class="brand-sub">Creative Workspace</span></span>
+      </div>
+      <nav class="nav">
+        <span class="nav-link active">工作台</span>
+        <span class="nav-link">工具中心</span>
+        <span class="nav-link">自研工具</span>
+        <span class="nav-link">素材库</span>
+        <span class="nav-link">历史记录</span>
+        <span class="nav-link">帮助文档</span>
+      </nav>
+      <div class="account-top">
+        <div class="avatar">勾</div>
+        <span><strong class="account-name">勾陈</strong><span class="account-sub">AI设计平台</span></span>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <p class="side-label">快速入口</p>
+      <div class="side-section">
+        <div class="side-row"><span class="side-main"><span class="icon">▦</span><span class="side-title">生图工具</span></span><span class="badge">5</span></div>
+        <div class="branch">
+          <div class="side-link"><span class="icon">✳</span>专家模式</div>
+          <div class="side-link"><span class="icon">▣</span>一键改字</div>
+          <div class="side-link"><span class="icon">◒</span>主体替换</div>
+          <div class="side-link"><span class="icon">□</span>产品微调</div>
+          <div class="side-link"><span class="icon">Ⅱ</span>批量美颜</div>
+        </div>
+      </div>
+      <div class="side-section">
+        <div class="side-row active"><span class="side-main"><span class="icon">◐</span><span class="side-title">AI能力...</span></span><span class="badge">5</span></div>
+        <div class="branch">
+          <div class="side-link"><span class="icon">▱</span>AI多角度</div>
+          <div class="side-link"><span class="icon">☞</span>AI区域重绘</div>
+          <div class="side-link"><span class="icon">✳</span>AI提示词</div>
+          <div class="side-link active"><span class="icon">◒</span>AI买家秀</div>
+          <div class="side-link"><span class="icon">▱</span>AI视频流</div>
+        </div>
+      </div>
+      <div class="side-link"><span class="icon">▱</span>AI 无限画布</div>
+      <div class="side-link"><span class="icon">◒</span>素材管理中心</div>
+      <div class="divider"></div>
+      <div class="side-link"><span class="icon">◐</span>数据智能</div>
+      <div class="side-link"><span class="icon">♙</span>权限管理</div>
+      <div class="side-link"><span class="icon">⚙</span>系统设置</div>
+    </aside>
+
+    <main class="main">
+      <div class="page-head topline-card" style="margin-bottom:14px;padding:10px 16px;min-height:auto;display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:12px;border:1px solid rgba(15,23,42,.08);border-radius:14px;background:rgba(255,255,255,.92);box-shadow:0 16px 44px rgba(72,102,137,.10);">
+        <button class="ghost-btn" style="flex:none;">‹ 返回</button>
+        <div class="crumb">AI能力中心 <span>/</span> <strong>AI买家秀</strong> <em>场景化输出</em></div>
+        <div style="margin-left:auto;">
+          <a class="prd-dl-btn" href="prd/AI买家秀-PRD.md" download="AI买家秀-PRD.md"><span class="ic">⬇</span>下载 PRD</a>
+        </div>
+      </div>
+      <section class="workspace">
+        <aside class="config-panel card">
+          <div class="config-scroll">
+          <div class="panel-head">
+            <div>
+              <div class="eyebrow">WORKSPACE</div>
+              <h1 class="panel-title">AI买家秀</h1>
+              <div class="desc">选商品、选场景，自动带出规则后直接生成一组买家秀图。</div>
+            </div>
+          </div>
+
+          <div class="module">
+            <div class="module-title"><strong><span class="prd-anchor">图片队列<span class="prd-badge prd-badge-corner" data-prd="buyer-images" tabindex="0" role="button">1</span></span></strong><span>1 / 16 · 单张 20MB 内</span></div>
+            <div class="upload-grid">
+              <button class="upload-card"><strong>素材库选择</strong><span>个人/公共素材库</span></button>
+              <button class="upload-card"><strong>本地上传</strong><span>电脑多图上传</span></button>
+            </div>
+            <div class="selected-product">
+              <img src="assets/buyer.webp" alt="商品图">
+              <div><strong>图一</strong><span>f4281d95...png · 1.6MB</span></div>
+              <button class="small-btn">更换</button>
+            </div>
+          </div>
+
+          <div class="module">
+            <div class="module-title">
+              <strong>场景</strong>
+              <span class="prd-anchor"><button class="small-btn soft" id="manageToggleBtn">⚙ 管理</button><span class="prd-badge prd-badge-corner" data-prd="buyer-manage-lib" tabindex="0" role="button">5</span></span>
+            </div>
+
+            <div class="scene-sub-label"><span class="prd-anchor">产品品类<span class="prd-badge prd-badge-corner" data-prd="buyer-category" tabindex="0" role="button">2</span></span> <span id="productTypeHint">选品类 · 带出该品类场景</span></div>
+            <div class="param-dropdown-anchor">
+              <button class="select-card" id="categoryCard"><span>品类</span><strong id="categoryValue">未选择</strong></button>
+              <div class="dropdown-panel" id="categoryDropdown">
+                <input id="categorySearchInput" type="text" placeholder="搜索品类名称" style="margin-bottom:10px">
+                <div class="option-list" id="categoryOptionList"></div>
+              </div>
+            </div>
+            <div class="base-rule-box hidden" id="baseRuleBox"></div>
+
+            <div class="scene-sub-label" style="margin-top:14px"><span class="prd-anchor">场景预设<span class="prd-badge prd-badge-corner" data-prd="buyer-scenes" tabindex="0" role="button">3</span></span> <span id="sceneHint">选场景 · 自动带规则</span></div>
+            <div class="lib-tabs" id="libTabs">
+              <button class="lib-tab active" data-lib="public">公共场景库 <span class="badge" id="publicCountBadge">0</span></button>
+              <button class="lib-tab" data-lib="mine">我的场景库 <span class="badge" id="mineCountBadge">0</span></button>
+            </div>
+            <div class="scene-grid" id="sceneGrid"></div>
+
+            <div class="scene-sub-label" style="margin-top:14px"><span class="prd-anchor">场景规则<span class="prd-badge prd-badge-corner" data-prd="buyer-rules" tabindex="0" role="button">4</span></span> <span>内置 · 生成时自动生效</span></div>
+            <div class="desc" id="ruleSummaryLine" style="margin-bottom:10px"></div>
+            <button class="small-btn soft" id="viewRuleBtn">查看规则</button>
+            <div class="rule-readonly hidden" id="ruleReadonly" style="margin-top:10px"></div>
+          </div>
+
+          <div class="module">
+            <div class="module-title"><strong><span class="prd-anchor">综合提示词<span class="prd-badge prd-badge-corner" data-prd="buyer-prompt" tabindex="0" role="button">6</span></span></strong><span class="prd-anchor"><button class="soft-btn" id="polishPromptBtn">AI 润色</button><span class="prd-badge prd-badge-corner" data-prd="buyer-polish" tabindex="0" role="button">7</span></span></div>
+            <textarea id="promptInput" placeholder="例如：画面像手机随手拍，人物穿深色开衫，整体干净可信。"></textarea>
+          </div>
+
+          <div class="module">
+            <div class="module-title"><strong>生成参数</strong></div>
+            <div class="param-row">
+              <div class="param-dropdown-anchor">
+                <span class="prd-anchor" style="display:block"><button class="select-card" id="modelCard"><span>模型</span><strong id="modelValue">Nano Banana 2</strong></button><span class="prd-badge prd-badge-corner" data-prd="buyer-model" tabindex="0" role="button">8</span></span>
+                <div class="dropdown-panel" id="modelDropdown" style="width:460px">
+                  <div class="option-list" id="modelOptionList"></div>
+                </div>
+              </div>
+              <div class="param-dropdown-anchor">
+                <span class="prd-anchor" style="display:block"><button class="select-card" id="paramCard"><span>参数</span><strong id="paramValue">2K · 4:3 · 高画质 · 4 张</strong></button><span class="prd-badge prd-badge-corner" data-prd="buyer-params" tabindex="0" role="button">9</span></span>
+                <div class="dropdown-panel" id="paramDropdown">
+                  <section class="param-section">
+                    <h4>清晰度</h4>
+                    <div class="segmented" id="resolutionOptions"></div>
+                  </section>
+                  <section class="param-section">
+                    <h4>图片尺寸</h4>
+                    <div class="ratio-grid" id="ratioOptions"></div>
+                  </section>
+                  <section class="param-section">
+                    <h4>图片张数</h4>
+                    <div class="count-grid" id="countOptions"></div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+          <div class="config-foot">
+            <span class="prd-anchor" style="flex:1;display:flex"><button class="primary-btn" id="submitTaskBtn" style="flex:1">提交任务</button><span class="prd-badge prd-badge-corner" data-prd="buyer-submit" tabindex="0" role="button">10</span></span>
+            <span class="prd-anchor"><button class="ghost-btn" id="resetConfigBtn">清空</button><span class="prd-badge prd-badge-corner" data-prd="buyer-clear" tabindex="0" role="button">11</span></span>
+          </div>
+        </aside>
+
+        <section class="output-panel card">
+          <div class="output-head" style="padding:16px">
+            <div>
+              <div class="eyebrow">OUTPUT</div>
+              <h2 class="panel-title"><span class="prd-anchor">结果栏<span class="prd-badge prd-badge-corner" data-prd="buyer-task-list" tabindex="0" role="button">12</span></span></h2>
+              <div class="desc">右侧先只看任务列表，点任务后再弹窗看详情，页面保持清爽。</div>
+            </div>
+            <div class="tabs">
+              <button class="tab active">任务列表</button>
+              <button class="tab">评论文案 · 任务内</button>
+              <button class="tab">历史</button>
+            </div>
+          </div>
+
+          <div class="output-scroll">
+          <aside class="task-panel">
+            <div class="module-title"><strong>结果任务</strong><span id="taskCountLabel">0 个任务</span></div>
+            <div class="task-toolbar">
+              <input class="small-input" id="taskSearchInput" type="text" placeholder="搜索任务时间 / 场景 / 请求 ID">
+              <button class="small-btn soft" id="resetTaskFilterBtn">重置</button>
+            </div>
+            <div class="task-list" id="taskList"></div>
+          </aside>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-mask" id="taskDetailMask" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">BUYER SHOW TASK</div>
+          <h3 id="taskDetailTitle">任务详情</h3>
+          <div class="desc" id="taskDetailDesc"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="soft-btn" id="openReviewBatchBtn">生成整套评价</button>
+          <button class="soft-btn" id="downloadZipBtn">全部下载 ZIP</button>
+          <span class="status-pill" id="taskDetailStatus">已完成</span>
+          <button class="ghost-btn" data-close="taskDetailMask">关闭</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="scene-summary">
+          <div>
+            <strong id="taskSceneLabel"></strong><br>
+            <span id="taskRuleHint">规则在提交前可编辑，历史任务内默认只读。</span>
+          </div>
+          <button class="soft-btn" id="toggleRuleBtn">查看规则</button>
+        </div>
+
+        <div class="detail-tabs" id="detailTabs">
+          <button class="detail-tab active" data-detail-view="images">结果图片</button>
+          <button class="detail-tab" data-detail-view="reviews"><span class="prd-anchor">评价文案<span class="prd-badge prd-badge-corner" data-prd="buyer-reviews" tabindex="0" role="button">15</span></span> <span id="reviewTabCount">0</span></button>
+        </div>
+
+        <div class="module hidden" id="rulePreviewBox" style="margin-bottom:14px">
+          <div class="module-title"><strong>场景规则</strong><span>历史任务只读</span></div>
+          <div class="desc" id="taskRulePreview" style="white-space: pre-line"></div>
+        </div>
+
+        <section id="imageResultPanel">
+          <div class="section-title"><strong>分镜记录</strong><span id="storyboardCountLabel"></span></div>
+          <div class="storyboard" id="storyboardGrid"></div>
+
+          <div class="section-title"><strong><span class="prd-anchor">结果图<span class="prd-badge prd-badge-corner" data-prd="buyer-results" tabindex="0" role="button">13</span></span></strong><span id="resultCountLabel"></span></div>
+          <div class="result-grid" id="resultGrid"></div>
+        </section>
+
+        <section class="review-panel hidden" id="reviewPanel">
+          <div class="review-config">
+            <div class="review-field">
+              <label for="reviewSellingPoints">商品卖点</label>
+              <textarea id="reviewSellingPoints" placeholder="例如：支撑稳、佩戴贴合、日常活动方便">支撑稳、佩戴贴合、日常活动方便</textarea>
+              <div class="desc">系统同时参考任务场景、图片内容和运营评价标准；每条评价覆盖 1-3 个卖点。</div>
+            </div>
+            <div class="review-field">
+              <label>生成数量</label>
+              <div class="review-counts" id="reviewCountOptions"></div>
+              <div class="custom-count-row hidden" id="customCountRow">
+                <input id="customReviewCount" type="number" min="1" max="20" step="1" value="5" aria-label="自定义评价数量">
+                <span>最多 20 条</span>
+              </div>
+              <button class="small-btn primary" id="batchGenerateReviewsBtn">批量生成评价</button>
+            </div>
+          </div>
+          <div class="review-actions">
+            <div class="review-actions-left">
+              <strong id="reviewCountLabel">0 条评价</strong>
+              <span class="desc">每条评价已关联具体结果图，内容由AI生成需人工进行审核后使用。</span>
+            </div>
+            <div class="review-actions-right">
+              <button class="small-btn" id="copyAllReviewsBtn">复制全部</button>
+              <span class="prd-anchor"><button class="small-btn soft" id="exportReviewsBtn">导出 Excel</button><span class="prd-badge prd-badge-corner" data-prd="buyer-export" tabindex="0" role="button">16</span></span>
+            </div>
+          </div>
+          <div class="review-list" id="reviewList"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="imageEditMask" aria-hidden="true">
+    <div class="modal small">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow">SINGLE IMAGE EDIT</div>
+          <h3 id="editModalTitle"><span class="prd-anchor">单图返修<span class="prd-badge prd-badge-corner" data-prd="buyer-edit-image" tabindex="0" role="button">14</span></span></h3>
+          <div class="desc">只改当前这一张，其他结果不受影响；默认继承原任务场景规则和参数。</div>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-btn" data-close="imageEditMask">关闭</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="edit-layout">
+          <section class="preview-panel">
+            <div class="preview-large"><img id="editSourceImage" src="" alt="待编辑图片"></div>
+            <div class="image-summary" id="editImageSummary"></div>
+            <div class="desc">建议把“人物、佩戴、背景、真实感”这类问题拆成一句话来改，结果会更稳。</div>
+          </section>
+
+          <section>
+            <div class="editor-panel">
+              <div class="section-title" style="margin-top:0"><strong>快速返修</strong><span>推荐先选一个方向</span></div>
+              <div class="quick-actions" id="quickActionGrid"></div>
+
+              <div class="inherit-box" id="inheritInfo"></div>
+
+              <div class="section-title"><strong>补充要求</strong><span>只写这次差异</span></div>
+              <textarea id="editInstructionInput" placeholder="例如：保持护腰带不变，只调整人物手部动作，让姿势更自然。"></textarea>
+
+              <div class="card-actions" style="margin-top:12px">
+                <button class="small-btn soft" id="generateCandidatesBtn">生成 2 张候选</button>
+                <button class="small-btn" id="clearEditInstructionBtn">清空</button>
+              </div>
+            </div>
+
+            <div class="candidate-panel">
+              <div class="section-title" style="margin-top:0"><strong>返修候选</strong><span id="candidateCountLabel">请选择一个结果替换</span></div>
+              <div class="candidate-grid" id="candidateGrid"></div>
+              <div class="card-actions" style="margin-top:12px">
+                <button class="small-btn primary" id="applyCandidateBtn">替换当前结果</button>
+                <button class="small-btn" data-close="imageEditMask">稍后再说</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="libEditMask" aria-hidden="true">
+    <div class="modal" id="libEditModal">
+      <div class="modal-head">
+        <div>
+          <div class="eyebrow" id="libEditEyebrow">SCENE LIBRARY</div>
+          <h3 id="libEditTitle">管理场景库</h3>
+          <div class="desc" id="libEditDesc">公共场景库只读；新增、编辑、删除只作用于「我的场景库」，改好后可发布到公共。</div>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-btn hidden" id="libEditBackBtn">‹ 返回列表</button>
+          <button class="ghost-btn" data-close="libEditMask">关闭</button>
+        </div>
+      </div>
+      <div class="modal-body" id="libEditBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // 嵌入模式：在 iframe 中运行时隐藏自身的顶栏和侧栏
+    (function(){
+      if (window.self === window.top) return;
+      if (new URLSearchParams(window.location.search).get('embed') !== '1') return;
+      var s = document.createElement('style');
+      s.textContent = '.topbar,.sidebar{display:none!important} .main{position:static!important;height:100%!important;margin:0!important;left:auto!important;top:auto!important;padding:24px!important;width:auto!important;min-width:0!important} .app{min-width:0!important}';
+      document.head.appendChild(s);
+    })();
+
+    // 场景规则的 6 个维度（只用于「场景差异规则」，品类基础规则单独一层）
+    const RULE_DIMENSIONS = [
+      { key: "people", label: "人物", hint: "年龄/状态/表情/着装" },
+      { key: "scene", label: "场景描述", hint: "具体地点/环境" },
+      { key: "light", label: "光线", hint: "明暗/光源" },
+      { key: "angle", label: "角度构图", hint: "机位/景别" },
+      { key: "action", label: "动作姿态", hint: "在做什么/避免什么" },
+      { key: "real", label: "真实感画风", hint: "整体基调/风格" }
+    ];
+
+    // 内置公共场景库：护腰带一个品类，基础规则 + 4 个场景（差异规则按 6 维度拆分）
+    const defaultLibrary = {
+      public: [
+        {
+          id: "cat-waist",
+          name: "护腰带",
+          sellingPoints: "支撑稳、佩戴贴合、日常活动方便、透气不闷热",
+          baseRules: "以用户上传的商品图为基准，保持产品结构、颜色、材质与图案不变，禁止重新生成或臆造产品细节；护腰带需紧贴腰腹部，不上滑至胸口、不下滑至臀部；绑带方向符合真实使用逻辑，产品边缘和魔术贴细节清晰，不漂浮、不穿模。",
+          scenes: [
+            {
+              id: "sc-medical",
+              name: "医疗康复",
+              desc: "医院康复科候诊区",
+              dims: {
+                people: "60 岁左右中老年人，皮肤保留真实纹理和毛孔质感，有自然的表情皱纹，无磨皮痕迹。",
+                scene: "医院康复科候诊区，米白墙面、康复科指示牌、窗边自然光洒入。",
+                light: "窗边自然光，柔和不刺眼。",
+                angle: "半侧面、颈部以下构图，手机原相机抓拍感。",
+                action: "坐在候诊椅上弯腰系鞋带或捡拾物品，动作缓慢自然不吃力，旁边可放置折叠拐杖作为环境元素。",
+                real: "生活化随手拍质感，非商业广告精修感。"
+              }
+            },
+            {
+              id: "sc-elder",
+              name: "中老年居家",
+              desc: "客厅、厨房、日常活动",
+              dims: {
+                people: "人物年龄感偏中老年，表情自然放松，避免年轻化过度修饰。",
+                scene: "客厅、卧室、餐桌等家庭空间。",
+                light: "室内自然光，氛围温和。",
+                angle: "全景与腰部近景结合，露出比例适中。",
+                action: "起身、走动等日常轻活动。",
+                real: "生活气息强，可信不摆拍。"
+              }
+            },
+            {
+              id: "sc-homecare",
+              name: "居家治疗",
+              desc: "床边、沙发、明亮室内",
+              dims: {
+                people: "主体比例真实，不夸大体态变化。",
+                scene: "沙发、床边、靠垫等辅助休息环境。",
+                light: "室内明亮柔和。",
+                angle: "坐姿、半躺视角，兼顾细节特写。",
+                action: "休息、起身、轻度活动为主，避免运动场景与误导性治疗动作。",
+                real: "轻治疗氛围，不做强医疗暗示。"
+              }
+            },
+            {
+              id: "sc-outdoor",
+              name: "户外休闲",
+              desc: "公园、小区、轻松走动",
+              dims: {
+                people: "人物姿态轻松自然，不过度磨皮。",
+                scene: "公园、小区等户外轻活动场地。",
+                light: "户外自然光，画面明亮。",
+                angle: "行走全景与侧面特写结合。",
+                action: "慢走等日常轻活动，避免跑跳等高强度动作。",
+                real: "像手机随手拍，真实通透。"
+              }
+            }
+          ]
+        },
+        {
+          id: "cat-knee",
+          name: "护膝",
+          sellingPoints: "贴合膝盖、柔软舒适、运动防护、透气材质",
+          baseRules: "以用户上传的商品图为基准，保持产品结构、颜色、材质与图案不变，禁止重新生成或臆造产品细节；护膝需紧贴膝盖，不上滑至大腿、不下滑至小腿。",
+          scenes: [
+            {
+              id: "sc-knee-hospital",
+              name: "医院坐姿/轮椅场景",
+              desc: "医院走廊、病房或候诊区，轮椅或拄拐",
+              dims: {
+                people: "60 岁左右中老年患者，皮肤保留真实纹理和自然表情皱纹，无磨皮痕迹。",
+                scene: "医院走廊、病房或候诊区，画面中出现轮椅或拄拐作为环境元素。",
+                light: "医院日光灯或自然光，明亮干净。",
+                angle: "坐姿平视构图，清晰露出膝部佩戴护膝的状态。",
+                action: "静坐或缓慢移动，可倚靠拐杖或轮椅，不做剧烈动作。",
+                real: "生活化医院实拍质感，非商业精修感。"
+              }
+            }
+          ]
+        },
+        {
+          id: "cat-knee-double",
+          name: "双拉带护膝",
+          sellingPoints: "双拉带固定、硅胶防滑、支撑性好、运动不跑位",
+          baseRules: "以用户上传的商品图为基准，保持产品结构、颜色、材质与图案不变，禁止重新生成或臆造产品细节；双拉带护膝的硅胶垫、支撑条、绑带纹理需保持清晰，绑带长度适中（不延长至脚踝、不过短）；佩戴需紧贴膝盖，硅胶垫对准膝盖骨，不错位到大腿、不下滑到小腿。",
+          scenes: [
+            {
+              id: "sc-double-medical",
+              name: "中老年人医疗场景",
+              desc: "医院各类场所，突出医用属性",
+              dims: {
+                people: "60 岁左右气质型中老年人，服装整齐干净，皮肤保留真实纹理和自然表情皱纹。",
+                scene: "医院各类场所（诊室、走廊、候诊区），突出医用属性。",
+                light: "医院自然光或日光灯，明亮真实。",
+                angle: "清晰露出膝部佩戴双拉带护膝的状态，硅胶垫位置可见。",
+                action: "不出现剧烈运动（举铁、跑步），可有轻微行走或候诊等待动作。",
+                real: "真实可信，非产品误导性夸大宣传。"
+              }
+            }
+          ]
+        },
+        {
+          id: "cat-knee-heating",
+          name: "电加热护膝",
+          sellingPoints: "电加热恒温、二十八味药盐灸、亚麻亲肤、控温便捷",
+          baseRules: "以用户上传的商品图为基准，保持产品结构、颜色、材质与图案不变，禁止重新生成或臆造产品细节；电加热护膝材质为浅米色亚麻面料，古典美人刺绣，二十八味药盐灸，刺绣文字需清晰；电源线清晰不变形，连接控制面板与电插头。控制面板按键文字属于精细图案渲染，当前图像模型对小面积文字/按键的还原不稳定，建议出图后人工检查这个细节，不完全依赖提示词。",
+          scenes: [
+            {
+              id: "sc-heating-home",
+              name: "居家生活场景",
+              desc: "居家卧室或客厅，躺在床上或沙发上",
+              dims: {
+                people: "60 岁左右中老年人，居家放松状态，皮肤保留真实纹理和自然表情。",
+                scene: "居家卧室或客厅，躺在床上或沙发上。",
+                light: "室内自然光，明亮温暖。",
+                angle: "侧躺或半坐姿态，清晰露出护膝佩戴状态及电源线与控制面板的连接关系。",
+                action: "静躺或轻微调整姿势，不做剧烈动作，体现居家休养放松感。",
+                real: "生活化居家实拍质感，温暖休养氛围。"
+              }
+            }
+          ]
+        }
+      ],
+      mine: []
+    };
+
+    const quickEditTemplates = [
+      { key: "pose", title: "修正人物状态", desc: "人物姿势更自然，减少僵硬感" },
+      { key: "wear", title: "修正佩戴位置", desc: "护具位置更准，贴合关系更真实" },
+      { key: "background", title: "调整背景", desc: "保留主体，只换成更合适场景" },
+      { key: "reality", title: "提升真实感", desc: "降低美颜感，像真实手机拍摄" }
+    ];
+
+    const modelOptions = [
+      { key: "nano-banana-2", name: "Nano Banana 2", desc: "多参考图生成，适合复杂主体与长文本画面", eta: "75s", icon: "assets/gemini.png" },
+      { key: "wan-2-7", name: "Wan 2.7 Image Pro", desc: "中文指令稳定，适合商品、场景与主体编辑", eta: "61s", icon: "assets/wan.png" },
+      { key: "nano-banana-pro", name: "Nano Banana Pro", desc: "多参考图生成，适合复杂主体与长文本画面", eta: "79s", icon: "assets/gemini.png" },
+      { key: "seedream-5", name: "Seedream 5.0", desc: "生成速度快，适合批量创意与商业出图", eta: "40s", icon: "assets/seedream.svg" },
+      { key: "gpt-image-2", name: "GPT Image 2", desc: "细节还原强，适合高质量生成与局部修改", eta: "140s", icon: "assets/gpt.png" }
+    ];
+
+    const resolutionOptions = ["1K", "2K", "4K"];
+    const ratioOptions = [
+      { label: "智能比例", icon: "smart" },
+      { label: "1:1", icon: "square" },
+      { label: "3:2", icon: "horizontal" },
+      { label: "2:3", icon: "vertical" },
+      { label: "16:9", icon: "horizontal" },
+      { label: "4:3", icon: "horizontal" },
+      { label: "3:4", icon: "vertical" },
+      { label: "9:16", icon: "vertical" }
+    ];
+    const countOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+    const assetPool = [
+      "assets/buyer.webp",
+      "assets/expert.webp",
+      "assets/prompt.webp",
+      "assets/repaint.webp"
+    ];
+
+    const appState = {
+      library: null,          // 运行时从 defaultLibrary 载入，不持久化
+      activeLib: "public",    // 使用态当前 tab：public / mine
+      selectedCategoryName: null,  // 选中品类按「名字」跨库对齐：品类是全局的，切库不改它
+      selectedSceneId: null,
+      categorySearch: "",     // 品类下拉框内的搜索关键词
+      manage: {                // 管理弹窗内部的独立状态，不影响主页面
+        activeLib: "mine",      // 管理弹窗里当前查看的库：public(只读) / mine(可编辑)
+        selectedCategoryId: null,
+        view: "list",           // list(品类+场景列表) / category-form / scene-form
+        editingCategoryId: null,
+        editingSceneId: null
+      },
+      prompt: "画面像手机随手拍，人物穿深色开衫，整体干净可信。",
+      selectedModel: "Nano Banana 2",
+      selectedResolution: "2K",
+      selectedRatio: "4:3",
+      selectedQuality: "高画质",
+      selectedCount: "4",
+      search: "",
+      detailView: "images",
+      reviewDefaults: {
+        countMode: "5",
+        customCount: 5,
+        sellingPoints: "支撑稳、佩戴贴合、日常活动方便"
+      },
+      tasks: [
+        {
+          id: "683973d5-ef89-4ab1-b922-87815302dff1",
+          title: "4 张买家秀 · 15:45",
+          time: "今天 15:45",
+          status: "已完成",
+          progress: 100,
+          doneText: "4/4",
+          scene: "医疗康复",
+          productType: "护腰带",
+          model: "GPT Image 2",
+          resolution: "2K",
+          ratio: "4:3",
+          quality: "高画质",
+          count: "4 张",
+          prompt: "真实中老年康复场景，画面像手机随手拍，强调佩戴护腰带的舒适与可信感。",
+          rules: "【品类基础】护腰带主体不变形，佩戴位置准确，绑带方向符合真实使用逻辑。\n【人物】人物状态真实自然，不做夸张美颜。\n【场景】医院、候诊区、康复训练区为主。\n【动作】动作轻缓，不出现剧烈运动。",
+          storyboard: [
+            { index: "01", title: "沙发正面全景展示", desc: "正面平视，完整看到佩戴状态与人物体态。" },
+            { index: "02", title: "侧向俯拍细节展示", desc: "斜侧方构图，清晰展示绑带贴合与结构细节。" },
+            { index: "03", title: "半躺小憩使用场景", desc: "体现居家休息感，动作轻缓自然。" },
+            { index: "04", title: "特写局部材质展示", desc: "展示印花、材质纹理与魔术贴细节。" }
+          ],
+          results: [
+            { id: "r1", shot: "01", title: "沙发正面全景展示", label: "认可", note: "适合作为主图位候选。", src: "assets/buyer.webp", version: "原始结果", editHistory: [] },
+            { id: "r2", shot: "02", title: "侧向俯拍细节展示", label: "认可", note: "绑带与腰部贴合关系清晰。", src: "assets/expert.webp", version: "原始结果", editHistory: [] },
+            { id: "r3", shot: "03", title: "半躺小憩使用场景", label: "待调整", note: "人物手部有些别扭，可单图返修。", src: "assets/prompt.webp", version: "原始结果", editHistory: [] },
+            { id: "r4", shot: "04", title: "特写局部材质展示", label: "认可", note: "细节图可直接下载使用。", src: "assets/repaint.webp", version: "原始结果", editHistory: [] }
+          ]
+        },
+        {
+          id: "2f104247-bad3-4d15-9b49-3d9bb5f81f8b",
+          title: "4 张买家秀 · 15:35",
+          time: "今天 15:35",
+          status: "已完成",
+          progress: 100,
+          doneText: "4/4",
+          scene: "中老年居家",
+          productType: "护腰带",
+          model: "Nano Banana 2",
+          resolution: "2K",
+          ratio: "4:3",
+          quality: "标准",
+          count: "4 张",
+          prompt: "居家生活化的中老年护腰带使用场景，强调可信与舒适。",
+          rules: "【品类基础】护腰带主体不变形，佩戴位置准确，绑带方向符合真实使用逻辑。\n【人物】人物年龄感偏中老年，表情自然放松。\n【场景】客厅、卧室、餐桌等家庭空间。\n【动作】起身、走动等日常轻活动。",
+          storyboard: [
+            { index: "01", title: "客厅起身场景", desc: "人物从沙发起身，护腰带自然露出。" },
+            { index: "02", title: "餐桌侧身场景", desc: "居家桌边动作，展示日常轻活动。" },
+            { index: "03", title: "腰部细节近景", desc: "突出腰部贴合与结构。" },
+            { index: "04", title: "窗边站姿全景", desc: "体现室内自然光与日常可信感。" }
+          ],
+          results: [
+            { id: "r5", shot: "01", title: "客厅起身场景", label: "认可", note: "适合投放居家模版。", src: "assets/expert.webp", version: "原始结果", editHistory: [] },
+            { id: "r6", shot: "02", title: "餐桌侧身场景", label: "认可", note: "生活气息较强。", src: "assets/prompt.webp", version: "原始结果", editHistory: [] },
+            { id: "r7", shot: "03", title: "腰部细节近景", label: "认可", note: "结构展示清楚。", src: "assets/repaint.webp", version: "原始结果", editHistory: [] },
+            { id: "r8", shot: "04", title: "窗边站姿全景", label: "待调整", note: "背景略杂，可以单图改。", src: "assets/buyer.webp", version: "原始结果", editHistory: [] }
+          ]
+        },
+        {
+          id: "ea9d40cb-b5d8-47a8-a4fc-c41d151b10ac",
+          title: "4 张买家秀 · 15:28",
+          time: "今天 15:28",
+          status: "已完成",
+          progress: 100,
+          doneText: "4/4",
+          scene: "居家治疗",
+          productType: "护腰带",
+          model: "GPT Image 2",
+          resolution: "2K",
+          ratio: "4:3",
+          quality: "高画质",
+          count: "4 张",
+          prompt: "卧室与沙发结合的轻治疗氛围，不出现强医疗暗示。",
+          rules: "【品类基础】护腰带主体不变形，佩戴位置准确，绑带方向符合真实使用逻辑。\n【场景】沙发、床边、靠垫等辅助休息环境。\n【动作】休息、起身、轻度活动为主，避免运动场景。",
+          storyboard: [
+            { index: "01", title: "床边起身", desc: "居家治疗氛围中的轻动作。" },
+            { index: "02", title: "沙发坐姿", desc: "体现舒适度与支撑感。" },
+            { index: "03", title: "侧身调整", desc: "展示腰带调节细节。" },
+            { index: "04", title: "材质补充图", desc: "补充商品结构和面料纹理。" }
+          ],
+          results: [
+            { id: "r9", shot: "01", title: "床边起身", label: "认可", note: "动作自然。", src: "assets/prompt.webp", version: "原始结果", editHistory: [] },
+            { id: "r10", shot: "02", title: "沙发坐姿", label: "认可", note: "适合详情页中段。", src: "assets/repaint.webp", version: "原始结果", editHistory: [] },
+            { id: "r11", shot: "03", title: "侧身调整", label: "认可", note: "佩戴逻辑正确。", src: "assets/buyer.webp", version: "原始结果", editHistory: [] },
+            { id: "r12", shot: "04", title: "材质补充图", label: "认可", note: "适合补充图位。", src: "assets/expert.webp", version: "原始结果", editHistory: [] }
+          ]
+        },
+        {
+          id: "4ac8e745-c242-4349-a3ef-00f719335e49",
+          title: "4 张买家秀 · 00:42",
+          time: "昨天 00:42",
+          status: "已终止",
+          progress: 50,
+          doneText: "2/4",
+          scene: "户外休闲",
+          productType: "护腰带",
+          model: "Nano Banana 2",
+          resolution: "2K",
+          ratio: "4:3",
+          quality: "标准",
+          count: "4 张",
+          prompt: "户外轻活动场景，人物自然行走，背景明亮。",
+          rules: "【品类基础】护腰带主体不变形，佩戴位置准确，绑带方向符合真实使用逻辑。\n【场景】公园、小区等户外轻活动场地。\n【光线】户外自然光，画面明亮。\n【动作】慢走等日常轻活动，避免跑跳等高强度动作。",
+          storyboard: [
+            { index: "01", title: "小区散步全景", desc: "慢走状态，姿态轻松。" },
+            { index: "02", title: "公园长椅休息", desc: "户外休闲氛围。" },
+            { index: "03", title: "腰部侧面特写", desc: "强调贴合度。" },
+            { index: "04", title: "步行动作补拍", desc: "轻动作展示。" }
+          ],
+          results: [
+            { id: "r13", shot: "01", title: "小区散步全景", label: "处理中", note: "只完成前两张。", src: "assets/buyer.webp", version: "原始结果", editHistory: [] },
+            { id: "r14", shot: "02", title: "公园长椅休息", label: "处理中", note: "任务中途终止。", src: "assets/expert.webp", version: "原始结果", editHistory: [] }
+          ]
+        }
+      ],
+      activeTaskId: "683973d5-ef89-4ab1-b922-87815302dff1",
+      editState: {
+        taskId: null,
+        resultId: null,
+        quickKey: "pose",
+        instruction: "",
+        candidates: [],
+        selectedCandidateId: null
+      }
+    };
+
+    const els = {
+      productTypeHint: document.getElementById("productTypeHint"),
+      categoryCard: document.getElementById("categoryCard"),
+      categoryValue: document.getElementById("categoryValue"),
+      categoryDropdown: document.getElementById("categoryDropdown"),
+      categorySearchInput: document.getElementById("categorySearchInput"),
+      categoryOptionList: document.getElementById("categoryOptionList"),
+      baseRuleBox: document.getElementById("baseRuleBox"),
+      sceneGrid: document.getElementById("sceneGrid"),
+      sceneHint: document.getElementById("sceneHint"),
+      libTabs: document.getElementById("libTabs"),
+      publicCountBadge: document.getElementById("publicCountBadge"),
+      mineCountBadge: document.getElementById("mineCountBadge"),
+      ruleSummaryLine: document.getElementById("ruleSummaryLine"),
+      viewRuleBtn: document.getElementById("viewRuleBtn"),
+      ruleReadonly: document.getElementById("ruleReadonly"),
+      manageToggleBtn: document.getElementById("manageToggleBtn"),
+      libEditMask: document.getElementById("libEditMask"),
+      libEditBackBtn: document.getElementById("libEditBackBtn"),
+      libEditEyebrow: document.getElementById("libEditEyebrow"),
+      libEditTitle: document.getElementById("libEditTitle"),
+      libEditDesc: document.getElementById("libEditDesc"),
+      libEditBody: document.getElementById("libEditBody"),
+      promptInput: document.getElementById("promptInput"),
+      modelCard: document.getElementById("modelCard"),
+      modelValue: document.getElementById("modelValue"),
+      paramCard: document.getElementById("paramCard"),
+      paramValue: document.getElementById("paramValue"),
+      taskList: document.getElementById("taskList"),
+      taskCountLabel: document.getElementById("taskCountLabel"),
+      taskSearchInput: document.getElementById("taskSearchInput"),
+      resetTaskFilterBtn: document.getElementById("resetTaskFilterBtn"),
+      submitTaskBtn: document.getElementById("submitTaskBtn"),
+      polishPromptBtn: document.getElementById("polishPromptBtn"),
+      taskDetailMask: document.getElementById("taskDetailMask"),
+      taskDetailTitle: document.getElementById("taskDetailTitle"),
+      taskDetailDesc: document.getElementById("taskDetailDesc"),
+      taskDetailStatus: document.getElementById("taskDetailStatus"),
+      openReviewBatchBtn: document.getElementById("openReviewBatchBtn"),
+      downloadZipBtn: document.getElementById("downloadZipBtn"),
+      taskSceneLabel: document.getElementById("taskSceneLabel"),
+      toggleRuleBtn: document.getElementById("toggleRuleBtn"),
+      rulePreviewBox: document.getElementById("rulePreviewBox"),
+      taskRulePreview: document.getElementById("taskRulePreview"),
+      storyboardCountLabel: document.getElementById("storyboardCountLabel"),
+      storyboardGrid: document.getElementById("storyboardGrid"),
+      resultCountLabel: document.getElementById("resultCountLabel"),
+      resultGrid: document.getElementById("resultGrid"),
+      detailTabs: document.getElementById("detailTabs"),
+      imageResultPanel: document.getElementById("imageResultPanel"),
+      reviewPanel: document.getElementById("reviewPanel"),
+      reviewTabCount: document.getElementById("reviewTabCount"),
+      reviewSellingPoints: document.getElementById("reviewSellingPoints"),
+      reviewCountOptions: document.getElementById("reviewCountOptions"),
+      customCountRow: document.getElementById("customCountRow"),
+      customReviewCount: document.getElementById("customReviewCount"),
+      batchGenerateReviewsBtn: document.getElementById("batchGenerateReviewsBtn"),
+      reviewCountLabel: document.getElementById("reviewCountLabel"),
+      copyAllReviewsBtn: document.getElementById("copyAllReviewsBtn"),
+      exportReviewsBtn: document.getElementById("exportReviewsBtn"),
+      reviewList: document.getElementById("reviewList"),
+      imageEditMask: document.getElementById("imageEditMask"),
+      editModalTitle: document.getElementById("editModalTitle"),
+      editSourceImage: document.getElementById("editSourceImage"),
+      editImageSummary: document.getElementById("editImageSummary"),
+      quickActionGrid: document.getElementById("quickActionGrid"),
+      inheritInfo: document.getElementById("inheritInfo"),
+      editInstructionInput: document.getElementById("editInstructionInput"),
+      generateCandidatesBtn: document.getElementById("generateCandidatesBtn"),
+      clearEditInstructionBtn: document.getElementById("clearEditInstructionBtn"),
+      candidateCountLabel: document.getElementById("candidateCountLabel"),
+      candidateGrid: document.getElementById("candidateGrid"),
+      applyCandidateBtn: document.getElementById("applyCandidateBtn"),
+      modelDropdown: document.getElementById("modelDropdown"),
+      modelOptionList: document.getElementById("modelOptionList"),
+      paramDropdown: document.getElementById("paramDropdown"),
+      resolutionOptions: document.getElementById("resolutionOptions"),
+      ratioOptions: document.getElementById("ratioOptions"),
+      countOptions: document.getElementById("countOptions"),
+      toast: document.getElementById("toast")
+    };
+
+    function getActiveTask() {
+      return appState.tasks.find((task) => task.id === appState.activeTaskId) || appState.tasks[0];
+    }
+
+    function getTaskById(taskId) {
+      return appState.tasks.find((task) => task.id === taskId);
+    }
+
+    function getResultByIds(taskId, resultId) {
+      const task = getTaskById(taskId);
+      if (!task) return null;
+      return task.results.find((result) => result.id === resultId) || null;
+    }
+
+    function isResultActionable(task, result) {
+      // 只要这张图已生成完成（非「处理中」）且任务未终止，就始终可操作。
+      // 认可/不认可只是单图反馈标签，不再反过来锁死操作。
+      return task.status !== "已终止" && result.label !== "处理中";
+    }
+
+    function summarizeInstruction(instruction) {
+      const compact = (instruction || "").replace(/\s+/g, " ").trim();
+      if (!compact) return "按当前返修方向生成";
+      return compact.length > 18 ? compact.slice(0, 18) + "..." : compact;
+    }
+
+    // ===== 场景库：访问 + 规则合成 =====
+    // 原型演示用，不做持久化：每次打开/刷新都从代码里的 defaultLibrary 重新加载，
+    // 管理弹窗里的增删改发布只在本次页面会话内生效。
+    function loadLibrary() {
+      return JSON.parse(JSON.stringify(defaultLibrary));
+    }
+
+    function saveLibrary() {
+      // 原型不接数据库，留空。管理态的修改已经直接改在 appState.library 上，
+      // 当次会话内的渲染和交互都会用到最新数据，只是刷新页面不会保留。
+    }
+
+    function getCategories(lib) {
+      return appState.library[lib || appState.activeLib] || [];
+    }
+
+    // 两库品类名字的并集（保持公共库在前的顺序），品类下拉据此渲染，
+    // 这样不管在哪个 tab，上面能选的品类都是全量的，切库不会让品类消失。
+    function getAllCategoryNames() {
+      const names = [];
+      ["public", "mine"].forEach((lib) => {
+        getCategories(lib).forEach((c) => {
+          if (!names.includes(c.name)) names.push(c.name);
+        });
+      });
+      return names;
+    }
+
+    // 当前品类在「指定库」里的定义（可能为 null：该库没有这个品类）。
+    function getCategoryInLib(lib, name) {
+      return getCategories(lib).find((c) => c.name === (name ?? appState.selectedCategoryName)) || null;
+    }
+
+    // 当前品类在「当前 tab 库」里的定义，用于场景列表等跟 tab 走的展示。
+    function getCurrentCategory() {
+      return getCategoryInLib(appState.activeLib, appState.selectedCategoryName);
+    }
+
+    // 品类的全局定义（基础规则等与库无关的属性）：优先当前库，缺失则回退另一库。
+    function getCategoryAnyLib(name) {
+      const key = name ?? appState.selectedCategoryName;
+      return getCategoryInLib(appState.activeLib, key) || getCategoryInLib("public", key) || getCategoryInLib("mine", key);
+    }
+
+    function getCurrentScene() {
+      const cat = getCurrentCategory();
+      if (!cat) return null;
+      return cat.scenes.find((sc) => sc.id === appState.selectedSceneId) || null;
+    }
+
+    function ensureSelection() {
+      const allNames = getAllCategoryNames();
+      // 选中品类只在「两库都没有这个名字」时才重置为首个；仅仅当前 tab 没有不重置。
+      if (!allNames.length) {
+        appState.selectedCategoryName = null;
+        appState.selectedSceneId = null;
+        return;
+      }
+      if (!allNames.includes(appState.selectedCategoryName)) {
+        appState.selectedCategoryName = allNames[0];
+      }
+      // 场景 id 跟当前 tab 库走：当前库有这个品类就校正到它的首个场景，没有则清空。
+      const cat = getCurrentCategory();
+      if (!cat) {
+        appState.selectedSceneId = null;
+        return;
+      }
+      if (!cat.scenes.some((sc) => sc.id === appState.selectedSceneId)) {
+        appState.selectedSceneId = cat.scenes.length ? cat.scenes[0].id : null;
+      }
+    }
+
+    // 把「品类基础规则 + 场景 6 维度差异规则」合成为完整规则文本
+    function composeRules(category, scene) {
+      const lines = [];
+      if (category && category.baseRules) {
+        lines.push("【品类基础】" + category.baseRules);
+      }
+      if (scene && scene.dims) {
+        RULE_DIMENSIONS.forEach((dim) => {
+          const val = (scene.dims[dim.key] || "").trim();
+          if (val) lines.push("【" + dim.label + "】" + val);
+        });
+      }
+      return lines.join("\n");
+    }
+
+    function newId(prefix) {
+      return prefix + "-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+    }
+
+    function emptyDims() {
+      const dims = {};
+      RULE_DIMENSIONS.forEach((dim) => { dims[dim.key] = ""; });
+      return dims;
+    }
+
+    function recomputeTaskStatus(task) {
+      // 任务状态只反映「生成进度」：已终止 / 生成中 / 已完成。
+      // 认可、不认可、待调整都只是单图反馈，不参与任务状态计算。
+      const processingCount = task.results.filter((result) => result.label === "处理中").length;
+
+      if (task.status === "已终止") {
+        task.doneText = task.results.length + "/4";
+        task.progress = 50;
+        return;
+      }
+
+      if (processingCount > 0) {
+        task.status = "已提交";
+        task.doneText = task.results.length + "/4";
+        task.progress = 25;
+        return;
+      }
+
+      task.status = "已完成";
+      task.doneText = task.results.length + "/4";
+      task.progress = 100;
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    function openModal(mask) {
+      mask.classList.add("show");
+      mask.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal(mask) {
+      mask.classList.remove("show");
+      mask.setAttribute("aria-hidden", "true");
+    }
+
+    function closeParameterDropdowns() {
+      els.modelDropdown.classList.remove("show");
+      els.paramDropdown.classList.remove("show");
+      els.categoryDropdown.classList.remove("show");
+    }
+
+    // 使用态整块重绘的总入口（主页面始终只读，管理弹窗有自己独立的渲染）
+    function renderLibrary() {
+      ensureSelection();
+      renderLibTabs();
+      renderCategorySelector();
+      renderScenes();
+      renderBaseRule();
+      renderRuleDisplay();
+    }
+
+    // badge 显示「当前选中品类」在各库下的场景数量，而不是该库的品类总数，
+    // 否则会误导（例如公共库有 4 个品类，但当前品类下只有 1 个场景时仍显示 4）。
+    function countScenesInLib(lib, categoryName) {
+      if (!categoryName) return 0;
+      const cat = getCategories(lib).find((c) => c.name === categoryName);
+      return cat ? cat.scenes.length : 0;
+    }
+
+    function renderLibTabs() {
+      const currentName = appState.selectedCategoryName || "";
+      els.publicCountBadge.textContent = countScenesInLib("public", currentName);
+      els.mineCountBadge.textContent = countScenesInLib("mine", currentName);
+      els.libTabs.querySelectorAll(".lib-tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.lib === appState.activeLib);
+      });
+    }
+
+    function truncateText(str, max) {
+      const compact = (str || "").trim();
+      if (!compact) return "暂无品类基础规则";
+      return compact.length > max ? compact.slice(0, max) + "…" : compact;
+    }
+
+    // 所有品类基础规则都以这句公共锚点开头（"以商品图为基准…禁止臆造产品细节"），
+    // 预览摘要里去掉这句公共前缀，只留下真正体现该品类差异的部分，否则截断后每个品类看起来都一样。
+    const BASE_RULE_COMMON_PREFIX_RE = /^以用户上传的商品图为基准，保持产品结构、颜色、材质与图案不变，禁止重新生成或臆造产品细节[；;]\s*/;
+    function categoryPreviewText(baseRules) {
+      const stripped = (baseRules || "").replace(BASE_RULE_COMMON_PREFIX_RE, "");
+      return truncateText(stripped, 26);
+    }
+
+    // 品类改为下拉选择器：卡片显示当前品类，点开是可搜索列表，
+    // 每项带场景数量 + 品类基础规则截断预览，帮用户在品类变多后快速确认/辨识。
+    function renderCategorySelector() {
+      const name = appState.selectedCategoryName;
+      els.categoryValue.textContent = name ? name : (getAllCategoryNames().length ? "请选择品类" : "暂无品类");
+      renderCategoryOptionList();
+    }
+
+    function renderCategoryOptionList() {
+      els.categoryOptionList.innerHTML = "";
+      const names = getAllCategoryNames();
+      const keyword = appState.categorySearch.trim().toLowerCase();
+      const filtered = keyword ? names.filter((n) => n.toLowerCase().includes(keyword)) : names;
+
+      if (!names.length) {
+        const tip = document.createElement("div");
+        tip.className = "desc";
+        tip.textContent = "暂无品类，去右上角「管理」新增。";
+        els.categoryOptionList.appendChild(tip);
+        return;
+      }
+      if (!filtered.length) {
+        const tip = document.createElement("div");
+        tip.className = "desc";
+        tip.textContent = "没有匹配到品类，换个关键词试试。";
+        els.categoryOptionList.appendChild(tip);
+        return;
+      }
+
+      filtered.forEach((name) => {
+        const active = appState.selectedCategoryName === name;
+        const def = getCategoryAnyLib(name);          // 用于名字/基础规则预览（与库无关）
+        const sceneCount = countScenesInLib(appState.activeLib, name);  // 场景数跟当前 tab 走
+        const btn = document.createElement("button");
+        btn.className = "option-card" + (active ? " active" : "");
+        btn.innerHTML = [
+          "<div class='option-icon'>" + escapeHtml(name.slice(0, 1)) + "</div>",
+          "<div class='option-copy'><strong>" + escapeHtml(name) + "</strong><span>" + escapeHtml(categoryPreviewText(def ? def.baseRules : "")) + "</span></div>",
+          "<div class='option-side'><span class='option-time'>" + sceneCount + " 个场景</span>" + (active ? "<span class='option-status'>已选</span>" : "") + "</div>"
+        ].join("");
+        btn.addEventListener("click", () => {
+          appState.selectedCategoryName = name;
+          const cur = getCurrentCategory();
+          appState.selectedSceneId = cur && cur.scenes.length ? cur.scenes[0].id : null;
+          appState.categorySearch = "";
+          els.categorySearchInput.value = "";
+          renderLibrary();
+          closeParameterDropdowns();
+        });
+        els.categoryOptionList.appendChild(btn);
+      });
+    }
+
+    function renderBaseRule() {
+      const cat = getCategoryAnyLib();
+      if (cat) {
+        var html = "";
+        if (cat.sellingPoints) {
+          html += "<b>品类卖点：</b>" + escapeHtml(cat.sellingPoints) + "<br><br>";
+        }
+        if (cat.baseRules) {
+          html += "<b>品类基础规则：</b>" + cat.baseRules;
+        }
+        if (html) {
+          els.baseRuleBox.classList.remove("hidden");
+          els.baseRuleBox.innerHTML = html;
+          return;
+        }
+      }
+      els.baseRuleBox.classList.add("hidden");
+      els.baseRuleBox.innerHTML = "";
+    }
+
+    function renderScenes() {
+      els.sceneGrid.innerHTML = "";
+      const cat = getCurrentCategory();
+      const scenes = cat ? cat.scenes : [];
+
+      scenes.forEach((scene) => {
+        const btn = document.createElement("button");
+        btn.className = "scene-card" + (appState.selectedSceneId === scene.id ? " active" : "");
+        const filled = RULE_DIMENSIONS.filter((d) => (scene.dims && scene.dims[d.key] || "").trim()).length;
+        btn.innerHTML =
+          "<strong>" + scene.name + " <em>" + filled + "/6 维度</em></strong>" +
+          "<p>" + (scene.desc || "未填写场景描述") + "</p>";
+        btn.addEventListener("click", () => {
+          appState.selectedSceneId = scene.id;
+          renderScenes();
+          renderRuleDisplay();
+          showToast("已带出「" + scene.name + "」的场景规则");
+        });
+        els.sceneGrid.appendChild(btn);
+      });
+
+      if (!scenes.length) {
+        const tip = document.createElement("div");
+        tip.className = "lib-empty";
+        const libName = appState.activeLib === "mine" ? "我的场景库" : "公共场景库";
+        if (!appState.selectedCategoryName) {
+          tip.textContent = "先选一个品类。";
+        } else if (!cat) {
+          tip.textContent = "「" + libName + "」暂无「" + appState.selectedCategoryName + "」的场景，切到另一个库或去「管理」新增。";
+        } else {
+          tip.textContent = "该品类暂无场景，去右上角「管理」新增。";
+        }
+        els.sceneGrid.appendChild(tip);
+      }
+    }
+
+    function renderRuleDisplay() {
+      const cat = getCurrentCategory();
+      const scene = getCurrentScene();
+      if (!cat || !scene) {
+        els.ruleSummaryLine.textContent = "未选择场景，规则暂不可用。";
+        els.ruleReadonly.classList.add("hidden");
+        els.ruleReadonly.innerHTML = "";
+        return;
+      }
+      els.ruleSummaryLine.textContent = "当前：" + cat.name + " · " + scene.name + "，规则已内置，生成时自动生效。";
+      const dimRows = RULE_DIMENSIONS.map((dim) => {
+        const val = (scene.dims && scene.dims[dim.key] || "").trim();
+        if (!val) return "";
+        return "<div class='rule-dim-row'><b>" + dim.label + "</b><span>" + val + "</span></div>";
+      }).filter(Boolean).join("");
+      els.ruleReadonly.innerHTML =
+        "<div class='rule-base'>【品类基础】" + (cat.baseRules || "（未填写）") + "</div>" +
+        "<div class='rule-dim-list' style='margin-top:8px'>" + dimRows + "</div>";
+    }
+
+    function renderParameterSummary() {
+      els.modelValue.textContent = appState.selectedModel;
+      els.paramValue.textContent = [
+        appState.selectedResolution,
+        appState.selectedRatio,
+        appState.selectedQuality,
+        appState.selectedCount + " 张"
+      ].join(" · ");
+    }
+
+    function renderModelOptions() {
+      els.modelOptionList.innerHTML = "";
+      els.modelOptionList.style.cssText = "display:grid;grid-template-columns:repeat(2,1fr);gap:8px";
+      modelOptions.forEach((option) => {
+        const active = appState.selectedModel === option.name;
+        const btn = document.createElement("button");
+        btn.className = "option-card" + (active ? " active" : "");
+        btn.style.cssText = "grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:12px";
+        btn.innerHTML = [
+          "<img src='" + option.icon + "' alt='' style='width:28px;height:28px;object-fit:contain;border-radius:7px;flex:none'>",
+          "<div class='option-copy' style='flex:1;min-width:0'>",
+          "<strong>" + option.name + "</strong>",
+          "<span>" + option.desc + "</span>",
+          "<span class='option-time' style='margin-top:4px;display:inline-block'>" + option.eta + "</span>",
+          (active ? "<span class='option-status'>已选</span>" : ""),
+          "</div>"
+        ].join("");
+        btn.addEventListener("click", () => {
+          appState.selectedModel = option.name;
+          renderParameterSummary();
+          renderModelOptions();
+          showToast("已切换模型：" + option.name);
+          closeParameterDropdowns();
+        });
+        els.modelOptionList.appendChild(btn);
+      });
+    }
+
+    function renderResolutionOptions() {
+      els.resolutionOptions.innerHTML = "";
+      resolutionOptions.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (appState.selectedResolution === item ? " active" : "");
+        btn.textContent = item;
+        btn.addEventListener("click", () => {
+          appState.selectedResolution = item;
+          renderResolutionOptions();
+          renderParameterSummary();
+          closeParameterDropdowns();
+        });
+        els.resolutionOptions.appendChild(btn);
+      });
+    }
+
+    function renderRatioOptions() {
+      els.ratioOptions.innerHTML = "";
+      ratioOptions.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.className = "ratio-card" + (appState.selectedRatio === item.label ? " active" : "");
+        btn.innerHTML = "<span class='ratio-icon ratio-" + item.icon + "'></span><span>" + item.label + "</span>";
+        btn.addEventListener("click", () => {
+          appState.selectedRatio = item.label;
+          renderRatioOptions();
+          renderParameterSummary();
+          closeParameterDropdowns();
+        });
+        els.ratioOptions.appendChild(btn);
+      });
+    }
+
+    function renderCountOptions() {
+      els.countOptions.innerHTML = "";
+      countOptions.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.className = "count-card" + (appState.selectedCount === item ? " active" : "");
+        btn.textContent = item;
+        btn.addEventListener("click", () => {
+          appState.selectedCount = item;
+          renderCountOptions();
+          renderParameterSummary();
+          closeParameterDropdowns();
+        });
+        els.countOptions.appendChild(btn);
+      });
+    }
+
+    // ===== 管理弹窗：品类 / 场景 的增删改 + 发布，全部在弹窗内完成，不污染主页面 =====
+    function openManageModal() {
+      appState.manage.activeLib = "mine";
+      appState.manage.view = "list";
+      const mineCats = getCategories("mine");
+      appState.manage.selectedCategoryId = mineCats.length ? mineCats[0].id : null;
+      els.libEditBackBtn.classList.add("hidden");
+      renderManageModal();
+      openModal(els.libEditMask);
+    }
+
+    function getManageCategories() {
+      return getCategories(appState.manage.activeLib);
+    }
+
+    function getManageCategory() {
+      return getManageCategories().find((c) => c.id === appState.manage.selectedCategoryId) || null;
+    }
+
+    function renderManageModal() {
+      if (appState.manage.view === "list") {
+        els.libEditBackBtn.classList.add("hidden");
+        els.libEditEyebrow.textContent = "SCENE LIBRARY";
+        els.libEditTitle.textContent = "管理场景库";
+        els.libEditDesc.textContent = "公共场景库只读；新增、编辑、删除只作用于「我的场景库」，改好后可发布到公共。";
+        renderManageList();
+      } else if (appState.manage.view === "category-form") {
+        renderCategoryForm();
+      } else if (appState.manage.view === "scene-form") {
+        renderSceneForm();
+      }
+    }
+
+    function renderManageList() {
+      const cats = getManageCategories();
+      if (!cats.some((c) => c.id === appState.manage.selectedCategoryId)) {
+        appState.manage.selectedCategoryId = cats.length ? cats[0].id : null;
+      }
+      const cat = getManageCategory();
+      const editable = appState.manage.activeLib === "mine";
+
+      const catItems = cats.map((c) => {
+        let actions = "";
+        if (editable) {
+          actions = "<span class='manage-scene-actions'>" +
+            "<button class='small-btn' data-cat-act='edit' data-cat='" + c.id + "'>编辑</button>" +
+            "<button class='small-btn danger' data-cat-act='del' data-cat='" + c.id + "'>删除</button>" +
+            "</span>";
+        }
+        return "<div class='manage-cat-item" + (c.id === appState.manage.selectedCategoryId ? " active" : "") + "'>" +
+          "<button class='chip' data-cat-select='" + c.id + "' style='border:0;box-shadow:none;padding:0;background:transparent'>" + escapeHtml(c.name) + " <span class='badge'>" + c.scenes.length + "</span></button>" +
+          actions +
+          "</div>";
+      }).join("") || "<div class='lib-empty'>暂无品类</div>";
+
+      const sceneItems = (cat ? cat.scenes : []).map((s) => {
+        const filled = RULE_DIMENSIONS.filter((d) => (s.dims && s.dims[d.key] || "").trim()).length;
+        let actions = "<button class='small-btn' data-act='view' data-scene='" + s.id + "'>查看</button>";
+        if (editable) {
+          actions += "<button class='small-btn' data-act='edit' data-scene='" + s.id + "'>编辑</button>" +
+            "<button class='small-btn soft' data-act='publish' data-scene='" + s.id + "'>发布到公共</button>" +
+            "<button class='small-btn danger' data-act='del' data-scene='" + s.id + "'>删除</button>";
+        }
+        return "<div class='manage-scene-item'>" +
+          "<div><strong>" + escapeHtml(s.name) + "</strong><br><span>" + escapeHtml(s.desc || "未填写场景描述") + " · " + filled + "/6 维度</span></div>" +
+          "<div class='manage-scene-actions'>" + actions + "</div>" +
+          "</div>";
+      }).join("") || "<div class='lib-empty'>" + (cat ? "该品类暂无场景" : "先选一个品类") + "</div>";
+
+      els.libEditBody.innerHTML = [
+        "<div class='lib-tabs' id='manageLibTabs'>",
+        "<button class='lib-tab" + (appState.manage.activeLib === "public" ? " active" : "") + "' data-mlib='public'>公共场景库（只读） <span class='badge'>" + getCategories("public").length + "</span></button>",
+        "<button class='lib-tab" + (appState.manage.activeLib === "mine" ? " active" : "") + "' data-mlib='mine'>我的场景库 <span class='badge'>" + getCategories("mine").length + "</span></button>",
+        "</div>",
+        "<div class='manage-layout'>",
+        "<aside class='manage-side'>",
+        "<h4>品类" + (editable ? "<button class='small-btn soft' id='manageAddCatBtn' style='margin-left:8px'>+ 新增品类</button>" : "") + "</h4>",
+        "<div class='manage-cat-list' id='manageCatList'>" + catItems + "</div>",
+        "</aside>",
+        "<section>",
+        "<div class='manage-scene-head'><div><strong>场景</strong><br><span style='font-size:11px;color:var(--muted)'>" + (cat ? escapeHtml(cat.name) : "未选品类") + (cat && cat.sellingPoints ? " · 卖点：" + escapeHtml(cat.sellingPoints) : "") + "</span></div>" + (editable && cat ? "<button class='small-btn soft' id='manageAddSceneBtn'>+ 新增场景</button>" : "") + "</div>",
+        "<div class='manage-scene-list' id='manageSceneList'>" + sceneItems + "</div>",
+        "</section>",
+        "</div>"
+      ].join("");
+
+      els.libEditBody.querySelectorAll("[data-mlib]").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          appState.manage.activeLib = tab.getAttribute("data-mlib");
+          appState.manage.selectedCategoryId = null;
+          renderManageList();
+        });
+      });
+      els.libEditBody.querySelectorAll("[data-cat-select]").forEach((item) => {
+        item.addEventListener("click", () => {
+          appState.manage.selectedCategoryId = item.getAttribute("data-cat-select");
+          renderManageList();
+        });
+      });
+      els.libEditBody.querySelectorAll("[data-cat-act]").forEach((btn) => {
+        const act = btn.getAttribute("data-cat-act");
+        const catId = btn.getAttribute("data-cat");
+        btn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (act === "edit") { openCategoryForm(catId); return; }
+          if (act === "del") { deleteCategoryFromManage(catId); return; }
+        });
+      });
+      const addCatBtn = document.getElementById("manageAddCatBtn");
+      if (addCatBtn) addCatBtn.addEventListener("click", () => openCategoryForm(null));
+      const addSceneBtn = document.getElementById("manageAddSceneBtn");
+      if (addSceneBtn) addSceneBtn.addEventListener("click", () => openSceneForm(cat.id, null));
+
+      els.libEditBody.querySelectorAll("[data-act]").forEach((btn) => {
+        const act = btn.getAttribute("data-act");
+        const sceneId = btn.getAttribute("data-scene");
+        btn.addEventListener("click", () => {
+          if (act === "view") { openSceneForm(cat.id, sceneId, true); return; }
+          if (act === "edit") { openSceneForm(cat.id, sceneId); return; }
+          if (act === "publish") { publishSceneFromManage(cat.id, sceneId); return; }
+          if (act === "del") { deleteSceneFromManage(cat.id, sceneId); return; }
+        });
+      });
+    }
+
+    function openCategoryForm(categoryId) {
+      const cat = categoryId ? getCategories("mine").find((c) => c.id === categoryId) : null;
+      appState.manage.view = "category-form";
+      appState.manage.editingCategoryId = categoryId;
+      renderCategoryForm(cat);
+    }
+
+    function renderCategoryForm(catArg) {
+      const cat = catArg || (appState.manage.editingCategoryId ? getCategories("mine").find((c) => c.id === appState.manage.editingCategoryId) : null);
+      els.libEditBackBtn.classList.remove("hidden");
+      els.libEditEyebrow.textContent = "PRODUCT CATEGORY";
+      els.libEditTitle.textContent = cat ? "编辑品类" : "新增品类";
+      els.libEditDesc.textContent = "品类基础规则会在该品类的每个场景生成时自动生效。仅可编辑「我的场景库」。";
+      els.libEditBody.innerHTML = [
+        "<div class='form-field'><label>品类名称</label>",
+        "<input id='catNameInput' type='text' placeholder='例如：护膝' value='" + (cat ? escapeAttr(cat.name) : "") + "'></div>",
+        "<div class='form-field'><label>品类卖点</label>",
+        "<span class='hint'>生成评价文案时默认带入此卖点，可手动修改。</span>",
+        "<textarea id='catSellingInput' style='min-height:64px' placeholder='例如：支撑稳、佩戴贴合、日常活动方便'>" + (cat && cat.sellingPoints ? escapeHtml(cat.sellingPoints) : "") + "</textarea></div>",
+        "<div class='form-field'><label>品类基础规则</label>",
+        "<span class='hint'>写这个品类所有场景都要遵守的硬约束，如主体不变形、佩戴位置准确。</span>",
+        "<textarea id='catBaseInput' style='min-height:96px'>" + (cat ? escapeHtml(cat.baseRules) : "") + "</textarea></div>",
+        "<div class='card-actions'>",
+        "<button class='small-btn primary' id='saveCatBtn'>保存</button>",
+        "<button class='small-btn' id='cancelCatBtn'>取消</button>",
+        "</div>"
+      ].join("");
+      document.getElementById("saveCatBtn").addEventListener("click", saveCategoryForm);
+      document.getElementById("cancelCatBtn").addEventListener("click", backToManageList);
+    }
+
+    function saveCategoryForm() {
+      const name = document.getElementById("catNameInput").value.trim();
+      const base = document.getElementById("catBaseInput").value.trim();
+      const selling = document.getElementById("catSellingInput").value.trim();
+      if (!name) { showToast("请填写品类名称"); return; }
+      const mine = getCategories("mine");
+      const editing = appState.manage.editingCategoryId
+        ? mine.find((c) => c.id === appState.manage.editingCategoryId)
+        : null;
+      if (editing) {
+        editing.name = name;
+        editing.baseRules = base;
+        editing.sellingPoints = selling;
+      } else {
+        const cat = { id: newId("cat"), name, baseRules: base, sellingPoints: selling, scenes: [] };
+        mine.push(cat);
+        appState.manage.selectedCategoryId = cat.id;
+      }
+      saveLibrary();
+      renderLibrary();
+      backToManageList();
+      showToast(editing ? "已更新品类" : "已新增品类，可继续加场景");
+    }
+
+    function deleteCategoryFromManage(categoryId) {
+      const mine = getCategories("mine");
+      const idx = mine.findIndex((c) => c.id === categoryId);
+      if (idx < 0) return;
+      if (!confirm("删除品类「" + mine[idx].name + "」及其所有场景？")) return;
+      mine.splice(idx, 1);
+      saveLibrary();
+      renderLibrary();
+      renderManageList();
+    }
+
+    function openSceneForm(categoryId, sceneId, readOnly) {
+      const cat = getCategories(appState.manage.activeLib).find((c) => c.id === categoryId);
+      if (!cat) return;
+      appState.manage.view = "scene-form";
+      appState.manage.editingCategoryId = categoryId;
+      appState.manage.editingSceneId = sceneId;
+      renderSceneForm(cat, readOnly);
+    }
+
+    function renderSceneForm(catArg, readOnlyArg) {
+      const cat = catArg || getCategories(appState.manage.activeLib).find((c) => c.id === appState.manage.editingCategoryId);
+      if (!cat) { backToManageList(); return; }
+      const scene = appState.manage.editingSceneId ? cat.scenes.find((s) => s.id === appState.manage.editingSceneId) : null;
+      const readOnly = !!readOnlyArg || appState.manage.activeLib === "public";
+
+      els.libEditBackBtn.classList.remove("hidden");
+      els.libEditEyebrow.textContent = "SCENE PRESET";
+      els.libEditTitle.textContent = readOnly ? "查看场景" : (scene ? "编辑场景" : "新增场景");
+      els.libEditDesc.textContent = readOnly
+        ? "公共场景库只读，如需调整请先在「我的场景库」新增或复制后编辑。"
+        : "按 6 个维度填写场景差异规则，留空的维度不会进入最终规则。";
+      const dims = scene ? scene.dims : emptyDims();
+      const dimFields = RULE_DIMENSIONS.map((dim) => {
+        return "<div class='dim-field'><label>" + dim.label + " <i>" + dim.hint + "</i></label>" +
+          "<textarea data-dim='" + dim.key + "'" + (readOnly ? " disabled" : "") + ">" + escapeHtml(dims[dim.key] || "") + "</textarea></div>";
+      }).join("");
+      els.libEditBody.innerHTML = [
+        "<div class='form-field'><label>场景名称</label>",
+        "<input id='sceneNameInput' type='text' placeholder='例如：冬季户外' value='" + (scene ? escapeAttr(scene.name) : "") + "'" + (readOnly ? " disabled" : "") + "></div>",
+        "<div class='form-field'><label>场景简述</label>",
+        "<input id='sceneDescInput' type='text' placeholder='例如：公园、小区、轻松走动' value='" + (scene ? escapeAttr(scene.desc || "") : "") + "'" + (readOnly ? " disabled" : "") + "></div>",
+        "<div class='section-title' style='margin-top:4px'><strong>场景差异规则 · 6 维度</strong><span>所属品类：" + escapeHtml(cat.name) + "</span></div>",
+        "<div class='dim-grid'>" + dimFields + "</div>",
+        "<div class='card-actions' style='margin-top:14px'>",
+        readOnly ? "" : "<button class='small-btn primary' id='saveSceneBtn'>保存场景</button>",
+        "<button class='small-btn' id='cancelSceneBtn'>返回</button>",
+        "</div>"
+      ].join("");
+      if (!readOnly) {
+        document.getElementById("saveSceneBtn").addEventListener("click", saveSceneForm);
+      }
+      document.getElementById("cancelSceneBtn").addEventListener("click", backToManageList);
+    }
+
+    function saveSceneForm() {
+      const cat = getCategories("mine").find((c) => c.id === appState.manage.editingCategoryId);
+      if (!cat) return;
+      const name = document.getElementById("sceneNameInput").value.trim();
+      if (!name) { showToast("请填写场景名称"); return; }
+      const desc = document.getElementById("sceneDescInput").value.trim();
+      const dims = {};
+      els.libEditBody.querySelectorAll("[data-dim]").forEach((ta) => {
+        dims[ta.getAttribute("data-dim")] = ta.value.trim();
+      });
+      const editing = appState.manage.editingSceneId
+        ? cat.scenes.find((s) => s.id === appState.manage.editingSceneId)
+        : null;
+      if (editing) {
+        editing.name = name;
+        editing.desc = desc;
+        editing.dims = dims;
+      } else {
+        const scene = { id: newId("sc"), name, desc, dims };
+        cat.scenes.push(scene);
+        appState.manage.selectedCategoryId = cat.id;
+      }
+      saveLibrary();
+      renderLibrary();
+      backToManageList();
+      showToast(editing ? "已更新场景" : "已新增场景");
+    }
+
+    function deleteSceneFromManage(categoryId, sceneId) {
+      const cat = getCategories("mine").find((c) => c.id === categoryId);
+      if (!cat) return;
+      const idx = cat.scenes.findIndex((s) => s.id === sceneId);
+      if (idx < 0) return;
+      if (!confirm("删除场景「" + cat.scenes[idx].name + "」？")) return;
+      cat.scenes.splice(idx, 1);
+      saveLibrary();
+      renderLibrary();
+      renderManageList();
+    }
+
+    // 发布：把个人库里的场景推到公共库。公共库没有同名品类则连品类基础规则一起带过去。
+    function publishSceneFromManage(categoryId, sceneId) {
+      const cat = getCategories("mine").find((c) => c.id === categoryId);
+      if (!cat) return;
+      const scene = cat.scenes.find((s) => s.id === sceneId);
+      if (!scene) return;
+      if (!confirm("把「" + cat.name + " · " + scene.name + "」发布到公共场景库？全组织都能用到。")) return;
+
+      const pub = getCategories("public");
+      let target = pub.find((c) => c.name === cat.name);
+      if (!target) {
+        target = { id: newId("cat"), name: cat.name, baseRules: cat.baseRules, sellingPoints: cat.sellingPoints || "", scenes: [] };
+        pub.push(target);
+      } else if (cat.sellingPoints && !target.sellingPoints) {
+        target.sellingPoints = cat.sellingPoints;
+      }
+      const clone = JSON.parse(JSON.stringify(scene));
+      clone.id = newId("sc");
+      const dup = target.scenes.find((s) => s.name === scene.name);
+      if (dup) {
+        dup.desc = clone.desc;
+        dup.dims = clone.dims;
+      } else {
+        target.scenes.push(clone);
+      }
+      saveLibrary();
+      renderLibrary();
+      renderManageList();
+      showToast("已发布到公共场景库");
+    }
+
+    function backToManageList() {
+      appState.manage.view = "list";
+      appState.manage.editingCategoryId = null;
+      appState.manage.editingSceneId = null;
+      renderManageList();
+      els.libEditBackBtn.classList.add("hidden");
+      els.libEditEyebrow.textContent = "SCENE LIBRARY";
+      els.libEditTitle.textContent = "管理场景库";
+      els.libEditDesc.textContent = "公共场景库只读；新增、编辑、删除只作用于「我的场景库」，改好后可发布到公共。";
+    }
+
+
+    function escapeHtml(str) {
+      return String(str == null ? "" : str)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    function escapeAttr(str) {
+      return escapeHtml(str).replace(/"/g, "&quot;");
+    }
+
+    function getFilteredTasks() {
+      const keyword = appState.search.trim().toLowerCase();
+      if (!keyword) return appState.tasks;
+      return appState.tasks.filter((task) => {
+        return [
+          task.title,
+          task.scene,
+          task.productType,
+          task.id,
+          task.time,
+          task.model
+        ].some((field) => String(field).toLowerCase().includes(keyword));
+      });
+    }
+
+    function renderTaskList() {
+      const tasks = getFilteredTasks();
+      els.taskCountLabel.textContent = tasks.length + " 个任务";
+      els.taskList.innerHTML = "";
+
+      if (!tasks.length) {
+        const empty = document.createElement("div");
+        empty.className = "history-empty";
+        empty.innerHTML = "<div><strong>没有匹配到任务</strong><span>换个关键词试试，或者先提交一组新的买家秀任务。</span></div>";
+        els.taskList.appendChild(empty);
+        return;
+      }
+
+      tasks.forEach((task) => {
+        const statusClass = task.status === "已完成" ? "" : task.status === "已终止" ? " stopped" : " pending";
+        const statusText = task.status === "已终止" ? "已终止" : task.status;
+        const btn = document.createElement("button");
+        btn.className = "task-card" + (appState.activeTaskId === task.id ? " active" : "");
+        var thumbsHtml = '<div class="task-thumbs">' + task.results.map(function(r) {
+          return '<img src="' + r.src + '" alt="' + r.title + '" title="' + r.title + '">';
+        }).join("") + '</div>';
+        btn.innerHTML = [
+          "<img class='task-thumb-main' src='" + task.results[0].src + "' alt='" + task.title + "'>",
+          "<div class='task-main'>",
+          "<div class='task-title-line'><strong>" + task.title + "</strong><span>" + task.id + "</span></div>",
+          "<div class='task-model-line'>" + [task.model, task.resolution, task.ratio, task.quality].join(" · ") + "</div>",
+          "<div class='task-meta-line'><span class='task-status-pill" + statusClass + "'>" + statusText + "</span><span class='task-meta-right'>" + task.doneText + " · " + task.time.replace('今天 ', '').replace('昨天 ', '') + "</span></div>",
+          "<div class='progress' style='--p:" + task.progress + "%'><b></b></div>",
+          "<p>" + task.storyboard.map(function(item) { return item.title; }).join(" / ") + "</p>",
+          thumbsHtml,
+          "</div>"
+        ].join("");
+        btn.addEventListener("click", () => {
+          appState.activeTaskId = task.id;
+          renderTaskList();
+          renderTaskDetail();
+          openModal(els.taskDetailMask);
+        });
+        els.taskList.appendChild(btn);
+      });
+    }
+
+    function renderTaskDetail() {
+      const task = getActiveTask();
+      if (!task) return;
+
+      if (!task.reviews) task.reviews = [];
+      if (!task.reviewConfig) {
+        task.reviewConfig = Object.assign({}, appState.reviewDefaults);
+        // 品类卖点默认带入
+        var catDef = getCategoryAnyLib(task.productType);
+        if (catDef && catDef.sellingPoints) {
+          task.reviewConfig.sellingPoints = catDef.sellingPoints;
+        }
+      }
+
+      recomputeTaskStatus(task);
+      els.taskDetailTitle.textContent = task.title;
+      els.taskDetailDesc.textContent = [task.model, task.resolution, task.ratio, task.quality].join(" · ");
+      els.taskDetailStatus.textContent = task.status;
+      els.taskSceneLabel.textContent = "场景秀规则：" + task.scene + " · " + task.productType;
+      els.taskRulePreview.textContent = task.rules;
+      els.storyboardCountLabel.textContent = task.storyboard.length + " 条";
+      els.resultCountLabel.textContent = task.results.length + " 张结果";
+      els.reviewTabCount.textContent = task.reviews.length;
+      renderDetailView();
+
+      els.storyboardGrid.innerHTML = task.storyboard.map((item) => {
+        return "<div class='shot'><b>" + item.index + "</b><strong>" + item.title + "</strong><span>" + item.desc + "</span></div>";
+      }).join("");
+
+      els.resultGrid.innerHTML = "";
+      task.results.forEach((result) => {
+        const actionable = isResultActionable(task, result);
+        const reviewable = actionable && result.label === "认可";
+        const disabledAttr = actionable ? "" : " disabled";
+        const reviewDisabledAttr = reviewable ? "" : " disabled";
+        const displayNote = actionable ? result.note : "这张图还在生成中，完成后即可返修、认可或下载。";
+        const card = document.createElement("article");
+        card.className = "result-card";
+        card.innerHTML = [
+          "<div class='result-image'><img src='" + result.src + "' alt='" + result.title + "'><span class='result-badge'>" + result.shot + "</span></div>",
+          "<div class='result-body'>",
+          "<div class='result-title'><strong>" + result.title + "</strong></div>",
+          "<div class='card-actions' style='display:flex;align-items:center;gap:4px'>",
+          "<button class='thumb-btn up" + (result.label === "认可" ? " active" : "") + "' data-action='approve'" + disabledAttr + " title='点赞' style='width:26px;height:26px;font-size:13px'>👍</button>",
+          "<button class='thumb-btn down" + (result.label === "待调整" ? " active" : "") + "' data-action='reject'" + disabledAttr + " title='待调整' style='width:26px;height:26px;font-size:13px'>👎</button>",
+          "<button class='small-btn soft' data-action='edit'" + disabledAttr + " style='min-height:26px;padding:0 8px;font-size:11px'>编辑</button>",
+          "<button class='small-btn primary' data-action='download'" + disabledAttr + " style='min-height:26px;padding:0 8px;font-size:11px'>下载</button>",
+          "</div>",
+          "</div>"
+        ].join("");
+
+        if (actionable) {
+          card.querySelector("[data-action='approve']").addEventListener("click", () => {
+            result.label = "认可";
+            result.note = "已标记为认可，可用于后续评论文案。";
+            renderTaskList();
+            renderTaskDetail();
+            showToast("👍 已点赞当前结果");
+          });
+          card.querySelector("[data-action='reject']").addEventListener("click", () => {
+            result.label = "待调整";
+            result.note = "已标记为待调整，建议走单图返修。";
+            renderTaskList();
+            renderTaskDetail();
+            showToast("👎 已标记为待调整");
+          });
+          card.querySelector("[data-action='download']").addEventListener("click", () => {
+            showToast("这里演示下载当前结果图。");
+          });
+          card.querySelector("[data-action='edit']").addEventListener("click", () => {
+            openImageEdit(task.id, result.id);
+          });
+        }
+
+        els.resultGrid.appendChild(card);
+      });
+
+      renderReviewControls();
+      renderReviewList();
+    }
+
+    function renderDetailView() {
+      const showReviews = appState.detailView === "reviews";
+      els.imageResultPanel.classList.toggle("hidden", showReviews);
+      els.reviewPanel.classList.toggle("hidden", !showReviews);
+      els.detailTabs.querySelectorAll("[data-detail-view]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.detailView === appState.detailView);
+      });
+    }
+
+    function renderReviewControls() {
+      const task = getActiveTask();
+      const config = task.reviewConfig;
+      const options = ["5", "10", "15", "20", "custom"];
+      els.reviewCountOptions.innerHTML = options.map((value) => {
+        const label = value === "custom" ? "自定义" : value;
+        const active = config.countMode === value ? " active" : "";
+        return "<button class='review-count-btn" + active + "' data-review-count='" + value + "'>" + label + "</button>";
+      }).join("");
+      els.customCountRow.classList.toggle("hidden", config.countMode !== "custom");
+      els.customReviewCount.value = config.customCount;
+      els.reviewSellingPoints.value = config.sellingPoints;
+
+      els.reviewCountOptions.querySelectorAll("[data-review-count]").forEach((button) => {
+        button.addEventListener("click", () => {
+          config.countMode = button.dataset.reviewCount;
+          renderReviewControls();
+          if (button.dataset.reviewCount === "custom") els.customReviewCount.focus();
+        });
+      });
+    }
+
+    function getReviewCount() {
+      const config = getActiveTask().reviewConfig;
+      if (config.countMode !== "custom") return Number(config.countMode);
+      return Math.max(1, Math.min(20, Math.floor(Number(config.customCount) || 1)));
+    }
+
+    function buildReviewText(task, result, index) {
+      const points = task.reviewConfig.sellingPoints.split(/[、,，]/).map((item) => item.trim()).filter(Boolean);
+      const point = points[index % Math.max(points.length, 1)] || "用起来很方便";
+      let imageObservation = "实际戴上的状态和图里比较接近";
+      if (/材质|特写|细节/.test(result.title)) imageObservation = "细节和图里拍得差不多，走线和贴合位置都看得清";
+      else if (/沙发|半躺|休息|小憩/.test(result.title)) imageObservation = "平时坐沙发休息时就像图里这样戴着，用起来挺自然";
+      else if (/起身|走|活动|站姿/.test(result.title)) imageObservation = "起身和慢慢走动时都试过，没有明显影响动作";
+      else if (/侧向|侧身/.test(result.title)) imageObservation = "侧面看贴合得比较稳，位置和图里基本一致";
+      const templates = [
+        imageObservation + "。贴合度比想象中好，" + point + "，平时在家活动也不会觉得特别碍事。",
+        "给家里人买的，" + imageObservation + "。腰部包得比较稳，坐着休息时也挺自然。",
+        "用了几天才来评价，" + imageObservation + "。穿在外套里面不怎么显，松紧调整起来顺手。",
+        imageObservation + "，和我平时用的时候很像。做工摸着扎实，细节没有敷衍。",
+        "本来担心戴着会勒，实际调好以后还可以，腰两侧有支撑感，日常用够了。",
+        "图片看着挺真实，收到的佩戴效果也比较接近。绑带好调，固定住以后不容易乱跑。",
+        "家里老人试了说支撑感不错，坐沙发和慢慢走动时都能用，操作也不复杂。",
+        "材质摸起来不硬，贴着衣服戴没有明显磨人的感觉。细节位置做得规整，整体符合预期。",
+        "戴上以后腰部有被托住的感觉，但不会影响正常活动。尺寸按客服建议选的，比较合适。",
+        "不是那种夸张的效果，不过日常需要支撑的时候挺实用，穿脱方便，清洗起来也省事。",
+        "刚开始还不太会调，看了一下就弄明白了。调整好后贴合得稳，走动时没有明显移位。",
+        "实物比预想中轻一些，坐着休息的时候戴着也可以。边缘处理得比较柔和，没有硌人的地方。",
+        "给爸爸准备的，他自己就能穿戴。支撑位置比较准，家里做些轻活动时用着方便。",
+        "用了一周，魔术贴粘得牢，反复开合也没有松。腰部包裹感明显，整体做工可以。",
+        "日常在家戴得比较多，衣服盖住后不突兀。调节范围够用，不会一动就往上跑。",
+        "侧面的贴合效果和图里差不多，受力比较均匀。戴久一点也没有特别闷，体验不错。",
+        "包装完整，拿出来没有异味。试戴后感觉支撑够用，尤其坐久了再起身时更踏实一些。",
+        "买来主要是做家务和散步时用，固定效果不错，动作幅度不大的时候基本不影响。",
+        "细节图拍得很清楚，实物的面料和走线也对得上。大小合适，佩戴步骤简单。",
+        "整体属于实用型，外观不花哨，腰部需要支撑时随手就能戴上，家里人也说挺方便。"
+      ];
+      const templateIndex = index % templates.length;
+      return templateIndex < 4 ? templates[templateIndex] : imageObservation + "。" + templates[templateIndex];
+    }
+
+    function generateBatchReviews() {
+      const task = getActiveTask();
+      if (!task) return;
+      const availableResults = task.results.filter((result) => isResultActionable(task, result) && result.label === "认可");
+      if (!availableResults.length) {
+        showToast("当前任务还没有已认可的结果图，请先确认图片");
+        return;
+      }
+      if (task.reviews.length && !confirm("重新批量生成会替换当前 " + task.reviews.length + " 条评价，已编辑内容也会被覆盖。是否继续？")) return;
+      const count = getReviewCount();
+      task.reviews = Array.from({ length: count }, (_, index) => {
+        const result = availableResults[index % availableResults.length];
+        return {
+          id: "review-" + Date.now() + "-" + index,
+          resultId: result.id,
+          resultVersion: result.version,
+          imageSrc: result.src,
+          text: buildReviewText(task, result, index),
+          status: ""
+        };
+      });
+      appState.detailView = "reviews";
+      renderTaskDetail();
+      showToast("已生成 " + count + " 条评价，并完成逐条图片关联");
+    }
+
+    function generateSingleReview(task, result) {
+      if (!task.reviews) task.reviews = [];
+      if (task.reviews.length >= 20) {
+        showToast("单个任务最多保留 20 条评价，请先删除一条再生成");
+        return;
+      }
+      const index = task.reviews.length;
+      task.reviews.push({
+        id: "review-" + Date.now(),
+        resultId: result.id,
+        resultVersion: result.version,
+        imageSrc: result.src,
+        text: buildReviewText(task, result, index),
+        status: "待审核"
+      });
+      appState.detailView = "reviews";
+      renderTaskDetail();
+      showToast("已基于“" + result.title + "”生成 1 条评价");
+    }
+
+    function renderReviewList() {
+      const task = getActiveTask();
+      const reviews = task && task.reviews ? task.reviews : [];
+      els.reviewCountLabel.textContent = reviews.length + " 条评价";
+      els.copyAllReviewsBtn.disabled = !reviews.length;
+      els.exportReviewsBtn.disabled = !reviews.length;
+      els.reviewList.innerHTML = "";
+
+      if (!reviews.length) {
+        els.reviewList.innerHTML = "<div class='review-empty'><div><strong>还没有评价文案</strong><span>选择数量后批量生成，系统会让每条评价关联具体结果图。</span></div></div>";
+        return;
+      }
+
+      reviews.forEach((review, index) => {
+        const result = task.results.find((item) => item.id === review.resultId) || task.results[0];
+        const card = document.createElement("article");
+        card.className = "review-card";
+        card.innerHTML = [
+          "<img class='review-thumb' src='" + (review.imageSrc || result.src) + "' alt='关联图片 " + result.shot + "'>",
+          "<div class='review-main'>",
+          "<div class='review-meta'><b>评价 " + String(index + 1).padStart(2, "0") + "</b><span>关联图 " + result.shot + " · " + result.title + " · " + (review.resultVersion || result.version) + "</span></div>",
+          "<textarea class='review-text' data-review-text='" + review.id + "'>" + escapeHtml(review.text) + "</textarea>",
+          "</div>",
+          "<div class='review-side'>",
+          "<button class='small-btn' data-review-action='copy'>复制</button>",
+          "<button class='small-btn soft' data-review-action='regenerate'>重写</button>",
+          "<button class='small-btn danger' data-review-action='delete'>删除</button>",
+          "</div>"
+        ].join("");
+
+        card.querySelector("[data-review-text]").addEventListener("input", (event) => {
+          review.text = event.target.value;
+        });
+        card.querySelector("[data-review-action='copy']").addEventListener("click", () => {
+          copyText(review.text);
+          showToast("已复制评价 " + String(index + 1).padStart(2, "0"));
+        });
+        card.querySelector("[data-review-action='regenerate']").addEventListener("click", () => {
+          review.text = buildReviewText(task, result, index + reviews.length + 1);
+          review.status = "待审核";
+          renderTaskDetail();
+          showToast("已重写当前评价，仍保持关联图不变");
+        });
+        card.querySelector("[data-review-action='delete']").addEventListener("click", () => {
+          task.reviews = task.reviews.filter((item) => item.id !== review.id);
+          renderTaskDetail();
+          showToast("已删除当前评价");
+        });
+        els.reviewList.appendChild(card);
+      });
+    }
+
+    function copyText(text) {
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.style.position = "fixed";
+      helper.style.opacity = "0";
+      document.body.appendChild(helper);
+      helper.select();
+      document.execCommand("copy");
+      helper.remove();
+    }
+
+    function copyAllReviews() {
+      const task = getActiveTask();
+      if (!task || !task.reviews || !task.reviews.length) return;
+      copyText(task.reviews.map((review, index) => (index + 1) + ". " + review.text).join("\n"));
+      showToast("已复制全部 " + task.reviews.length + " 条评价");
+    }
+
+    function exportReviews() {
+      const task = getActiveTask();
+      if (!task || !task.reviews || !task.reviews.length) return;
+      const rows = [["序号", "关联图片", "分镜名称", "评价文案", "状态"]];
+      task.reviews.forEach((review, index) => {
+        const result = task.results.find((item) => item.id === review.resultId) || task.results[0];
+        rows.push([index + 1, "图 " + result.shot, result.title, review.text, review.status]);
+      });
+      const content = "\ufeff" + rows.map((row) => row.map((cell) => String(cell).replace(/\t/g, " ").replace(/\n/g, " ")).join("\t")).join("\n");
+      const url = URL.createObjectURL(new Blob([content], { type: "application/vnd.ms-excel;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "买家秀评价文案_" + task.id.slice(0, 8) + ".xls";
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("已导出 Excel，包含图片编号和评价文案");
+    }
+
+    function buildQuickInstruction(task, templateKey, result) {
+      const map = {
+        pose: "保持" + task.productType + "不变，只调整人物姿势和手部动作，让状态更自然。",
+        wear: "保持人物和背景不变，修正" + task.productType + "的佩戴位置与贴合关系。",
+        background: "保持人物和产品不变，把背景调整为更符合“" + task.scene + "”的场景。",
+        reality: "保持构图不变，降低美颜感和修饰感，让画面更像真实手机拍摄。"
+      };
+      return map[templateKey] || ("围绕“" + result.title + "”做轻量优化。");
+    }
+
+    function openImageEdit(taskId, resultId) {
+      const task = getTaskById(taskId);
+      const result = getResultByIds(taskId, resultId);
+      if (!task || !result) return;
+
+      appState.editState = {
+        taskId,
+        resultId,
+        quickKey: "pose",
+        instruction: buildQuickInstruction(task, "pose", result),
+        candidates: buildCandidates(task, result, "pose", buildQuickInstruction(task, "pose", result)),
+        selectedCandidateId: "c1"
+      };
+
+      renderImageEditModal();
+      openModal(els.imageEditMask);
+    }
+
+    function buildCandidates(task, result, quickKey, instruction) {
+      const instructionHint = summarizeInstruction(instruction);
+      const variantMap = {
+        pose: [
+          { id: "c1", src: assetPool[(assetPool.indexOf(result.src) + 1) % assetPool.length], title: "候选 A", note: "人物手部动作更自然，保留原构图。" },
+          { id: "c2", src: assetPool[(assetPool.indexOf(result.src) + 2) % assetPool.length], title: "候选 B", note: "人物姿态放松，画面更像手机抓拍。" }
+        ],
+        wear: [
+          { id: "c1", src: assetPool[(assetPool.indexOf(result.src) + 2) % assetPool.length], title: "候选 A", note: "佩戴位置更稳，绑带逻辑更准确。" },
+          { id: "c2", src: assetPool[(assetPool.indexOf(result.src) + 3) % assetPool.length], title: "候选 B", note: "贴合关系更清晰，产品主体保持不变。" }
+        ],
+        background: [
+          { id: "c1", src: assetPool[(assetPool.indexOf(result.src) + 3) % assetPool.length], title: "候选 A", note: "背景换成更明确的业务场景，主体保持一致。" },
+          { id: "c2", src: assetPool[(assetPool.indexOf(result.src) + 1) % assetPool.length], title: "候选 B", note: "背景更干净，减少杂乱元素。" }
+        ],
+        reality: [
+          { id: "c1", src: assetPool[(assetPool.indexOf(result.src) + 1) % assetPool.length], title: "候选 A", note: "减少磨皮和修饰，保留生活感。" },
+          { id: "c2", src: assetPool[(assetPool.indexOf(result.src) + 2) % assetPool.length], title: "候选 B", note: "光线更自然，人物质感更真实。" }
+        ]
+      };
+      return variantMap[quickKey].map((item, index) => ({
+        ...item,
+        title: item.title + " · " + instructionHint,
+        request: (index + 1) + " / 2"
+      }));
+    }
+
+    function renderQuickActions() {
+      els.quickActionGrid.innerHTML = "";
+      quickEditTemplates.forEach((template) => {
+        const btn = document.createElement("button");
+        btn.className = "quick-action" + (appState.editState.quickKey === template.key ? " active" : "");
+        btn.innerHTML = "<strong>" + template.title + "</strong><span>" + template.desc + "</span>";
+        btn.addEventListener("click", () => {
+          const task = getTaskById(appState.editState.taskId);
+          const result = getResultByIds(appState.editState.taskId, appState.editState.resultId);
+          appState.editState.quickKey = template.key;
+          appState.editState.instruction = buildQuickInstruction(task, template.key, result);
+          appState.editState.candidates = buildCandidates(task, result, template.key, appState.editState.instruction);
+          appState.editState.selectedCandidateId = "c1";
+          renderImageEditModal();
+        });
+        els.quickActionGrid.appendChild(btn);
+      });
+    }
+
+    function renderCandidates() {
+      els.candidateGrid.innerHTML = "";
+      els.candidateCountLabel.textContent = "共 " + appState.editState.candidates.length + " 张候选，可替换当前结果";
+      appState.editState.candidates.forEach((candidate) => {
+        const card = document.createElement("button");
+        card.className = "candidate-card" + (candidate.id === appState.editState.selectedCandidateId ? " selected" : "");
+        card.innerHTML = [
+          "<img src='" + candidate.src + "' alt='" + candidate.title + "'>",
+          "<div class='candidate-body'>",
+          "<strong>" + candidate.title + "</strong>",
+          "<p>" + candidate.note + "</p>",
+          "<span class='small-btn soft'>" + candidate.request + "</span>",
+          "</div>"
+        ].join("");
+        card.addEventListener("click", () => {
+          appState.editState.selectedCandidateId = candidate.id;
+          renderCandidates();
+        });
+        els.candidateGrid.appendChild(card);
+      });
+    }
+
+    function renderImageEditModal() {
+      const task = getTaskById(appState.editState.taskId);
+      const result = getResultByIds(appState.editState.taskId, appState.editState.resultId);
+      if (!task || !result) return;
+
+      els.editModalTitle.textContent = "单图返修 · " + result.title;
+      els.editSourceImage.src = result.src;
+      els.editImageSummary.innerHTML = [
+        "<div><b>所属任务：</b>" + task.title + "</div>",
+        "<div><b>当前状态：</b>" + result.label + "</div>",
+        "<div><b>当前版本：</b>" + result.version + "</div>"
+      ].join("");
+      els.inheritInfo.innerHTML = [
+        "<strong>本次返修会自动继承：</strong><br>",
+        "场景：" + task.scene + " · " + task.productType + "<br>",
+        "规则：" + task.rules.split("\n")[0] + "<br>",
+        "参数：" + [task.model, task.resolution, task.ratio, task.quality].join(" · "),
+        "<br><br><span style='color:#7c3aed;font-weight:800'>🔧 开发注意：</span><span style='color:#64748b'>点击「生成候选」后需调用图像模型重新生成图片（传入当前结果图 + 返修方向 + 补充要求），当前原型为静态演示占位。</span>"
+      ].join("");
+      els.editInstructionInput.value = appState.editState.instruction;
+      renderQuickActions();
+      renderCandidates();
+    }
+
+    function applySelectedCandidate() {
+      const task = getTaskById(appState.editState.taskId);
+      const result = getResultByIds(appState.editState.taskId, appState.editState.resultId);
+      const candidate = appState.editState.candidates.find((item) => item.id === appState.editState.selectedCandidateId);
+      appState.editState.instruction = els.editInstructionInput.value.trim() || appState.editState.instruction;
+      if (!task || !result || !candidate) {
+        showToast("请先选择一个返修候选");
+        return;
+      }
+
+      result.editHistory.push({
+        from: result.src,
+        version: result.version,
+        instruction: appState.editState.instruction
+      });
+      result.src = candidate.src;
+      result.version = "返修第 " + result.editHistory.length + " 版";
+      result.label = "已返修";
+      result.note = appState.editState.instruction;
+      (task.reviews || []).forEach((review) => {
+        if (review.resultId === result.id) review.status = "图片已更新，待复核";
+      });
+
+      recomputeTaskStatus(task);
+      renderTaskList();
+      renderTaskDetail();
+      closeModal(els.imageEditMask);
+      showToast("已替换当前结果，原图已保留在返修记录里");
+    }
+
+    var genTimer = null;
+    function createTaskFromCurrentConfig() {
+      const cat = getCurrentCategory();
+      const scene = getCurrentScene();
+      if (!cat || !scene) {
+        showToast("请先选择产品品类和场景");
+        return;
+      }
+      if (genTimer) { clearInterval(genTimer); genTimer = null; }
+      const count = parseInt(appState.selectedCount, 10) || 4;
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const title = count + " 张买家秀 · " + hh + ":" + mm;
+      const storyboard = [
+        { index: "01", title: "主视角场景展示", desc: "系统按场景规则自动生成首张结果。" },
+        { index: "02", title: "侧向细节视角", desc: "展示护具贴合与细节结构。" },
+        { index: "03", title: "使用动作场景", desc: "强调日常可信感与场景氛围。" },
+        { index: "04", title: "补充材质特写", desc: "补充商品面料与结构细节。" }
+      ];
+      var assetPoolLocal = ["assets/buyer.webp", "assets/expert.webp", "assets/prompt.webp", "assets/repaint.webp"];
+      var results = [];
+      for (var i = 0; i < count; i++) {
+        var si = i < storyboard.length ? i : i % storyboard.length;
+        results.push({
+          id: "result-" + Date.now() + "-" + i,
+          shot: storyboard[si].index,
+          title: storyboard[si].title,
+          label: "处理中",
+          note: "正在生成中…",
+          src: assetPoolLocal[i % assetPoolLocal.length],
+          version: "原始结果",
+          editHistory: []
+        });
+      }
+      var newTask = {
+        id: "demo-" + Date.now(),
+        title,
+        time: "刚刚",
+        status: "生成中",
+        progress: 0,
+        doneText: "0/" + count,
+        scene: scene.name,
+        productType: cat.name,
+        model: appState.selectedModel,
+        resolution: appState.selectedResolution,
+        ratio: appState.selectedRatio,
+        quality: appState.selectedQuality,
+        count: count + " 张",
+        prompt: appState.prompt || "未填写补充提示词",
+        rules: composeRules(cat, scene),
+        storyboard: storyboard.slice(0, Math.min(count, storyboard.length)),
+        results: results
+      };
+      appState.tasks.unshift(newTask);
+      appState.activeTaskId = newTask.id;
+      renderTaskList();
+      showToast("已提交任务，开始生成 " + count + " 张…");
+      els.submitTaskBtn.textContent = "生成中…";
+      els.submitTaskBtn.disabled = true;
+      // 模拟逐张生成
+      var done = 0;
+      genTimer = setInterval(function() {
+        if (!appState.tasks.includes(newTask)) { clearInterval(genTimer); genTimer = null; return; }
+        done++;
+        newTask.results.forEach(function(r, i) {
+          if (i < done) {
+            r.label = "认可";
+            r.note = "已生成完成，可点赞/编辑/下载。";
+          }
+        });
+        newTask.done = done;
+        newTask.doneText = done + "/" + count;
+        newTask.progress = Math.round(done / count * 100);
+        els.submitTaskBtn.textContent = "生成中… " + done + "/" + count;
+        renderTaskList();
+        if (els.taskDetailMask.classList.contains("show")) renderTaskDetail();
+        if (done >= count) {
+          newTask.status = "已完成";
+          renderTaskList();
+          if (els.taskDetailMask.classList.contains("show")) renderTaskDetail();
+          clearInterval(genTimer);
+          genTimer = null;
+          els.submitTaskBtn.textContent = "提交任务";
+          els.submitTaskBtn.disabled = false;
+          showToast("全部 " + count + " 张生成完成");
+        }
+      }, 600);
+    }
+
+    function bindEvents() {
+      els.promptInput.addEventListener("input", (event) => {
+        appState.prompt = event.target.value;
+      });
+      els.manageToggleBtn.addEventListener("click", openManageModal);
+      els.libEditBackBtn.addEventListener("click", backToManageList);
+      els.libTabs.querySelectorAll(".lib-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          appState.activeLib = tab.dataset.lib;
+          appState.categorySearch = "";
+          els.categorySearchInput.value = "";
+          renderLibrary();
+        });
+      });
+      els.viewRuleBtn.addEventListener("click", () => {
+        els.ruleReadonly.classList.toggle("hidden");
+        els.viewRuleBtn.textContent = els.ruleReadonly.classList.contains("hidden") ? "查看规则" : "收起规则";
+      });
+      els.taskSearchInput.addEventListener("input", (event) => {
+        appState.search = event.target.value;
+        renderTaskList();
+      });
+      els.resetTaskFilterBtn.addEventListener("click", () => {
+        appState.search = "";
+        els.taskSearchInput.value = "";
+        renderTaskList();
+      });
+      els.categoryCard.addEventListener("click", () => {
+        renderCategoryOptionList();
+        els.modelDropdown.classList.remove("show");
+        els.paramDropdown.classList.remove("show");
+        els.categoryDropdown.classList.toggle("show");
+        if (els.categoryDropdown.classList.contains("show")) {
+          els.categorySearchInput.focus();
+        }
+      });
+      els.categorySearchInput.addEventListener("input", (event) => {
+        appState.categorySearch = event.target.value;
+        renderCategoryOptionList();
+      });
+      els.categorySearchInput.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+      els.modelCard.addEventListener("click", () => {
+        renderModelOptions();
+        els.paramDropdown.classList.remove("show");
+        els.categoryDropdown.classList.remove("show");
+        els.modelDropdown.classList.toggle("show");
+      });
+      els.paramCard.addEventListener("click", () => {
+        renderResolutionOptions();
+        renderRatioOptions();
+        renderCountOptions();
+        els.modelDropdown.classList.remove("show");
+        els.categoryDropdown.classList.remove("show");
+        els.paramDropdown.classList.toggle("show");
+      });
+      els.submitTaskBtn.addEventListener("click", () => {
+        if (genTimer) { showToast("正在生成中，请等待完成"); return; }
+        createTaskFromCurrentConfig();
+      });
+      document.getElementById("resetConfigBtn").addEventListener("click", () => {
+        if (genTimer) { clearInterval(genTimer); genTimer = null; }
+        appState.prompt = "";
+        els.promptInput.value = "";
+        appState.selectedCategoryName = null;
+        appState.selectedSceneId = null;
+        renderLibrary();
+        renderParameterSummary();
+        showToast("已清空配置");
+      });
+      els.polishPromptBtn.addEventListener("click", openPolish);
+      els.toggleRuleBtn.addEventListener("click", () => {
+        els.rulePreviewBox.classList.toggle("hidden");
+        els.toggleRuleBtn.textContent = els.rulePreviewBox.classList.contains("hidden") ? "查看规则" : "收起规则";
+      });
+      els.openReviewBatchBtn.addEventListener("click", () => {
+        appState.detailView = "reviews";
+        renderDetailView();
+      });
+      els.detailTabs.querySelectorAll("[data-detail-view]").forEach((button) => {
+        button.addEventListener("click", () => {
+          appState.detailView = button.dataset.detailView;
+          renderDetailView();
+        });
+      });
+      els.reviewSellingPoints.addEventListener("input", (event) => {
+        getActiveTask().reviewConfig.sellingPoints = event.target.value;
+      });
+      els.customReviewCount.addEventListener("input", (event) => {
+        const config = getActiveTask().reviewConfig;
+        const rawValue = Math.floor(Number(event.target.value));
+        if (rawValue > 20) {
+          event.target.value = 20;
+          config.customCount = 20;
+          showToast("自定义数量最多为 20 条");
+          return;
+        }
+        const safeValue = Math.max(1, rawValue || 1);
+        event.target.value = safeValue;
+        config.customCount = safeValue;
+      });
+      els.batchGenerateReviewsBtn.addEventListener("click", generateBatchReviews);
+      els.copyAllReviewsBtn.addEventListener("click", copyAllReviews);
+      els.exportReviewsBtn.addEventListener("click", exportReviews);
+      els.generateCandidatesBtn.addEventListener("click", () => {
+        const task = getTaskById(appState.editState.taskId);
+        const result = getResultByIds(appState.editState.taskId, appState.editState.resultId);
+        appState.editState.instruction = els.editInstructionInput.value.trim() || buildQuickInstruction(task, appState.editState.quickKey, result);
+        appState.editState.candidates = buildCandidates(task, result, appState.editState.quickKey, appState.editState.instruction);
+        appState.editState.selectedCandidateId = "c1";
+        renderImageEditModal();
+        showToast("已生成 2 张单图返修候选");
+      });
+      els.clearEditInstructionBtn.addEventListener("click", () => {
+        els.editInstructionInput.value = "";
+        appState.editState.instruction = "";
+      });
+      els.applyCandidateBtn.addEventListener("click", applySelectedCandidate);
+      els.downloadZipBtn.addEventListener("click", () => {
+        showToast("这里演示任务级全部下载 ZIP。");
+      });
+
+      document.querySelectorAll("[data-close]").forEach((button) => {
+        button.addEventListener("click", () => {
+          closeModal(document.getElementById(button.getAttribute("data-close")));
+        });
+      });
+
+      document.addEventListener("click", (event) => {
+        const categoryAnchor = els.categoryCard.closest(".param-dropdown-anchor");
+        const modelAnchor = els.modelCard.closest(".param-dropdown-anchor");
+        const paramAnchor = els.paramCard.closest(".param-dropdown-anchor");
+        if (categoryAnchor.contains(event.target) || modelAnchor.contains(event.target) || paramAnchor.contains(event.target)) return;
+        closeParameterDropdowns();
+      });
+
+      [els.taskDetailMask, els.imageEditMask, els.libEditMask].forEach((mask) => {
+        mask.addEventListener("click", (event) => {
+          if (event.target === mask) {
+            closeModal(mask);
+          }
+        });
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (els.modelDropdown.classList.contains("show") || els.paramDropdown.classList.contains("show") || els.categoryDropdown.classList.contains("show")) {
+            closeParameterDropdowns();
+            return;
+          }
+          if (els.libEditMask.classList.contains("show")) {
+            closeModal(els.libEditMask);
+            return;
+          }
+          if (els.imageEditMask.classList.contains("show")) {
+            closeModal(els.imageEditMask);
+          } else if (els.taskDetailMask.classList.contains("show")) {
+            closeModal(els.taskDetailMask);
+          }
+        }
+      });
+    }
+
+    // ===== AI润色弹窗（与商品套图一致）=====
+    var polishState = { open: false, original: "", result: "" };
+    function polishText(text) {
+      var clean = text.trim().replace(/\s+/g, " ").replace(/[。；;，,]+$/g, "");
+      return clean + "；突出核心优势、使用体验与购买价值，表达简洁有力。";
+    }
+    function openPolish() {
+      if (!appState.prompt.trim()) { showToast("请先填写综合提示词再进行 AI 润色"); return; }
+      polishState.open = true; polishState.original = appState.prompt; polishState.result = polishText(appState.prompt).slice(0, 500);
+      renderPolish();
+    }
+    function closePolish() {
+      polishState.open = false;
+      document.getElementById("polishRoot").innerHTML = "";
+    }
+    function applyPolish() {
+      appState.prompt = polishState.result.slice(0, 500);
+      els.promptInput.value = appState.prompt;
+      closePolish(); showToast("已应用润色结果");
+    }
+    function renderPolish() {
+      var anchor = els.polishPromptBtn.closest(".module");
+      if (anchor) anchor.style.position = "relative";
+      var host = anchor ? anchor.querySelector("#polishRoot") : document.getElementById("polishRoot");
+      if (!host) { host = document.createElement("div"); host.id = "polishRoot"; (anchor || document.body).appendChild(host); }
+      host.innerHTML = '<div class="polish-scrim" data-pact="mask"><div class="polish-modal">' +
+        '<div class="polish-head"><strong>AI 润色</strong><span class="polish-status">已完成</span></div>' +
+        '<div class="polish-body">' + escapeHtml(polishState.result) + '</div>' +
+        '<div class="polish-foot"><button class="ghost-btn" data-pact="cancel">取消</button><button class="primary-btn" data-pact="apply">确认</button></div>' +
+      '</div></div>';
+      host.querySelectorAll("[data-pact]").forEach(function(el){ el.addEventListener("click", function(e){
+        if (el.dataset.pact === "mask") { if (e.target===el) closePolish(); return; }
+        if (el.dataset.pact === "cancel") return closePolish();
+        if (el.dataset.pact === "apply") return applyPolish();
+      }); });
+    }
+
+    function init() {
+      appState.library = loadLibrary();
+      ensureSelection();
+      renderLibrary();
+      renderParameterSummary();
+      renderModelOptions();
+      renderResolutionOptions();
+      renderRatioOptions();
+      renderCountOptions();
+      els.promptInput.value = appState.prompt;
+      renderTaskList();
+      renderTaskDetail();
+      bindEvents();
+    }
+
+    init();
+  </script>
+
+  <!-- ===== PRD 标注层 ===== -->
+  <div class="prd-pop-backdrop" id="prdPopBackdrop"></div>
+  <div class="prd-popover" id="prdPopover" role="dialog" aria-modal="true">
+    <div class="prd-pop-head"><div><span class="prd-pop-tag" id="prdPopTag">PRD</span><h4 class="prd-pop-title" id="prdPopTitle"></h4></div><button class="prd-pop-close" id="prdPopClose" type="button" aria-label="关闭">×</button></div>
+    <div id="prdPopView"><div class="prd-pop-body" id="prdPopBody"></div><div class="prd-pop-source" id="prdPopSource"></div><div class="prd-pop-actions"><button type="button" id="prdPopEditBtn" style="display:none;">编辑</button><button type="button" id="prdPopResetBtn" style="display:none;">恢复默认</button><span class="spacer"></span><button type="button" class="danger" id="prdPopDeleteBtn" style="display:none;">删除标注</button></div></div>
+    <div id="prdPopEdit" style="display:none;"><label class="prd-pop-edit-field"><input type="text" id="prdPopEditTitle" placeholder="标注标题"></label><label class="prd-pop-edit-field"><textarea id="prdPopEditBody" placeholder="标注内容"></textarea></label><div class="prd-pop-actions"><button type="button" class="primary" id="prdPopSaveBtn">保存</button><button type="button" id="prdPopCancelBtn">取消</button></div></div>
+  </div>
+  <div class="custom-pin-layer" id="customPinLayer"></div>
+  <div class="placing-hint">点击页面任意位置添加标注 · 再次点击下方按钮退出</div>
+  <div class="anno-toolbar" id="annoToolbar" style="display:none;">
+    <button type="button" class="anno-fab copy" id="annoCopyBtn">📋 复制标注内容</button>
+    <button type="button" class="anno-fab" id="annoAddBtn">📍 添加标注</button>
+  </div>
+  <div class="anno-toast" id="annoToast"></div>
+  <script>
+  (function(){
+    var PRD_NOTES_DEFAULT={
+      "buyer-images":{tag:"PRD 6.1",title:"商品图片队列",body:"最多 16 张，第一张为主图，其余为参考图。支持 JPG/JPEG/PNG，单张 ≤20MB。\n\n支持从素材库选择和本地上传两种方式。\n\n当前原型为静态占位 UI，点击不触发真实文件选择。实际接入待后续迭代。"},
+      "buyer-category":{tag:"PRD 6.2.4",title:"品类选择器",body:"可搜索下拉列表。每项显示品类名称首字图标、名称、基础规则预览和场景数量。\n\n品类列表跨库并集（公共 + 我的），切库不改变已选品类。选中品类后自动带出当前库的第一个场景。\n\n品类在当前库没有场景时，场景区显示空状态提示。"},
+      "buyer-scenes":{tag:"PRD 6.2.5",title:"场景预设",body:"以 2 列卡片网格展示当前品类下的场景。每张卡片显示场景名称、维度填写进度（如 3/6 维度）和场景描述。\n\n切换公共/我的库时场景列表跟随变化。选中场景后自动合成并展示规则。"},
+      "buyer-rules":{tag:"PRD 6.2.3",title:"场景规则合成",body:"品类基础规则 + 场景 6 维度差异规则合并为完整规则文本：\n\n【品类基础】品类级硬约束（如主体不变形、佩戴位置准确）\n【人物】年龄/状态/表情/着装\n【场景描述】具体地点/环境\n【光线】明暗/光源\n【角度构图】机位/景别\n【动作姿态】在做什么/避免什么\n【真实感画风】整体基调/风格\n\n仅填写了内容的维度才出现在最终规则中。"},
+      "buyer-manage-lib":{tag:"PRD 6.3",title:"管理场景库",body:"弹窗固定高度，内容区独立滚动。\n\n顶部两个标签：公共场景库（只读）、我的场景库（可编辑）。\n\n左侧品类列表，右侧场景列表。新增按钮固定在标题行右侧，不随列表滚动。\n\n品类管理：新增/编辑品类表单（名称、卖点、基础规则），删除品类需二次确认。\n\n场景管理：新增/编辑场景表单（名称、描述、6 维度规则），发布到公共时按品类名称去重。"},
+      "buyer-prompt":{tag:"PRD 6.4.1",title:"综合提示词",body:"选填字段，自由文本输入。用户填写的内容作为补充提示词，与场景规则合成后送入生成。"},
+      "buyer-polish":{tag:"PRD 6.4.2",title:"AI 润色",body:"点击后在按钮上方弹出浮层展示润色结果。弹窗标题为「AI 润色」，右侧标注「已完成」状态。\n\n用户可点击「取消」保留原文，或「确认」替换输入框内容。未经确认不自动覆盖原文。\n\n当前原型为静态示例润色逻辑，实际接入需对接 AI 润色 API。"},
+      "buyer-model":{tag:"PRD 6.5.1",title:"生成模型",body:"首版支持 5 个模型：Nano Banana 2（默认）、Wan 2.7 Image Pro、Nano Banana Pro、Seedream 5.0、GPT Image 2。\n\n每个模型展示图标、名称、能力描述和预计速度标签。速度标签数值为占位示例，实际按平台模型配置动态展示。\n\n选择器为向上展开的浮层下拉。"},
+      "buyer-params":{tag:"PRD 6.5.2-6.5.4",title:"生成参数",body:"清晰度：1K / 2K（默认）/ 4K，表示输出最长边像素档位。\n\n比例：智能比例 / 1:1 / 3:2 / 2:3 / 16:9 / 4:3（默认）/ 3:4 / 9:16。\n\n张数：1~9 张，默认 4 张，以 9 格数字网格选择。\n\n参数下拉面板向上展开，点击面板外区域关闭。"},
+      "buyer-submit":{tag:"PRD 6.6",title:"提交任务",body:"提交前校验：已选择品类和场景、生成中不可重复提交。\n\n点击后直接提交，按钮切换为「生成中… N/M」并禁用。任务卡片在右侧列表实时更新进度，逐张模拟完成。全部完成后按钮恢复。\n\n当前原型生成过程为前端定时器模拟，实际接入需替换为任务队列回调驱动。"},
+      "buyer-clear":{tag:"PRD 6.6.3",title:"清空配置",body:"重置品类、场景选择和提示词。如有正在生成的任务，先终止再清空。"},
+      "buyer-task-list":{tag:"PRD 6.7.1",title:"任务列表",body:"每个任务以卡片展示：主商品缩略图、任务标题、模型参数、状态标签、进度条、分镜描述摘要、结果缩略图（单行展示全部图片）。\n\n搜索框支持按时间/场景/请求 ID 过滤。点击卡片选中任务，再次点击打开详情弹窗。"},
+      "buyer-results":{tag:"PRD 6.7.3",title:"结果图片",body:"每张结果图包含分镜编号、标题、图片和标签（认可/待调整/处理中）。\n\n缩略图左对齐排列，固定 180px 宽度。每个结果可点赞（👍）、倒赞（👎）、编辑、下载。\n\n点赞标记为「认可」，可用于后续评价生成。倒赞标记为「待调整」，建议走单图返修。"},
+      "buyer-edit-image":{tag:"PRD 6.7.5",title:"单图返修",body:"弹窗左侧展示当前图片和绘制工具（画笔/框选），右侧展示返修配置。\n\n系统自动展示本次返修继承的上下文（场景、规则、参数）。用户可选择快速返修方向或输入自定义补充要求。\n\n⚠️ 当前原型为静态占位：点击「生成候选」后需调用图像模型重新生成图片，传入当前结果图 + 返修方向 + 补充要求。"},
+      "buyer-reviews":{tag:"PRD 6.8",title:"评价文案生成",body:"首次打开评价标签时自动带入当前品类的卖点（如有）。\n\n生成数量可选 5/10/15/20 或自定义 1~20。仅基于「认可」的结果图生成评价。\n\n图文绑定：每条评价必须引用至少 1 个结果图中可观察到的视觉特征，禁止生成与图无关的泛化文案。\n\n人设多样性：批量生成时随机分配四种买家人设风格（简洁实用型/细节控/生活化/种草风格），确保评价间语气有差异。\n\n文本安全：过滤硬广推销词、品牌侵权、导流信息和绝对化用语。\n\n每条评价已关联具体结果图，内容由AI生成需人工进行审核后使用。\n\n当前原型评价生成为静态模板拼接，实际接入需对接文案生成能力。"},
+      "buyer-export":{tag:"PRD 6.8.4",title:"导出评价 Excel",body:"将当前任务的全部评价文案导出为 Excel 文件。\n\n导出字段：序号、关联分镜编号、关联结果图标题、评价正文、生成时间。\n\n导出范围：当前任务下的全部评价，不跨任务。\n\n当前原型为占位 Toast，实际接入需对接导出能力。"}
+    };
+    var DEV_PASSCODE="mengdie";
+    var isDevMode=new URLSearchParams(window.location.search).get("dev")===DEV_PASSCODE;
+    var STORAGE_KEY="prd_anno_buyer_show";
+    var annoState={overrides:{},custom:[]};
+    try{var saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");annoState.overrides=saved.overrides||{};annoState.custom=saved.custom||[];}catch(e){}
+    function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(annoState));}
+    function getEffectiveNote(key){
+      if(!key)return null;
+      if(key.startsWith("custom-")){var item=annoState.custom.find(function(c){return c.id===key;});if(!item)return null;return{tag:"自定义标注",title:item.title,body:item.body,isCustom:true};}
+      var base=PRD_NOTES_DEFAULT[key];if(!base)return null;
+      var override=annoState.overrides[key];if(override)return{tag:base.tag,title:override.title,body:override.body,isEdited:true};
+      return{tag:base.tag,title:base.title,body:base.body};
+    }
+    var prdPopover=document.getElementById("prdPopover"),prdPopBackdrop=document.getElementById("prdPopBackdrop");
+    var prdPopTitle=document.getElementById("prdPopTitle"),prdPopTag=document.getElementById("prdPopTag"),prdPopBody=document.getElementById("prdPopBody");
+    var prdPopSource=document.getElementById("prdPopSource"),prdPopView=document.getElementById("prdPopView"),prdPopEdit=document.getElementById("prdPopEdit");
+    var prdPopEditTitle=document.getElementById("prdPopEditTitle"),prdPopEditBody=document.getElementById("prdPopEditBody");
+    var prdPopEditBtn=document.getElementById("prdPopEditBtn"),prdPopResetBtn=document.getElementById("prdPopResetBtn"),prdPopDeleteBtn=document.getElementById("prdPopDeleteBtn");
+    var prdPopSaveBtn=document.getElementById("prdPopSaveBtn"),prdPopCancelBtn=document.getElementById("prdPopCancelBtn");
+    var annoToast=document.getElementById("annoToast"),currentKey=null;
+    function showAnnoToast(msg){annoToast.textContent=msg;annoToast.classList.add("show");setTimeout(function(){annoToast.classList.remove("show");},1800);}
+    function renderPopoverView(){
+      var note=getEffectiveNote(currentKey);if(!note){closePrdPopover();return;}
+      prdPopTag.textContent=note.tag;prdPopTitle.textContent=note.title;
+      if(note.isEdited){var tag=document.createElement("span");tag.className="prd-pop-edited-tag";tag.textContent="已编辑";prdPopTitle.appendChild(tag);}
+      prdPopBody.textContent=note.body;prdPopSource.textContent="来源：AI买家秀 PRD";
+      prdPopEditBtn.style.display=isDevMode?"":"none";prdPopResetBtn.style.display=isDevMode&&note.isEdited?"":"none";prdPopDeleteBtn.style.display=isDevMode&&note.isCustom?"":"none";
+      prdPopView.style.display="";prdPopEdit.style.display="none";
+    }
+    function positionPopover(anchorEl){var rect=anchorEl.getBoundingClientRect(),popW=420,left=rect.left,top=rect.bottom+8;if(left+popW>window.innerWidth-16)left=window.innerWidth-popW-16;if(left<16)left=16;if(top+320>window.innerHeight)top=Math.max(16,rect.top-320);prdPopover.style.left=left+"px";prdPopover.style.top=top+"px";}
+    function openPrdPopover(key,anchorEl,startInEdit){var note=getEffectiveNote(key);if(!note)return;currentKey=key;prdPopover.classList.add("show");prdPopBackdrop.classList.add("show");positionPopover(anchorEl);if(startInEdit)enterEditMode();else renderPopoverView();}
+    function closePrdPopover(){prdPopover.classList.remove("show");prdPopBackdrop.classList.remove("show");currentKey=null;}
+    function enterEditMode(){var note=getEffectiveNote(currentKey);if(!note)return;prdPopEditTitle.value=note.title;prdPopEditBody.value=note.body;prdPopView.style.display="none";prdPopEdit.style.display="";prdPopEditTitle.focus();}
+    function saveCurrentEdit(){var title=prdPopEditTitle.value.trim(),body=prdPopEditBody.value.trim();if(!title){prdPopEditTitle.focus();return;}if(currentKey.startsWith("custom-")){var item=annoState.custom.find(function(c){return c.id===currentKey;});if(item){item.title=title;item.body=body;delete item.isNew;}}else{annoState.overrides[currentKey]={title:title,body:body};}persist();renderPopoverView();}
+    function resetCurrentToDefault(){if(!currentKey||currentKey.startsWith("custom-"))return;delete annoState.overrides[currentKey];persist();renderPopoverView();}
+    function deleteCurrentCustom(){if(!currentKey||!currentKey.startsWith("custom-"))return;annoState.custom=annoState.custom.filter(function(c){return c.id!==currentKey;});persist();closePrdPopover();}
+    var pinLayer=document.getElementById("customPinLayer");
+    function renderCustomPin(item){var pin=document.createElement("button");pin.type="button";pin.className="custom-pin";pin.dataset.prd=item.id;pin.style.left=item.xPct+"%";pin.style.top=item.yPct+"%";pin.textContent="+";pin.setAttribute("aria-label",item.title||"自定义标注");pinLayer.appendChild(pin);return pin;}
+    function renderAllCustomPins(){pinLayer.innerHTML="";annoState.custom.forEach(renderCustomPin);}
+    renderAllCustomPins();
+    var placingMark=false,addMarkBtn=document.getElementById("annoAddBtn"),annoToolbar=document.getElementById("annoToolbar");
+    if(isDevMode)annoToolbar.style.display="";
+    addMarkBtn.addEventListener("click",function(){placingMark=!placingMark;document.body.classList.toggle("placing-mark",placingMark);addMarkBtn.classList.toggle("active",placingMark);addMarkBtn.textContent=placingMark?"✕ 退出标注模式":"📍 添加标注";});
+    document.body.addEventListener("click",function(event){if(!isDevMode||!placingMark)return;if(event.target.closest(".prd-badge, .custom-pin, .prd-popover, .anno-toolbar, button, a, input, select, textarea"))return;var xPct=(event.clientX/window.innerWidth)*100;var yPct=((event.clientY+window.scrollY)/document.body.scrollHeight)*100;var id="custom-"+Date.now()+"-"+Math.floor(Math.random()*1000);var item={id:id,xPct:Math.round(xPct*100)/100,yPct:Math.round(yPct*100)/100,title:"",body:"",isNew:true};annoState.custom.push(item);var pinEl=renderCustomPin(item);placingMark=false;document.body.classList.remove("placing-mark");addMarkBtn.classList.remove("active");addMarkBtn.textContent="📍 添加标注";openPrdPopover(id,pinEl,true);});
+    document.addEventListener("click",function(event){var badge=event.target.closest(".prd-badge, .custom-pin");if(badge){event.stopPropagation();openPrdPopover(badge.dataset.prd,badge);}});
+    document.addEventListener("keydown",function(event){if(event.key!=="Enter"&&event.key!==" ")return;var badge=event.target.closest(".prd-badge, .custom-pin");if(badge){event.preventDefault();openPrdPopover(badge.dataset.prd,badge);}});
+    if(isDevMode)prdPopEditBtn.addEventListener("click",enterEditMode);
+    prdPopCancelBtn.addEventListener("click",renderPopoverView);prdPopSaveBtn.addEventListener("click",saveCurrentEdit);
+    prdPopResetBtn.addEventListener("click",resetCurrentToDefault);prdPopDeleteBtn.addEventListener("click",deleteCurrentCustom);
+    document.getElementById("prdPopClose").addEventListener("click",closePrdPopover);prdPopBackdrop.addEventListener("click",closePrdPopover);
+    document.addEventListener("keydown",function(event){if(event.key==="Escape")closePrdPopover();});
+    var annoCopyBtn=document.getElementById("annoCopyBtn");
+    if(annoCopyBtn){annoCopyBtn.addEventListener("click",function(){var payload={说明:"从原型页面导出的标注修改内容",被编辑过的内置角标:annoState.overrides,新增的自定义标注点:annoState.custom.map(function(c){return{id:c.id,title:c.title,body:c.body,位置:{x百分比:c.xPct,y百分比:c.yPct}};})};var text=JSON.stringify(payload,null,2);try{navigator.clipboard.writeText(text);showAnnoToast("已复制到剪贴板");}catch(e){showAnnoToast("复制失败，请检查浏览器权限");}});}
+  })();
+  </script>
+</body>
+</html>

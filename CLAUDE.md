@@ -234,3 +234,10 @@ prd/vN/
 - Supabase：`prd_annotations` 表，存 PRD 编辑内容、待确认回复、原型标注
 - 编辑模式：URL 加 `?edit=mengdie` 解锁在线编辑
 - 嵌入模式：URL 加 `?embedded=true` 隐藏 PRD 顶部 header（index.html 里的 iframe 自动带此参数）
+
+## 国内访问的两个坑（做原型必看，不看会重犯）
+
+托管在 Vercel，国内访问的边缘节点不稳定，由此有两个反复出现的坑：
+
+- **图片破图**：HTML 小、能加载，但外链图片（logo/图标/截图）走 CDN 时容易超时失败，表现为"有人能看、有人破图"（跟落到的 Vercel IP + 所处网络有关，不是代码问题）。**对策：原型里的关键小图（logo 等）一律 base64 内嵌进 HTML**，不走单独的图片请求。命令：`printf '<img src="data:image/png;base64,%s">' "$(base64 -i 图.png)"`。大图/多图才考虑迁国内图床。
+- **目录 URL 缺末尾斜杠 → 相对跳转 404**：访问 `.../vN/prototype`（无斜杠）时浏览器把 `prototype` 当文件，页内 `location.href='main.html'` 这类**相对跳转**会以上一级为基准，跳成 `.../vN/main.html` 而 404；带斜杠 `.../vN/prototype/` 才正确。**对策二选一**：① 分享链接优先用带外壳的正式入口 `.../vN/`（无此陷阱）；② 在原型入口页 `<head>` 顶部加归一化脚本，无斜杠时 `location.replace(pathname+'/')` 补正后再加载（v4/prototype 已加此脚本可参考）。

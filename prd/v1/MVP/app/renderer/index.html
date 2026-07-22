@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>先马Centaur</title>
+<style>
+:root{--primary:#667eea;--primary2:#764ba2;--bg:#f9fafb;--text:#1f2937;--dim:#6b7280;--border:#e5e7eb;--ok:#16a34a;--err:#dc2626;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.topbar h1{font-size:18px;font-weight:600;}
+.topbar .right{display:flex;gap:8px;align-items:center;}
+.badge{font-size:12px;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:12px;}
+.icon-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;}
+.icon-btn:hover{background:rgba(255,255,255,.3);}
+.main{flex:1;display:flex;overflow:hidden;}
+.skills{width:280px;border-right:1px solid var(--border);background:#fff;padding:16px;overflow-y:auto;flex-shrink:0;}
+.skills h2{font-size:13px;color:var(--dim);margin-bottom:12px;text-transform:uppercase;}
+.skill-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;}
+.skill-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(102,126,234,.15);}
+.skill-card.active{border-color:var(--primary);background:#f5f3ff;}
+.skill-card .ic{font-size:22px;}
+.skill-card .nm{font-weight:600;margin-top:4px;}
+.skill-card .st{font-size:12px;color:var(--dim);margin-top:2px;}
+.panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.chat{flex:1;overflow-y:auto;padding:20px;}
+.event{margin-bottom:10px;font-size:14px;line-height:1.6;}
+.event.user{text-align:right;}
+.event.user span{background:var(--primary);color:#fff;padding:8px 14px;border-radius:12px;display:inline-block;max-width:70%;}
+.event.tool{color:var(--dim);font-family:monospace;font-size:13px;}
+.event.tool .ok{color:var(--ok);}
+.event.tool .err{color:var(--err);}
+.event.done{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;white-space:pre-wrap;}
+.inputbar{border-top:1px solid var(--border);padding:14px 20px;background:#fff;display:flex;gap:10px;flex-shrink:0;}
+.inputbar input{flex:1;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;}
+.inputbar button{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:0 22px;cursor:pointer;font-size:14px;}
+.inputbar button:disabled{opacity:.5;cursor:not-allowed;}
+.empty{color:var(--dim);text-align:center;margin-top:80px;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;}
+.modal-bg.show{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:24px;width:420px;max-width:90%;}
+.modal h3{font-size:16px;margin-bottom:10px;}
+.modal .warn{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px;font-size:14px;margin:12px 0;}
+.modal .row{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+.modal button{padding:8px 18px;border-radius:6px;border:1px solid var(--border);cursor:pointer;font-size:14px;background:#fff;}
+.modal button.danger{background:var(--err);color:#fff;border:none;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:13px;color:var(--dim);margin-bottom:5px;}
+.field input,.field select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:14px;}
+.field .hint{font-size:12px;color:var(--dim);margin-top:4px;}
+.ws-path{font-size:12px;background:rgba(255,255,255,.15);padding:4px 8px;border-radius:6px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>🐎 先马Centaur</h1>
+  <div class="right">
+    <span class="ws-path" id="wsPath">未设置工作区</span>
+    <span class="badge" id="modelBadge">—</span>
+    <button class="icon-btn" onclick="openSettings()">⚙ 设置</button>
+  </div>
+</div>
+<div class="main">
+  <div class="skills"><h2>技能库</h2><div id="skillList"></div></div>
+  <div class="panel">
+    <div class="chat" id="chat"><div class="empty">选择左侧技能卡，或直接输入需求开始</div></div>
+    <div class="inputbar">
+      <input id="userInput" placeholder="描述你的需求，例如：帮我生成上周的周报" onkeydown="if(event.key==='Enter')send()" />
+      <button id="sendBtn" onclick="send()">执行</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <h3>⚠️ 高风险操作确认</h3>
+    <div class="warn" id="confirmText"></div>
+    <p style="font-size:13px;color:var(--dim)">此操作需要你手动确认，AI 无法自动执行。</p>
+    <div class="row">
+      <button onclick="resolveConfirm(false)">取消</button>
+      <button class="danger" onclick="resolveConfirm(true)">确认执行</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <h3>设置</h3>
+    <div class="field">
+      <label>工作区目录（AI 只能在此目录内读写）</label>
+      <div style="display:flex;gap:8px">
+        <input id="setWs" readonly placeholder="点击选择" style="flex:1" />
+        <button onclick="pickWs()" style="padding:0 14px;border:1px solid var(--border);border-radius:8px;cursor:pointer">选择</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>模型服务商</label>
+      <select id="setProvider" onchange="onProviderChange()">
+        <option value="deepseek">DeepSeek（便宜，中文好）</option>
+        <option value="openai">OpenAI GPT</option>
+        <option value="custom">自定义（通义/智谱/其他）</option>
+      </select>
+    </div>
+    <div class="field"><label>API 地址（baseURL）</label><input id="setBaseURL" /></div>
+    <div class="field"><label>模型名</label><input id="setModel" /></div>
+    <div class="field">
+      <label>API Key</label><input id="setKey" type="password" placeholder="sk-..." />
+      <div class="hint">Key 只存本机，不上传。</div>
+    </div>
+    <div class="row">
+      <button onclick="closeSettings()">取消</button>
+      <button class="danger" style="background:var(--primary)" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

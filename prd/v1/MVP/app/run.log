@@ -1,0 +1,6 @@
+
+> xianma-centaur@1.0.0 start
+> electron .
+
+2026-07-22 13:47:45.489 Electron[62359:2038888] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+2026-07-22 13:47:58.897 Electron[62359:2038888] error messaging the mach port for IMKCFRunLoopWakeUpReliable

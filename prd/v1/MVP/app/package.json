@@ -1,0 +1,27 @@
+{
+  "name": "xianma-centaur",
+  "version": "1.0.0",
+  "description": "先马·Centaur — 企业 AI Agent 桌面助手",
+  "main": "main.js",
+  "author": "先马电商",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "dependencies": {
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.xianma.centaur",
+    "productName": "先马Centaur",
+    "files": ["**/*", "!**/*.md", "!workspace-demo/**"],
+    "mac": { "target": "dmg", "category": "public.app-category.productivity" },
+    "win": { "target": "nsis" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+  }
+}

@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何与 AI 协作 · 先马电商 · 梦蝶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ============ 主题色(定制:先马电商 · 深色红金) ============
+       深色底 + 吉祥物红,红取自公司牛形象 #fe493a */
+    --ink:#0d0b0c;
+    --ink-rgb:13,11,12;
+    --paper:#f4f1ee;
+    --paper-rgb:244,241,238;
+    --paper-tint:#1a1618;
+    --ink-tint:#171314;
+
+    /* ============ 品牌强调色(公司红,取自吉祥物) ============ */
+    --accent:#fe493a;
+    --accent-rgb:254,73,58;
+    --accent-deep:#950000;
+    --accent-deep-rgb:149,0,0;
+
+    /* ============ 字体(跨主题固定) ============ */
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  /* ============ WebGL 双背景 ============ */
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+
+  /* ============ Deck 容器 + 翻页 ============ */
+  /* width: NSLIDES * 100vw，会在 JS 里动态矫正 */
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink)}
+  .slide.dark{color:var(--paper)}
+
+  /* 默认页：遮罩较厚，保证文字可读 */
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.80);backdrop-filter:blur(2px)}
+  /* Hero 页：遮罩大幅降低，让 WebGL 背景明显透出 */
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.50);backdrop-filter:none}
+  /* Hero 页顶底微弱渐隐，保证 chrome/foot 区域可读 */
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  /* ============ Magazine chrome：顶部 meta + 底部 foot ============ */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+  .rule.v{width:1px;height:100%;margin:0}
+
+  /* ============ 字体规则 ============
+     · 衬线（Noto Serif SC / Playfair）：大标题、重点金句、数字
+     · 非衬线（Noto Sans SC）：正文描述、body、补充说明
+     · 等宽（IBM Plex Mono）：kicker、meta 小标签、foot 右侧
+  */
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .display{font-family:var(--serif-en);font-weight:700;font-size:11vw;line-height:.92;letter-spacing:-.025em}
+  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:7.8vw;line-height:1.04;letter-spacing:-.005em}
+  .h1-zh{font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.12;letter-spacing:-.005em}
+  .h2-zh{font-family:var(--serif-zh);font-weight:600;font-size:3.2vw;line-height:1.2;letter-spacing:0}
+  .h3-zh{font-family:var(--serif-zh);font-weight:500;font-size:1.9vw;line-height:1.35}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.9vw;line-height:1.4;opacity:.85}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .ghost{font-family:var(--serif-en);font-weight:900;font-size:34vw;line-height:.8;opacity:.06;letter-spacing:-.04em;position:absolute;font-feature-settings:"tnum"}
+  em{font-style:italic;font-family:var(--serif-en)}
+  .en{font-family:var(--serif-en);font-style:italic;font-weight:500}
+
+  /* ============ 布局工具 ============ */
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-9{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3vh 4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .bottom-left{position:absolute;left:6vw;bottom:9vh;max-width:50vw}
+  .bottom-right{position:absolute;right:6vw;bottom:9vh;max-width:50vw;text-align:right}
+  .top-right{position:absolute;right:6vw;top:6vh;text-align:right}
+
+  /* ============ Stat（数字矩阵） ============ */
+  .stat{display:flex;flex-direction:column;gap:1vh;align-items:flex-start}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:8vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat .l{font-family:var(--sans-zh);font-size:max(13px,1.05vw);opacity:.7;margin-top:1vh;font-weight:400;line-height:1.5}
+  .stat .m{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:.2vh}
+
+  /* ============ Callout（引用框） ============ */
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.6vw);line-height:1.42}
+
+  /* ============ Platform（平台卡） ============ */
+  .plat{display:flex;flex-direction:column;justify-content:flex-end;padding:2vh 0;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .plat .name{font-family:var(--serif-zh);font-weight:700;font-size:1.8vw;margin-bottom:.6vh}
+  .plat .nb{font-family:var(--serif-en);font-weight:700;font-size:3.2vw;letter-spacing:-.02em;line-height:1;font-feature-settings:"tnum"}
+  .plat .sub{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:.6vh}
+  .plat .fill{font-family:var(--sans-zh);font-weight:300;font-size:2.4vw;opacity:.28;letter-spacing:-.01em;line-height:1}
+
+  /* ============ Rowline（表格行） ============ */
+  .rowline{display:grid;grid-template-columns:1fr 2fr 1fr;gap:2vw;padding:2.2vh 0;border-top:1px solid currentColor;align-items:center;border-color:rgba(127,127,127,.25)}
+  .rowline:last-child{border-bottom:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .rowline .k{font-family:var(--serif-zh);font-weight:700;font-size:1.7vw}
+  .rowline .v{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.2vw);opacity:.85;line-height:1.55}
+  .rowline .m{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;justify-self:end}
+
+  /* ============ Pillar（支柱卡片） ============ */
+  .pillar{display:flex;flex-direction:column;gap:1.8vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400}
+  .pillar .ic svg{width:2.8vw;height:2.8vw;stroke-width:1.2;opacity:.7}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+
+  /* ============ Signature / Highlight ============ */
+  .sign{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:2vw;opacity:.7}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+
+  /* ============ Icons（Lucide via CDN） ============ */
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
+  .ico-md{width:1.8vw;height:1.8vw;stroke-width:1.3;display:inline-block;vertical-align:-.4em}
+  .ico-sm{width:1.1vw;height:1.1vw;stroke-width:1.4;display:inline-block;vertical-align:-.15em;opacity:.7}
+
+  /* ============ 图片占位（虚线框，提示设计师位置） ============ */
+  .img-slot{border:1.5px dashed rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1vh;padding:2vh 2vw;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;position:relative;aspect-ratio:16/9;width:100%;max-height:56vh;margin-inline:auto;box-sizing:border-box}
+  .img-slot::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.2}
+  .img-slot .plus{font-size:2vw;font-weight:300;opacity:.5;letter-spacing:0}
+  .img-slot .label{position:relative;z-index:2;text-align:center}
+  .img-slot.r-4x3{aspect-ratio:4/3}
+  .img-slot.r-3x2{aspect-ratio:3/2}
+  .img-slot.r-1x1{aspect-ratio:1/1}
+
+  /* ============ 图片实填框（关键：固定高度 + 只裁底部） ============
+     重要约束：高度用内联 height:Nvh 精确控制，不要用 aspect-ratio（会撑破布局）
+     object-position:top center 保证严禁裁剪顶部和左右，只裁剪底部
+  */
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-cap{display:flex;justify-content:space-between;align-items:baseline;gap:1vw;margin-top:.8vh;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+  .frame-cap .pf{font-family:var(--serif-zh);font-weight:600;font-size:max(13px,1vw);letter-spacing:.04em;text-transform:none;opacity:.94}
+  .frame-cap .nb{font-family:var(--serif-en);font-style:italic;font-size:max(15px,1.2vw);letter-spacing:.02em;text-transform:none;opacity:.88}
+  .frame-cap .idx{font-family:var(--mono);opacity:.5}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  figure.tile > .frame-img{flex:0 0 auto}
+
+  /* ============ 导航 ============ */
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+
+  /* ============================================================
+     ============ LAYOUTS API · 面向 agent 的类（v2）============
+     所有 layouts.md 中的骨架都基于下面这套命名。
+     如果你在 layouts.md 里看到某个类，它必须在下面有定义。
+     ============================================================ */
+
+  /* ---------- .frame：每页主内容容器 ---------- */
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  /* 当 .frame 同时加了 grid 类时，grid 的 display:grid 覆盖 flex */
+  .frame.grid-2-7-5,
+  .frame.grid-2-6-6,
+  .frame.grid-2-8-4,
+  .frame.grid-3-3,
+  .frame.grid-6{display:grid}
+
+  /* ---------- 标题层级（API 名称，衬线为主） ---------- */
+  .h-hero{
+    font-family:var(--serif-zh);
+    font-weight:900;
+    font-size:10vw;
+    line-height:.96;
+    letter-spacing:-.02em;
+  }
+  .h-xl{
+    font-family:var(--serif-zh);
+    font-weight:700;
+    font-size:6.2vw;
+    line-height:1.08;
+    letter-spacing:-.01em;
+  }
+  .h-sub{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:3.1vw;
+    line-height:1.25;
+    letter-spacing:0;
+    opacity:.7;
+  }
+  .h-md{
+    font-family:var(--serif-zh);
+    font-weight:600;
+    font-size:2.3vw;
+    line-height:1.3;
+  }
+  /* 英文标题专用（Playfair 衬线） */
+  .h-hero-en,.h-xl-en{font-family:var(--serif-en);letter-spacing:-.025em}
+
+  /* ---------- lead 引语 ---------- */
+  .lead{
+    font-family:var(--serif-zh);
+    font-weight:400;
+    font-size:1.75vw;
+    line-height:1.5;
+    opacity:.86;
+  }
+
+  /* ---------- meta-row 底部元数据 ---------- */
+  .meta-row{
+    display:flex;
+    gap:1.2em;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:max(12px,.92vw);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- stat-card（数据大字报用） ---------- */
+  .stat-card{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    align-items:flex-start;
+    padding-top:1.6vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.3);
+  }
+  .stat-card .stat-label{
+    font-family:var(--mono);
+    font-size:max(10px,.78vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.55;
+  }
+  .stat-card .stat-nb{
+    font-family:var(--serif-en);
+    font-weight:800;
+    font-size:5.8vw;
+    line-height:.9;
+    letter-spacing:-.03em;
+    font-feature-settings:"tnum";
+    margin-top:.4vh;
+  }
+  .stat-card .stat-nb .stat-unit{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:.38em;
+    letter-spacing:0;
+    opacity:.72;
+    margin-left:.14em;
+  }
+  .stat-card .stat-note{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(13px,1.05vw);
+    line-height:1.5;
+    opacity:.72;
+    margin-top:.6vh;
+  }
+  /* 当 stat-card 用于 grid-4（2x2），数字适度放大；若页面有标题+引文在上方，可内联 style 覆盖为更小值 */
+  .grid-4 .stat-card .stat-nb{font-size:5vw}
+  /* 当只有 3 个，字也可以稍大 */
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+
+  /* ---------- pipeline（流水线） ---------- */
+  .pipeline-section{
+    margin-top:4.4vh;
+    padding-top:2.8vh;
+    border-top:1px dashed rgba(127,127,127,.32);
+  }
+  .pipeline-section:first-of-type{
+    border-top:0;
+    padding-top:0;
+    margin-top:3vh;
+  }
+  .pipeline-label{
+    font-family:var(--mono);
+    font-size:max(11px,.85vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.62;
+    margin-bottom:2.2vh;
+  }
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1.2vw;
+  }
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="6"]{grid-template-columns:repeat(6,1fr)}
+  .step{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    padding-top:1.4vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.35);
+  }
+  .step-nb{
+    font-family:var(--serif-en);
+    font-style:italic;
+    font-weight:500;
+    font-size:1.15vw;
+    opacity:.45;
+  }
+  .step-title{
+    font-family:var(--sans-zh);
+    font-weight:700;
+    font-size:1.55vw;
+    letter-spacing:.01em;
+    line-height:1.2;
+  }
+  .step-desc{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(12px,.95vw);
+    line-height:1.45;
+    opacity:.72;
+  }
+
+  /* ---------- 网格（layouts.md 所用） ---------- */
+  /* 这些类独立挂到任何容器上都能生效，不依赖 .frame 复合选择器 */
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:minmax(0,1fr);
+    gap:2.4vh 2vw;
+  }
+  /* grid-6 已在旧样式里定义为 3x2，这里仅补 align */
+
+  /* ---------- 复制提示词按钮 ---------- */
+  .copy-btn{position:absolute;top:1.2vh;right:1.2vw;z-index:5;font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.12em;padding:.7vh 1vw;color:var(--accent);background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.5);border-radius:4px;cursor:pointer;transition:all .18s ease}
+  .copy-btn:hover{background:rgba(var(--accent-rgb),.2)}
+  .copy-btn.copied{color:#7bd88f;border-color:rgba(123,216,143,.6);background:rgba(123,216,143,.12)}
+
+  /* ---------- 图片 frame-img（layouts.md 主命名） ---------- */
+  /* 在旧样式里已定义，这里补 img-cap 命名别名与增强 */
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  .img-cap{
+    display:block;
+    margin-top:.8vh;
+    font-family:var(--mono);
+    font-size:max(10px,.8vw);
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+  /* callout src 命名别名 */
+  .callout-src{
+    display:block;
+    margin-top:1.6vh;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- chrome & foot 补位（layouts.md 简单写法） ---------- */
+  .chrome{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+  /* ============ 动效系统(Motion One 驱动) ============
+     所有 [data-anim] 元素默认隐藏,进入页面时由 JS 逐个揭示。
+     - cascade(默认):按 DOM 顺序 stagger 120ms 淡入 + y:16→0
+     - hero(hero 页自动):慢一点的 stagger 180ms
+     - quote(含 [data-anim="line"]):逐行 600ms 淡入
+     - directional(含 [data-anim="left|right"]):左→分隔线→右
+     - pipeline(data-animate="pipeline"):Space/→ 手动推进
+     Motion One 没加载成功时(CDN 断 + 本地丢),所有 [data-anim] 会兜底显示。
+  */
+  [data-anim]{opacity:0}
+  [data-anim="left"]{transform:translateX(-24px)}
+  [data-anim="right"]{transform:translateX(24px)}
+  [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  [data-animate="pipeline"] [data-anim]{opacity:.15}
+
+  /* ---------- 先马定制:品牌红强调 + 吉祥物 ---------- */
+  /* chrome/foot 在 center(hero)页也强制满宽左右分布,和其他页统一 */
+  .chrome,.foot{align-self:stretch;width:100%}
+  .kicker{color:var(--accent);opacity:.9}
+  .slide.dark .hi::after{background:rgba(var(--accent-rgb),.28)}
+  .accent{color:var(--accent)}
+  .stat-card{border-color:rgba(var(--accent-rgb),.45)}
+  .stat-card .stat-nb{color:var(--accent)}
+  .callout{border-left-color:var(--accent)}
+  .rule.accent-rule{background:linear-gradient(90deg,var(--accent),var(--accent-deep));opacity:1;height:2px}
+
+  /* 封面吉祥物:C 位发光 */
+  .mascot-hero{width:16vw;max-width:200px;filter:drop-shadow(0 0 40px rgba(var(--accent-rgb),.55));display:block}
+  /* 内页角落水印(右下区域,位于 footer 文字上方,不与正文/页脚重叠) */
+  .mascot-mark{position:absolute;right:3vw;bottom:15vh;width:4vw;max-width:52px;opacity:.35;filter:drop-shadow(0 0 12px rgba(var(--accent-rgb),.4));pointer-events:none;z-index:5}
+
+  /* chrome 内联品牌标(放在页眉小标题前,正常显示) */
+  .mascot-inline{height:34px;width:auto;vertical-align:middle;margin-right:.7em;filter:drop-shadow(0 0 8px rgba(var(--accent-rgb),.45));position:relative;top:-2px}
+
+  /* 跟随鼠标的前景红光晕(内容页遮罩较厚,让鼠标效果透出来) */
+  #cursor-glow{position:fixed;top:0;left:0;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;pointer-events:none;z-index:12;background:radial-gradient(circle,rgba(var(--accent-rgb),.20) 0%,rgba(var(--accent-rgb),.08) 35%,transparent 70%);mix-blend-mode:screen;transition:opacity .3s ease;will-change:transform}
+
+  /* 编号徽标(替代纯数字,带品牌红) */
+  .num-badge{display:inline-flex;align-items:center;justify-content:center;width:2.8vw;height:2.8vw;min-width:44px;min-height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;font-family:var(--serif-en);font-weight:800;font-size:1.5vw;box-shadow:0 6px 24px rgba(var(--accent-rgb),.35);flex-shrink:0}
+
+  /* 左右分栏对比(开场认知页用) */
+  .versus{display:grid;grid-template-columns:1fr 1px 1fr;gap:0 4vw;flex:1;align-items:center}
+  .versus .vs-col{display:flex;flex-direction:column;gap:2.2vh}
+  .versus .vs-divider{background:linear-gradient(180deg,transparent,rgba(var(--accent-rgb),.5),transparent);width:1px;height:70%;align-self:center}
+  .versus .vs-head{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.2}
+  .versus .vs-item{font-family:var(--sans-zh);font-size:max(15px,1.25vw);line-height:1.6;opacity:.85}
+
+  /* 目录列表 */
+  .toc{display:grid;grid-template-columns:1fr 1fr;gap:2.4vh 5vw;flex:1;align-content:center}
+  .toc-item{display:flex;align-items:baseline;gap:1.4vw;border-bottom:1px solid rgba(127,127,127,.2);padding-bottom:1.6vh}
+  .toc-item .toc-nb{font-family:var(--serif-en);font-weight:700;font-size:1.8vw;color:var(--accent);font-feature-settings:"tnum";min-width:2em}
+  .toc-item .toc-t{font-family:var(--serif-zh);font-weight:600;font-size:1.7vw;line-height:1.2}
+
+  /* ---------- 互动页(明显区分:红色内框 + 徽标) ---------- */
+  .slide.qa::after{content:"";position:absolute;inset:2.4vh 2.4vw;border:1.5px solid rgba(var(--accent-rgb),.5);border-radius:10px;pointer-events:none;z-index:1}
+  .qa-badge{display:inline-flex;align-items:center;gap:.5em;font-family:var(--mono);font-size:max(11px,.82vw);letter-spacing:.22em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-deep));padding:6px 16px;border-radius:999px;box-shadow:0 4px 20px rgba(var(--accent-rgb),.4)}
+  .qa-badge.answer{background:linear-gradient(135deg,#2e7d32,#1b5e20);box-shadow:0 4px 20px rgba(46,125,50,.4)}
+  /* 选项卡 */
+  .opt{display:flex;gap:1.2vw;align-items:flex-start;padding:1.8vh 1.6vw;border:1px solid rgba(127,127,127,.3);border-radius:8px;transition:all .3s}
+  .opt .ol{flex-shrink:0;width:2.2vw;height:2.2vw;min-width:36px;min-height:36px;border-radius:8px;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--serif-en);font-weight:700;font-size:1.1vw;opacity:.7}
+  .opt .ot{font-family:var(--sans-zh);font-size:max(14px,1.15vw);line-height:1.5;opacity:.9}
+  .opt.correct{border-color:var(--accent);background:rgba(var(--accent-rgb),.1)}
+  .opt.correct .ol{background:var(--accent);color:#fff;border-color:var(--accent);opacity:1}
+  .opt.correct .ot{opacity:1}
+  .opt.wrong{opacity:.45}
+  /* 场景卡 */
+  .scene{padding:2.4vh 2vw;border-left:3px solid var(--accent);background:rgba(var(--accent-rgb),.07);border-radius:0 8px 8px 0;font-family:var(--serif-zh);font-size:max(16px,1.4vw);line-height:1.55}
+  .scene .who{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1vh;display:block}
+  /* 参考答案框 */
+  .ref{padding:2.2vh 1.8vw;border:1px solid rgba(46,125,50,.5);background:rgba(46,125,50,.08);border-radius:8px}
+  .ref .rl{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#66bb6a;margin-bottom:1.2vh;display:block}
+  /* 答案卡片(填充 grid,避免留白) */
+  .ans-card{display:flex;align-items:center;gap:1.2vw;padding:3vh 1.8vw;border:1px solid rgba(var(--accent-rgb),.35);border-radius:10px;background:rgba(var(--accent-rgb),.06);height:100%}
+  .ans-card .ans-t{font-family:var(--sans-zh);font-size:max(15px,1.35vw);line-height:1.5;opacity:1}
+  .ans-card .ans-t b{color:var(--accent);font-weight:700}
+  /* 日常App截图并排(竖屏手机) */
+  .phone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;flex:1;align-items:center;padding:1vh 0}
+  .phone{display:flex;flex-direction:column;align-items:center;gap:1.6vh}
+  .phone .shot{height:46vh;width:auto;max-width:100%;border-radius:18px;border:1px solid rgba(var(--accent-rgb),.3);box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 30px rgba(var(--accent-rgb),.15);object-fit:cover}
+  .phone .cap{font-family:var(--serif-zh);font-weight:600;font-size:max(15px,1.3vw);text-align:center}
+  .phone .cap .app{color:var(--accent)}
+  .phone .cap .sub{display:block;font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-top:.5vh;font-weight:400}
+
+  /* ---------- 响应式降级 ---------- */
+  @media (max-width:900px){
+    .display{font-size:16vw}
+    .display-zh{font-size:12vw}
+    .h1-zh{font-size:7vw}
+    .h-hero{font-size:14vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · ESC 索引</div>
+<div id="cursor-glow"></div>
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     每页模板参考 references/page-patterns.md
+     页面组件参考 references/components.md
+     ============================================================ -->
+
+<!-- SLIDES_HERE -->
+<!-- 封面 -->
+<section class="slide hero dark center" data-theme="dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><span>先马电商 · 数智中心</span><span class="sep"></span><span>TRAINING</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center fill" style="gap:3vh">
+    <img src="images/mascot.png" class="mascot-hero" alt="先马吉祥物" data-anim>
+    <div class="kicker" data-anim>AI PLATFORM · 运营培训</div>
+    <h1 class="h-hero" style="white-space:nowrap" data-anim>设计平台使用指南</h1>
+    <div class="h-sub" data-anim>方法论 · 让你回去知道怎么做</div>
+    <div class="row center" style="gap:1vw;margin-top:1vh">
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)" data-anim>节约积分</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)" data-anim>提高效率</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)" data-anim>建立认知</span>
+    </div>
+  </div>
+  <div class="foot" style="opacity:1;justify-content:center">
+    <div class="title" style="font-size:max(16px,1.35vw);opacity:1;letter-spacing:.08em">数智中心　<span class="accent" style="font-weight:700">星河界-梦蝶</span></div>
+  </div>
+</section>
+
+<!-- 目录 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>目录</span><span class="sep"></span><span>Contents</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:3vh 0 2vh">
+    <div class="kicker" data-anim>全场地图</div>
+    <h2 class="h-xl" data-anim>今天讲什么</h2>
+  </div>
+  <div class="toc">
+    <div class="toc-item" data-anim><span class="toc-nb">01</span><span class="toc-t">不是AI不好用</span></div>
+    <div class="toc-item" data-anim><span class="toc-nb">02</span><span class="toc-t">素材怎么选</span></div>
+    <div class="toc-item" data-anim><span class="toc-nb">03</span><span class="toc-t">提示词怎么写</span></div>
+    <div class="toc-item" data-anim><span class="toc-nb">04</span><span class="toc-t">案例快速演示</span></div>
+    <div class="toc-item" data-anim><span class="toc-nb">05</span><span class="toc-t">结果怎么判断</span></div>
+    <div class="toc-item" data-anim><span class="toc-nb">06</span><span class="toc-t">调整怎么操作</span></div>
+    <div class="toc-item" data-anim><span class="toc-nb">07</span><span class="toc-t">带走的工具</span></div>
+  </div>
+  <div class="foot"><div class="title">今天讲什么</div><div>Build AI Awareness</div></div>
+</section>
+
+<!-- 开场-痛点案例 -->
+<section class="slide hero dark center" data-theme="dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>开场</span><span class="sep"></span><span>Problem</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center fill" style="gap:3.2vh">
+    <div class="kicker" data-anim>PART 01 · 从问题出发</div>
+    <h2 class="h-hero" style="white-space:nowrap" data-anim>不是AI不好用</h2>
+    <div class="lead" style="text-align:center;max-width:60vw" data-anim>同一任务反复生成，<span class="accent">时间和积分都在流失</span></div>
+  </div>
+  <div class="foot"><div class="title">不是AI不好用</div><div>The Root Cause</div></div>
+</section>
+
+<!-- 开场-常见现象 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>痛点</span><span class="sep"></span><span>Common Issues</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:3vh 0 3vh">
+    <div class="kicker" data-anim>平台常见现象</div>
+    <h2 class="h-xl" data-anim>你可能也遇到过</h2>
+  </div>
+  <div class="grid-4" style="gap:4vh 6vw">
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">10+</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">反复生成</div><div class="body-zh" style="margin:0">同一任务反复生成10+次</div></div>
+    </div>
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">?</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">改了还是不对</div><div class="body-zh" style="margin:0">改了半天，出来还是不满意</div></div>
+    </div>
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">时</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">时间全耗进去</div><div class="body-zh" style="margin:0">一张图磨半天，活儿堆着</div></div>
+    </div>
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">重</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">整组重生</div><div class="body-zh" style="margin:0">一张不满意，4张全重做</div></div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3vh" data-anim>说明：这是平台常见现象，<span class="accent">不针对个人</span></div>
+  <div class="foot"><div class="title">常见现象</div><div>Not Alone</div></div>
+</section>
+
+<!-- 开场-三个误区 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>根源</span><span class="sep"></span><span>Root Cause</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 3vh">
+    <div class="kicker" data-anim>问题根源</div>
+    <h2 class="h-xl" data-anim>对AI的预期不对</h2>
+  </div>
+  <div class="grid-3" style="gap:4vw">
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">误区1</div>
+      <div class="t">AI能理解模糊需求</div>
+      <div class="d"><span class="accent">实际：</span>AI需要明确指令</div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">误区2</div>
+      <div class="t">AI一次就能做对</div>
+      <div class="d"><span class="accent">实际：</span>AI需要迭代和调整</div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">误区3</div>
+      <div class="t">结果不好是AI问题</div>
+      <div class="d"><span class="accent">实际：</span>素材、提示词、检查都很关键</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3.4vh" data-anim>今天不只教功能，而是教你们：<span class="accent">建立正确的AI认知，掌握可复用的方法</span></div>
+  <div class="foot"><div class="title">三个误区</div><div>Mindset First</div></div>
+</section>
+
+<!-- 平台介绍 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>平台</span><span class="sep"></span><span>Platform</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2vh 0 2.2vh">
+    <div class="kicker" data-anim>先认识平台能力</div>
+    <h2 class="h-xl" data-anim>平台能做什么</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(2,1fr);gap:2.2vh 1.6vw;flex:1;align-content:center">
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">主体替换</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">把商品融入现有优质场景</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">场景替换</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">保留商品，更换背景环境</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">AI买家秀</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">生成真人上身或使用效果</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">一键改字</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">替换图片文案、价格和卖点</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">产品微调</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">优化细节、材质和画面质感</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">批量改图</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">对一批图片执行相同操作</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">专家模式</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">用多图参考处理复杂需求</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">已产出调整</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">继续修改已经生成的结果</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">素材库</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">管理并复用常用业务素材</div>
+    </div>
+    <div class="col" style="gap:.7vh;padding:1.5vh 1.1vw;border-left:2px solid var(--accent);background:rgba(255,255,255,.035)" data-anim>
+      <div class="h-md" style="font-size:1.45vw">场景化</div>
+      <div class="body-zh" style="margin:0;font-size:max(12px,.88vw)">沉淀好用场景，下次直接套用</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:2.2vh" data-anim>这一页先看<span class="accent">平台有什么</span>，下一页再看<span class="accent">业务需求该选什么</span></div>
+  <div class="foot"><div class="title">平台功能</div><div>Capability Map</div></div>
+</section>
+
+<!-- 功能选择指南 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>怎么选</span><span class="sep"></span><span>Which One</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.4vh">
+    <div class="kicker" data-anim>功能这么多,别慌</div>
+    <h2 class="h-xl" data-anim>什么场景选什么</h2>
+  </div>
+  <div class="col" style="gap:0;flex:1;justify-content:center">
+    <div class="rowline" data-anim>
+      <div class="k">商品进新场景</div>
+      <div class="v">把商品放进别人的好场景里 → <span class="accent">主体替换</span></div>
+      <div class="m">Swap</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">要真人展示</div>
+      <div class="v">想要真人上身/使用的效果图 → <span class="accent">AI买家秀</span></div>
+      <div class="m">Model</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">改图上文字</div>
+      <div class="v">只改图片上的文案、价格、卖点字 → <span class="accent">一键改字</span></div>
+      <div class="m">Text</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">单图不满意</div>
+      <div class="v">细节、材质、质感想再提一提 → <span class="accent">产品微调</span></div>
+      <div class="m">Refine</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">一批图同样操作</div>
+      <div class="v">一次改一堆图的文字/去水印 → <span class="accent">批量改图</span></div>
+      <div class="m">Batch</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:2.4vh" data-anim>拿不准用哪个?<span class="accent">直接上专家模式</span>——0~5张参考图,复杂需求它基本都能扛</div>
+  <div class="foot"><div class="title">怎么选功能</div><div>Which One</div></div>
+</section>
+
+<!-- 完整工作链路 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法总览</span><span class="sep"></span><span>Workflow</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 3vh">
+    <div class="kicker" data-anim>选对功能只是入口</div>
+    <h2 class="h-xl" data-anim>一套完整的出图链路</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1.4vw;flex:1;align-items:center">
+    <div class="pillar" style="height:29vh;padding:2.2vh 1.3vw" data-anim>
+      <div class="ic accent" style="font-size:2vw;opacity:1;font-weight:800">01</div>
+      <div class="t">素材</div>
+      <div class="d">选择清晰、完整、信息一致的参考图</div>
+    </div>
+    <div class="pillar" style="height:29vh;padding:2.2vh 1.3vw" data-anim>
+      <div class="ic accent" style="font-size:2vw;opacity:1;font-weight:800">02</div>
+      <div class="t">生成</div>
+      <div class="d">选对功能，写清任务与结果要求</div>
+    </div>
+    <div class="pillar" style="height:29vh;padding:2.2vh 1.3vw" data-anim>
+      <div class="ic accent" style="font-size:2vw;opacity:1;font-weight:800">03</div>
+      <div class="t">判断</div>
+      <div class="d">检查商品、场景与画面真实感</div>
+    </div>
+    <div class="pillar" style="height:29vh;padding:2.2vh 1.3vw" data-anim>
+      <div class="ic accent" style="font-size:2vw;opacity:1;font-weight:800">04</div>
+      <div class="t">调整</div>
+      <div class="d">先诊断原因，一次只改一个变量</div>
+    </div>
+    <div class="pillar" style="height:29vh;padding:2.2vh 1.3vw" data-anim>
+      <div class="ic accent" style="font-size:2vw;opacity:1;font-weight:800">05</div>
+      <div class="t">沉淀</div>
+      <div class="d">保存素材、提示词、参数和可复用场景</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3vh;text-align:center" data-anim>明确需求、选对功能后，始终按<span class="accent">素材 → 生成 → 判断 → 调整 → 沉淀</span>完成闭环</div>
+  <div class="foot"><div class="title">完整工作链路</div><div>From Input to Reuse</div></div>
+</section>
+
+<!-- 方法1章节封面 -->
+<section class="slide hero dark center" data-theme="dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法论</span><span class="sep"></span><span>Method 01</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center fill" style="gap:2.6vh">
+    <div class="kicker" data-anim>PART 02 · 素材决定成败</div>
+    <h2 class="h-hero" style="white-space:nowrap" data-anim>素材怎么选</h2>
+    <div class="lead" style="text-align:center;max-width:60vw" data-anim>AI对素材质量敏感，<span class="accent">好素材才有好结果</span></div>
+    <div class="row center" style="gap:1vw;margin-top:1vh" data-anim>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">多图参考</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">穿戴图</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">白底图</span>
+    </div>
+  </div>
+  <div class="foot"><div class="title">素材怎么选</div><div>Material First</div></div>
+</section>
+
+<!-- 方法1-素材标准 -->
+<section class="slide dark" data-theme="dark" data-animate="directional">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法1</span><span class="sep"></span><span>Good vs Bad</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2vh 0 2vh">
+    <div class="kicker" data-anim>主体替换素材对照</div>
+    <h2 class="h-xl" style="font-size:5vw" data-anim>什么样的素材更好用</h2>
+  </div>
+  <div class="split" style="gap:4vw;flex:1;align-items:start">
+    <figure class="tile" data-anim="left">
+      <div class="row" style="gap:1vw;margin-bottom:1.2vh"><span class="num-badge">✓</span><div class="h-md accent">好的主体替换素材</div></div>
+      <div class="frame-img" style="height:37vh;border:1px solid rgba(var(--accent-rgb),.4)"><img src="images/material-good-subject.png" alt="好的主体替换素材" style="object-fit:contain;object-position:center"></div>
+      <div class="body-zh" style="margin:1.2vh 0 0;font-size:max(13px,1.02vw);line-height:1.55">产品完整清晰，穿戴与展开形态都能看见；颜色、材质、绑带和结构可辨，背景干净。</div>
+    </figure>
+    <figure class="tile" data-anim="right">
+      <div class="row" style="gap:1vw;margin-bottom:1.2vh"><span class="num-badge">×</span><div class="h-md">不好的主体替换素材</div></div>
+      <div class="frame-img" style="height:37vh;border:1px solid rgba(255,255,255,.16)"><img src="images/material-bad-subject.jpg" alt="不好的主体替换素材" style="object-fit:contain;object-position:center"></div>
+      <div class="body-zh" style="margin:1.2vh 0 0;font-size:max(13px,1.02vw);line-height:1.55">背景和无关物体过多，产品被人物与衣服遮挡；只展示单一侧面和局部，AI难以提取完整结构。</div>
+    </figure>
+  </div>
+  <div class="callout" style="margin-top:1.6vh;padding:1.5vh 1.6vw" data-anim>不是“穿戴图不好”，而是要<span class="accent">清晰、少遮挡、形态完整</span>。穿戴图定形态，白底图锁细节；角度越接近，主体替换越自然。</div>
+  <div class="foot"><div class="title">主体替换素材对照</div><div>Material Quality</div></div>
+</section>
+
+<!-- 方法1-场景图标准 -->
+<section class="slide dark" data-theme="dark" data-animate="directional">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法1</span><span class="sep"></span><span>Scene</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2vh 0 2vh">
+    <div class="kicker" data-anim>主体替换原场景要求</div>
+    <h2 class="h-xl" style="font-size:4.8vw" data-anim>什么样的场景图更好用</h2>
+  </div>
+  <div class="split" style="gap:4vw;flex:1;align-items:start">
+    <figure class="tile" data-anim="left">
+      <div class="row" style="gap:1vw;margin-bottom:1.2vh">
+        <span class="num-badge">✓</span>
+        <div class="h-md accent">好的场景图</div>
+      </div>
+      <div class="frame-img" style="height:39vh;border:1px solid rgba(var(--accent-rgb),.4)">
+        <img src="images/scene-good.jpg" alt="好的主体替换场景图" style="object-fit:contain;object-position:center">
+      </div>
+      <div class="body-zh" style="margin:1.2vh 0 0;font-size:max(13px,1.02vw);line-height:1.55">人物、护腰和佩戴关系完整清晰，目标位置明确，画面分辨率足够，AI 容易理解要替换的位置与形态。</div>
+    </figure>
+    <figure class="tile" data-anim="right">
+      <div class="row" style="gap:1vw;margin-bottom:1.2vh">
+        <span class="num-badge">×</span>
+        <div class="h-md">不好的场景图</div>
+      </div>
+      <div class="frame-img" style="height:39vh;border:1px solid rgba(255,255,255,.16)">
+        <img src="images/scene-bad.jpg" alt="不好的主体替换场景图" style="object-fit:contain;object-position:center">
+      </div>
+      <div class="body-zh" style="margin:1.2vh 0 0;font-size:max(13px,1.02vw);line-height:1.55">只有沙发、电热毯和控制器等局部物体，缺少完整人物与明确穿戴位置，无法提供有效的主体替换关系。</div>
+    </figure>
+  </div>
+  <div class="callout" style="margin-top:1.6vh;padding:1.5vh 1.6vw" data-anim>判断重点不是“画面是否好看”，而是：<span class="accent">目标主体是否完整，位置和使用关系是否清楚</span>。</div>
+  <div class="foot"><div class="title">场景图标准</div><div>Good vs Bad</div></div>
+</section>
+
+<!-- 方法2章节封面 -->
+<section class="slide hero dark center" data-theme="dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法论</span><span class="sep"></span><span>Method 02</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center fill" style="gap:2.6vh">
+    <div class="kicker" data-anim>PART 03 · 提示词是AI的说明书</div>
+    <h2 class="h-hero" style="white-space:nowrap" data-anim>提示词怎么写</h2>
+    <div class="lead" style="text-align:center;max-width:60vw" data-anim>AI不会猜你的意图，<span class="accent">说清楚才能做对</span></div>
+    <div class="row center" style="gap:1vw;margin-top:1vh" data-anim>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">5要素</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">参考框架</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">可迁移</span>
+    </div>
+  </div>
+  <div class="foot"><div class="title">提示词怎么写</div><div>Prompt Engineering</div></div>
+</section>
+
+<!-- 方法2-提示词参考框架 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法2</span><span class="sep"></span><span>5 Elements</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center" style="margin:2vh 0 2.4vh;gap:1vh;text-align:center">
+    <div class="kicker" data-anim>提示词使用的第一条原则</div>
+    <h2 class="h-xl" style="font-size:4.5vw;text-align:center;line-height:1.18" data-anim><span class="accent">一套提示词</span>，不可能解决所有问题</h2>
+    <div class="lead" style="font-size:1.25vw;text-align:center;max-width:72vw;opacity:.82" data-anim>五要素只是参考框架，具体内容必须根据产品、品类和业务场景重新描述。</div>
+  </div>
+  <div class="grid-6" style="gap:2.5vh 4vw">
+    <div class="col" style="gap:.5vh" data-anim>
+      <div class="row" style="gap:.8vw;align-items:center"><span class="num-badge" style="width:2.2vw;height:2.2vw;min-width:38px;min-height:38px;font-size:1vw">1</span><div class="h-md">要做什么</div></div>
+      <div class="body-zh" style="margin:0">任务：替换护膝 / 生成买家秀</div>
+    </div>
+    <div class="col" style="gap:.5vh" data-anim>
+      <div class="row" style="gap:.8vw;align-items:center"><span class="num-badge" style="width:2.2vw;height:2.2vw;min-width:38px;min-height:38px;font-size:1vw">2</span><div class="h-md">操作对象</div></div>
+      <div class="body-zh" style="margin:0">替换哪个 / 保留哪个</div>
+    </div>
+    <div class="col" style="gap:.5vh" data-anim>
+      <div class="row" style="gap:.8vw;align-items:center"><span class="num-badge" style="width:2.2vw;height:2.2vw;min-width:38px;min-height:38px;font-size:1vw">3</span><div class="h-md">必须保留</div></div>
+      <div class="body-zh" style="margin:0">人物/姿势/背景/构图/光线</div>
+    </div>
+    <div class="col" style="gap:.5vh" data-anim>
+      <div class="row" style="gap:.8vw;align-items:center"><span class="num-badge" style="width:2.2vw;height:2.2vw;min-width:38px;min-height:38px;font-size:1vw">4</span><div class="h-md">不能改变</div></div>
+      <div class="body-zh" style="margin:0">外形/颜色/材质/结构/比例</div>
+    </div>
+    <div class="col" style="gap:.5vh" data-anim>
+      <div class="row" style="gap:.8vw;align-items:center"><span class="num-badge" style="width:2.2vw;height:2.2vw;min-width:38px;min-height:38px;font-size:1vw">5</span><div class="h-md">期望效果</div></div>
+      <div class="body-zh" style="margin:0">自然/真实/高清/融合</div>
+    </div>
+    <div class="col center" style="gap:.5vh;grid-column:3" data-anim>
+      <div class="h-md accent" style="font-size:1.8vw">框架可迁移</div>
+      <div class="body-zh" style="margin:0;text-align:center">品类细节要重写</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1.6vh;padding:1.5vh 1.6vw" data-anim>
+    <div style="font-size:max(13px,1vw);line-height:1.55"><span class="accent" style="font-weight:800">品类不同，关注点不同：</span>护腰看佩戴位置、包裹关系和支撑感；宠物药品看适用对象、剂型和使用情境；地毯看纹理、尺寸比例、铺设空间和家居风格。</div>
+  </div>
+  <div class="foot"><div class="title">参考框架</div><div>Adapt to Each Category</div></div>
+</section>
+
+<!-- 方法2-三种对比 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法2</span><span class="sep"></span><span>Examples</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>三种提示词对比</div>
+    <h2 class="h-xl" data-anim>什么是好提示词</h2>
+  </div>
+  <div class="col" style="gap:3vh;flex:1;justify-content:center">
+    <div class="callout" style="border-left-color:rgba(127,127,127,.4)" data-anim>
+      <div class="kicker" style="margin-bottom:1vh">✗ 太简单（信息不足）</div>
+      <div class="body-zh" style="font-size:max(16px,1.35vw)">"把护膝换到这个场景里"</div>
+      <div class="cite" style="margin-top:1.2vh;color:rgba(255,255,255,.5)">问题：不知道保留什么、不知道商品特征、不知道要什么效果</div>
+    </div>
+    <div class="callout" style="border-left-color:rgba(127,127,127,.4)" data-anim>
+      <div class="kicker" style="margin-bottom:1vh">✗ 太复杂（无脑堆词）</div>
+      <div class="body-zh" style="font-size:max(16px,1.35vw)">"保留人物保留姿势保留背景保留构图保留光线保留一切，不能改变不能改变绝对不能改变，要自然要真实要高清要精致要完美要融合要好看要专业……"</div>
+      <div class="cite" style="margin-top:1.2vh;color:rgba(255,255,255,.5)">问题：车轱辘话反复堆，没说清具体保留什么、改什么，AI抓不住重点</div>
+    </div>
+    <div class="callout" data-anim>
+      <div class="kicker" style="margin-bottom:1vh">✓ 正确版本（5要素清晰）</div>
+      <div class="body-zh" style="font-size:max(16px,1.35vw)">"参考<span class="accent">人物穿戴图</span>中护膝的佩戴位置、包裹关系、比例和角度，将<span class="accent">白底细节图中的黑红护膝</span>替换到人物腿部。保留人物、姿势、动作、背景环境、构图和光线；锁定护膝的<span class="accent">外形、黑红配色、材质、纹理、结构和比例</span>。画面要<span class="accent">自然、真实</span>。"</div>
+      <div class="cite" style="margin-top:1.2vh">5要素齐全、重点清晰、不重复</div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">提示词对比</div><div>Right Way</div></div>
+</section>
+
+
+<!-- 方法2-实际案例 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法2</span><span class="sep"></span><span>Real Cases</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:1.6vh 0 1.6vh">
+    <div class="kicker" data-anim>实际案例 · 提示词太少</div>
+    <h2 class="h-xl" data-anim>提示词过少的坑</h2>
+  </div>
+  <div class="row" style="gap:2.4vw;flex:1;align-items:center;justify-content:center">
+    <figure class="tile" data-anim style="flex:1;min-width:0">
+      <img src="images/case_bad_1.jpg" alt="提示词过少1" style="width:100%;height:56vh;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.04)">
+      <div class="img-cap">只写"高清放大" · 结果几乎没变化</div>
+    </figure>
+    <figure class="tile" data-anim style="flex:1;min-width:0">
+      <img src="images/case_bad_2.jpg" alt="提示词过少2" style="width:100%;height:56vh;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.04)">
+      <div class="img-cap">只写"将产品优化" · AI只能瞎猜</div>
+    </figure>
+  </div>
+  <div class="callout" style="margin-top:1.6vh" data-anim>信息不足，<span class="accent">AI只能猜，猜不中就反复重来</span></div>
+  <div class="foot"><div class="title">提示词过少</div><div>Too Little</div></div>
+</section>
+
+<!-- 方法2-实际案例2 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法2</span><span class="sep"></span><span>Real Cases</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:1.6vh 0 1.6vh">
+    <div class="kicker" data-anim>实际案例 · 另外两种坑</div>
+    <h2 class="h-xl" data-anim>过多 &amp; 反复重生</h2>
+  </div>
+  <div class="row" style="gap:2.4vw;flex:1;align-items:center;justify-content:center">
+    <figure class="tile" data-anim style="flex:1;min-width:0">
+      <img src="images/case_bad_4.jpg" alt="提示词过多" style="width:100%;height:56vh;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.04)">
+      <div class="img-cap">提示词过多 · 重点被淹没</div>
+    </figure>
+    <figure class="tile" data-anim style="flex:1;min-width:0">
+      <img src="images/case_bad_3.jpg" alt="重复生成" style="width:100%;height:56vh;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.04)">
+      <div class="img-cap">同一任务反复生成 · 费时又费分</div>
+    </figure>
+  </div>
+  <div class="callout" style="margin-top:1.6vh" data-anim>这些都是<span class="accent">匿名化的真实案例</span>，看看是不是也遇到过</div>
+  <div class="foot"><div class="title">实际案例</div><div>Learn from Mistakes</div></div>
+</section>
+
+<!-- 互动页-出题 -->
+<section class="slide dark qa" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>互动 · 测试</span><span class="sep"></span><span>Quiz</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="qa-badge" data-anim style="align-self:flex-start">互动 · 你来答</div>
+    <h2 class="h-md" style="margin-top:1.6vh" data-anim">下面哪个提示词更好？</h2>
+  </div>
+  <div class="col" style="gap:1.8vh;flex:1;justify-content:center">
+    <div class="opt" data-anim><span class="ol">A</span><span class="ot">"换护膝，要自然"</span></div>
+    <div class="opt" data-anim><span class="ol">B</span><span class="ot">"将黑红护膝替换到场景中护膝位置，保留人物姿势背景，不改变护膝颜色材质，画面自然真实"</span></div>
+    <div class="opt" data-anim><span class="ol">C</span><span class="ot">"保留保留保留，不改变不改变不改变，要自然要真实要高清要融合..."</span></div>
+  </div>
+  <div class="foot"><div class="title">互动 · 测试</div><div>先想想，按 → 看答案</div></div>
+</section>
+
+<!-- 互动页-答案 -->
+<section class="slide dark qa" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>互动 · 揭晓</span><span class="sep"></span><span>Answer</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 3vh">
+    <div class="qa-badge answer" data-anim style="align-self:flex-start">答案</div>
+    <h2 class="h-md" style="margin-top:1.4vh" data-anim>选B，<span class="accent">5要素清晰，不重复</span></h2>
+  </div>
+  <div class="grid-4" style="gap:3vh 4vw;flex:1;align-content:stretch">
+    <div class="ans-card" data-anim>
+      <span class="num-badge" style="width:2.6vw;height:2.6vw;min-width:42px;min-height:42px;font-size:1.2vw">✓</span>
+      <div class="ans-t"><b>任务</b>明确：替换护膝</div>
+    </div>
+    <div class="ans-card" data-anim>
+      <span class="num-badge" style="width:2.6vw;height:2.6vw;min-width:42px;min-height:42px;font-size:1.2vw">✓</span>
+      <div class="ans-t"><b>对象</b>清楚：黑红护膝</div>
+    </div>
+    <div class="ans-card" data-anim>
+      <span class="num-badge" style="width:2.6vw;height:2.6vw;min-width:42px;min-height:42px;font-size:1.2vw">✓</span>
+      <div class="ans-t"><b>保留</b>具体：人物姿势背景</div>
+    </div>
+    <div class="ans-card" data-anim>
+      <span class="num-badge" style="width:2.6vw;height:2.6vw;min-width:42px;min-height:42px;font-size:1.2vw">✓</span>
+      <div class="ans-t"><b>效果</b>明确：自然真实</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3vh" data-anim>记住：<span class="accent">说清楚才能做对，AI不会猜你的意图</span></div>
+  <div class="foot"><div class="title">互动 · 揭晓</div><div>Got It</div></div>
+</section>
+
+<!-- 案例演示章节封面 -->
+<section class="slide hero dark center" data-theme="dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>案例</span><span class="sep"></span><span>Demo</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center fill" style="gap:2.6vh">
+    <div class="kicker" data-anim>PART 04 · 方法印证</div>
+    <h2 class="h-hero" style="white-space:nowrap" data-anim>护膝案例演示</h2>
+    <div class="lead" style="text-align:center;max-width:60vw" data-anim>一个真实案例，<span class="accent">印证前面讲的方法</span></div>
+  </div>
+  <div class="foot"><div class="title">案例演示</div><div>Case Study</div></div>
+</section>
+
+<!-- 案例-素材选择 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>案例</span><span class="sep"></span><span>Material</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>印证方法1</div>
+    <h2 class="h-xl" data-anim>这两张图分别提供什么</h2>
+  </div>
+  <div class="split" style="gap:5vw;flex:1;align-items:stretch">
+    <div class="col" style="gap:1.4vh" data-anim>
+      <div class="h-md accent">黑红护膝（白底细节图）</div>
+      <img src="images/case_material_product.png" alt="白底细节图" style="width:100%;height:34vh;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.04)">
+      <div class="body-zh" style="margin:0">锁定颜色、材质和结构细节　<span class="accent">→ 细节参考</span></div>
+    </div>
+    <div class="col" style="gap:1.4vh" data-anim>
+      <div class="h-md accent">康复医院人物图（穿戴形态参考）</div>
+      <img src="images/case_material_scene.png" alt="穿戴形态参考图" style="width:100%;height:34vh;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.04)">
+      <div class="body-zh" style="margin:0">提供佩戴位置、人物姿势和包裹关系　<span class="accent">→ 形态参考</span></div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">素材选择</div><div>Good Materials</div></div>
+</section>
+
+<!-- 案例-主体替换 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>案例</span><span class="sep"></span><span>Replace</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>印证方法2</div>
+    <h2 class="h-xl" data-anim>主体替换提示词</h2>
+  </div>
+  <div class="col" style="gap:2.4vh;flex:1">
+    <div class="callout" data-anim>
+      <div class="q-big">"参考<span class="accent">人物穿戴图</span>中护膝的佩戴位置、包裹关系、比例和角度，将<span class="accent">白底细节图中的黑红护膝</span>替换到人物腿部。保留人物、姿势、动作、背景环境、构图和光线；锁定护膝的<span class="accent">外形、黑红配色、材质、纹理、结构和比例</span>。替换后画面要<span class="accent">自然、真实</span>，商品与人物和场景自然融合。"</div>
+      <div class="row" style="justify-content:flex-end;margin-top:1.2vh">
+        <button class="copy-btn" style="position:static" onclick="copyPrompt(this)" data-prompt="参考人物穿戴图中护膝的佩戴位置、包裹关系、比例和角度，将白底细节图中的黑红护膝替换到人物腿部。保留人物、姿势、动作、背景环境、构图和光线；锁定护膝的外形、黑红配色、材质、纹理、结构和比例。替换后画面要自然、真实，商品与人物和场景自然融合。">复制提示词</button>
+      </div>
+    </div>
+    <div class="grid-6" style="gap:2.4vh 4vw;margin-top:0">
+      <div class="col" style="gap:.4vh" data-anim>
+        <div class="kicker" style="margin:0">要素1</div>
+        <div class="body-zh" style="margin:0"><span class="accent">任务：</span>替换护膝</div>
+      </div>
+      <div class="col" style="gap:.4vh" data-anim>
+        <div class="kicker" style="margin:0">要素2</div>
+        <div class="body-zh" style="margin:0"><span class="accent">对象：</span>黑红护膝</div>
+      </div>
+      <div class="col" style="gap:.4vh" data-anim>
+        <div class="kicker" style="margin:0">要素3</div>
+        <div class="body-zh" style="margin:0"><span class="accent">保留：</span>人物姿势背景</div>
+      </div>
+      <div class="col" style="gap:.4vh" data-anim>
+        <div class="kicker" style="margin:0">要素4</div>
+        <div class="body-zh" style="margin:0"><span class="accent">特征：</span>外形颜色材质</div>
+      </div>
+      <div class="col" style="gap:.4vh" data-anim>
+        <div class="kicker" style="margin:0">要素5</div>
+        <div class="body-zh" style="margin:0"><span class="accent">效果：</span>自然真实融合</div>
+      </div>
+      <div class="col center" style="gap:.4vh" data-anim>
+        <div class="h-md accent" style="font-size:1.8vw">✓ 完美</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">主体替换</div><div>5 Elements</div></div>
+</section>
+
+<!-- 案例-买家秀素材对照 -->
+<section class="slide dark" data-theme="dark" data-animate="directional">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>案例</span><span class="sep"></span><span>UGC Material</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2vh 0 2vh">
+    <div class="kicker" data-anim>AI买家秀素材对照</div>
+    <h2 class="h-xl" style="font-size:4.8vw" data-anim>什么素材可以用</h2>
+  </div>
+  <div class="split" style="gap:4vw;flex:1;align-items:start">
+    <figure class="tile" data-anim="left">
+      <div class="row" style="gap:1vw;margin-bottom:1.2vh">
+        <span class="num-badge">✓</span>
+        <div class="h-md accent">合格的买家秀素材</div>
+      </div>
+      <div class="frame-img" style="height:39vh;border:1px solid rgba(var(--accent-rgb),.4)">
+        <img src="images/buyer-show-good.jpg" alt="合格的AI买家秀素材" style="object-fit:cover;object-position:center 56%">
+      </div>
+      <div class="body-zh" style="margin:1.2vh 0 0;font-size:max(13px,1.02vw);line-height:1.55">人物、动作和康复场景完整清晰，护膝佩戴位置可辨，能够为 AI 提供明确的使用情境。</div>
+    </figure>
+    <figure class="tile" data-anim="right">
+      <div class="row" style="gap:1vw;margin-bottom:1.2vh">
+        <span class="num-badge">×</span>
+        <div class="h-md">不合格的买家秀素材</div>
+      </div>
+      <div class="frame-img" style="height:39vh;border:1px solid rgba(255,255,255,.16)">
+        <img src="images/buyer-show-bad.jpg" alt="不合格的AI买家秀素材" style="object-fit:cover;object-position:center 56%">
+      </div>
+      <div class="body-zh" style="margin:1.2vh 0 0;font-size:max(13px,1.02vw);line-height:1.55">只有病号服、拐杖和轮椅等局部元素，缺少完整人物、商品与使用动作，参考信息不足。</div>
+    </figure>
+  </div>
+  <div class="callout" style="margin-top:1.6vh;padding:1.5vh 1.6vw" data-anim>买家秀素材不只要“像这个场景”，还要同时提供：<span class="accent">完整人物、清楚动作、明确商品</span>。</div>
+  <div class="foot"><div class="title">买家秀素材</div><div>Good vs Bad</div></div>
+</section>
+
+<!-- 案例-买家秀流程与提示词 -->
+<section class="slide dark" data-theme="dark" data-animate="directional">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>案例</span><span class="sep"></span><span>UGC Prompt</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:1.8vh 0 2vh">
+    <div class="kicker" data-anim>用六个维度说清画面</div>
+    <h2 class="h-xl" style="font-size:4.6vw" data-anim>AI买家秀提示词</h2>
+  </div>
+  <div class="split" style="grid-template-columns:42fr 58fr;gap:3vw;flex:1;align-items:stretch">
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr);gap:1.4vh 1.1vw" data-anim="left">
+      <div class="col" style="gap:.6vh;padding:1.5vh 1vw;border-left:3px solid var(--accent);background:rgba(255,255,255,.045)"><div class="accent" style="font-size:1.05vw;font-weight:800">01 人物</div><div class="body-zh" style="margin:0;font-size:max(12px,.9vw);line-height:1.45">60岁左右中老年人<br>肤质、表情真实自然</div></div>
+      <div class="col" style="gap:.6vh;padding:1.5vh 1vw;border-left:3px solid var(--accent);background:rgba(255,255,255,.045)"><div class="accent" style="font-size:1.05vw;font-weight:800">02 场景描述</div><div class="body-zh" style="margin:0;font-size:max(12px,.9vw);line-height:1.45">医院康复科候诊区<br>米白墙面、指示牌</div></div>
+      <div class="col" style="gap:.6vh;padding:1.5vh 1vw;border-left:3px solid var(--accent);background:rgba(255,255,255,.045)"><div class="accent" style="font-size:1.05vw;font-weight:800">03 光线</div><div class="body-zh" style="margin:0;font-size:max(12px,.9vw);line-height:1.45">窗边自然光<br>柔和、不刺眼</div></div>
+      <div class="col" style="gap:.6vh;padding:1.5vh 1vw;border-left:3px solid var(--accent);background:rgba(255,255,255,.045)"><div class="accent" style="font-size:1.05vw;font-weight:800">04 角度构图</div><div class="body-zh" style="margin:0;font-size:max(12px,.9vw);line-height:1.45">半侧面、中景<br>手机原相机抓拍感</div></div>
+      <div class="col" style="gap:.6vh;padding:1.5vh 1vw;border-left:3px solid var(--accent);background:rgba(255,255,255,.045)"><div class="accent" style="font-size:1.05vw;font-weight:800">05 动作姿态</div><div class="body-zh" style="margin:0;font-size:max(12px,.9vw);line-height:1.45">坐在候诊椅<br>自然调整护膝绑带</div></div>
+      <div class="col" style="gap:.6vh;padding:1.5vh 1vw;border-left:3px solid var(--accent);background:rgba(255,255,255,.045)"><div class="accent" style="font-size:1.05vw;font-weight:800">06 真实感画风</div><div class="body-zh" style="margin:0;font-size:max(12px,.9vw);line-height:1.45">生活化随手拍<br>避免广告精修感</div></div>
+    </div>
+    <div class="callout" data-anim="right" style="margin:0;padding:2.2vh 1.8vw;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div class="kicker" style="margin:0 0 1.4vh;font-size:max(14px,1vw)">六个维度组合成完整提示词</div>
+        <div class="body-zh" style="margin:0;font-size:max(14px,1.08vw);line-height:1.75">“生成一张真人使用黑红护膝的买家秀：<span class="accent">60岁左右中老年人</span>，皮肤保留真实纹理和自然表情；位于<span class="accent">医院康复科候诊区</span>，米白墙面、康复科指示牌，窗边<span class="accent">柔和自然光</span>；采用<span class="accent">半侧面、中景、手机原相机抓拍构图</span>；人物<span class="accent">坐在候诊椅上自然调整护膝绑带</span>，旁边可放折叠拐杖；整体呈现<span class="accent">生活化随手拍质感，避免商业广告精修感</span>。”</div>
+      </div>
+      <div>
+        <div class="row" style="justify-content:flex-end;margin-bottom:1.4vh"><button class="copy-btn" style="position:static" onclick="copyPrompt(this)" data-prompt="生成一张真人使用黑红护膝的买家秀：60岁左右中老年人，皮肤保留真实纹理和自然表情；位于医院康复科候诊区，米白墙面、康复科指示牌，窗边柔和自然光；采用半侧面、中景、手机原相机抓拍构图；人物坐在候诊椅上自然调整护膝绑带，旁边可放折叠拐杖；整体呈现生活化随手拍质感，避免商业广告精修感。">复制提示词</button></div>
+        <div class="body-zh" style="margin:0;padding-top:1.3vh;border-top:1px solid rgba(255,255,255,.15);font-size:max(12px,.9vw);line-height:1.5">操作顺序：<span class="accent">选 AI 买家秀 → 上传合格素材 → 填六维提示词 → 生成并检查</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">买家秀提示词</div><div>6 Dimensions</div></div>
+</section>
+
+<!-- 新功能-买家秀场景化 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>新功能</span><span class="sep"></span><span>UGC Scene Preset</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>跑通一类场景，就沉淀一套方法</div>
+    <h2 class="h-xl" data-anim>买家秀场景化</h2>
+  </div>
+  <div class="grid-3" style="gap:4vw;flex:1;align-content:center">
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">01</div>
+      <div class="t">按品类沉淀</div><div class="d">护具、服饰、家居等品类，对人物、动作和展示重点的要求不同</div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">02</div>
+      <div class="t">按场景细分</div><div class="d">同一品类也要区分医院康复、日常居家、运动训练等使用场景</div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">03</div>
+      <div class="t">沉淀并共建</div><div class="d">业务部门先沉淀并验证模板，成熟后提交 AI 实验室评估并更新到平台</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3vh" data-anim>
+    <div>一套买家秀<span class="accent">不可能覆盖所有品类和使用场景</span>；每类业务都应沉淀更匹配的成熟模板。</div>
+    <div style="margin-top:.8vh;font-size:max(13px,1vw);opacity:.78">业务部门自行沉淀与验证 <span class="accent">→</span> 提交 AI 实验室 <span class="accent">→</span> 评估后更新到平台 <span class="accent">→</span> 更多团队复用</div>
+  </div>
+  <div class="foot"><div class="title">买家秀场景化</div><div>Reusable by Category & Scene</div></div>
+</section>
+
+<!-- 方法3章节封面 -->
+<section class="slide hero dark center" data-theme="dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法论</span><span class="sep"></span><span>Method 03</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center fill" style="gap:2.6vh">
+    <div class="kicker" data-anim>PART 05 · AI会出错，人要检查</div>
+    <h2 class="h-hero" style="white-space:nowrap" data-anim>结果怎么判断</h2>
+    <div class="lead" style="text-align:center;max-width:60vw" data-anim>AI不是最终决策者，<span class="accent">人负责检查和决策</span></div>
+    <div class="row center" style="gap:1vw;margin-top:1vh" data-anim>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">商品检查</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">场景检查</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">真实感</span>
+    </div>
+  </div>
+  <div class="foot"><div class="title">结果怎么判断</div><div>Quality Check</div></div>
+</section>
+
+<!-- 方法3-检查清单 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法3</span><span class="sep"></span><span>Checklist</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>生成结果后按这个顺序检查</div>
+    <h2 class="h-xl" data-anim>三步检查清单</h2>
+  </div>
+  <div class="grid-3" style="gap:4vw">
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">商品</div>
+      <div class="t">检查商品质量</div>
+      <div class="d">• 有没有变形？<br>• 颜色对不对？<br>• 材质、结构、比例正常吗？<br>• 细节（logo、纹理）清晰吗？</div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">场景</div>
+      <div class="t">检查场景合理性</div>
+      <div class="d">• 场景是否符合需求？<br>• 人物姿势对不对？<br>• 背景合不合理？<br>• 商品与场景是否融合？</div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">真实</div>
+      <div class="t">检查真实感</div>
+      <div class="d">• 看起来自然吗？<br>• 光影合理吗？<br>• 有没有明显AI痕迹？<br>• 可以用于业务吗？</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3.4vh" data-anim>记住：<span class="accent">不检查就使用 = 把质量风险交给AI = 不负责任</span></div>
+  <div class="foot"><div class="title">三步检查</div><div>3-Step Check</div></div>
+</section>
+
+<!-- 方法3-常见问题 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法3</span><span class="sep"></span><span>Troubleshooting</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>遇到问题怎么办</div>
+    <h2 class="h-xl" data-anim>常见问题对照表</h2>
+  </div>
+  <div class="col" style="gap:0;flex:1;justify-content:center">
+    <div class="rowline" data-anim>
+      <div class="k">商品变形</div>
+      <div class="v">素材角度/比例不匹配 → <span class="accent">换素材</span></div>
+      <div class="m">Material</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">商品色差</div>
+      <div class="v">提示词没说清颜色 → <span class="accent">改提示词，强调具体颜色</span></div>
+      <div class="m">Prompt</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">细节丢失</div>
+      <div class="v">素材分辨率不够 → <span class="accent">换高清素材</span></div>
+      <div class="m">Material</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">场景不对</div>
+      <div class="v">提示词场景描述模糊 → <span class="accent">改提示词，具体描述场景</span></div>
+      <div class="m">Prompt</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">整体不真实</div>
+      <div class="v">模型不适合/参数不对 → <span class="accent">换模型或调参数</span></div>
+      <div class="m">Model</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">4张都不满意</div>
+      <div class="v">素材或提示词有根本问题 → <span class="accent">先检查素材 → 再检查提示词</span></div>
+      <div class="m">Check</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:2.4vh" data-anim>拍照保存这张表，<span class="accent">回去遇到问题直接查</span></div>
+  <div class="foot"><div class="title">常见问题</div><div>Quick Reference</div></div>
+</section>
+
+<!-- 方法4章节封面 -->
+<section class="slide hero dark center" data-theme="dark" data-animate="hero">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法论</span><span class="sep"></span><span>Method 04</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center fill" style="gap:2.6vh">
+    <div class="kicker" data-anim>PART 06 · 调整是常态，迭代才能出好结果</div>
+    <h2 class="h-hero" style="white-space:nowrap" data-anim>调整怎么操作</h2>
+    <div class="lead" style="text-align:center;max-width:60vw" data-anim>AI一次做对是小概率，<span class="accent">有方法地调整才能快速收敛</span></div>
+    <div class="row center" style="gap:1vw;margin-top:1vh" data-anim>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">诊断流程</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">决策树</span>
+      <span class="tag" style="border-color:var(--accent);color:var(--accent)">节约积分</span>
+    </div>
+  </div>
+  <div class="foot"><div class="title">调整怎么操作</div><div>Iteration</div></div>
+</section>
+
+<!-- 方法4-诊断决策树 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法4</span><span class="sep"></span><span>Decision Tree</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>结果不满意时按这个流程判断</div>
+    <h2 class="h-xl" data-anim>诊断决策树</h2>
+  </div>
+  <div class="col" style="gap:1.6vh;flex:1;justify-content:center">
+    <div class="callout" style="border-left-color:var(--accent);background:rgba(var(--accent-rgb),.1);padding:1.4vh 1.6vw" data-anim>
+      <div class="h-md" style="margin-bottom:.6vh;font-size:1.5vw">第一步：4张都不满意？</div>
+      <div class="body-zh" style="margin:0;font-size:max(14px,1.1vw)">→ 是：整组问题，从源头调整　　→ 否：只有1-2张不满意，单张调整</div>
+    </div>
+    <div class="versus" style="flex:0 1 auto" data-anim>
+      <div class="vs-col" style="gap:1.4vh">
+        <div class="kicker" style="margin:0">整组不满意</div>
+        <div class="vs-head" style="font-size:1.7vw">从源头调整</div>
+        <div class="vs-item" style="font-size:max(13px,1.05vw);line-height:1.5"><span class="accent">1. 先检查素材</span>　穿戴图是否清晰、无遮挡、角度接近？白底图细节完整吗？<br>→ 多图信息矛盾或素材有问题，就更换后再生成</div>
+        <div class="vs-item" style="font-size:max(13px,1.05vw);line-height:1.5"><span class="accent">2. 再检查提示词</span>　5要素齐全、重点说清了吗？<br>→ 有问题就改提示词重新生成</div>
+        <div class="vs-item" style="font-size:max(13px,1.05vw);line-height:1.5"><span class="accent">3. 最后调模型/参数</span>　前两步都没问题才考虑<br>→ 尝试其他模型或调参数</div>
+      </div>
+      <div class="vs-divider"></div>
+      <div class="vs-col" style="gap:1.4vh">
+        <div class="kicker" style="margin:0">只有1-2张不满意</div>
+        <div class="vs-head" style="font-size:1.7vw">单张调整</div>
+        <div class="vs-item" style="font-size:max(13px,1.05vw);line-height:1.5"><span class="accent">1. 选中不满意的那张</span>　保留其他可用的图</div>
+        <div class="vs-item" style="font-size:max(13px,1.05vw);line-height:1.5"><span class="accent">2. 点"已产出调整"</span>　说清要改什么（如"颜色太浅调深"）</div>
+        <div class="vs-item" style="font-size:max(13px,1.05vw);line-height:1.5"><span class="accent">3. 一次只改一个变量</span>　别同时改颜色姿势背景，改完看效果再动下一个</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1.6vh" data-anim>关键：<span class="accent">整组不满意≠换模型，单张不满意≠整组重生</span></div>
+  <div class="foot"><div class="title">诊断决策树</div><div>Save Credits</div></div>
+</section>
+
+<!-- 方法4-关键原则 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>方法4</span><span class="sep"></span><span>Principles</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:3vh 0 3vh">
+    <div class="kicker" data-anim>节约积分的关键</div>
+    <h2 class="h-xl" data-anim>4个原则</h2>
+  </div>
+  <div class="grid-4" style="gap:4vh 6vw">
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">1</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">整组不满意 ≠ 换模型</div><div class="body-zh" style="margin:0">先看素材和提示词，模型是最后一步</div></div>
+    </div>
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">2</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">单张不满意 ≠ 整组重生</div><div class="body-zh" style="margin:0">用"已产出调整"，不要浪费其他可用的图</div></div>
+    </div>
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">3</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">一次只改一个变量</div><div class="body-zh" style="margin:0">同时改多个，不知道哪个有效</div></div>
+    </div>
+    <div class="row" style="gap:1.4vw;align-items:flex-start" data-anim>
+      <span class="num-badge">4</span>
+      <div class="col" style="gap:.6vh"><div class="h-md">记录有效的调整</div><div class="body-zh" style="margin:0">下次遇到类似问题，直接用</div></div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3vh" data-anim>记住：<span class="accent">调整不是失败，而是AI使用的正常流程</span></div>
+  <div class="foot"><div class="title">4个原则</div><div>Best Practice</div></div>
+</section>
+
+<!-- 平台能力边界与需求反馈 -->
+<section class="slide dark" data-theme="dark" data-animate="directional">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>使用共识</span><span class="sep"></span><span>Capability Boundary</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2vh 0 2vh">
+    <div class="kicker" data-anim>先做好可控的，再认识能力边界</div>
+    <h2 class="h-xl" style="font-size:4.8vw" data-anim>平台能优化什么，不能承诺什么</h2>
+  </div>
+  <div class="versus" style="flex:1;gap:3.2vw" data-anim>
+    <div class="vs-col" data-anim="left" style="gap:1.25vh">
+      <div class="kicker" style="margin:0;font-size:max(16px,1.15vw);letter-spacing:.16em;font-weight:800;border:1px solid var(--accent);padding:.85vh 1vw;align-self:flex-start">模型决定能力上限</div>
+      <div class="vs-head" style="font-size:1.8vw">应用层无法彻底解决</div>
+      <div class="vs-item" style="font-size:max(13px,1vw);line-height:1.5"><span class="accent">输入信息有限</span>　原图模糊或细节缺失，AI无法保证准确补全</div>
+      <div class="vs-item" style="font-size:max(13px,1vw);line-height:1.5"><span class="accent">生成存在边界</span>　商品结构、人物肢体和文字仍可能出错</div>
+      <div class="vs-item" style="font-size:max(13px,1vw);line-height:1.5"><span class="accent">依赖模型升级</span>　平台接入行业主流模型，底层能力需随模型持续演进</div>
+      <div class="body-zh" style="margin:.4vh 0 0;font-size:max(12px,.92vw);line-height:1.5;opacity:.72">自研基础模型需要投入大量时间、人力、算力和资金，也未必优于行业领先模型。</div>
+    </div>
+    <div class="vs-divider" data-anim="divider"></div>
+    <div class="vs-col" data-anim="right" style="gap:1.25vh">
+      <div class="kicker" style="margin:0;font-size:max(16px,1.15vw);letter-spacing:.16em;font-weight:800;border:1px solid var(--accent);padding:.85vh 1vw;align-self:flex-start">平台提升落地效率</div>
+      <div class="vs-head" style="font-size:1.8vw">我们可以持续优化</div>
+      <div class="vs-item" style="font-size:max(13px,1vw);line-height:1.5"><span class="accent">模型接入</span>　评估并更新更适合业务场景的成熟模型</div>
+      <div class="vs-item" style="font-size:max(13px,1vw);line-height:1.5"><span class="accent">体验与交互</span>　优化操作流程、提示引导和使用效率</div>
+      <div class="vs-item" style="font-size:max(13px,1vw);line-height:1.5"><span class="accent">业务定制</span>　沉淀场景、模板、素材和成功参数，支持团队复用</div>
+      <div class="body-zh" style="margin:.4vh 0 0;font-size:max(12px,.92vw);line-height:1.5;opacity:.72">基础模型决定“能做到什么程度”，平台负责让它更容易用、更适合业务、更容易复用。</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:1.5vh;padding:1.5vh 1.6vw" data-anim>
+    <div class="row" style="gap:1vw;align-items:center;justify-content:center;flex-wrap:wrap;font-size:max(13px,1.02vw)">
+      <span>运营人员反馈</span><span class="accent">→</span><span>部门 AI BP 收集整理</span><span class="accent">→</span><span>通过需求表统一提交</span><span class="accent">→</span><span>数智中心定期评估与更新</span>
+    </div>
+  </div>
+  <div class="foot"><div class="title">能力边界与反馈</div><div>Feedback Loop</div></div>
+</section>
+
+<!-- 总结-操作口诀 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>总结</span><span class="sep"></span><span>Summary</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>拍照保存</div>
+    <h2 class="h-xl" data-anim>操作口诀</h2>
+  </div>
+  <div class="grid-3" style="gap:4vw">
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">生成前</div>
+      <div class="t">做好准备</div>
+      <div class="d">
+        ✓ 先明确目标<br>
+        ✓ 选对功能<br>
+        ✓ 检查素材质量<br>
+        ✓ 提示词写清5要素
+      </div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">结果不满意</div>
+      <div class="t">有序调整</div>
+      <div class="d">
+        ✓ 4张都不满意 → 整组问题<br>
+        　└ 先看素材 → 再看提示词 → 最后调模型<br>
+        ✓ 1-2张不满意 → 单张问题<br>
+        　└ 已产出调整 → 一次只改一个变量
+      </div>
+    </div>
+    <div class="pillar" data-anim>
+      <div class="ic accent" style="font-size:2.4vw;opacity:1;font-weight:800">结果可用</div>
+      <div class="t">沉淀复用</div>
+      <div class="d">
+        ✓ 用检查清单判断<br>
+        ✓ 下载并加入素材库<br>
+        ✓ 保留提示词和参数<br>
+        ✓ 下次优先复用
+      </div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:3.4vh" data-anim>记住：<span class="accent">少重复一次，就是节约时间；多沉淀一次，下次就能更快</span></div>
+  <div class="foot"><div class="title">操作口诀</div><div>Quick Guide</div></div>
+</section>
+
+<!-- 积分申请表 -->
+<section class="slide dark" data-theme="dark" data-animate="directional">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>使用支持</span><span class="sep"></span><span>Credit Request</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.2vh 0 2.2vh">
+    <div class="kicker" data-anim>平台积分不足时</div>
+    <h2 class="h-xl" style="font-size:5.2vw" data-anim>扫码申请追加积分</h2>
+  </div>
+  <div class="split" style="grid-template-columns:38fr 62fr;gap:5vw;align-items:center">
+    <figure class="tile" data-anim="left" style="align-items:center">
+      <div class="frame-img" style="height:54vh;width:25.5vw;border:1px solid rgba(var(--accent-rgb),.45);box-shadow:0 0 36px rgba(var(--accent-rgb),.12)">
+        <img src="images/credit-application-qr.png" alt="积分申请表二维码" style="object-fit:contain;object-position:center">
+      </div>
+      <div class="frame-cap" style="width:25.5vw;margin-top:1.2vh"><span class="pf">积分申请表</span><span class="idx">扫码填写</span></div>
+    </figure>
+    <div class="col" style="gap:2.2vh" data-anim="right">
+      <div class="lead" style="font-size:1.65vw;line-height:1.55">当平台积分不足时，各业务方可通过本流程发起<span class="accent">积分追加申请</span>。</div>
+      <div class="row" style="gap:1.2vw;align-items:flex-start">
+        <span class="num-badge" style="width:2.5vw;height:2.5vw;min-width:42px;min-height:42px;font-size:1.1vw">1</span>
+        <div class="col" style="gap:.5vh"><div class="h-md" style="font-size:1.6vw">工作日内申请</div><div class="body-zh" style="margin:0">当天内完成审核，并配置到账。</div></div>
+      </div>
+      <div class="row" style="gap:1.2vw;align-items:flex-start">
+        <span class="num-badge" style="width:2.5vw;height:2.5vw;min-width:42px;min-height:42px;font-size:1.1vw">2</span>
+        <div class="col" style="gap:.5vh"><div class="h-md" style="font-size:1.6vw">非工作日申请</div><div class="body-zh" style="margin:0">顺延至首个工作日进行集中处理。</div></div>
+      </div>
+      <div class="row" style="gap:1.2vw;align-items:flex-start">
+        <span class="num-badge" style="width:2.5vw;height:2.5vw;min-width:42px;min-height:42px;font-size:1.1vw">3</span>
+        <div class="col" style="gap:.5vh"><div class="h-md" style="font-size:1.6vw">写明积分用途</div><div class="body-zh" style="margin:0">请填写具体业务场景，例如：<span class="accent">用于生成 AI 买家秀</span>。</div></div>
+      </div>
+      <div class="callout" style="border-left-color:var(--accent);background:rgba(var(--accent-rgb),.1);padding:1.8vh 1.6vw;margin-top:.6vh" data-anim>先按本次培训方法减少无效生成；<span class="accent">确需追加时，再扫码申请</span>。</div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">积分申请表</div><div>Scan to Apply</div></div>
+</section>
+
+<!-- 总结-AI使用心法 -->
+<section class="slide dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>总结</span><span class="sep"></span><span>Mindset</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col" style="margin:2.4vh 0 2.6vh">
+    <div class="kicker" data-anim>用之前，先摆正心态</div>
+    <h2 class="h-xl" data-anim>AI使用心法</h2>
+  </div>
+  <div class="col" style="gap:0;flex:1;justify-content:center">
+    <div class="rowline" data-anim>
+      <div class="k">祛魅</div>
+      <div class="v">AI<span class="accent">不是神仙</span>，是个会算的工具，别神话它</div>
+      <div class="m">Tool</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">认边界</div>
+      <div class="v">它<span class="accent">解决不了100%的问题</span>，别指望一步到位</div>
+      <div class="m">Limit</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">给指令</div>
+      <div class="v">它<span class="accent">不会猜</span>，你说多清楚，它就做多准</div>
+      <div class="m">Clear</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">人把关</div>
+      <div class="v">它<span class="accent">会出错</span>，最后拍板的永远是人</div>
+      <div class="m">Check</div>
+    </div>
+    <div class="rowline" data-anim>
+      <div class="k">肯练手</div>
+      <div class="v"><span class="accent">用得多才用得好</span>，把它当成你的一个同事</div>
+      <div class="m">Practice</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:2.4vh" data-anim>降低预期、主动去用——<span class="accent">你会带，它就好用</span></div>
+  <div class="foot"><div class="title">AI使用心法</div><div>Mindset First</div></div>
+</section>
+
+<!-- 结尾与注册提醒 -->
+<section class="slide hero dark" data-theme="dark" data-animate="cascade">
+  <div class="chrome">
+    <div class="left"><img src="images/mascot.png" class="mascot-inline" alt="先马"><span>结尾</span><span class="sep"></span><span>Takeaway</span></div>
+    <div class="right"><span>00</span></div>
+  </div>
+  <div class="col center" style="margin:4.5vh 0 4vh;gap:1.5vh;text-align:center">
+    <div class="kicker" data-anim>本次培训的核心</div>
+    <div class="h1-zh" style="line-height:1.25;font-size:4.1vw;text-align:center" data-anim><span class="accent">了解 AI</span>，掌握方法，才能真正<span class="accent">用好平台</span></div>
+    <div class="lead" style="font-size:1.35vw;text-align:center;max-width:70vw;opacity:.78" data-anim>从素材、生成、判断到调整与沉淀，把每次尝试变成可复用的经验。</div>
+  </div>
+  <div class="col" style="gap:0;flex:1;justify-content:center;border-top:1px solid rgba(255,255,255,.14)" data-anim>
+    <div class="row" style="display:grid;grid-template-columns:3.2vw 15vw 1fr;gap:1.4vw;align-items:center;padding:1.8vh .5vw;border-bottom:1px solid rgba(255,255,255,.14)">
+      <span class="accent" style="font-family:var(--font-mono);font-size:.9vw;letter-spacing:.12em">01</span>
+      <div class="h-md" style="font-size:1.35vw">通知与 Bug 反馈</div>
+      <div class="body-zh" style="margin:0;font-size:max(13px,.98vw);line-height:1.55">关注「<span class="accent">AI设计平台运营通知群</span>」获取更新；遇到 Bug 可直接在群里反馈，<span class="accent">我们会尽快处理</span>。</div>
+    </div>
+    <div class="row" style="display:grid;grid-template-columns:3.2vw 15vw 1fr;gap:1.4vw;align-items:center;padding:1.8vh .5vw;border-bottom:1px solid rgba(255,255,255,.14)">
+      <span class="accent" style="font-family:var(--font-mono);font-size:.9vw;letter-spacing:.12em">02</span>
+      <div class="h-md" style="font-size:1.35vw">业务需求反馈</div>
+      <div class="body-zh" style="margin:0;font-size:max(13px,.98vw);line-height:1.55">新增需求先反馈至<span class="accent">部门 AI BP</span>，由 AI BP 收集整理并通过需求表统一提交数智中心。</div>
+    </div>
+    <div class="row" style="display:grid;grid-template-columns:3.2vw 15vw 1fr;gap:1.4vw;align-items:center;padding:1.8vh .5vw;border-bottom:1px solid rgba(255,255,255,.14)">
+      <span class="accent" style="font-family:var(--font-mono);font-size:.9vw;letter-spacing:.12em">03</span>
+      <div class="h-md" style="font-size:1.35vw">平台注册提醒</div>
+      <div class="body-zh" style="margin:0;font-size:max(13px,.98vw);line-height:1.55">“公司花名”栏填写花名；“<span class="accent">真实姓名</span>”栏务必填写真名，才能绑定公司钉钉并一键登录。</div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:2vh;align-items:center;justify-content:space-between" data-anim>
+    <div class="body-zh" style="margin:0;opacity:.62">平台持续更新，欢迎大家使用、反馈与共建</div>
+    <div class="h-md accent" style="font-size:1.55vw">谢谢大家</div>
+  </div>
+  <div class="foot"><div class="title" style="opacity:1">数智中心　<span class="accent" style="font-weight:700">星河界-梦蝶</span></div><div>AI Design Platform</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 ===============
+   深色页：Holographic Dispersion（全息色散 · 钛金暗流）—— 彩虹微扰、鼠标径向涟漪
+   浅色页：Spiral Vortex（旋转涡流 · 银色珍珠）—— domain-warp 流动、无中心
+   修改风格请参考 references/webgl-backgrounds.md
+*/
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.16,0.11,0.11);
+  vec3 b=vec3(0.11,0.05,0.03);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.0,0.12,0.22);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.09,disp*0.03,disp*0.01);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*vec3(0.20,0.10,0.05);
+  // 涟漪已移除(脉动太快会晕),鼠标互动改用上层柔和光晕
+  vec3 base=vec3(0.06,0.045,0.048);
+  col=mix(base,col,0.9);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+const glowEl=document.getElementById('cursor-glow');
+addEventListener('mousemove',e=>{
+  mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight;
+  if(glowEl)glowEl.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;
+});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+const drawDark=bootGL('bg-dark',FS_DARK);
+const drawLight=bootGL('bg-light',FS_LIGHT);
+const t0=Date.now();
+(function loop(){
+  const t=(Date.now()-t0)/1000;
+  drawDark(t);drawLight(t);
+  requestAnimationFrame(loop);
+})();
+
+// =============== 导航（翻页 / 圆点 / 键盘 / 滚轮 / 触屏） ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+// 关键：矫正 deck 宽度为 total * 100vw，否则翻页会错位
+deck.style.width=(total*100)+'vw';
+
+// 自动页码：按顺序重排 chrome 右上角页码(插入互动页后无需手改)
+slides.forEach((s,i)=>{
+  const pn=s.querySelector('.chrome .right span');
+  if(pn) pn.textContent=String(i+1).padStart(2,'0');
+});
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  /* 主题切换：优先读 data-theme，其次从 class（light/dark）推断 */
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  /* 动效：翻页过渡中段触发当前页的入场动画（由 motion-boot 注册） */
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（本地优先,CDN 兜底） ============
+     加载策略:先 ./assets/motion.min.js(本地,离线可用),失败 fallback 到 jsDelivr CDN
+     加载完成后挂 window.__playSlide / window.__pipeAdvance,
+     导航脚本会在翻页中段调用 __playSlide(idx),键盘/滚轮/触屏会在翻页前调用 __pipeAdvance()
+     双双失败时会兜底把所有 [data-anim] 设为可见,不让动效破坏阅读
+-->
+<script>
+function copyPrompt(btn){
+  const text = btn.getAttribute('data-prompt') || '';
+  const done = ()=>{const o=btn.textContent;btn.textContent='已复制';btn.classList.add('copied');setTimeout(()=>{btn.textContent=o;btn.classList.remove('copied');},1600);};
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  } else { fallbackCopy(text,done); }
+}
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');done();}catch(e){}
+  document.body.removeChild(ta);
+}
+</script>
+<script type="module">
+let motion;
+try {
+  motion = await import('./assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+    document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1');
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let pipeStep = -1;
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(recipe === 'pipeline'){
+      pipeStep = -1;
+      slide.querySelectorAll('[data-anim]').forEach(el=>{
+        el.style.opacity='0.15';
+        el.style.transform='none';
+      });
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'directional'){
+      const lefts  = all.filter(el=>el.dataset.anim==='left');
+      const divs   = all.filter(el=>el.dataset.anim==='divider');
+      const rights = all.filter(el=>el.dataset.anim==='right');
+      const others = all.filter(el=>!['left','right','divider'].includes(el.dataset.anim));
+      if(others.length) animate(others, {opacity:[0,1], y:[12,0]}, {duration:.6, delay:stagger(.1, {start:.15}), easing:EASE});
+      if(lefts.length)  animate(lefts,  {opacity:[0,1], x:[-24,0]}, {duration:.8, delay:.35, easing:EASE});
+      if(divs.length)   animate(divs,   {opacity:[0,.25]},          {duration:.5, delay:.9});
+      if(rights.length) animate(rights, {opacity:[0,1], x:[24,0]},  {duration:.8, delay:1.0, easing:EASE});
+      return;
+    }
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    // default: cascade
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  function pipeAdvance(){
+    const slide = slides[lastIdx];
+    if(!slide || slide.dataset.animate !== 'pipeline') return false;
+    const steps  = [...slide.querySelectorAll('[data-anim="step"]')];
+    const arrows = [...slide.querySelectorAll('[data-anim="arrow"]')];
+    if(pipeStep >= steps.length - 1) return false;
+    pipeStep++;
+    animate(steps[pipeStep], {opacity:[0.15,1], y:[8,0]}, {duration:.5, easing:EASE});
+    if(pipeStep > 0 && arrows[pipeStep-1]){
+      animate(arrows[pipeStep-1], {opacity:[0.15,.7]}, {duration:.3, delay:.15});
+    }
+    return true;
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = pipeAdvance;
+
+  // 首屏:go(0) 已跑过(同步),没来得及触发动效 → 这里补一下
+  playSlide(0);
+}
+</script>
+</body>
+</html>

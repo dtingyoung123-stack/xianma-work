@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- 圆形背景 -->
+  <circle cx="32" cy="32" r="32" fill="url(#logoGradient)"/>
+  
+  <!-- 马头部轮廓 -->
+  <g transform="translate(32, 34) scale(0.85) translate(-32, -34)">
+    <!-- 脸部 -->
+    <path d="M22 24C22 24 18 18 20 14C22 10 26 8 30 8C34 8 38 10 40 14C42 18 40 24 40 24" fill="#FFFFFF"/>
+    
+    <!-- 马头主体 -->
+    <path d="M20 20C20 14 24 10 30 10C36 10 42 14 42 20C44 26 42 32 38 38C36 42 34 46 34 50C34 54 30 54 30 54C30 54 26 54 26 50C26 46 24 42 22 38C18 32 18 26 20 20Z" fill="#FFFFFF" opacity="0.98"/>
+    
+    <!-- 鬃毛 -->
+    <path d="M20 14C18 12 16 10 16 8C18 10 20 12 22 12C24 8 26 6 30 6C34 6 38 8 40 12C42 12 44 10 46 8C46 10 44 12 42 14C44 16 44 18 42 20" fill="#FFFFFF" opacity="0.95"/>
+    
+    <!-- 眼睛 -->
+    <ellipse cx="26" cy="26" rx="3.5" ry="4.5" fill="#1E40AF"/>
+    <circle cx="27" cy="25" r="1.5" fill="#FFFFFF"/>
+    <ellipse cx="38" cy="26" rx="3.5" ry="4.5" fill="#1E40AF"/>
+    <circle cx="39" cy="25" r="1.5" fill="#FFFFFF"/>
+    
+    <!-- 眉毛 -->
+    <path d="M23 21C24 20 26 20 28 21" stroke="#1E40AF" stroke-width="2" stroke-linecap="round"/>
+    <path d="M36 21C38 20 40 20 41 21" stroke="#1E40AF" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- 鼻孔 -->
+    <ellipse cx="28" cy="38" rx="1.5" ry="2" fill="#60A5FA"/>
+    <ellipse cx="36" cy="38" rx="1.5" ry="2" fill="#60A5FA"/>
+    
+    <!-- 微笑嘴部 -->
+    <path d="M28 44C29 46 31 47 32 47C33 47 35 46 36 44" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </g>
+  
+  <!-- 高光圆环 -->
+  <circle cx="32" cy="32" r="30" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/>
+  
+  <defs>
+    <linearGradient id="logoGradient" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,14 @@
+{
+  "name": "centaur-spike",
+  "version": "0.1.0",
+  "private": true,
+  "description": "先马·Centaur Spike 阶段二：验证 Anthropic SDK + 沙箱 + 人工确认技术可行性",
+  "scripts": {
+    "test": "node --test",
+    "gateway": "node src/mockGateway.js",
+    "agent": "node src/agent.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1"
+  }
+}

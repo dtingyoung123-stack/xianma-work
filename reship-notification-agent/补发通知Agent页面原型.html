@@ -1,0 +1,1570 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>补发通知管理 - 页面原型</title>
+  <style>
+    :root {
+      --blue: #5d6cdd;
+      --blue-strong: #4f63d7;
+      --blue-soft: #eef3ff;
+      --text: #1f2937;
+      --muted: #7b8494;
+      --line: #e6eaf1;
+      --bg: #f5f7fb;
+      --white: #ffffff;
+      --green: #0f9f6e;
+      --green-bg: #dff8eb;
+      --orange: #d88719;
+      --orange-bg: #fff4dc;
+      --red: #d94c4c;
+      --red-bg: #ffe9e9;
+      --gray-bg: #f0f2f5;
+      --shadow: 0 1px 2px rgba(24, 35, 63, .04);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 232px 1fr;
+      background: var(--bg);
+    }
+
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .brand {
+      height: 88px;
+      padding: 20px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-mark,
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      background: var(--blue);
+      color: #fff;
+      display: inline-grid;
+      place-items: center;
+      font-weight: 700;
+      flex: 0 0 auto;
+      box-shadow: var(--shadow);
+    }
+
+    .brand-title {
+      line-height: 1.45;
+      font-size: 18px;
+      font-weight: 700;
+      word-break: keep-all;
+    }
+
+    .menu {
+      padding: 18px 0;
+      flex: 1;
+      overflow: auto;
+    }
+
+    .menu-section {
+      margin-bottom: 18px;
+    }
+
+    .menu-head,
+    .menu-item {
+      height: 38px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #8b95a5;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .menu-head {
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .menu-head .left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .menu-item {
+      color: #647083;
+      padding-left: 28px;
+      font-size: 13px;
+      position: relative;
+    }
+
+    .menu-item.active {
+      color: var(--blue-strong);
+      background: var(--blue-soft);
+      font-weight: 600;
+    }
+
+    .menu-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 7px;
+      bottom: 7px;
+      width: 3px;
+      background: var(--blue-strong);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .menu-icon {
+      width: 16px;
+      height: 16px;
+      color: #9aa4b2;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .chevron {
+      color: #b6bdc9;
+    }
+
+    .user-card {
+      height: 86px;
+      border-top: 1px solid var(--line);
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-name {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      height: 88px;
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px 0 24px;
+    }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+    }
+
+    .bell {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .bell::after {
+      content: "";
+      position: absolute;
+      right: 3px;
+      top: 3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef5350;
+      border: 1px solid #fff;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--text);
+    }
+
+    .content {
+      padding: 0 24px 28px;
+      min-width: 0;
+    }
+
+    .panel {
+      margin-top: 0;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 0 16px 10px;
+      min-height: calc(100vh - 116px);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px 16px;
+      padding: 16px 0 18px;
+      align-items: center;
+    }
+
+    .filters {
+      display: contents;
+    }
+
+    .field {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .field label {
+      color: #536071;
+      font-size: 13px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .input,
+    .select {
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: #323b49;
+      padding: 0 10px;
+      min-width: 154px;
+      outline: none;
+    }
+
+    .input:focus,
+    .select:focus {
+      border-color: #8ab9ff;
+      box-shadow: 0 0 0 2px rgba(38, 135, 255, .08);
+    }
+
+    .date-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      width: 250px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      padding: 0 10px;
+      color: #323b49;
+    }
+
+    .date-range.active {
+      border-color: #4b9cff;
+      box-shadow: 0 0 0 2px rgba(75, 156, 255, .08);
+    }
+
+    .date-icon,
+    .date-clear {
+      color: #9aa4b2;
+      flex: 0 0 auto;
+    }
+
+    .date-range .input {
+      min-width: 0;
+      width: 88px;
+      height: 34px;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .date-range .input:focus {
+      box-shadow: none;
+    }
+
+    .calendar-popover {
+      position: absolute;
+      left: 0;
+      top: 44px;
+      width: 650px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 30px rgba(20, 32, 56, .14);
+      border-radius: 4px;
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      z-index: 30;
+    }
+
+    .calendar-popover::before {
+      content: "";
+      position: absolute;
+      top: -7px;
+      left: 116px;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-left: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      transform: rotate(45deg);
+    }
+
+    .calendar-popover.show {
+      display: grid;
+    }
+
+    .calendar-month {
+      padding: 18px 18px 14px;
+      border-right: 1px solid var(--line);
+    }
+
+    .calendar-month:last-child {
+      border-right: 0;
+    }
+
+    .calendar-head {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 600;
+      color: #4b5565;
+      margin-bottom: 8px;
+    }
+
+    .cal-nav {
+      border: 0;
+      background: transparent;
+      color: #7b8494;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0 4px;
+    }
+
+    .calendar-week,
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+    }
+
+    .calendar-week {
+      height: 34px;
+      align-items: center;
+      color: #7b8494;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day {
+      height: 38px;
+      display: grid;
+      place-items: center;
+      color: #4b5565;
+      cursor: pointer;
+      border: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    .day.muted {
+      color: #b6bdc9;
+    }
+
+    .day span {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+    }
+
+    .day.in-range span {
+      background: #e8f2ff;
+      border-radius: 0;
+      width: 100%;
+    }
+
+    .day.selected span {
+      background: #4b9cff;
+      color: #fff;
+      border-radius: 50%;
+    }
+
+    .btns,
+    .table-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+      color: #5b6472;
+      padding: 0 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .btn.text {
+      border-color: transparent;
+      background: transparent;
+      color: #2687ff;
+      padding: 0 8px;
+    }
+
+    .btn.warn {
+      color: var(--orange);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      color: #b7bfcc;
+      background: #f7f8fb;
+    }
+
+    .summary {
+      min-height: 50px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(112px, 1fr));
+      background: #fbfcff;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .summary-item {
+      padding: 10px 14px;
+      border-right: 1px solid var(--line);
+      display: grid;
+      gap: 4px;
+    }
+
+    .summary-item:last-child {
+      border-right: 0;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .summary-value {
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    .summary-value.success {
+      color: var(--green);
+    }
+
+    .summary-value.danger {
+      color: var(--red);
+    }
+
+    .summary-value.warning {
+      color: var(--orange);
+    }
+
+    .notice {
+      border: 1px solid #ffe0a3;
+      background: #fff9eb;
+      color: #94610d;
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 22px;
+      transform: translateX(-50%) translateY(-12px);
+      min-width: 220px;
+      max-width: 520px;
+      padding: 10px 14px;
+      border-radius: 4px;
+      background: rgba(31, 41, 55, .92);
+      color: #fff;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+      z-index: 40;
+      box-shadow: 0 8px 24px rgba(20, 32, 56, .16);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .28);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+    }
+
+    .modal-mask.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 420px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 18px 48px rgba(20, 32, 56, .18);
+      border: 1px solid var(--line);
+    }
+
+    .modal-head {
+      height: 50px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .modal-body {
+      padding: 18px;
+      line-height: 1.7;
+      color: #4b5565;
+    }
+
+    .modal-foot {
+      height: 58px;
+      padding: 0 18px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .empty {
+      height: 168px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-top: 0;
+      background: #fff;
+    }
+
+    .empty.show {
+      display: flex;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 12px;
+      padding: 16px 0;
+    }
+
+    .config-card {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      min-height: 118px;
+    }
+
+    .config-title {
+      font-weight: 700;
+    }
+
+    .config-desc {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .mini-table {
+      border: 1px solid var(--line);
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .mini-table table {
+      min-width: 0;
+    }
+
+    .mini-table th,
+    .mini-table td {
+      height: 44px;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      overflow: auto;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1520px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 0 12px;
+      height: 52px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th {
+      height: 38px;
+      background: #f8fafc;
+      color: #7a8391;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: 0;
+    }
+
+    .status {
+      display: inline-flex;
+      height: 24px;
+      align-items: center;
+      padding: 0 9px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .status.pending {
+      background: #edf3ff;
+      color: #2f75dd;
+    }
+
+    .status.success {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .status.failed {
+      background: var(--red-bg);
+      color: var(--red);
+    }
+
+    .status.done {
+      background: var(--gray-bg);
+      color: #697386;
+    }
+
+    .platform {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .dot.red {
+      background: #ef4444;
+    }
+
+    .dot.orange {
+      background: #f59e0b;
+    }
+
+    .dot.green {
+      background: #10b981;
+    }
+
+    .ops {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .td-ops {
+      overflow: visible;
+      text-overflow: unset;
+    }
+
+    .op {
+      color: #2687ff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .op.warn {
+      color: var(--orange);
+    }
+
+    .op.muted {
+      color: #9aa4b2;
+    }
+
+    .pagination {
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      padding-right: 2px;
+    }
+
+    .page-btn {
+      min-width: 30px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      display: inline-grid;
+      place-items: center;
+      background: #fff;
+      color: #687386;
+    }
+
+    .page-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .drawer {
+      position: fixed;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 384px;
+      background: #fff;
+      border-left: 1px solid var(--line);
+      box-shadow: -10px 0 24px rgba(20, 32, 56, .08);
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .18s ease, opacity .18s ease;
+      z-index: 20;
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      padding: 0 18px;
+      font-weight: 700;
+    }
+
+    .drawer-body {
+      padding: 18px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .detail-block {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-title {
+      font-weight: 700;
+      color: #3a4352;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 8px;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .kv span:first-child {
+      color: var(--muted);
+    }
+
+    .message-box {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcff;
+      padding: 12px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1180px) {
+      .app {
+        grid-template-columns: 72px 1fr;
+      }
+
+      .brand-title,
+      .menu-head span.label,
+      .menu-item span.label,
+      .user-card .user-meta,
+      .chevron {
+        display: none;
+      }
+
+      .brand,
+      .menu-head,
+      .menu-item,
+      .user-card {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+      }
+
+      .menu-item {
+        padding-left: 0;
+      }
+
+      .summary {
+        grid-template-columns: repeat(3, minmax(112px, 1fr));
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .table-actions {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">I</div>
+        <div class="brand-title">智能客户售后管理<br>平台</div>
+      </div>
+
+      <nav class="menu" aria-label="主菜单">
+        <div class="menu-section">
+          <a class="menu-head" href="#">
+            <span class="left"><span class="menu-icon">□</span><span class="label">工单管理</span></span>
+            <span class="chevron">›</span>
+          </a>
+        </div>
+
+        <div class="menu-section">
+          <a class="menu-head" href="#">
+            <span class="left"><span class="menu-icon">◇</span><span class="label">京东运营</span></span>
+            <span class="chevron">›</span>
+          </a>
+        </div>
+
+        <div class="menu-section">
+          <a class="menu-head" href="#">
+            <span class="left"><span class="menu-icon">✦</span><span class="label">智能运营</span></span>
+            <span class="chevron">›</span>
+          </a>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-head">
+            <span class="left"><span class="menu-icon">◈</span><span class="label">Agent 监控</span></span>
+            <span class="chevron">⌄</span>
+          </div>
+          <a class="menu-item active" href="#"><span class="menu-icon">◎</span><span class="label">补发通知智能体</span></a>
+        </div>
+
+        <div class="menu-section">
+          <a class="menu-head" href="#">
+            <span class="left"><span class="menu-icon">⚙</span><span class="label">系统管理</span></span>
+            <span class="chevron">›</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="user-card">
+        <div class="avatar">梦</div>
+        <div class="user-meta">
+          <div class="user-name">梦蝶</div>
+          <div class="user-role">系统管理员</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="page-title">补发通知管理</div>
+        <div class="top-actions">
+          <span class="bell" title="通知">♧</span>
+          <div class="profile">
+            <div class="avatar">梦</div>
+            <span>梦蝶</span>
+            <span class="chevron">⌄</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="panel">
+          <div class="toolbar">
+            <div class="filters">
+              <div class="field">
+                <label for="status">状态</label>
+                <select id="status" class="select">
+                  <option>全部</option>
+                  <option>待发送</option>
+                  <option>发送成功</option>
+                  <option>发送失败</option>
+                  <option>已处理</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="tradeNo">交易号</label>
+                <input id="tradeNo" class="input" placeholder="精确/模糊查询">
+              </div>
+              <div class="field">
+                <label for="orderNo">订单号</label>
+                <input id="orderNo" class="input" placeholder="精确/模糊查询">
+              </div>
+              <div class="field">
+                <label for="shop">店铺</label>
+                <input id="shop" class="input" placeholder="店铺名称">
+              </div>
+              <div class="field">
+                <label for="expressNo">快递单号</label>
+                <input id="expressNo" class="input" placeholder="精确/模糊查询">
+              </div>
+              <div class="field">
+                <label>创建日期</label>
+                <div class="date-range">
+                  <span class="date-icon">▣</span>
+                  <input class="input" id="startDate" value="2026-07-03" readonly>
+                  <span>至</span>
+                  <input class="input" id="endDate" value="2026-07-03" readonly>
+                  <span class="date-clear" id="clearDate">×</span>
+                  <div class="calendar-popover" id="calendarPopover"></div>
+                </div>
+              </div>
+              <div class="btns">
+                <button class="btn primary" id="queryBtn">应用</button>
+                <button class="btn" id="resetBtn">重置</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary" aria-label="任务概览">
+            <div class="summary-item">
+              <div class="summary-label">今日生成</div>
+              <div class="summary-value" id="sumTotal">128</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">待发送</div>
+              <div class="summary-value" id="sumPending">6</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">发送成功</div>
+              <div class="summary-value success" id="sumSuccess">112</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">发送失败</div>
+              <div class="summary-value danger" id="sumFailed">5</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">已处理</div>
+              <div class="summary-value warning" id="sumDone">2</div>
+            </div>
+          </div>
+
+          <div class="notice">
+            <strong>试点提示</strong>
+            <span>V1.0 仅处理客服确认的试点平台和试点店铺；未在清单内的平台或店铺，即使 OMS 中存在符合条件的补发订单，也不会生成自动发送任务。</span>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 150px;">店铺名称</th>
+                  <th style="width: 106px;">平台类型</th>
+                  <th style="width: 154px;">交易号</th>
+                  <th style="width: 154px;">订单号</th>
+                  <th style="width: 118px;">会员名称</th>
+                  <th style="width: 116px;">快递公司</th>
+                  <th style="width: 148px;">快递单号</th>
+                  <th style="width: 98px;">状态</th>
+                  <th style="width: 190px;">失败原因</th>
+                  <th style="width: 82px;">重试次数</th>
+                  <th style="width: 150px;">任务生成时间</th>
+                  <th style="width: 150px;">发送时间</th>
+                  <th style="width: 220px;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="taskBody"></tbody>
+            </table>
+          </div>
+          <div class="empty" id="emptyState">暂无符合条件的补发通知任务</div>
+
+          <div class="pagination">
+            <span id="pageTotal">共 0 条</span>
+            <button class="page-btn" id="prevPage">‹</button>
+            <span class="page-btn active">1</span>
+            <button class="page-btn" id="nextPage">›</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="drawer" id="detailDrawer" aria-label="任务详情示例">
+      <div class="drawer-head">
+        <span>任务详情</span>
+        <button class="btn text" id="closeDrawer">×</button>
+      </div>
+      <div class="drawer-body">
+        <div class="detail-block">
+          <div class="detail-title">基础信息</div>
+          <div class="kv"><span>店铺</span><strong id="detailShop">先马官方旗舰店</strong></div>
+          <div class="kv"><span>平台</span><span id="detailPlatform">淘宝/天猫</span></div>
+          <div class="kv"><span>交易号</span><span id="detailTrade">TB2607035571</span></div>
+          <div class="kv"><span>会员名称</span><span id="detailMember">moon_27</span></div>
+          <div class="kv"><span>唯一键</span><span>交易号 + 快递公司 + 快递单号</span></div>
+        </div>
+
+        <div class="detail-block">
+          <div class="detail-title">补发物流</div>
+          <div class="kv"><span>快递公司</span><span id="detailExpress">圆通速递</span></div>
+          <div class="kv"><span>快递单号</span><span id="detailExpressNo">YT738621905472</span></div>
+          <div class="kv"><span>来源</span><span>OMS 红色“补”标签对应物流</span></div>
+        </div>
+
+        <div class="detail-block">
+          <div class="detail-title">发送信息</div>
+          <div class="kv"><span>状态</span><span id="detailStatus"><span class="status failed">发送失败</span></span></div>
+          <div class="kv"><span>重试次数</span><span id="detailRetry">3/3</span></div>
+          <div class="kv"><span>失败原因</span><span id="detailReason">会员名称匹配多个会话</span></div>
+          <div class="kv" id="processedByRow"><span>处理人</span><span id="detailProcessedBy">-</span></div>
+          <div class="kv" id="processedAtRow"><span>处理时间</span><span id="detailProcessedAt">-</span></div>
+        </div>
+
+        <div class="detail-block">
+          <div class="detail-title">消息文案</div>
+          <div class="message-box" id="detailMessage">亲，这是给您补发的物流信息，圆通速递：YT738621905472，请注意查收哦</div>
+        </div>
+
+        <div class="btns">
+          <button class="btn primary" id="detailCopy">复制文案</button>
+          <button class="btn" id="detailDone">标记已处理</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="modal-mask" id="confirmMask" role="dialog" aria-modal="true" aria-label="确认标记已处理">
+      <div class="modal">
+        <div class="modal-head">
+          <span>确认标记已处理</span>
+          <button class="btn text" id="confirmClose">×</button>
+        </div>
+        <div class="modal-body">
+          确认将该任务标记为已处理吗？标记后该补发通知不会再被自动发送或重新生成。
+        </div>
+        <div class="modal-foot">
+          <button class="btn" id="confirmCancel">取消</button>
+          <button class="btn primary" id="confirmDone">确认标记</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const statusMeta = {
+      '待发送': { className: 'pending' },
+      '发送成功': { className: 'success' },
+      '发送失败': { className: 'failed' },
+      '已处理': { className: 'done' }
+    };
+
+    const platformMeta = {
+      '拼多多': 'red',
+      '淘宝/天猫': 'orange',
+      '京东': 'green'
+    };
+
+    const tasks = [
+      { id: 1, shop: '先马家居旗舰店', platform: '拼多多', tradeNo: 'PDD2607031088', orderNo: 'ORD2607031088', member: '陈**', express: '中通快递', expressNo: '782646218563', status: '发送成功', reason: '-', retry: '0/3', createdAt: '2026-07-03 10:12', sentAt: '2026-07-03 10:13' },
+      { id: 2, shop: '先马官方旗舰店', platform: '淘宝/天猫', tradeNo: 'TB2607035571', orderNo: 'ORD2607035571', member: 'moon_27', express: '圆通速递', expressNo: 'YT738621905472', status: '发送失败', reason: '会员名称匹配多个会话', retry: '3/3', createdAt: '2026-07-03 10:20', sentAt: '-' },
+      { id: 3, shop: '先马京东自营店', platform: '京东', tradeNo: 'JD2607039904', orderNo: 'ORD2607039904', member: '张**', express: '京东物流', expressNo: 'JDVA192836401', status: '待发送', reason: '-', retry: '1/3', createdAt: '2026-07-03 10:28', sentAt: '-' },
+      { id: 4, shop: '先马家居旗舰店', platform: '拼多多', tradeNo: 'PDD2607031136', orderNo: 'ORD2607031136', member: '小橙子', express: '韵达快递', expressNo: '430981226540', status: '待发送', reason: '-', retry: '0/3', createdAt: '2026-07-03 10:31', sentAt: '-' },
+      { id: 5, shop: '先马官方旗舰店', platform: '淘宝/天猫', tradeNo: 'TM2607034412', orderNo: 'ORD2607034412', member: '-', express: '申通快递', expressNo: 'STO9081726351', status: '发送失败', reason: '会员名称为空，无法兜底搜索', retry: '3/3', createdAt: '2026-07-03 10:34', sentAt: '-' },
+      { id: 6, shop: '先马京东自营店', platform: '京东', tradeNo: 'JD2607032217', orderNo: 'ORD2607032217', member: '刘**', express: '京东物流', expressNo: 'JDVA192836889', status: '已处理', reason: '账号登录失效', retry: '3/3', createdAt: '2026-07-03 09:46', sentAt: '-', processedBy: '梦蝶', processedAt: '2026-07-03 10:05' },
+      { id: 7, shop: '先马家居旗舰店', platform: '拼多多', tradeNo: 'PDD2607030921', orderNo: 'ORD2607030921', member: '林**', express: '极兔速递', expressNo: 'JT7390048219', status: '待发送', reason: '-', retry: '0/3', createdAt: '2026-07-03 09:30', sentAt: '-' },
+      { id: 8, shop: '先马官方旗舰店', platform: '淘宝/天猫', tradeNo: 'TM2607038826', orderNo: 'ORD2607038826', member: '王**', express: '顺丰速运', expressNo: 'SF1689207762', status: '发送成功', reason: '-', retry: '1/3', createdAt: '2026-07-03 09:12', sentAt: '2026-07-03 09:15' }
+    ];
+
+    let filteredTasks = [...tasks];
+    let currentTaskId = tasks[1].id;
+
+    const drawer = document.getElementById('detailDrawer');
+    const taskBody = document.getElementById('taskBody');
+    const emptyState = document.getElementById('emptyState');
+    const closeDrawer = document.getElementById('closeDrawer');
+    const confirmMask = document.getElementById('confirmMask');
+    let pendingDoneTaskId = null;
+    const shopFilter = document.getElementById('shop');
+    const tradeNoFilter = document.getElementById('tradeNo');
+    const orderNoFilter = document.getElementById('orderNo');
+    const expressNoFilter = document.getElementById('expressNo');
+    const statusFilter = document.getElementById('status');
+    const dateInputs = document.querySelectorAll('.date-range .input');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const calendarPopover = document.getElementById('calendarPopover');
+    let pickingDate = 'start';
+    let calendarBase = new Date(2026, 6, 1);
+
+    function messageOf(task) {
+      return `亲，这是给您补发的物流信息，${task.express}：${task.expressNo}，请注意查收哦`;
+    }
+
+    function statusTag(status) {
+      const meta = statusMeta[status] || statusMeta['待发送'];
+      return `<span class="status ${meta.className}">${status}</span>`;
+    }
+
+    function platformTag(platform) {
+      return `<span class="platform"><span class="dot ${platformMeta[platform] || ''}"></span>${platform}</span>`;
+    }
+
+    function toast(text) {
+      let node = document.querySelector('.toast');
+      if (!node) {
+        node = document.createElement('div');
+        node.className = 'toast';
+        document.body.appendChild(node);
+      }
+      node.textContent = text;
+      node.classList.add('show');
+      window.clearTimeout(node.timer);
+      node.timer = window.setTimeout(() => node.classList.remove('show'), 1800);
+    }
+
+    function nowText() {
+      const now = new Date();
+      const pad = (value) => String(value).padStart(2, '0');
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
+    function formatDate(date) {
+      const pad = (value) => String(value).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      const [year, month, day] = value.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function monthLabel(date) {
+      return `${date.getFullYear()} 年 ${date.getMonth() + 1} 月`;
+    }
+
+    function sameDate(a, b) {
+      if (!a || !b) return false;
+      return formatDate(a) === formatDate(b);
+    }
+
+    function inSelectedRange(date) {
+      const start = parseDate(startDateInput.value);
+      const end = parseDate(endDateInput.value);
+      if (!start || !end) return false;
+      return date >= start && date <= end;
+    }
+
+    function renderMonth(date, side) {
+      const first = new Date(date.getFullYear(), date.getMonth(), 1);
+      const start = new Date(first);
+      start.setDate(first.getDate() - first.getDay());
+      const days = [];
+      for (let index = 0; index < 42; index += 1) {
+        const day = new Date(start);
+        day.setDate(start.getDate() + index);
+        const muted = day.getMonth() !== date.getMonth() ? ' muted' : '';
+        const selected = sameDate(day, parseDate(startDateInput.value)) || sameDate(day, parseDate(endDateInput.value)) ? ' selected' : '';
+        const ranged = !selected && inSelectedRange(day) ? ' in-range' : '';
+        days.push(`<button class="day${muted}${selected}${ranged}" data-date="${formatDate(day)}"><span>${day.getDate()}</span></button>`);
+      }
+      return `
+        <div class="calendar-month">
+          <div class="calendar-head">
+            <button class="cal-nav" data-nav="${side === 'left' ? 'prev' : ''}">${side === 'left' ? '‹' : ''}</button>
+            <span>${monthLabel(date)}</span>
+            <button class="cal-nav" data-nav="${side === 'right' ? 'next' : ''}">${side === 'right' ? '›' : ''}</button>
+          </div>
+          <div class="calendar-week"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+          <div class="calendar-days">${days.join('')}</div>
+        </div>
+      `;
+    }
+
+    function renderCalendar() {
+      const nextMonth = new Date(calendarBase.getFullYear(), calendarBase.getMonth() + 1, 1);
+      calendarPopover.innerHTML = renderMonth(calendarBase, 'left') + renderMonth(nextMonth, 'right');
+    }
+
+    function openCalendar(target) {
+      pickingDate = target;
+      renderCalendar();
+      document.querySelector('.date-range').classList.add('active');
+      calendarPopover.classList.add('show');
+    }
+
+    function chooseDate(value) {
+      if (pickingDate === 'start') {
+        startDateInput.value = value;
+        if (!endDateInput.value || parseDate(startDateInput.value) > parseDate(endDateInput.value)) endDateInput.value = value;
+        pickingDate = 'end';
+      } else {
+        endDateInput.value = value;
+        if (!startDateInput.value || parseDate(endDateInput.value) < parseDate(startDateInput.value)) startDateInput.value = value;
+        calendarPopover.classList.remove('show');
+        document.querySelector('.date-range').classList.remove('active');
+        applyFilters({ notify: false });
+      }
+      renderCalendar();
+    }
+
+    function getActions(task) {
+      const actions = [`<a class="op js-detail" data-id="${task.id}" href="#">详情</a>`];
+      if (['发送失败', '已处理'].includes(task.status)) {
+        actions.push(`<a class="op js-copy" data-id="${task.id}" href="#">复制文案</a>`);
+      }
+      if (task.status === '发送失败') {
+        actions.push(`<a class="op warn js-done" data-id="${task.id}" href="#">标记已处理</a>`);
+      }
+      return `<div class="ops">${actions.join('')}</div>`;
+    }
+
+    function renderTable() {
+      taskBody.innerHTML = filteredTasks.map((task) => `
+        <tr>
+          <td>${task.shop}</td>
+          <td>${platformTag(task.platform)}</td>
+          <td>${task.tradeNo}</td>
+          <td>${task.orderNo}</td>
+          <td>${task.member}</td>
+          <td>${task.express}</td>
+          <td>${task.expressNo}</td>
+          <td>${statusTag(task.status)}</td>
+          <td>${task.reason}</td>
+          <td>${task.retry}</td>
+          <td>${task.createdAt}</td>
+          <td>${task.sentAt}</td>
+          <td class="td-ops">${getActions(task)}</td>
+        </tr>
+      `).join('');
+
+      emptyState.classList.toggle('show', filteredTasks.length === 0);
+      document.getElementById('pageTotal').textContent = `共 ${filteredTasks.length} 条`;
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const count = (status) => filteredTasks.filter((task) => task.status === status).length;
+      document.getElementById('sumTotal').textContent = filteredTasks.length;
+      document.getElementById('sumPending').textContent = count('待发送');
+      document.getElementById('sumSuccess').textContent = count('发送成功');
+      document.getElementById('sumFailed').textContent = count('发送失败');
+      document.getElementById('sumDone').textContent = count('已处理');
+    }
+
+    function getFilteredTasks() {
+      const shop = shopFilter.value.trim();
+      const tradeNo = tradeNoFilter.value.trim();
+      const orderNo = orderNoFilter.value.trim();
+      const expressNo = expressNoFilter.value.trim();
+      const status = statusFilter.value;
+      const start = dateInputs[0].value;
+      const end = dateInputs[1].value;
+
+      return tasks.filter((task) => {
+        const date = task.createdAt.slice(0, 10);
+        return (!shop || task.shop.includes(shop))
+          && (!tradeNo || task.tradeNo.includes(tradeNo))
+          && (!orderNo || task.orderNo.includes(orderNo))
+          && (!expressNo || task.expressNo.includes(expressNo))
+          && (status === '全部' || task.status === status)
+          && (!start || date >= start)
+          && (!end || date <= end);
+      });
+    }
+
+    function applyFilters(options = { notify: true }) {
+      filteredTasks = getFilteredTasks();
+      renderTable();
+      if (options.notify) toast(`已查询到 ${filteredTasks.length} 条任务`);
+    }
+
+    function resetFilters() {
+      shopFilter.value = '';
+      tradeNoFilter.value = '';
+      orderNoFilter.value = '';
+      expressNoFilter.value = '';
+      statusFilter.value = '全部';
+      dateInputs[0].value = '2026-07-03';
+      dateInputs[1].value = '2026-07-03';
+      filteredTasks = [...tasks];
+      renderTable();
+      toast('筛选条件已重置');
+    }
+
+    function openDetail(taskId) {
+      const task = tasks.find((item) => item.id === Number(taskId));
+      if (!task) return;
+      currentTaskId = task.id;
+      document.getElementById('detailShop').textContent = task.shop;
+      document.getElementById('detailPlatform').textContent = task.platform;
+      document.getElementById('detailTrade').textContent = task.tradeNo;
+      document.getElementById('detailMember').textContent = task.member;
+      document.getElementById('detailExpress').textContent = task.express;
+      document.getElementById('detailExpressNo').textContent = task.expressNo;
+      document.getElementById('detailStatus').innerHTML = statusTag(task.status);
+      document.getElementById('detailRetry').textContent = task.retry;
+      document.getElementById('detailReason').textContent = task.reason;
+      document.getElementById('detailProcessedBy').textContent = task.processedBy || '-';
+      document.getElementById('detailProcessedAt').textContent = task.processedAt || '-';
+      document.getElementById('processedByRow').style.display = task.status === '已处理' ? 'grid' : 'none';
+      document.getElementById('processedAtRow').style.display = task.status === '已处理' ? 'grid' : 'none';
+      document.getElementById('detailMessage').textContent = messageOf(task);
+      document.getElementById('detailDone').disabled = task.status !== '发送失败';
+      drawer.classList.add('open');
+    }
+
+    async function copyMessage(taskId) {
+      const task = tasks.find((item) => item.id === Number(taskId));
+      if (!task) return;
+      const text = messageOf(task);
+      try {
+        await navigator.clipboard.writeText(text);
+        toast('消息文案已复制');
+      } catch (error) {
+        toast(text);
+      }
+    }
+
+    function requestMarkDone(taskId) {
+      const task = tasks.find((item) => item.id === Number(taskId));
+      if (!task || task.status !== '发送失败') return;
+      pendingDoneTaskId = task.id;
+      confirmMask.classList.add('show');
+    }
+
+    function closeConfirm() {
+      pendingDoneTaskId = null;
+      confirmMask.classList.remove('show');
+    }
+
+    function markDone(taskId, options = { refreshDetail: false }) {
+      const task = tasks.find((item) => item.id === Number(taskId));
+      if (!task || task.status !== '发送失败') return;
+      task.status = '已处理';
+      task.reason = task.reason === '-' ? '客服已人工处理' : task.reason;
+      task.processedBy = '梦蝶';
+      task.processedAt = nowText();
+      applyFilters({ notify: false });
+      if (options.refreshDetail) openDetail(task.id);
+      closeConfirm();
+      toast('已标记为已处理');
+    }
+
+    function refreshStatus() {
+      const pendingTask = tasks.find((task) => task.status === '待发送');
+      if (pendingTask) {
+        pendingTask.status = '发送成功';
+        pendingTask.reason = '-';
+        pendingTask.sentAt = '2026-07-03 10:36';
+        pendingTask.retry = pendingTask.retry || '0/3';
+      }
+      applyFilters();
+      toast(pendingTask ? '已刷新，待发送任务已更新为发送成功' : '当前没有待发送任务');
+    }
+
+    function exportCsv() {
+      const header = ['店铺名称', '平台类型', '交易号', '订单号', '会员名称', '快递公司', '快递单号', '状态', '失败原因', '重试次数', '任务生成时间', '发送时间'];
+      const rows = filteredTasks.map((task) => [task.shop, task.platform, task.tradeNo, task.orderNo, task.member, task.express, task.expressNo, task.status, task.reason, task.retry, task.createdAt, task.sentAt]);
+      const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n');
+      const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = '补发通知任务列表.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      toast('已导出当前筛选列表');
+    }
+
+    document.getElementById('queryBtn').addEventListener('click', applyFilters);
+    document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    document.getElementById('refreshBtn')?.addEventListener('click', refreshStatus);
+    document.getElementById('exportBtn')?.addEventListener('click', exportCsv);
+    document.getElementById('prevPage').addEventListener('click', () => toast('当前为第 1 页'));
+    document.getElementById('nextPage').addEventListener('click', () => toast('原型仅展示第 1 页数据'));
+    closeDrawer.addEventListener('click', () => drawer.classList.remove('open'));
+
+    taskBody.addEventListener('click', (event) => {
+      const target = event.target.closest('a');
+      if (!target) return;
+      event.preventDefault();
+      const id = target.dataset.id;
+      if (target.classList.contains('js-detail')) openDetail(id);
+      if (target.classList.contains('js-copy')) copyMessage(id);
+      if (target.classList.contains('js-done')) requestMarkDone(id);
+    });
+
+    document.getElementById('detailCopy').addEventListener('click', () => copyMessage(currentTaskId));
+    document.getElementById('detailDone').addEventListener('click', () => requestMarkDone(currentTaskId));
+    document.getElementById('confirmClose').addEventListener('click', closeConfirm);
+    document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+    document.getElementById('confirmDone').addEventListener('click', () => {
+      const shouldRefreshDetail = drawer.classList.contains('open') && currentTaskId === pendingDoneTaskId;
+      markDone(pendingDoneTaskId, { refreshDetail: shouldRefreshDetail });
+    });
+    confirmMask.addEventListener('click', (event) => {
+      if (event.target === confirmMask) closeConfirm();
+    });
+    startDateInput.addEventListener('click', () => openCalendar('start'));
+    endDateInput.addEventListener('click', () => openCalendar('end'));
+    document.getElementById('clearDate').addEventListener('click', (event) => {
+      event.stopPropagation();
+      startDateInput.value = '';
+      endDateInput.value = '';
+      calendarPopover.classList.remove('show');
+      document.querySelector('.date-range').classList.remove('active');
+      applyFilters({ notify: false });
+    });
+    calendarPopover.addEventListener('click', (event) => {
+      const nav = event.target.closest('.cal-nav')?.dataset.nav;
+      if (nav === 'prev') {
+        calendarBase = new Date(calendarBase.getFullYear(), calendarBase.getMonth() - 1, 1);
+        renderCalendar();
+        return;
+      }
+      if (nav === 'next') {
+        calendarBase = new Date(calendarBase.getFullYear(), calendarBase.getMonth() + 1, 1);
+        renderCalendar();
+        return;
+      }
+      const day = event.target.closest('.day');
+      if (day) chooseDate(day.dataset.date);
+    });
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.date-range')) {
+        calendarPopover.classList.remove('show');
+        document.querySelector('.date-range').classList.remove('active');
+      }
+    });
+
+    renderCalendar();
+    renderTable();
+  </script>
+</body>
+</html>
