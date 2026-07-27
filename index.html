@@ -34,9 +34,7 @@
 
   /* ===== 顶부 ===== */
   .header {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: 52px 40px 40px;
+    padding: 52px 10% 40px;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -93,6 +91,44 @@
   }
   .dot-green { background: var(--green); box-shadow: 0 0 7px var(--green); }
   .dot-dim   { background: var(--muted-soft); }
+
+  /* ===== 筛选栏 ===== */
+  .filter-bar {
+    padding: 0 10%;
+    margin: 0 0 26px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .filter-btn:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,.2);
+    background: var(--surface-hover);
+  }
+  .filter-btn.active {
+    color: #c7d2fe;
+    border-color: rgba(99,102,241,.55);
+    background: rgba(99,102,241,.18);
+  }
+  .filter-count {
+    font-size: 11.5px;
+    font-weight: 700;
+    opacity: .7;
+  }
 
   /* ===== 分隔行 ===== */
   .section-row {
@@ -226,6 +262,7 @@
     white-space: nowrap;
   }
   .type-prd    { color: #a5b4fc; background: rgba(99,102,241,.14); }
+  .type-proto  { color: #a5b4fc; background: rgba(99,102,241,.14); }
   .type-doc    { color: #fbbf24; background: rgba(251,191,36,.13); }
   .type-plan   { color: #34d399; background: rgba(52,211,153,.13); }
 
@@ -290,7 +327,8 @@
     display: flex;
     gap: 6px;
     align-items: center;
-    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
   .act-btn {
     display: inline-flex;
@@ -541,6 +579,13 @@
   </div>
 </div>
 
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-dim="all" type="button">全部</button>
+  <button class="filter-btn" data-dim="proto" type="button">🔧 原型</button>
+  <button class="filter-btn" data-dim="plan" type="button">📋 方案</button>
+  <button class="filter-btn" data-dim="train" type="button">📖 培训</button>
+</div>
+
 <div class="section-row">
   <span class="section-label">进行中</span>
   <div class="section-line"></div>
@@ -585,8 +630,6 @@
         <div class="card-footer">
           <span class="card-date">更新 2026-07-08</span>
           <div class="card-actions">
-            <a class="act-btn" href="./ai-cli-panel/v2/prototype.html" onclick="event.stopPropagation()">原型</a>
-            <a class="act-btn" href="./ai-cli-panel/v2/prd.html" onclick="event.stopPropagation()">PRD</a>
             <a class="act-btn primary" href="./ai-cli-panel/v2/" onclick="event.stopPropagation()">查看 →</a>
           </div>
         </div>
@@ -665,8 +708,6 @@
         <div class="card-footer">
           <span class="card-date">更新 2026-06-24</span>
           <div class="card-actions">
-            <a class="act-btn" href="./pdd/v1/prototype.html" onclick="event.stopPropagation()">原型</a>
-            <a class="act-btn" href="./pdd/v1/prd.html" onclick="event.stopPropagation()">PRD</a>
             <a class="act-btn primary" href="./pdd/v1/" onclick="event.stopPropagation()">查看 →</a>
           </div>
         </div>
@@ -712,8 +753,6 @@
         <div class="card-footer">
           <span class="card-date">更新 2026-07-22</span>
           <div class="card-actions">
-            <a class="act-btn" href="./reship-notification-agent/#prototype" onclick="event.stopPropagation()">原型</a>
-            <a class="act-btn" href="./reship-notification-agent/#prd" onclick="event.stopPropagation()">PRD</a>
             <a class="act-btn primary" href="./reship-notification-agent/" onclick="event.stopPropagation()">查看 →</a>
           </div>
         </div>
@@ -790,8 +829,6 @@
         <div class="card-footer">
           <span class="card-date">更新 2026-07-08</span>
           <div class="card-actions">
-            <a class="act-btn" href="./xianma-ai-canvas/v1/prototype.html" onclick="event.stopPropagation()">原型</a>
-            <a class="act-btn" href="./xianma-ai-canvas/v1/prd.html" onclick="event.stopPropagation()">PRD</a>
             <a class="act-btn primary" href="./xianma-ai-canvas/v1/" onclick="event.stopPropagation()">查看 →</a>
           </div>
         </div>
@@ -915,6 +952,43 @@
   const days = ["周日","周一","周二","周三","周四","周五","周六"];
   document.getElementById("todayDate").textContent =
     d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日 " + days[d.getDay()];
+
+  // ===== 维度筛选：靠卡片类型标签文字识别，不依赖逐张标注 =====
+  function cardDim(card) {
+    const tag = card.querySelector(".type-tag");
+    const t = tag ? tag.textContent : "";
+    if (t.includes("原型")) return "proto";
+    if (t.includes("培训")) return "train";
+    return "plan"; // 规划 / 方案 / 业务沟通 归入方案
+  }
+  const allCards = [...document.querySelectorAll(".card")];
+  allCards.forEach(c => c.dataset.dim = cardDim(c));
+
+  function applyFilter(dim) {
+    allCards.forEach(c => {
+      c.style.display = (dim === "all" || c.dataset.dim === dim) ? "" : "none";
+    });
+    // 空的项目分组隐藏
+    document.querySelectorAll(".project-group").forEach(g => {
+      const visible = [...g.querySelectorAll(".card")].some(c => c.style.display !== "none");
+      g.style.display = visible ? "" : "none";
+    });
+    // 空的分区（section-row + 其后的 grid）隐藏
+    document.querySelectorAll(".grid").forEach(grid => {
+      const visible = [...grid.querySelectorAll(".card")].some(c => c.style.display !== "none");
+      grid.style.display = visible ? "" : "none";
+      const row = grid.previousElementSibling;
+      if (row && row.classList.contains("section-row")) row.style.display = visible ? "" : "none";
+    });
+  }
+
+  document.getElementById("filterBar").addEventListener("click", e => {
+    const btn = e.target.closest(".filter-btn");
+    if (!btn) return;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFilter(btn.dataset.dim);
+  });
 
   const recordKey = "mengdie-workbench-records";
   const recordLauncher = document.getElementById("recordLauncher");
