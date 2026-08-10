@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>抖音退款 Agent 规则确认板 V1.0</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --brand: #d9353f;
+      --brand-soft: #fff1f2;
+      --ink: #202124;
+      --muted: #687076;
+      --line: #dfe3e6;
+      --surface: #ffffff;
+      --surface-alt: #f6f7f8;
+      --auto: #16794b;
+      --auto-soft: #e9f7ef;
+      --wait: #996300;
+      --wait-soft: #fff5d9;
+      --manual: #b4232d;
+      --manual-soft: #fdecef;
+      --hold: #5f6670;
+      --hold-soft: #eef0f2;
+      --info: #2463a6;
+      --info-soft: #eaf3fc;
+      --shadow: 0 8px 24px rgba(23, 29, 33, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--surface-alt);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+      letter-spacing: 0;
+    }
+
+    button { font: inherit; }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 24px auto 40px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 24px 28px 20px;
+      border-top: 5px solid var(--brand);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 1.3;
+      font-weight: 600;
+    }
+
+    .header p { margin: 0; color: var(--muted); }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 30px;
+      padding: 5px 10px;
+      color: var(--manual);
+      background: var(--manual-soft);
+      border-radius: 6px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--manual);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tab,
+    .print-button {
+      min-height: 36px;
+      padding: 7px 13px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--surface);
+    }
+
+    .tab:hover,
+    .print-button:hover { border-color: #9aa0a6; }
+
+    .tab:focus-visible,
+    .print-button:focus-visible {
+      outline: 3px solid rgba(217, 53, 63, 0.22);
+      outline-offset: 2px;
+    }
+
+    .content { padding: 24px 28px 30px; }
+    .panel[hidden] { display: none; }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      color: var(--muted);
+    }
+
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    .dot-auto { background: var(--auto); }
+    .dot-wait { background: var(--wait); }
+    .dot-manual { background: var(--manual); }
+    .dot-hold { background: var(--hold); }
+
+    .priority {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+
+    .priority-item {
+      min-width: 0;
+      padding: 14px 15px;
+      border-right: 1px solid var(--line);
+      background: var(--surface-alt);
+    }
+
+    .priority-item:last-child { border-right: 0; }
+    .priority-item strong { display: block; margin-bottom: 2px; }
+    .priority-item span { color: var(--muted); }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .flow-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .flow-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .flow-head h2 { margin: 0; font-size: 17px; font-weight: 600; }
+
+    .number {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      margin-right: 8px;
+      border-radius: 6px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .flow-body { padding: 4px 16px 10px; }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: minmax(108px, 0.8fr) 22px minmax(0, 1.25fr);
+      align-items: center;
+      gap: 8px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .flow-row:last-child { border-bottom: 0; }
+    .condition { color: var(--muted); }
+    .arrow { text-align: center; color: var(--muted); font-size: 18px; }
+
+    .action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .action::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .auto { color: var(--auto); background: var(--auto-soft); }
+    .wait { color: var(--wait); background: var(--wait-soft); }
+    .manual { color: var(--manual); background: var(--manual-soft); }
+    .hold { color: var(--hold); background: var(--hold-soft); }
+    .info { color: var(--info); background: var(--info-soft); }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 14px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .section-title span { color: var(--muted); font-size: 14px; font-weight: 400; }
+
+    .rule-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .rule-table th,
+    .rule-table td {
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      word-break: break-word;
+    }
+
+    .rule-table th { color: var(--muted); font-weight: 600; background: var(--surface-alt); }
+    .rule-table th:nth-child(1) { width: 19%; }
+    .rule-table th:nth-child(2) { width: 57%; }
+    .rule-table th:nth-child(3) { width: 24%; }
+
+    .manual-label {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 5px;
+      color: var(--manual);
+      background: var(--manual-soft);
+      font-weight: 600;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .time-block {
+      position: relative;
+      min-height: 132px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .time-block::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--brand);
+    }
+
+    .time-value { margin: 2px 0 4px; font-size: 27px; line-height: 1.2; font-weight: 700; }
+    .time-block strong { display: block; }
+    .time-block p { margin: 4px 0 0; color: var(--muted); }
+
+    .thresholds {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .threshold {
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .threshold-value {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--brand);
+    }
+
+    .threshold p { margin: 2px 0 0; color: var(--muted); }
+
+    .message-box {
+      padding: 18px 20px;
+      border-left: 4px solid var(--brand);
+      background: var(--surface-alt);
+    }
+
+    .message-box strong { display: block; margin-bottom: 8px; }
+    .message-box p { margin: 0; }
+
+    .supplement {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .decision-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .decision-step {
+      min-width: 0;
+      padding: 14px 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-alt);
+    }
+
+    .decision-step strong { display: block; margin-bottom: 5px; }
+    .decision-step p { margin: 0; color: var(--muted); }
+
+    .evidence-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .evidence {
+      margin: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .evidence figcaption {
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .evidence img {
+      display: block;
+      width: auto;
+      max-width: min(100%, 900px);
+      height: auto;
+      margin: 0 auto;
+      border: 1px solid var(--line);
+    }
+
+    .notice-facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .notice-fact {
+      min-width: 0;
+      padding: 14px 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-alt);
+    }
+
+    .notice-fact strong { display: block; margin-bottom: 3px; }
+    .notice-fact span { color: var(--muted); word-break: break-word; }
+
+    .notice-rule {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .notice-rule strong { display: block; margin-bottom: 3px; }
+    .notice-rule span { color: var(--muted); }
+
+    .notice-scope {
+      margin-bottom: 18px;
+      padding: 13px 15px;
+      border-left: 4px solid var(--info);
+      background: var(--info-soft);
+    }
+
+    .notice-scope strong { display: block; margin-bottom: 3px; }
+    .notice-scope span { color: var(--muted); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .contact {
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      text-align: center;
+      background: var(--surface);
+      white-space: nowrap;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--surface-alt);
+      font-size: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .page { width: 100%; margin: 0; border-radius: 0; box-shadow: none; }
+      .header, .toolbar, .content, .footer { padding-left: 18px; padding-right: 18px; }
+      .header { flex-direction: column; gap: 12px; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .flow-grid, .timeline, .thresholds, .notice-facts, .decision-strip { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .priority { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .priority-item:nth-child(2) { border-right: 0; }
+      .priority-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .rule-table { min-width: 650px; }
+      .table-wrap { overflow-x: auto; }
+      .footer { flex-direction: column; }
+    }
+
+    @media (max-width: 460px) {
+      .header h1 { font-size: 21px; }
+      .tabs { display: grid; width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tab { padding-left: 8px; padding-right: 8px; }
+      .print-button { width: 100%; }
+      .priority { grid-template-columns: 1fr; }
+      .priority-item { border-right: 0; border-bottom: 1px solid var(--line); }
+      .priority-item:last-child { border-bottom: 0; }
+      .flow-row { grid-template-columns: 1fr; gap: 5px; }
+      .arrow { text-align: left; transform: rotate(90deg); transform-origin: center; width: 18px; }
+      .threshold { grid-template-columns: 64px minmax(0, 1fr); }
+    }
+
+    @media print {
+      @page { size: A4; margin: 14mm 12mm; }
+      body { background: #fff; }
+      .page { width: 100%; margin: 0; box-shadow: none; }
+      .toolbar { display: none; }
+      .panel[hidden] { display: block; }
+      .panel + .panel { margin-top: 22px; padding-top: 18px; border-top: 2px solid #202124; }
+      #timing { break-before: page; }
+      .flow-card, .time-block, .threshold, .decision-step, .evidence { break-inside: avoid; }
+      .rule-table th, .rule-table td { padding: 9px 8px; }
+      .rule-table tr { break-inside: avoid; }
+      .notice-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .contact-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .timeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .thresholds { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .footer { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <h1>抖音退款 Agent 规则确认板</h1>
+        <p>规则基线：抖音退款 SOP 2.0 · V1.0 · 本次补充更新 2026-08-10</p>
+      </div>
+      <div class="status">已业务确认</div>
+    </header>
+
+    <div class="toolbar">
+      <div class="tabs" role="tablist" aria-label="规则视图">
+        <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="overview" id="tab-overview">流程总览</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="manual" id="tab-manual">人工兜底</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="notification" id="tab-notification">通知配置</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="timing" id="tab-timing">时效与话术</button>
+      </div>
+      <button class="print-button" type="button" id="print-page">打印 / 导出 PDF</button>
+    </div>
+
+    <div class="content">
+      <section class="panel" id="overview" role="tabpanel" aria-labelledby="tab-overview">
+        <div class="legend" aria-label="状态图例">
+          <span class="legend-item"><span class="legend-dot dot-auto"></span>自动处理</span>
+          <span class="legend-item"><span class="legend-dot dot-wait"></span>等待复查</span>
+          <span class="legend-item"><span class="legend-dot dot-manual"></span>转人工</span>
+          <span class="legend-item"><span class="legend-dot dot-hold"></span>暂不处理</span>
+        </div>
+
+        <div class="priority" aria-label="全局优先规则">
+          <div class="priority-item"><strong>金额 ≥ 500元</strong><span>转管理人员</span></div>
+          <div class="priority-item"><strong>部分退款 / 部分换货</strong><span>统一转人工</span></div>
+          <div class="priority-item"><strong>聊天记录判断</strong><span>V1不识别，转人工</span></div>
+          <div class="priority-item"><strong>结果不明确</strong><span>不猜测，转人工</span></div>
+        </div>
+
+        <div class="flow-grid">
+          <article class="flow-card">
+            <div class="flow-head"><h2><span class="number">1</span>未发货退款</h2><span class="action auto">自动路径</span></div>
+            <div class="flow-body">
+              <div class="flow-row"><span class="condition">＜500元，无需核验OMS</span><span class="arrow">→</span><span class="action auto">直接退款</span></div>
+              <div class="flow-row"><span class="condition">需核验，OMS未配货</span><span class="arrow">→</span><span class="action auto">直接退款</span></div>
+              <div class="flow-row"><span class="condition">需核验，OMS全部配货</span><span class="arrow">→</span><span class="action info">先取消配货</span></div>
+              <div class="flow-row"><span class="condition">取消配货成功</span><span class="arrow">→</span><span class="action auto">处理退款</span></div>
+              <div class="flow-row"><span class="condition">取消失败 / 结果不明</span><span class="arrow">→</span><span class="action manual">转人工，不退款</span></div>
+              <div class="flow-row"><span class="condition">金额 ≥ 500元</span><span class="arrow">→</span><span class="action manual">转管理人员</span></div>
+              <div class="flow-row"><span class="condition">退款页面</span><span class="arrow">→</span><span class="action info">显示成功后完成</span></div>
+            </div>
+          </article>
+
+          <article class="flow-card">
+            <div class="flow-head"><h2><span class="number">2</span>已发货退款</h2><span class="action wait">状态驱动</span></div>
+            <div class="flow-body">
+              <div class="flow-row"><span class="condition">OMS低值品</span><span class="arrow">→</span><span class="action auto">弃件并立即退款</span></div>
+              <div class="flow-row"><span class="condition">普通订单</span><span class="arrow">→</span><span class="action info">创建TMS拦截工单</span></div>
+              <div class="flow-row"><span class="condition">工单已完成</span><span class="arrow">→</span><span class="action auto">执行退款</span></div>
+              <div class="flow-row"><span class="condition">待处理且 ＞12h</span><span class="arrow">→</span><span class="action wait">等待复查</span></div>
+              <div class="flow-row"><span class="condition">待处理且 ≤12h</span><span class="arrow">→</span><span class="action manual">转人工</span></div>
+              <div class="flow-row"><span class="condition">拒收 / 已签收</span><span class="arrow">→</span><span class="action manual">转人工</span></div>
+            </div>
+          </article>
+
+          <article class="flow-card">
+            <div class="flow-head"><h2><span class="number">3</span>退货退款</h2><span class="action auto">物流判断</span></div>
+            <div class="flow-body">
+              <div class="flow-row"><span class="condition">发往指定地址</span><span class="arrow">→</span><span class="action auto">直接退款</span></div>
+              <div class="flow-row"><span class="condition">物流异常且 ＞3天</span><span class="arrow">→</span><span class="action hold">暂不处理，继续复查</span></div>
+              <div class="flow-row"><span class="condition">物流异常且 ≤3天</span><span class="arrow">→</span><span class="action manual">拒绝退款并留言</span></div>
+              <div class="flow-row"><span class="condition">物流无法判断</span><span class="arrow">→</span><span class="action manual">转人工</span></div>
+            </div>
+          </article>
+
+          <article class="flow-card">
+            <div class="flow-head"><h2><span class="number">4</span>换货</h2><span class="action info">OMS补发</span></div>
+            <div class="flow-body">
+              <div class="flow-row"><span class="condition">发往指定地址</span><span class="arrow">→</span><span class="action auto">创建OMS补发单</span></div>
+              <div class="flow-row"><span class="condition">生成补发单号</span><span class="arrow">→</span><span class="action auto">Agent任务完成</span></div>
+              <div class="flow-row"><span class="condition">信息缺失 / 冲突</span><span class="arrow">→</span><span class="action manual">转人工</span></div>
+              <div class="flow-row"><span class="condition">物流异常</span><span class="arrow">→</span><span class="action manual">转人工</span></div>
+              <div class="flow-row"><span class="condition">创建结果不明确</span><span class="arrow">→</span><span class="action manual">转人工</span></div>
+            </div>
+          </article>
+        </div>
+
+        <section class="supplement" aria-labelledby="oms-supplement-title">
+          <h2 class="section-title" id="oms-supplement-title">未发货仅退款 · OMS配货状态补充 <span>客服补充，2026-08-10</span></h2>
+          <div class="decision-strip">
+            <div class="decision-step"><strong>OMS显示“未配货”</strong><p>直接处理退款。</p></div>
+            <div class="decision-step"><strong>OMS显示“全部配货”</strong><p>先取消配货；明确取消成功后，再处理退款。</p></div>
+            <div class="decision-step"><strong>取消失败或状态不明</strong><p>停止自动操作，转人工，不执行退款。</p></div>
+          </div>
+          <div class="evidence-list" aria-label="OMS操作截图">
+            <figure class="evidence">
+              <figcaption>OMS：未配货状态示例</figcaption>
+              <img src="assets/抖音退款Agent/OMS未发货仅退款-未配货状态.png" alt="OMS订单详情显示配货状态为未配货">
+            </figure>
+            <figure class="evidence">
+              <figcaption>OMS：全部配货及取消入口示例</figcaption>
+              <img src="assets/抖音退款Agent/OMS未发货仅退款-全部配货及取消入口.png" alt="OMS订单详情显示全部配货及取消配货操作入口">
+            </figure>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel" id="manual" role="tabpanel" aria-labelledby="tab-manual" hidden>
+        <h2 class="section-title">人工兜底清单 <span>命中任一项即停止自动操作</span></h2>
+        <div class="table-wrap">
+          <table class="rule-table">
+            <thead><tr><th>类别</th><th>触发条件</th><th>Agent动作</th></tr></thead>
+            <tbody>
+              <tr><td>金额风险</td><td>本次退款金额 ≥ 500元</td><td><span class="manual-label">转管理人员</span></td></tr>
+              <tr><td>非标准售后</td><td>部分商品、部分数量、部分金额；补寄或维修</td><td><span class="manual-label">转人工</span></td></tr>
+              <tr><td>纠纷订单</td><td>平台介入、仲裁待协商、仲裁待举证</td><td><span class="manual-label">转人工</span></td></tr>
+              <tr><td>聊天判断</td><td>需要识别人工协商记录、买家态度或协商结果</td><td><span class="manual-label">转人工</span></td></tr>
+              <tr><td>取消配货</td><td>取消失败、结果未知、OMS显示其他配货状态或状态无法明确判断</td><td><span class="manual-label">转人工，不退款</span></td></tr>
+              <tr><td>快递回复</td><td>拒收、已签收或需要理解快递具体回复</td><td><span class="manual-label">转人工</span></td></tr>
+              <tr><td>物流信息</td><td>单号无法查询、信息缺失、结果冲突或无法明确判断</td><td><span class="manual-label">转人工</span></td></tr>
+              <tr><td>换货异常</td><td>退回物流异常，或商品、数量、地址信息不完整</td><td><span class="manual-label">转人工</span></td></tr>
+              <tr><td>系统异常</td><td>退款/补发失败、无结果、登录失效、页面或字段异常</td><td><span class="manual-label">停止并转人工</span></td></tr>
+              <tr><td>并发操作</td><td>检测到人工与Agent可能同时处理同一售后单</td><td><span class="manual-label">停止并转人工</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="notification" role="tabpanel" aria-labelledby="tab-notification" hidden>
+        <h2 class="section-title">通知配置 <span>转人工和系统异常触发</span></h2>
+        <div class="notice-facts">
+          <div class="notice-fact"><strong>通知群</strong><span>天猫抖音退款Agent通知群</span></div>
+          <div class="notice-fact"><strong>钉钉群号</strong><span>189925002005</span></div>
+          <div class="notice-fact"><strong>成功订单</strong><span>自动处理成功不通知</span></div>
+        </div>
+        <div class="notice-scope">
+          <strong>首批运行店铺(3家)</strong>
+          <span>Panapopo护肤旗舰店、Panapopo官方旗舰店、Panapopo陆吾个人护理专卖店</span>
+        </div>
+        <div class="notice-rule">
+          <strong>固定 @ 10位指定人员</strong>
+          <span>每次通知均逐一@以下人员，不使用“@所有人”，群内其他成员不@。</span>
+        </div>
+        <div class="contact-grid" aria-label="固定通知人员">
+          <div class="contact">张欣(子宁)</div>
+          <div class="contact">易嘉豪(狄云)</div>
+          <div class="contact">何紫辉(婉安)</div>
+          <div class="contact">陈姣群(梨花)</div>
+          <div class="contact">蔡妍(今夏)</div>
+          <div class="contact">彭心雨(听竹)</div>
+          <div class="contact">彭玉洁(青顾)</div>
+          <div class="contact">曾昶(霜寒)</div>
+          <div class="contact">刘敏(秦桑)</div>
+          <div class="contact">崔志文(行云)</div>
+        </div>
+      </section>
+
+      <section class="panel" id="timing" role="tabpanel" aria-labelledby="tab-timing" hidden>
+        <h2 class="section-title">处理时效 <span>全部从买家发起本次售后申请时开始计算</span></h2>
+        <div class="timeline">
+          <div class="time-block"><strong>未发货退款</strong><div class="time-value">24小时</div><p>完成退款处理</p></div>
+          <div class="time-block"><strong>已发货退款</strong><div class="time-value">33小时</div><p>完成拦截及退款处理</p></div>
+          <div class="time-block"><strong>退货退款 / 换货</strong><div class="time-value">7天</div><p>完成退款或创建补发单</p></div>
+        </div>
+
+        <div class="thresholds">
+          <div class="threshold"><div class="threshold-value">≤12h</div><div><strong>即将超时</strong><p>拦截工单仍待处理时转人工</p></div></div>
+          <div class="threshold"><div class="threshold-value">≤3天</div><div><strong>退货物流异常</strong><p>拒绝退款并给买家留言</p></div></div>
+        </div>
+
+        <div class="message-box">
+          <strong>退货物流异常留言</strong>
+          <p>亲，我这边查到您填写的退货物流未发往或未签收至商家指定退货地址，因此本次退款申请暂时无法通过。辛苦您核实退货地址及物流信息，如有异常请联系发件快递确认哦～</p>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <span>首批店铺：Panapopo护肤旗舰店 · Panapopo官方旗舰店 · Panapopo陆吾个人护理专卖店</span>
+      <span>确认方式：无异议回复“确认”；有异议请注明规则及修改意见</span>
+    </footer>
+  </main>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+    const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const panelId = tab.getAttribute('aria-controls');
+        tabs.forEach((item) => item.setAttribute('aria-selected', String(item === tab)));
+        panels.forEach((panel) => { panel.hidden = panel.id !== panelId; });
+      });
+    });
+
+    document.getElementById('print-page').addEventListener('click', () => window.print());
+  </script>
+</body>
+</html>

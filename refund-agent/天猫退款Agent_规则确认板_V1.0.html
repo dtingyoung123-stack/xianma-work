@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>天猫退款 Agent 规则确认板 V1.0</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --brand: #d9353f;
+      --brand-soft: #fff1f2;
+      --ink: #202124;
+      --muted: #687076;
+      --line: #dfe3e6;
+      --surface: #ffffff;
+      --surface-alt: #f6f7f8;
+      --auto: #16794b;
+      --auto-soft: #e9f7ef;
+      --oms: #2463a6;
+      --oms-soft: #eaf3fc;
+      --tms: #0f766e;
+      --wait: #996300;
+      --wait-soft: #fff5d9;
+      --manual: #b4232d;
+      --manual-soft: #fdecef;
+      --neutral: #5f6670;
+      --neutral-soft: #eef0f2;
+      --shadow: 0 8px 24px rgba(23, 29, 33, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--surface-alt);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.58;
+      letter-spacing: 0;
+    }
+
+    button { font: inherit; }
+
+    .page {
+      width: min(90vw, 1400px);
+      margin: 24px auto 40px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 24px 28px 20px;
+      border-top: 5px solid var(--brand);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header h1 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      line-height: 1.3;
+      font-weight: 600;
+    }
+
+    .header p { margin: 0; color: var(--muted); }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 30px;
+      padding: 5px 10px;
+      color: var(--manual);
+      background: var(--manual-soft);
+      border-radius: 6px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--manual);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tab,
+    .print-button {
+      min-height: 36px;
+      padding: 7px 13px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--surface);
+    }
+
+    .tab:hover,
+    .print-button:hover { border-color: #9aa0a6; }
+
+    .tab:focus-visible,
+    .print-button:focus-visible {
+      outline: 3px solid rgba(217, 53, 63, 0.22);
+      outline-offset: 2px;
+    }
+
+    .content { max-width: 1100px; margin: 0 auto; padding: 24px 28px 30px; }
+    .panel[hidden] { display: none; }
+
+    .risk-banner {
+      margin-bottom: 20px;
+      padding: 18px 20px;
+      border-left: 5px solid var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .risk-banner strong { display: block; margin-bottom: 5px; font-size: 17px; }
+    .risk-banner p { margin: 0; }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      color: var(--muted);
+    }
+
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    .dot-auto { background: var(--auto); }
+    .dot-oms { background: var(--oms); }
+    .dot-tms { background: var(--tms); }
+    .dot-wait { background: var(--wait); }
+    .dot-manual { background: var(--manual); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .summary-item {
+      min-width: 0;
+      padding: 14px 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .summary-item span { display: block; color: var(--muted); }
+    .summary-item strong { display: block; margin-top: 2px; font-size: 18px; }
+
+    .priority {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .priority-item {
+      min-width: 0;
+      padding: 14px 15px;
+      border-right: 1px solid var(--line);
+      background: var(--surface-alt);
+    }
+
+    .priority-item:last-child { border-right: 0; }
+    .priority-item strong { display: block; margin-bottom: 2px; }
+    .priority-item span { color: var(--muted); }
+
+    .section-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 14px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .section-title span { color: var(--muted); font-size: 14px; font-weight: 400; }
+
+    .flow {
+      border-top: 1px solid var(--line);
+      margin-bottom: 24px;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 42px minmax(150px, 0.8fr) 24px minmax(0, 1.5fr);
+      gap: 10px;
+      align-items: center;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .step-number {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      color: var(--brand);
+      background: var(--brand-soft);
+      font-weight: 700;
+    }
+
+    .step-condition { color: var(--muted); }
+    .arrow { color: var(--muted); font-size: 18px; text-align: center; }
+
+    .action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      max-width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .action::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .auto { color: var(--auto); background: var(--auto-soft); }
+    .oms { color: var(--oms); background: var(--oms-soft); }
+    .wait { color: var(--wait); background: var(--wait-soft); }
+    .manual { color: var(--manual); background: var(--manual-soft); }
+    .neutral { color: var(--neutral); background: var(--neutral-soft); }
+
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .rule-block {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .rule-block h3 {
+      margin: 0;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-alt);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .rule-block ul { margin: 0; padding: 12px 17px 14px 34px; }
+    .rule-block li + li { margin-top: 7px; }
+
+    .table-wrap { overflow-x: auto; }
+
+    .rule-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .rule-table th,
+    .rule-table td {
+      padding: 11px 10px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      word-break: break-word;
+    }
+
+    .rule-table th { color: var(--muted); font-weight: 600; background: var(--surface-alt); }
+    .rule-table th:nth-child(1) { width: 20%; }
+    .rule-table th:nth-child(2) { width: 56%; }
+    .rule-table th:nth-child(3) { width: 24%; }
+
+    .label {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-weight: 600;
+    }
+
+    .label-auto { color: var(--auto); background: var(--auto-soft); }
+    .label-oms { color: var(--oms); background: var(--oms-soft); }
+    .label-manual { color: var(--manual); background: var(--manual-soft); }
+    .label-wait { color: var(--wait); background: var(--wait-soft); }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .time-item {
+      min-height: 126px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--brand);
+      border-radius: 8px;
+    }
+
+    .time-item strong { display: block; }
+    .time-value { margin: 2px 0 4px; font-size: 24px; line-height: 1.25; font-weight: 700; }
+    .time-item p { margin: 0; color: var(--muted); }
+
+    .store-table th:nth-child(1) { width: 46%; }
+    .store-table th:nth-child(2),
+    .store-table th:nth-child(3) { width: 27%; text-align: center; }
+    .store-table td:nth-child(2),
+    .store-table td:nth-child(3) { text-align: center; }
+    .yes { color: var(--auto); font-weight: 700; }
+    .no { color: var(--muted); }
+
+    .message-box {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 4px solid var(--brand);
+      background: var(--surface-alt);
+    }
+
+    .message-box strong { display: block; margin-bottom: 5px; }
+    .message-box p { margin: 0; }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--surface-alt);
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .priority { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .priority-item:nth-child(2) { border-right: 0; }
+      .priority-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .time-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 700px) {
+      .page { width: 100%; margin: 0; border-radius: 0; box-shadow: none; }
+      .header, .toolbar, .content, .footer { padding-left: 18px; padding-right: 18px; }
+      .header { flex-direction: column; gap: 12px; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .rule-grid { grid-template-columns: 1fr; }
+      .flow-step { grid-template-columns: 36px minmax(0, 1fr); align-items: start; }
+      .flow-step .arrow { display: none; }
+      .flow-step .action { grid-column: 2; }
+      .rule-table { min-width: 650px; }
+      .store-table { min-width: 520px; }
+      .footer { flex-direction: column; }
+    }
+
+    @media (max-width: 460px) {
+      .header h1 { font-size: 21px; }
+      .summary-grid, .priority, .time-grid { grid-template-columns: 1fr; }
+      .priority-item { border-right: 0; border-bottom: 1px solid var(--line); }
+      .priority-item:last-child { border-bottom: 0; }
+      .tabs { grid-template-columns: 1fr 1fr; }
+      .print-button { width: 100%; }
+    }
+
+    @media print {
+      @page { size: A4; margin: 13mm 11mm; }
+      body { background: #fff; font-size: 11px; }
+      .page { width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
+      .header { padding: 12px 0 10px; }
+      .header h1 { font-size: 20px; }
+      .toolbar { display: none; }
+      .content { max-width: none; padding: 14px 0 0; }
+      .panel[hidden] { display: block; }
+      .panel + .panel { margin-top: 18px; padding-top: 16px; border-top: 2px solid var(--ink); }
+      .risk-banner, .summary-item, .priority, .rule-block, .time-item { break-inside: avoid; }
+      .flow-step, .rule-table tr { break-inside: avoid; }
+      .summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      .priority { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .priority-item { padding: 9px; border-bottom: 0; }
+      .rule-grid { gap: 10px; }
+      .time-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+      .time-item { min-height: 0; padding: 10px; }
+      .time-value { font-size: 18px; }
+      .flow-step { padding: 8px 0; }
+      .rule-table { min-width: 0; }
+      .rule-table th, .rule-table td { padding: 7px 6px; }
+      .footer { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <h1>天猫退款 Agent 规则确认板</h1>
+        <p>规则基线：《天猫退款流程_项目基线0807.xlsx》 · 业务补充确认 2026-08-07 · V1.0</p>
+      </div>
+      <div class="status">待业务确认</div>
+    </header>
+
+    <div class="toolbar">
+      <div class="tabs" role="tablist" aria-label="规则视图">
+        <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="overview" id="tab-overview">规则总览</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="unreceived" id="tab-unreceived">未收货退款</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="return-refund" id="tab-return">退货退款</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="risk" id="tab-risk">风险与兜底</button>
+      </div>
+      <button class="print-button" type="button" id="print-page">打印 / 保存为 PDF</button>
+    </div>
+
+    <div class="content">
+      <section class="panel" id="overview" role="tabpanel" aria-labelledby="tab-overview">
+        <div class="risk-banner">
+          <strong>风险提示：首批3家店铺直接执行真实操作，无影子模式</strong>
+          <p>Agent 将真实执行同意退款、拒绝退款及 TMS 快递工单。AI/自动化可能因页面变化、字段识别错误、物流状态延迟、人工并发操作或平台异常发生误判，造成误退款、误拒绝、重复操作或漏处理。试点、二次校验、证据留存、幂等控制、结果不明确转人工和紧急暂停只能降低风险，不能完全消除风险。</p>
+        </div>
+
+        <div class="legend" aria-label="状态图例">
+          <span class="legend-item"><span class="legend-dot dot-auto"></span>自动同意/拒绝</span>
+          <span class="legend-item"><span class="legend-dot dot-oms"></span>OMS低值品核验</span>
+          <span class="legend-item"><span class="legend-dot dot-tms"></span>TMS快递操作</span>
+          <span class="legend-item"><span class="legend-dot dot-wait"></span>等待复查</span>
+          <span class="legend-item"><span class="legend-dot dot-manual"></span>转人工</span>
+        </div>
+
+        <div class="message-box">
+          <strong>系统职责边界</strong>
+          <p>OMS指“先马-巨益OMS”，仅用于核实订单是否有“低值品”标记；TMS指“智能用户服务平台”，用于未收货退款流程中对接快递并创建弃件、拦截、拒收工单。OMS与TMS是两个独立系统，不得作为别名混用。</p>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-item"><span>业务场景</span><strong>2类退款</strong></div>
+          <div class="summary-item"><span>首批范围</span><strong>3家店铺已确认</strong></div>
+          <div class="summary-item"><span>扫描频率</span><strong>每30分钟</strong></div>
+          <div class="summary-item"><span>金额边界</span><strong>本次及整单均≤500元</strong></div>
+          <div class="summary-item"><span>件数边界</span><strong>本次及整单均≤10件</strong></div>
+          <div class="summary-item"><span>运行方式</span><strong>真实操作，无影子模式</strong></div>
+        </div>
+
+        <div class="priority" aria-label="全局处理优先级">
+          <div class="priority-item"><strong>1. 平台已完结</strong><span>不重复操作，记录结果后关单</span></div>
+          <div class="priority-item"><strong>2. 命中人工边界</strong><span>停止自动化并转人工</span></div>
+          <div class="priority-item"><strong>3. 规则完全匹配</strong><span>执行明确的自动动作</span></div>
+          <div class="priority-item"><strong>4. 结果不明确</strong><span>不猜测、不重试不可逆操作</span></div>
+        </div>
+
+        <h2 class="section-title">店铺适用范围 <span>当前13家；首批3家已确认</span></h2>
+        <div class="table-wrap">
+          <table class="rule-table store-table">
+            <thead><tr><th>店铺</th><th>未收货退款</th><th>退货退款</th></tr></thead>
+            <tbody>
+              <tr><td>zeamo旗舰店 <span class="label label-auto">首批试运行</span></td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>冈朴制药旗舰店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>drboja旗舰店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>veevcc医疗器械旗舰店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>恒源祥先马专卖店 <span class="label label-auto">首批试运行</span></td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>艾漫旗舰店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>PAKEQI医疗器械旗舰店 <span class="label label-auto">首批试运行</span></td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>恒源祥鸿远专卖店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>dranlove旗舰店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>draddo旗舰店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>zeamo快马专卖店</td><td class="yes">适用</td><td class="yes">适用</td></tr>
+              <tr><td>zeamo海外旗舰店</td><td class="no">不适用</td><td class="yes">适用</td></tr>
+              <tr><td>dranlove海外旗舰店</td><td class="no">不适用</td><td class="yes">适用</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="message-box">
+          <strong>已移出本期范围</strong>
+          <p>皆花旗舰店、prowaves旗舰店已退回运营，客服不再承接处理，不进入Agent扫描和自动处理范围。</p>
+        </div>
+
+        <div class="message-box">
+          <strong>看板接入</strong>
+          <p>开发已有天猫看板，本期接入“天猫未收货退款”和“天猫退货退款”两个独立业务场景，分别统计、筛选、记录日志、转人工和启停。</p>
+        </div>
+      </section>
+
+      <section class="panel" id="unreceived" role="tabpanel" aria-labelledby="tab-unreceived" hidden>
+        <h2 class="section-title">未收货退款主流程 <span>11家非海外店铺 · 订单状态为待收货</span></h2>
+        <div class="flow">
+          <div class="flow-step"><span class="step-number">1</span><span class="step-condition">每30分钟扫描</span><span class="arrow">→</span><span class="action neutral">筛选未收货退款并按临近超时排序</span></div>
+          <div class="flow-step"><span class="step-number">2</span><span class="step-condition">执行前读取</span><span class="arrow">→</span><span class="action neutral">核验金额、件数、售后状态、物流、备注及同买家退款单量</span></div>
+          <div class="flow-step"><span class="step-number">3</span><span class="step-condition">OMS低值品标记</span><span class="arrow">→</span><span class="action oms">区分低值品与非低值品路径</span></div>
+          <div class="flow-step"><span class="step-number">4</span><span class="step-condition">规则完全匹配</span><span class="arrow">→</span><span class="action auto">执行退款、拒绝、协商或TMS快递工单</span></div>
+          <div class="flow-step"><span class="step-number">5</span><span class="step-condition">字段/结果不明确</span><span class="arrow">→</span><span class="action manual">停止自动化并转人工</span></div>
+        </div>
+
+        <div class="rule-grid">
+          <article class="rule-block">
+            <h3>低值品</h3>
+            <ul>
+              <li>以 OMS 现有低值品标记作为唯一判断依据，Agent不自行按金额推断。</li>
+              <li>物流未到买家所在地：TMS创建“弃件”工单，提交成功后立即同意退款。</li>
+              <li>物流已到买家所在地，包含派送、待取件或已签收：无需对接快递，直接同意退款。</li>
+              <li>退款后添加低值品红旗备注；备注名称由业务在“低值品处理/低值品退款”中统一。</li>
+            </ul>
+          </article>
+          <article class="rule-block">
+            <h3>非低值品</h3>
+            <ul>
+              <li>尚未在买家当地派件或签收，且发货物流仍在长沙：TMS创建物流拦截单并插旗备注，工单提交成功后立即同意退款。</li>
+              <li>尚未在买家当地派件或签收，但发货物流已离开长沙：通过TMS发起物流拦截，物流出现明确的拦截或退回信息后再同意退款；尚无明确记录则继续复查。</li>
+              <li>已到买家所在地并派件/待取件：TMS提交拒收，发送旺旺提醒并添加红旗备注。</li>
+              <li>拒收后物流出现明确退回记录：同意退款；尚无退回记录则继续复查。</li>
+              <li>原发货物流已签收：进入“协商退货退款”路径，不继续执行拦截/拒收步骤。</li>
+            </ul>
+          </article>
+        </div>
+
+        <h2 class="section-title">关键判断规则 <span>所有自动拒绝均须二次校验并留存证据</span></h2>
+        <div class="table-wrap">
+          <table class="rule-table">
+            <thead><tr><th>场景</th><th>触发条件</th><th>Agent动作</th></tr></thead>
+            <tbody>
+              <tr><td>金额超限</td><td>本次售后退款金额或整单金额任一＞500元</td><td><span class="label label-manual">转人工</span></td></tr>
+              <tr><td>件数超限</td><td>本次售后件数或整单总件数任一＞10件</td><td><span class="label label-manual">转人工</span></td></tr>
+              <tr><td>同买家多单</td><td>同一买家当前同时存在超过3个退款订单</td><td><span class="label label-manual">全部转人工</span></td></tr>
+              <tr><td>长沙内拦截</td><td>非低值品尚未在买家当地派件/签收，发货物流仍在长沙；TMS拦截工单提交成功并插旗备注</td><td><span class="label label-auto">立即同意退款</span></td></tr>
+              <tr><td>离开长沙拦截</td><td>非低值品尚未在买家当地派件/签收，但发货物流已离开长沙；TMS已发起拦截且物流出现明确拦截/退回信息</td><td><span class="label label-auto">同意退款</span></td></tr>
+              <tr><td>拒收后退回</td><td>TMS已发起拒收且物流出现明确退回记录</td><td><span class="label label-auto">同意退款</span></td></tr>
+              <tr><td>未退回临期</td><td>TMS已发起拦截/拒收，物流无退回记录且倒计时＜18小时</td><td><span class="label label-auto">自动拒绝</span></td></tr>
+              <tr><td>已签收协商</td><td>物流已签收且倒计时≥18小时，买家仍申请未收到货</td><td><span class="label label-wait">发起协商并监控</span></td></tr>
+              <tr><td>已签收临期</td><td>物流已签收且倒计时＜18小时</td><td><span class="label label-manual">转人工</span></td></tr>
+              <tr><td>已有备注</td><td>订单已有拦截/拒收备注</td><td><span class="label label-wait">不重复建单，只跟踪物流</span></td></tr>
+              <tr><td>结果不明</td><td>OMS低值品标记读取结果、TMS弃件/拦截/拒收工单结果或天猫操作结果无法确认；或平台报错、字段缺失、规则无法匹配</td><td><span class="label label-manual">停止并转人工</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="section-title" style="margin-top:24px">平台时效 <span>Agent直接读取天猫页面实时倒计时</span></h2>
+        <div class="time-grid">
+          <div class="time-item"><strong>未点拦截快递</strong><div class="time-value">36小时</div><p>平台退款处理倒计时</p></div>
+          <div class="time-item"><strong>已点拦截快递</strong><div class="time-value">延长至3天</div><p>以页面显示为准</p></div>
+          <div class="time-item"><strong>拒绝判断节点</strong><div class="time-value">＜18小时</div><p>无退回记录时二次校验</p></div>
+          <div class="time-item"><strong>平台倒计时归零</strong><div class="time-value">自动退款</div><p>Agent不再重复操作</p></div>
+        </div>
+      </section>
+
+      <section class="panel" id="return-refund" role="tabpanel" aria-labelledby="tab-return" hidden>
+        <h2 class="section-title">退货退款主流程 <span>13家店铺 · 待收货/交易成功</span></h2>
+        <div class="flow">
+          <div class="flow-step"><span class="step-number">1</span><span class="step-condition">每30分钟扫描</span><span class="arrow">→</span><span class="action neutral">筛选退货退款并按临近超时排序</span></div>
+          <div class="flow-step"><span class="step-number">2</span><span class="step-condition">读取退货物流</span><span class="arrow">→</span><span class="action neutral">核验金额、件数、单号、轨迹、目的城市及售后状态</span></div>
+          <div class="flow-step"><span class="step-number">3</span><span class="step-condition">物流到达目标城市</span><span class="arrow">→</span><span class="action auto">无需等待签收，立即同意退款</span></div>
+          <div class="flow-step"><span class="step-number">4</span><span class="step-condition">未填物流/临期</span><span class="arrow">→</span><span class="action neutral">未填物流等待关闭；已填物流按48小时规则拒绝</span></div>
+          <div class="flow-step"><span class="step-number">5</span><span class="step-condition">操作结果不明确</span><span class="arrow">→</span><span class="action manual">禁止重复退款，转人工核验</span></div>
+        </div>
+
+        <div class="rule-grid">
+          <article class="rule-block">
+            <h3>目标城市</h3>
+            <ul>
+              <li>11家非海外店铺：退货物流到达长沙即可同意退款，无需等待签收。</li>
+              <li>zeamo海外旗舰店、dranlove海外旗舰店：物流到达义乌或金华即可同意退款。</li>
+              <li>执行退款前再次读取最新物流；当前已明确签收地与退货地址不一致时转人工。</li>
+            </ul>
+          </article>
+          <article class="rule-block">
+            <h3>处理阶段</h3>
+            <ul>
+              <li>客服SOP以买家已退回货物的退款申请为主；同意退货阶段原则上由人工处理。</li>
+              <li>买家未填写退货物流：Agent不处理、不拒绝，等待平台超时自动关闭买家退货申请。</li>
+              <li>买家已填写有效退货物流：读取退款申请内的实时倒计时，满足＜48小时拒绝条件时执行自动拒绝。</li>
+              <li>物流单号、轨迹或平台状态无法可靠判断时，不使用默认值，直接转人工。</li>
+            </ul>
+          </article>
+        </div>
+
+        <h2 class="section-title">关键判断规则 <span>同一订单命中多条时，48小时拒绝规则优先</span></h2>
+        <div class="table-wrap">
+          <table class="rule-table">
+            <thead><tr><th>场景</th><th>触发条件</th><th>Agent动作</th></tr></thead>
+            <tbody>
+              <tr><td>金额超限</td><td>本次售后退款金额或整单金额任一＞500元</td><td><span class="label label-manual">转人工</span></td></tr>
+              <tr><td>件数超限</td><td>本次售后件数或整单总件数任一＞10件</td><td><span class="label label-manual">转人工</span></td></tr>
+              <tr><td>目标城市到达</td><td>普通店铺到达长沙；两家海外店铺到达义乌或金华</td><td><span class="label label-auto">同意退款</span></td></tr>
+              <tr><td>未填写退货物流</td><td>买家未填写退货物流，平台仍处于等待买家退货阶段</td><td><span class="label label-wait">不处理，等待平台自动关闭</span></td></tr>
+              <tr><td>物流未到临期</td><td>买家已填写有效退货物流但尚未到目标城市，退款申请倒计时＜48小时</td><td><span class="label label-auto">自动拒绝</span></td></tr>
+              <tr><td>物流停滞</td><td>上传单号超过3天无更新，且尚未进入＜48小时</td><td><span class="label label-manual">留言并转人工</span></td></tr>
+              <tr><td>地址不一致</td><td>退货物流签收地与退货地址不一致</td><td><span class="label label-manual">留言并转人工</span></td></tr>
+              <tr><td>结果不明</td><td>物流、页面、退款结果或必要字段无法确认</td><td><span class="label label-manual">停止并转人工</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="section-title" style="margin-top:24px">平台时效 <span>按天猫页面实时状态和倒计时判断</span></h2>
+        <div class="time-grid">
+          <div class="time-item"><strong>同意退货阶段</strong><div class="time-value">36小时</div><p>品退原因原则上由人工处理</p></div>
+          <div class="time-item"><strong>填写退货物流后</strong><div class="time-value">7天</div><p>平台退款处理倒计时</p></div>
+          <div class="time-item"><strong>退货物流签收后</strong><div class="time-value">48小时</div><p>平台倒计时缩短</p></div>
+          <div class="time-item"><strong>拒绝优先节点</strong><div class="time-value">＜48小时</div><p>未到目标城市时自动拒绝</p></div>
+        </div>
+      </section>
+
+      <section class="panel" id="risk" role="tabpanel" aria-labelledby="tab-risk" hidden>
+        <h2 class="section-title">人工兜底 <span>规则不明确时一律不猜测</span></h2>
+        <div class="table-wrap">
+          <table class="rule-table">
+            <thead><tr><th>类别</th><th>触发条件</th><th>处理方式</th></tr></thead>
+            <tbody>
+              <tr><td>业务边界</td><td>金额或件数超限；同买家当前退款订单超过3个；店铺或场景不在启用范围</td><td><span class="label label-manual">转人工/跳过</span></td></tr>
+              <tr><td>物流异常</td><td>物流单号不可查、轨迹冲突、地址不一致、无法确认是否到达目标城市</td><td><span class="label label-manual">转人工</span></td></tr>
+              <tr><td>系统异常</td><td>登录失效、验证码、页面改版、按钮缺失、OMS、TMS或天猫报错</td><td><span class="label label-manual">停止并转人工</span></td></tr>
+              <tr><td>资金异常</td><td>退款额度不足、支付宝代扣协议问题或平台资金提示</td><td><span class="label label-manual">转人工</span></td></tr>
+              <tr><td>并发操作</td><td>人工与Agent可能同时处理，或售后状态在判断后发生变化</td><td><span class="label label-manual">停止并复核</span></td></tr>
+              <tr><td>结果未知</td><td>已点击同意/拒绝或已提交TMS快递工单，但无法确认最终结果</td><td><span class="label label-manual">禁止重试，人工核验</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rule-grid" style="margin-top:24px">
+          <article class="rule-block">
+            <h3>上线控制</h3>
+            <ul>
+              <li>首批试运行店铺为：zeamo旗舰店、恒源祥先马专卖店、PAKEQI医疗器械旗舰店；3家店铺同时开启两个场景，直接执行真实操作。</li>
+              <li>场景和店铺必须支持独立启停；单场景异常不得影响另一场景。</li>
+              <li>出现误退款、重复操作、平台风控或页面规则失效时，应立即暂停受影响店铺或场景。</li>
+              <li>后续铺开门槛及具体店铺名单由业务另行确认。</li>
+            </ul>
+          </article>
+          <article class="rule-block">
+            <h3>通知与记录</h3>
+            <ul>
+              <li>转人工通知群：天猫抖音退款Agent通知群（钉钉群号：189925002005）。</li>
+              <li>@人员：崔志文、何紫辉、蔡妍、易嘉豪、彭玉洁、张欣、陈姣群、彭心雨、曾昶；人工处理SLA待业务确认。</li>
+              <li>转人工后Agent停止不可逆操作，任务进入天猫看板人工处理状态。</li>
+              <li>每次判断保存字段值、命中规则、操作时间和操作前后证据。</li>
+              <li>订单号、售后编号、物流单号、金额、地址和手机号不得出现在公开材料中。</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="risk-banner">
+          <strong>需要业务知晓并确认：AI无法保证100%准确，仍可能出错</strong>
+          <p>AI/自动化会按照当前规则进行判断和操作，但无法承诺上线后完全不出问题。页面变化、信息识别错误、物流更新延迟、人工同时操作或平台异常，都可能导致误退款、误拒绝、重复操作或漏处理。业务确认表示已清楚了解上述风险，并同意首批3家店铺在无影子模式下直接执行真实退款、拒绝退款及TMS快递工单；出现异常时由人工及时接管，并可暂停相关店铺或业务场景。</p>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <span>内部资料 · 仅用于天猫退款 Agent 需求确认</span>
+      <span>确认方式：无异议回复“确认”；有异议请注明具体场景和修改规则</span>
+    </footer>
+  </main>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+    const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+    function selectTab(tab) {
+      const panelId = tab.getAttribute('aria-controls');
+      tabs.forEach((item) => item.setAttribute('aria-selected', String(item === tab)));
+      panels.forEach((panel) => { panel.hidden = panel.id !== panelId; });
+      tab.focus();
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => selectTab(tab));
+      tab.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        const offset = event.key === 'ArrowRight' ? 1 : -1;
+        selectTab(tabs[(index + offset + tabs.length) % tabs.length]);
+      });
+    });
+
+    document.getElementById('print-page').addEventListener('click', () => window.print());
+  </script>
+</body>
+</html>

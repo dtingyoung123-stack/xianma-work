@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>退款 Agent 客服沟通内容</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --green: #16a34a;
+    --green-light: #f0fdf4;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --gray-900: #111827;
+    --gray-700: #374151;
+    --gray-500: #6b7280;
+    --gray-300: #d1d5db;
+    --gray-100: #f3f4f6;
+    --gray-50: #f9fafb;
+    --border: #e5e7eb;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--gray-900);
+    background: linear-gradient(180deg, #f4f5f8 0%, #edeff4 100%);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    width: 80%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-top: 28px;
+  }
+  /* Sidebar */
+  nav.toc {
+    width: clamp(220px, 17%, 264px);
+    flex-shrink: 0;
+    position: sticky;
+    top: 28px;
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
+    padding: 20px 14px 24px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 12px 28px -12px rgba(15,23,42,0.12);
+    scrollbar-width: thin;
+    scrollbar-color: var(--gray-300) transparent;
+  }
+  nav.toc::-webkit-scrollbar { width: 5px; }
+  nav.toc::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+
+  .toc-brand {
+    padding: 4px 10px 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .toc-brand-title {
+    color: var(--gray-900);
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .toc-brand-sub {
+    margin-top: 6px;
+    display: inline-block;
+    font-size: 11px;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  nav.toc .toc-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    letter-spacing: 0.1em;
+    margin: 10px 0 8px;
+    padding-left: 10px;
+  }
+  nav.toc a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    margin: 2px 0;
+    border-radius: 9px;
+    color: var(--gray-700);
+    text-decoration: none;
+    font-size: 13.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    border-left: 3px solid transparent;
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+  nav.toc a .idx {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-500);
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+  nav.toc a .label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  nav.toc a:hover { background: var(--gray-50); color: var(--gray-900); }
+  nav.toc a:hover .idx { background: var(--gray-300); color: var(--gray-700); }
+  nav.toc a.active {
+    background: var(--blue-light);
+    color: var(--blue);
+    font-weight: 700;
+    border-left-color: var(--blue);
+  }
+  nav.toc a.active .idx { background: var(--blue); color: #fff; }
+
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 0 0 120px;
+  }
+  .header-card {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb 60%, #3b82f6);
+    color: #fff;
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 30px -10px rgba(37,99,235,0.4);
+  }
+  .header-card h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 800;
+  }
+  .header-card .sub {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  .meta-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .meta-item {
+    background: rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .meta-item b { display:block; font-size: 11px; opacity: 0.75; font-weight: 500; margin-bottom:2px;}
+
+  section.block {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px clamp(16px, 3vw, 32px);
+    margin-bottom: 20px;
+    scroll-margin-top: 20px;
+  }
+  h2 {
+    font-size: 19px;
+    font-weight: 800;
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 28px; height: 28px;
+    background: var(--blue-light);
+    color: var(--blue);
+    border-radius: 8px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 22px 0 10px;
+  }
+  h3:first-child { margin-top: 4px; }
+  p { color: var(--gray-700); margin: 8px 0; }
+  ol, ul { color: var(--gray-700); padding-left: 22px; margin: 8px 0; }
+  li { margin: 4px 0; }
+  li::marker { color: var(--gray-500); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 18px;
+    font-size: 13.5px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 9px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--gray-50);
+    font-weight: 700;
+    color: var(--gray-700);
+    font-size: 12.5px;
+  }
+  tr:nth-child(even) td { background: #fafbfc; }
+  code {
+    background: var(--gray-100);
+    color: #b91c1c;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-family: "SF Mono", Consolas, monospace;
+  }
+
+  /* tag chips for 1.0 建议 */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .tag.go { background: var(--green-light); color: var(--green); }
+  .tag.caution { background: var(--amber-light); color: var(--amber); }
+  .tag.stop { background: var(--red-light); color: var(--red); }
+
+  .risk-item {
+    border-left: 3px solid var(--red);
+    background: var(--red-light);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 16px;
+    margin: 10px 0;
+    font-size: 13.5px;
+    color: #7f1d1d;
+  }
+  .risk-item b { color: #991b1b; }
+
+  .safeguard-item {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    align-items: flex-start;
+  }
+  .safeguard-item::before {
+    content: "✓";
+    color: var(--green);
+    font-weight: 800;
+    flex-shrink: 0;
+    background: var(--green-light);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .no-item {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    align-items: flex-start;
+  }
+  .no-item::before {
+    content: "✕";
+    color: var(--red);
+    font-weight: 800;
+    flex-shrink: 0;
+    background: var(--red-light);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .qa-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .qa-item:last-child { border-bottom: none; }
+  .qa-num {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--blue-light);
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .qa-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .qa-text { color: var(--gray-900); }
+  .qa-note-wrap {
+    position: relative;
+    margin-top: 8px;
+  }
+  .qa-note {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    resize: vertical;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-900);
+    background: var(--gray-50);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .qa-note::placeholder { color: var(--gray-500); }
+  .qa-note:focus {
+    outline: none;
+    border-color: var(--blue);
+    background: #fff;
+  }
+  .save-indicator {
+    position: absolute;
+    top: -18px;
+    right: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .save-indicator.show { opacity: 1; }
+
+  .export-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .export-indicator {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .export-indicator.show { opacity: 1; }
+  .export-btn {
+    background: var(--blue-light);
+    color: var(--blue);
+    border: none;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .export-btn:hover { background: var(--blue); color: #fff; }
+
+  .concl-box {
+    background: var(--blue-light);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 18px 22px;
+    color: #1e3a8a;
+    font-size: 14px;
+  }
+  .concl-box b { color: #1e40af; }
+
+  .top-btn {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px -4px rgba(37,99,235,0.5);
+    cursor: pointer;
+    font-size: 18px;
+    border: none;
+    opacity: 0.85;
+  }
+  .top-btn:hover { opacity: 1; }
+
+  @media print {
+    nav.toc, .top-btn { display: none; }
+    main { padding: 0; }
+    section.block { box-shadow:none; border: none; page-break-inside: avoid; }
+  }
+
+  @media (max-width: 1100px) {
+    .layout { width: 94%; }
+  }
+
+  @media (max-width: 900px) {
+    .layout { width: 100%; }
+    nav.toc { display: none; }
+    main { padding: 24px 18px 100px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <nav class="toc" id="toc">
+    <div class="toc-brand">
+      <div class="toc-brand-title">退款 Agent</div>
+      <span class="toc-brand-sub">客服沟通内容</span>
+    </div>
+    <div class="toc-title">目录导航</div>
+    <a href="#s1"><span class="idx">1</span><span class="label">当前背景</span></a>
+    <a href="#s2"><span class="idx">2</span><span class="label">希望客服提供的资料</span></a>
+    <a href="#s3"><span class="idx">3</span><span class="label">重点梳理的处理类型</span></a>
+    <a href="#s4"><span class="idx">4</span><span class="label">风险说明</span></a>
+    <a href="#s5"><span class="idx">5</span><span class="label">1.0 建议做成什么样</span></a>
+    <a href="#s6"><span class="idx">6</span><span class="label">会议希望确认的问题</span></a>
+    <a href="#s7"><span class="idx">7</span><span class="label">初步结论</span></a>
+  </nav>
+
+  <main>
+    <div class="header-card">
+      <h1>退款 Agent · 客服沟通内容</h1>
+      <div class="sub">沟通目标：确认客服现有退款 SOP、业务规则、平台操作方式和风险边界，为设计「跨平台退款处理 Agent」提供依据</div>
+      <div class="meta-grid">
+        <div class="meta-item"><b>适用范围</b>拼多多、闲鱼、京东、淘宝、天猫等 100+ 店铺</div>
+        <div class="meta-item"><b>需求性质</b>高风险操作，涉及真实资金</div>
+        <div class="meta-item"><b>沟通对象</b>客服团队</div>
+        <div class="meta-item"><b>编写人</b>梦蝶</div>
+        <div class="meta-item"><b>编写日期</b>2026-07-07</div>
+      </div>
+    </div>
+
+    <section class="block" id="s1">
+      <h2><span class="num">1</span>当前背景</h2>
+      <p>我们目前有 100 多家店铺，分布在拼多多、闲鱼、京东、淘宝、天猫等平台。</p>
+      <p>由于各平台 API 申请和店铺授权成本较高，现阶段更现实的方案是：让 Agent 通过浏览器进入各平台后台，模拟人工客服完成查询、判断、填写、提交和记录等操作。</p>
+      <p>因此，客服提供的 SOP 需要从「人能看懂」升级为「<b>Agent 能照着执行</b>」。</p>
+    </section>
+
+    <section class="block" id="s2">
+      <h2><span class="num">2</span>希望客服提供的核心资料</h2>
+
+      <h3>2.1 退款 SOP</h3>
+      <p>请客服提供当前退款处理 SOP，最好按平台和处理类型拆分。</p>
+      <p>这份 SOP 不只是操作步骤，也需要包含业务规则、上线标准、不能退款的边界、审批规则和异常处理。简单说：Agent 能不能处理、该怎么处理、什么时候必须停下来，都应该在 SOP 里写清楚。</p>
+      <p>每个 SOP 建议包含：</p>
+      <table>
+        <tr><th style="width:120px">内容</th><th>需要说明什么</th></tr>
+        <tr><td>适用范围</td><td>适用平台、店铺、商品类型、订单状态</td></tr>
+        <tr><td>处理类型</td><td>仅退款、退货退款、部分退款、平台介入等</td></tr>
+        <tr><td>上线标准</td><td>哪些场景可以进入 1.0 自动退款，哪些只能转人工</td></tr>
+        <tr><td>触发条件</td><td>什么状态下需要客服处理</td></tr>
+        <tr><td>判断规则</td><td>什么情况同意、拒绝、协商、转人工</td></tr>
+        <tr><td>禁止退款</td><td>哪些商品、订单、用户、状态不能退款</td></tr>
+        <tr><td>审批规则</td><td>多少钱以内可处理，多少钱以上需主管/财务审批；审批人响应时效上限，超时按什么规则处理</td></tr>
+        <tr><td>时效要求</td><td>各平台、各售后类型的强制处理时效（如“XX 小时未处理自动退款”），以及是否已出现过因超时被平台自动判责的情况</td></tr>
+        <tr><td>唯一标识</td><td>售后单的唯一键定义（交易号 + 售后单号等），同一交易号是否可能存在多个售后单</td></tr>
+        <tr><td>操作步骤</td><td>进入哪个后台、点哪个按钮、填什么内容</td></tr>
+        <tr><td>所需信息</td><td>订单号、售后单号、金额、物流、凭证、聊天记录等</td></tr>
+        <tr><td>金额规则</td><td>全额退款、部分退款、运费、优惠券、积分如何处理</td></tr>
+        <tr><td>成功判定</td><td>区分“退款提交成功”和“退款到账成功”，Agent 处理到哪一步算完成</td></tr>
+        <tr><td>异常处理</td><td>找不到订单、金额异常、平台报错、登录失效、订单状态被买家撤回等怎么办</td></tr>
+        <tr><td>话术模板</td><td>回复买家的标准话术、平台备注模板</td></tr>
+        <tr><td>风控边界</td><td>哪些情况必须人工处理，哪些禁止自动操作</td></tr>
+      </table>
+
+      <h3>2.2 配套材料</h3>
+      <p>除了 SOP 本身，也希望客服提供配套材料，用于校验 SOP 是否完整、是否能落地：</p>
+      <ul>
+        <li>每个平台典型退款流程的操作录屏</li>
+        <li>关键页面截图：售后列表、售后详情、退款按钮、拒绝按钮、弹窗、失败提示</li>
+        <li>测试/只读子账号，用于我们进入后台查看真实页面和状态</li>
+        <li>安排客服同学陪跑 1-2 次，现场讲解真实案例</li>
+        <li>指定一位负责人对接 SOP、账号、陪跑和后续问题确认</li>
+        <li>最近一段时间的脱敏退款案例，包括自动退款、人工退款、拒绝退款、转人工、平台介入案例</li>
+        <li>各平台退款规则、平台处罚风险和特殊限制的原始资料或链接</li>
+        <li>说明退款使用的客服账号是共享给多个功能（例如与补发通知 Agent 共用同一批账号），还是单独一批，便于评估账号风控和登录状态的影响范围</li>
+      </ul>
+      <p>调研阶段建议先提供只读权限，包括订单查询、售后查询、退款详情、物流、聊天记录查看等。等 SOP、低风险范围和审批边界确认后，再为试运行配置受限的退款操作权限。</p>
+    </section>
+
+    <section class="block" id="s3">
+      <h2><span class="num">3</span>需要重点梳理的处理类型</h2>
+      <p>我们建议先按以下统一类型梳理，后续再映射到各平台的具体名称。</p>
+      <table>
+        <tr><th style="width:150px">统一类型</th><th style="width:200px">典型场景</th><th>1.0 建议</th></tr>
+        <tr><td>未发货仅退款</td><td>买家申请退款，订单还未发货</td><td>若平台/系统已自动退款，则不作为重点；只处理系统未自动处理的漏单</td></tr>
+        <tr><td>已发货但未揽收退款</td><td>已发货但物流未揽收、可拦截</td><td>规则明确时可作为 1.0 自动退款场景</td></tr>
+        <tr><td>已发货在途退款</td><td>货在途，买家要求退款但不退货</td><td>拦截成功或符合 SOP 时，可低风险自动处理</td></tr>
+        <tr><td>已收货仅退款</td><td>买家已签收但要求不退货退款</td><td>建议 1.0 转人工</td></tr>
+        <tr><td>退货退款</td><td>买家退货，商家收货后退款</td><td>退货签收/验收入库后，可自动确认退款</td></tr>
+        <tr><td>小额部分退款</td><td>差价、少件、破损补偿</td><td>金额标准明确时，可自动发起部分退款</td></tr>
+        <tr><td>平台介入/纠纷</td><td>投诉、仲裁、平台判责</td><td>1.0 不建议自动决策</td></tr>
+      </table>
+    </section>
+
+    <section class="block" id="s4">
+      <h2><span class="num">4</span>风险说明</h2>
+      <p>退款 Agent 属于高风险操作，主要风险包括：</p>
+      <div class="risk-item"><b>误退款：</b>金额、订单、用户、商品判断错误</div>
+      <div class="risk-item"><b>越权操作：</b>Agent 操作了不该处理的店铺或订单</div>
+      <div class="risk-item"><b>平台处罚：</b>不符合平台规则导致店铺扣分、限制或纠纷升级；部分平台商家协议可能明确禁止“自动化工具操作店铺后台”，一旦被平台识别为异常操作，可能触发处罚，这属于经营风险而不只是技术风险</div>
+      <div class="risk-item"><b>时效风险：</b>各平台对售后单基本都有强制处理时效，商家超时未处理会被系统自动判买家赢（自动退款/自动介入），这是平台规则问题，Agent 的扫描频率必须比这个时效更紧，否则做了也没用</div>
+      <div class="risk-item"><b>并发/重复风险：</b>同一售后单可能被 Agent 和人工同时处理，若没有唯一键锁定机制，容易出现重复操作或双重退款</div>
+      <div class="risk-item"><b>资金风险：</b>高金额、重复退款、恶意退款未被识别；Agent 发起的退款金额与平台实际扣款是否一致，若缺少核对机制，容易出现资金差异且难以及时发现</div>
+      <div class="risk-item"><b>纠错风险：</b>退款一旦执行基本不可逆，一旦 Agent 判断错误已经把钱退了，若没有明确的补救流程（找买家要回、走平台申诉、内部核销），损失很难追回</div>
+      <div class="risk-item"><b>隐私风险：</b>订单、聊天记录、手机号、地址等信息泄露</div>
+      <div class="risk-item"><b>页面变化风险：</b>平台后台改版后，Agent 点错按钮或无法判断状态</div>
+      <div class="risk-item"><b>登录风险：</b>验证码、扫码、异地登录、账号风控导致流程中断；风控触发后处理动作可能卡在“退款未提交”的中间状态，需要明确这种中间态的处理方式</div>
+
+      <h3>因此需要做到</h3>
+      <div class="safeguard-item">全量操作留痕：截图、日志、判断依据、操作结果</div>
+      <div class="safeguard-item">分级权限控制：只读、建议、待审批执行、自动执行</div>
+      <div class="safeguard-item">高风险强制转人工</div>
+      <div class="safeguard-item">真实退款权限逐步开放</div>
+      <div class="safeguard-item">首期不追求全自动覆盖所有退款场景</div>
+      <div class="safeguard-item">售后单唯一键去重和锁定，避免同一单被重复处理或双重退款</div>
+      <div class="safeguard-item">建立资金核对/财务对账机制，明确谁、多久核对一次 Agent 发起的退款金额与平台实际扣款</div>
+      <div class="safeguard-item">上线前先跑“影子模式”：Agent 给出判断但不真正执行，人工核对判断和实际处理是否一致，跑到准确率达标后再放开自动执行权限</div>
+      <div class="safeguard-item">提前明确出错后的纠错和追责路径，作为放开自动执行权限的前提</div>
+    </section>
+
+    <section class="block" id="s5">
+      <h2><span class="num">5</span>我们建议 1.0 做成什么样</h2>
+      <p>1.0 需要具备真实自动退款能力，但不做全量自动退款。建议先做「<b>低风险自动退款 + 高风险转人工</b>」。</p>
+
+      <h3>5.1 1.0 能力范围</h3>
+      <ul>
+        <li>根据 SOP 判断处理类型和风险等级</li>
+        <li>对符合 SOP 的低风险场景，自动执行同意退款、确认退款或部分退款</li>
+        <li>对不符合自动退款条件的场景，转人工并说明原因</li>
+      </ul>
+
+      <h3>5.2 1.0 可优先尝试的自动退款场景</h3>
+      <table>
+        <tr><th style="width:200px">场景</th><th>Agent 可以做什么</th><th style="width:220px">前提</th></tr>
+        <tr><td>已发货但未揽收退款</td><td>查询物流，确认未揽收或可拦截后自动同意退款</td><td>SOP 明确未揽收/可拦截可退</td></tr>
+        <tr><td>已发货在途退款</td><td>查询物流和拦截状态，拦截成功后自动退款</td><td>必须能确认拦截成功或符合平台规则</td></tr>
+        <tr><td>退货已签收/验收后退款</td><td>查询退货物流和验收状态，自动确认退款</td><td>需要明确签收或仓库验收标准</td></tr>
+        <tr><td>小额部分退款</td><td>按 SOP 金额标准自动发起部分退款</td><td>少件、破损、差价等金额规则明确</td></tr>
+        <tr><td>系统未自动处理的取消/退款单</td><td>对平台或系统漏掉的低风险单自动处理</td><td>需要客服确认哪些状态会漏处理</td></tr>
+        <tr><td>即将超时的低风险退款单</td><td>定时扫描待处理退款单，符合规则时自动处理</td><td>避免超时导致平台自动判责</td></tr>
+      </table>
+
+      <h3>5.3 1.0 不建议做</h3>
+      <div class="no-item">不自动处理平台介入/纠纷单</div>
+      <div class="no-item">不自动处理高金额退款</div>
+      <div class="no-item">不自动处理规则不清晰的部分退款</div>
+      <div class="no-item">不自动处理已收货仅退款等高争议场景</div>
+      <div class="no-item">不处理平台/系统已经自动完成的未发货退款</div>
+      <div class="no-item">不在没有 SOP 和权限边界的店铺直接操作真实退款</div>
+    </section>
+
+    <section class="block" id="s6">
+      <h2>
+        <span class="num">6</span>本次会议希望确认的问题
+        <span class="export-actions">
+          <span class="export-indicator" id="exportIndicator">✓ 已复制到剪贴板</span>
+          <button class="export-btn" id="exportNotesBtn" type="button">导出备注</button>
+        </span>
+      </h2>
+      <div class="qa-item">
+        <span class="qa-num">1</span>
+        <div class="qa-body">
+          <div class="qa-text">客服是否已有完整退款 SOP？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-1">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-1" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">2</span>
+        <div class="qa-body">
+          <div class="qa-text">SOP 是否能按平台和处理类型拆分？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-2">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-2" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">3</span>
+        <div class="qa-body">
+          <div class="qa-text">哪些退款类型最简单、最稳定、最适合 1.0 先做？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-3">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-3" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">4</span>
+        <div class="qa-body">
+          <div class="qa-text">哪些情况必须人工处理？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-4">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-4" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">5</span>
+        <div class="qa-body">
+          <div class="qa-text">是否可以提供调研用只读子账号、客服陪跑，以及试运行阶段的受限退款权限？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-5">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-5" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">6</span>
+        <div class="qa-body">
+          <div class="qa-text">是否可以提供脱敏历史案例用于规则梳理和测试？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-6">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-6" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">7</span>
+        <div class="qa-body">
+          <div class="qa-text">1.0 的自动处理金额上限和权限边界如何设定？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-7">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-7" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">8</span>
+        <div class="qa-body">
+          <div class="qa-text">客服主管是否可以指定一位负责人，统一对接 SOP、账号、陪跑和后续确认？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-8">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-8" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">9</span>
+        <div class="qa-body">
+          <div class="qa-text">各平台售后处理的强制时效是多少？现在人工处理是否已经出现过因超时被平台自动判责的情况？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-9">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-9" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">10</span>
+        <div class="qa-body">
+          <div class="qa-text">售后单的唯一标识是什么？同一交易号是否可能存在多个售后单？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-10">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-10" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">11</span>
+        <div class="qa-body">
+          <div class="qa-text">退款“提交成功”和“到账成功”分别如何确认？Agent 处理到哪一步算完成？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-11">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-11" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">12</span>
+        <div class="qa-body">
+          <div class="qa-text">审批人如果超时未响应，应该如何处理（自动拒绝、自动升级、还是保持等待）？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-12">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-12" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">13</span>
+        <div class="qa-body">
+          <div class="qa-text">使用浏览器 Agent 操作店铺后台，是否符合各平台的商家协议？法务是否评估过这个风险？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-13">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-13" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">14</span>
+        <div class="qa-body">
+          <div class="qa-text">如果 Agent 判断错误已经完成退款，现在的补救流程是什么？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-14">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-14" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="qa-item">
+        <span class="qa-num">15</span>
+        <div class="qa-body">
+          <div class="qa-text">用于退款的客服账号，是否会和其他自动化场景（如补发通知 Agent）共用？</div>
+          <div class="qa-note-wrap">
+            <span class="save-indicator" data-for="s6-note-15">✓ 已自动保存</span>
+            <textarea class="qa-note" id="s6-note-15" placeholder="记录客服现场回复…"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="s7">
+      <h2><span class="num">7</span>初步结论</h2>
+      <div class="concl-box">
+        退款 Agent 的第一阶段目标不是覆盖所有退款，而是先把<b>低风险、规则明确、客服重复操作</b>的退款场景自动处理起来。
+        <br><br>
+        建议 1.0 从「已发货未揽收/可拦截退款、退货签收/验收后退款、小额部分退款、即将超时的低风险退款」开始，逐步扩展到更复杂的退货退款、部分退款和跨平台退款处理。上线前建议先以“影子模式”验证 Agent 判断准确率，达标后再逐步放开自动执行权限。
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<button class="top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</button>
+
+<script>
+  // Scrollspy for TOC
+  const sections = document.querySelectorAll('section.block');
+  const links = document.querySelectorAll('nav.toc a');
+  const map = {};
+  links.forEach(l => map[l.getAttribute('href').slice(1)] = l);
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const link = map[entry.target.id];
+      if (!link) return;
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -70% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Section 6 live notes: auto-save on blur
+  const NOTE_PREFIX = 'refund-agent-note-v1:';
+  document.querySelectorAll('textarea.qa-note').forEach(ta => {
+    const key = NOTE_PREFIX + ta.id;
+    const saved = localStorage.getItem(key);
+    if (saved !== null) ta.value = saved;
+    const indicator = document.querySelector('.save-indicator[data-for="' + ta.id + '"]');
+    let hideTimer = null;
+    ta.addEventListener('blur', () => {
+      localStorage.setItem(key, ta.value);
+      if (indicator) {
+        indicator.classList.add('show');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => indicator.classList.remove('show'), 1500);
+      }
+    });
+  });
+
+  // Export all section 6 notes as one text block
+  const exportBtn = document.getElementById('exportNotesBtn');
+  const exportIndicator = document.getElementById('exportIndicator');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const lines = ['退款 Agent 客服沟通 - 第6节确认问题记录', ''];
+      document.querySelectorAll('#s6 .qa-item').forEach((item, i) => {
+        const question = item.querySelector('.qa-text').textContent.trim();
+        const note = item.querySelector('.qa-note').value.trim();
+        lines.push((i + 1) + '. ' + question);
+        lines.push('记录：' + (note || '（未记录）'));
+        lines.push('');
+      });
+      const text = lines.join('\n');
+
+      const showCopied = () => {
+        if (exportIndicator) {
+          exportIndicator.classList.add('show');
+          setTimeout(() => exportIndicator.classList.remove('show'), 2000);
+        }
+      };
+      const downloadTxt = () => {
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '退款Agent沟通记录_第6节.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showCopied).catch(downloadTxt);
+      } else {
+        downloadTxt();
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
