@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>先马·AI Studio V1.1 - 导入技能</title>
+  <link rel="stylesheet" href="../assets/ui-tokens.css">
+</head>
+<body>
+  <div class="prototype-page">
+    <div class="app-window">
+      <div class="titlebar" aria-hidden="true">
+        <span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span>
+      </div>
+      <div class="app-body">
+        <aside class="app-sidebar">
+          <div class="app-brand"><img src="../icon.png" alt=""><span>先马·AI Studio</span></div>
+          <nav class="app-nav" aria-label="应用导航">
+            <a href="应用端_新对话.html"><span class="nav-mark">✎</span><span>新对话</span></a>
+            <a href="应用端_搜索.html"><span class="nav-mark">🔍</span><span>搜索</span></a>
+            <a href="应用端_提示词库.html"><span class="nav-mark">💡</span><span>提示词库</span></a>
+            <a class="active" href="应用端_技能库.html"><span class="nav-mark">⚡</span><span>技能</span></a>
+            <a href="应用端_已安排.html"><span class="nav-mark">🕐</span><span>已安排</span></a>
+          </nav>
+          <div class="side-spacer"></div>
+          <div class="side-account"><div class="avatar">用</div><div class="account-copy"><strong>当前用户</strong><span>设置与账户</span></div></div>
+        </aside>
+
+        <main class="app-main">
+          <a class="back-link" href="应用端_技能库.html">← 返回技能库</a>
+          <header class="page-head">
+            <div><h1>导入技能</h1><p>导入并校验完成后，该技能会立即进入“我的技能”。</p></div>
+          </header>
+
+          <div class="steps" aria-label="导入步骤">
+            <div class="step active" id="step-1"><span class="step-index">1</span><span>选择来源</span></div>
+            <div class="step" id="step-2"><span class="step-index">2</span><span>校验内容</span></div>
+            <div class="step" id="step-3"><span class="step-index">3</span><span>完成导入</span></div>
+          </div>
+
+          <section id="import-form">
+            <div class="source-grid" role="radiogroup" aria-label="导入方式">
+              <button class="source-option" data-source="folder" role="radio" aria-checked="false">
+                <strong>本地 Skill 文件夹</strong><span>选择包含 SKILL.md 的完整技能目录。</span>
+              </button>
+              <button class="source-option active" data-source="github" role="radio" aria-checked="true">
+                <strong>GitHub 地址</strong><span>复制公开仓库地址，一次性导入当前内容。</span>
+              </button>
+              <button class="source-option" data-source="zip" role="radio" aria-checked="false">
+                <strong>ZIP 压缩包</strong><span>上传包含 SKILL.md 的 ZIP 文件。</span>
+              </button>
+            </div>
+
+            <div class="field" id="source-field">
+              <label for="source-input" id="source-label">公开 GitHub 仓库地址</label>
+              <input class="input" id="source-input" value="https://github.com/example/review-insight-skill" autocomplete="off">
+              <div class="field-note" id="source-note">一期仅复制公开仓库当前内容，导入后不会自动同步。</div>
+              <div class="field-error" id="source-error">请输入以 https://github.com/ 开头的公开仓库地址。</div>
+            </div>
+
+            <div class="action-row">
+              <a class="btn secondary" href="应用端_技能库.html">取消</a>
+              <button class="btn primary" id="validate-btn">校验技能</button>
+            </div>
+          </section>
+
+          <section class="validation-box" id="validation-box" aria-live="polite">
+            <div class="validation-title">校验通过</div>
+            <ul class="validation-list">
+              <li>已识别 SKILL.md，名称为“评论卖点提炼”</li>
+              <li>目录结构完整，共 6 个文件</li>
+              <li>未发现可执行文件或敏感凭证</li>
+              <li>建议分类：商业运营；建议标签：评论、洞察</li>
+            </ul>
+            <div class="field">
+              <label for="skill-name">技能名称</label>
+              <input class="input" id="skill-name" value="评论卖点提炼">
+              <div class="field-error" id="skill-name-error">你的个人技能中已存在同名技能</div>
+            </div>
+            <div class="field">
+              <label for="import-category-search">分类</label>
+              <div class="choice-select" id="import-category-select">
+                <button class="choice-control" id="import-category-control" type="button" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="choice-current" id="import-category-current">商业运营</span><span class="choice-arrow" aria-hidden="true">▼</span>
+                </button>
+                <div class="choice-menu" id="import-category-menu">
+                  <div class="choice-search-wrap"><input class="choice-search" id="import-category-search" placeholder="搜索分类" autocomplete="off"></div>
+                  <div id="import-category-options" role="listbox" aria-label="分类选项"></div>
+                </div>
+              </div>
+              <div class="field-note">分类由管理后台统一维护，应用端仅支持选择。</div>
+            </div>
+            <div class="field">
+              <label for="import-tag-search">标签</label>
+              <div class="tag-select" id="import-tag-select">
+                <div class="tag-value-area" id="import-tag-values">
+                  <input class="tag-search" id="import-tag-search" placeholder="输入检索或新增标签" autocomplete="off">
+                </div>
+                <div class="tag-menu" id="import-tag-menu"></div>
+              </div>
+              <div class="field-note">支持多选；没有匹配项时按回车直接新增。</div>
+            </div>
+            <div class="action-row">
+              <button class="btn secondary" id="back-btn">返回修改</button>
+              <button class="btn primary" id="import-btn">导入到我的技能</button>
+            </div>
+          </section>
+
+          <section class="empty-state" id="success-state" aria-live="polite">
+            <strong>技能已导入，可以立即使用</strong>
+            <span>当前为“未提交”状态，仅你本人可见。</span>
+            <div class="action-row">
+              <a class="btn secondary" href="应用端_技能库_个人详情.html?id=review&state=%E6%9C%AA%E6%8F%90%E4%BA%A4">查看技能</a>
+              <a class="btn primary" href="应用端_新对话.html?skill=review&amp;name=%E8%AF%84%E8%AE%BA%E5%8D%96%E7%82%B9%E6%8F%90%E7%82%BC">立即使用</a>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let source = 'github';
+    const presets = {
+      github: {label:'公开 GitHub 仓库地址', value:'https://github.com/example/review-insight-skill', note:'一期仅复制公开仓库当前内容，导入后不会自动同步。', type:'text', placeholder:'https://github.com/组织/仓库'},
+      folder: {label:'选择本地 Skill 文件夹', value:'评论卖点提炼', note:'文件夹根目录必须包含 SKILL.md。', type:'text', placeholder:'选择或输入文件夹名称'},
+      zip: {label:'选择 ZIP 压缩包', value:'review-insight-skill.zip', note:'仅支持 ZIP，解压后根目录必须包含 SKILL.md。', type:'text', placeholder:'选择 ZIP 文件'}
+    };
+
+    const input = document.getElementById('source-input');
+    const error = document.getElementById('source-error');
+    const form = document.getElementById('import-form');
+    const validation = document.getElementById('validation-box');
+    const success = document.getElementById('success-state');
+    const categories = ['办公协同','开发工具','投资理财','效率工具','内容创作','信息资讯','教育学习','数据分析','网站部署','生活服务','商业运营','知识与学习'];
+    let selectedCategory = '商业运营';
+    const categorySelect = document.getElementById('import-category-select');
+    const categoryControl = document.getElementById('import-category-control');
+    const categoryCurrent = document.getElementById('import-category-current');
+    const categorySearch = document.getElementById('import-category-search');
+    const categoryOptions = document.getElementById('import-category-options');
+    const availableTags = ['评论','洞察','电商','文案','表格','清洗','图片','批处理','会议','总结','自动化'];
+    const selectedTags = ['评论','洞察'];
+    const tagSelect = document.getElementById('import-tag-select');
+    const tagValues = document.getElementById('import-tag-values');
+    const tagSearch = document.getElementById('import-tag-search');
+    const tagMenu = document.getElementById('import-tag-menu');
+
+    function setStep(number){
+      [1,2,3].forEach(index => {
+        const node = document.getElementById(`step-${index}`);
+        node.classList.toggle('active', index === number);
+        node.classList.toggle('done', index < number);
+        node.querySelector('.step-index').textContent = index < number ? '✓' : index;
+      });
+    }
+
+    function renderCategoryOptions(){
+      const keyword = categorySearch.value.trim().toLowerCase();
+      const matches = categories.filter(item => !keyword || item.toLowerCase().includes(keyword));
+      categoryOptions.innerHTML = '';
+      matches.forEach(item => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = `choice-option ${item === selectedCategory ? 'selected' : ''}`;
+        option.setAttribute('role', 'option');
+        option.setAttribute('aria-selected', String(item === selectedCategory));
+        const label = document.createElement('span'); label.textContent = item;
+        const marker = document.createElement('span'); marker.textContent = item === selectedCategory ? '✓' : '';
+        option.append(label, marker);
+        option.addEventListener('click', () => selectCategory(item));
+        categoryOptions.append(option);
+      });
+      if(!matches.length){ const empty = document.createElement('div'); empty.className = 'choice-empty'; empty.textContent = '没有匹配的分类'; categoryOptions.append(empty); }
+    }
+    function openCategorySelect(){ categorySelect.classList.add('open'); categoryControl.setAttribute('aria-expanded','true'); renderCategoryOptions(); categorySearch.focus(); }
+    function closeCategorySelect(){ categorySelect.classList.remove('open'); categoryControl.setAttribute('aria-expanded','false'); categorySearch.value=''; }
+    function selectCategory(value){ selectedCategory = value; categoryCurrent.textContent = value; closeCategorySelect(); }
+
+    function selectSource(next){
+      source = next;
+      document.querySelectorAll('.source-option').forEach(option => {
+        const active = option.dataset.source === source;
+        option.classList.toggle('active', active);
+        option.setAttribute('aria-checked', String(active));
+      });
+      const preset = presets[source];
+      document.getElementById('source-label').textContent = preset.label;
+      document.getElementById('source-note').textContent = preset.note;
+      input.value = preset.value;
+      input.placeholder = preset.placeholder;
+      error.classList.remove('show');
+    }
+
+    function renderSelectedTags(){
+      tagValues.querySelectorAll('.tag-chip').forEach(node => node.remove());
+      selectedTags.forEach(tag => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.append(document.createTextNode(tag));
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.setAttribute('aria-label', `移除标签${tag}`);
+        remove.textContent = '×';
+        remove.addEventListener('click', event => { event.stopPropagation(); removeTag(tag); });
+        chip.append(remove);
+        tagValues.insertBefore(chip, tagSearch);
+      });
+    }
+
+    function renderTagMenu(){
+      const keyword = tagSearch.value.trim().toLowerCase();
+      const matches = availableTags.filter(tag => !keyword || tag.toLowerCase().includes(keyword));
+      tagMenu.innerHTML = '';
+      matches.forEach(tag => {
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = `tag-option ${selectedTags.includes(tag) ? 'selected' : ''}`;
+        const label = document.createElement('span');
+        label.textContent = tag;
+        const marker = document.createElement('span');
+        marker.textContent = selectedTags.includes(tag) ? '已选' : '';
+        option.append(label, marker);
+        option.addEventListener('click', () => toggleTag(tag));
+        tagMenu.append(option);
+      });
+      const exact = availableTags.some(tag => tag.toLowerCase() === keyword);
+      if(keyword && !exact){
+        const create = document.createElement('button');
+        create.type = 'button';
+        create.className = 'tag-option tag-create';
+        create.textContent = `新增标签“${tagSearch.value.trim()}”`;
+        create.addEventListener('click', () => addTag(tagSearch.value.trim()));
+        tagMenu.append(create);
+      }
+    }
+
+    function openTagSelect(){ tagSelect.classList.add('open'); renderTagMenu(); }
+    function closeTagSelect(){ tagSelect.classList.remove('open'); }
+    function addTag(tag){
+      const value = tag.trim();
+      if(!value || selectedTags.includes(value)) return;
+      if(!availableTags.includes(value)) availableTags.push(value);
+      selectedTags.push(value);
+      tagSearch.value = '';
+      renderSelectedTags();
+      renderTagMenu();
+      tagSearch.focus();
+    }
+    function removeTag(tag){
+      const index = selectedTags.indexOf(tag);
+      if(index >= 0) selectedTags.splice(index, 1);
+      renderSelectedTags();
+      renderTagMenu();
+    }
+    function toggleTag(tag){ selectedTags.includes(tag) ? removeTag(tag) : addTag(tag); }
+
+    document.querySelectorAll('.source-option').forEach(option => option.addEventListener('click', () => selectSource(option.dataset.source)));
+    categoryControl.addEventListener('click', event => { event.stopPropagation(); categorySelect.classList.contains('open') ? closeCategorySelect() : openCategorySelect(); });
+    categorySearch.addEventListener('click', event => event.stopPropagation());
+    categorySearch.addEventListener('input', renderCategoryOptions);
+    categorySearch.addEventListener('keydown', event => { if(event.key === 'Escape') closeCategorySelect(); });
+    tagValues.addEventListener('click', () => { openTagSelect(); tagSearch.focus(); });
+    tagSearch.addEventListener('focus', openTagSelect);
+    tagSearch.addEventListener('input', renderTagMenu);
+    tagSearch.addEventListener('keydown', event => {
+      if(event.key === 'Enter') { event.preventDefault(); addTag(tagSearch.value); }
+      if(event.key === 'Backspace' && !tagSearch.value && selectedTags.length) removeTag(selectedTags[selectedTags.length - 1]);
+      if(event.key === 'Escape') closeTagSelect();
+    });
+    document.addEventListener('click', event => { if(!tagSelect.contains(event.target)) closeTagSelect(); if(!categorySelect.contains(event.target)) closeCategorySelect(); });
+
+    document.getElementById('validate-btn').addEventListener('click', () => {
+      const value = input.value.trim();
+      const valid = source === 'github' ? /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/.test(value) : value.length > 2;
+      error.textContent = source === 'github' ? '请输入以 https://github.com/ 开头的公开仓库地址。' : '请选择包含 SKILL.md 的有效文件。';
+      error.classList.toggle('show', !valid);
+      if(!valid) return;
+      validation.classList.add('show');
+      form.style.display = 'none';
+      setStep(2);
+    });
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      validation.classList.remove('show');
+      form.style.display = '';
+      setStep(1);
+    });
+
+    document.getElementById('import-btn').addEventListener('click', () => {
+      const name=document.getElementById('skill-name').value.trim();
+      const normalized=name.toLocaleLowerCase();
+      const existingNames=['日报 / 周报生成','商品图批量处理','电商文案润色','会议记录整理','SKU 信息清洗','商品上架检查','旧版数据导出'];
+      const duplicate=existingNames.some(item=>item.trim().toLocaleLowerCase()===normalized);
+      const nameError=document.getElementById('skill-name-error');
+      nameError.textContent=duplicate?'你的个人技能中已存在同名技能':'技能名称不能为空';
+      nameError.classList.toggle('show',!name||duplicate);
+      if(!name||duplicate)return;
+      validation.classList.remove('show');
+      success.classList.add('show');
+      setStep(3);
+    });
+    renderSelectedTags();
+    renderCategoryOptions();
+    renderTagMenu();
+  </script>
+</body>
+</html>

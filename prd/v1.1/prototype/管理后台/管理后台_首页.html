@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>先马·AI Studio - 管理后台首页</title>
+  <link rel="stylesheet" href="../assets/ui-tokens.css">
+  <style>
+    .chart-legend .legend-item{border:0;background:transparent;padding:0;cursor:pointer}.chart-legend .legend-item.is-hidden{opacity:.42;text-decoration:line-through}
+    .live-group+.live-group{margin-top:14px}.live-group-title{margin:0 0 8px;color:var(--text-faint);font-size:12px;font-weight:700}.metric-grid.live.coverage{grid-template-columns:repeat(4,minmax(0,1fr))}.metric-grid.live.governance{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .version-distribution{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.version-card{min-width:0;display:block;padding:15px;border:1px solid var(--border);border-radius:var(--radius);color:inherit;background:var(--surface);text-decoration:none}.version-card:hover{border-color:var(--brand-border);background:var(--brand-soft)}.version-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.version-card-head strong{font-size:15px}.version-badge{flex:none;padding:3px 6px;border-radius:4px;color:var(--brand);background:var(--brand-soft);font-size:11px;font-weight:700}.version-card-value{display:flex;align-items:baseline;gap:6px;margin-top:12px}.version-card-value strong{font-size:24px}.version-card-value span{color:var(--text-muted);font-size:12px}.version-card small{display:block;margin-top:5px;color:var(--text-faint)}
+    @media(max-width:980px){.metric-grid.live.coverage,.metric-grid.live.governance,.version-distribution{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:620px){.metric-grid.live.coverage,.metric-grid.live.governance,.version-distribution{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="admin-page">
+    <aside class="host-sidebar">
+      <div class="host-brand"><div class="host-logo">XM</div><div><strong>聚合管理后台</strong><span>企业应用中心</span></div></div>
+      <nav class="host-nav">
+        <a href="#"><span class="host-nav-mark">⌂</span><span class="host-nav-copy">工作台</span></a>
+        <a href="#"><span class="host-nav-mark">▦</span><span class="host-nav-copy">业务管理</span></a>
+        <a href="#"><span class="host-nav-mark">◇</span><span class="host-nav-copy">数据中心</span></a>
+        <a class="active" href="管理后台_首页.html"><span class="host-nav-mark">AI</span><span class="host-nav-copy">先马·AI Studio</span></a>
+        <a href="#"><span class="host-nav-mark">⚙</span><span class="host-nav-copy">系统设置</span></a>
+      </nav>
+      <div class="host-sidebar-foot">聚合管理后台 · 内部环境</div>
+    </aside>
+    <main class="admin-workspace">
+      <header class="host-topbar">
+        <div><div class="host-crumb">企业应用 / 先马·AI Studio</div><h1>AI Studio 管理</h1><p>统一管理平台使用、企业技能与基础配置</p></div>
+        <div class="host-user"><div class="avatar">管</div><div class="account-copy"><strong>平台管理员</strong><span>管理员权限</span></div></div>
+      </header>
+      <section class="module-shell">
+        <div class="module-bar"><div class="module-title"><div class="module-title-mark">AI</div><div class="module-bar-copy"><strong>先马·AI Studio</strong><span>企业 AI 工作平台</span></div></div><span>数据更新时间：2026-08-13 09:29</span></div>
+        <nav class="module-nav">
+          <a class="active" href="管理后台_首页.html">首页</a><a href="管理后台_技能管理.html">技能管理</a><a href="管理后台_用户管理.html">用户管理</a><a href="管理后台_基础配置.html">基础配置</a><a href="管理后台_版本发布.html">版本发布</a>
+        </nav>
+        <div class="module-content">
+          <div class="admin-page-head"><div><h2>首页</h2><p>查看平台核心使用情况和技能治理进度。</p></div><button class="btn secondary" id="refresh-btn">↻ 刷新数据</button></div>
+
+          <div class="section-heading"><div><h3>实时概况</h3><p>当前状态与历史累计，不受下方时间范围影响</p></div></div>
+          <div class="live-group">
+            <div class="live-group-title">平台覆盖</div>
+            <div class="metric-grid live coverage">
+              <div class="metric"><div class="metric-label"><span>累计用户</span><i class="metric-dot"></i></div><strong>132</strong><small>历史累计，停用后仍保留</small></div>
+              <div class="metric"><div class="metric-label"><span>当前有效用户</span><i class="metric-dot"></i></div><strong>128</strong><small>当前仍有 AI Studio 使用资格</small></div>
+              <div class="metric"><div class="metric-label"><span>当前在线</span><i class="metric-dot"></i></div><strong>20</strong><small>最近 5 分钟有效心跳，按用户去重</small></div>
+              <div class="metric"><div class="metric-label"><span>近 30 天活跃设备</span><i class="metric-dot"></i></div><strong>101</strong><small>最近 30 天有效心跳，按设备去重</small></div>
+            </div>
+          </div>
+          <div class="live-group">
+            <div class="live-group-title">技能治理</div>
+            <div class="metric-grid live governance">
+              <div class="metric"><div class="metric-label"><span>企业技能数</span><i class="metric-dot"></i></div><strong>24</strong><small>含已发布、已下架；当前已发布 21 个</small></div>
+              <div class="metric highlight"><div class="metric-label"><span>待审批</span><i class="metric-dot"></i></div><strong>3</strong><div class="metric-foot"><small>等待管理员处理</small><a class="metric-action" href="管理后台_技能管理.html?tab=approval">去审批</a></div></div>
+              <div class="metric highlight"><div class="metric-label"><span>待发布</span><i class="metric-dot"></i></div><strong>2</strong><div class="metric-foot"><small>审批通过，尚未发布</small><a class="metric-action" href="管理后台_技能管理.html?tab=publish">去发布</a></div></div>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="section-heading"><div><h3>使用概况</h3><p id="period-copy">今日 00:00 至当前</p></div><div class="period-switch"><button class="period-btn active" data-period="今日">今日</button><button class="period-btn" data-period="近 7 天">近 7 天</button><button class="period-btn" data-period="近 30 天">近 30 天</button><button class="period-btn" id="custom-btn">自定义</button></div></div>
+            <div class="metric-grid period" id="period-metrics"></div>
+          </div>
+
+          <div class="dashboard-grid section-block">
+            <section class="panel">
+              <div class="panel-head"><div><h3>任务趋势</h3><span id="trend-copy">今日 · 每 2 小时统计</span></div><div class="chart-legend"><button class="legend-item" type="button" data-series="tasks"><i class="legend-line"></i>任务数</button><button class="legend-item" type="button" data-series="success"><i class="legend-line success"></i>成功数</button><button class="legend-item" type="button" data-series="failure"><i class="legend-line danger"></i>失败数</button></div></div>
+              <div class="panel-body"><div class="trend-chart"><div class="trend-grid"><span></span><span></span><span></span><span></span></div><svg class="trend-svg" viewBox="0 0 600 170" preserveAspectRatio="none" aria-label="任务趋势图"><polyline data-series-line="tasks" points="0,145 100,132 200,108 300,115 400,66 500,82 600,38" fill="none" stroke="#2457a6" stroke-width="3"/><polyline data-series-line="success" points="0,153 100,140 200,118 300,125 400,78 500,94 600,51" fill="none" stroke="#178553" stroke-width="3"/><polyline data-series-line="failure" points="0,165 100,162 200,158 300,157 400,151 500,150 600,149" fill="none" stroke="#c4323a" stroke-width="3"/></svg><div class="chart-axis" id="chart-axis"><span>00:00-01:59</span><span>02:00-03:59</span><span>04:00-05:59</span><span>06:00-07:59</span><span>08:00-09:59</span></div></div></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head"><div><h3>功能使用排行</h3><span>按关键操作人数排序 · Top 5</span></div></div>
+              <div class="panel-body"><ol class="rank-list"><li class="rank-item"><span class="rank-no">1</span><div class="rank-copy"><strong>AI 对话</strong><span>访问 46 人 / 92 次 · 关键操作 29 人 / 168 次</span></div><span class="rank-value">63.0%</span></li><li class="rank-item"><span class="rank-no">2</span><div class="rank-copy"><strong>技能库</strong><span>访问 39 人 / 71 次 · 关键操作 28 人 / 86 次</span></div><span class="rank-value">71.8%</span></li><li class="rank-item"><span class="rank-no">3</span><div class="rank-copy"><strong>浏览器工具</strong><span>访问 25 人 / 43 次 · 关键操作 18 人 / 37 次</span></div><span class="rank-value">72.0%</span></li><li class="rank-item"><span class="rank-no">4</span><div class="rank-copy"><strong>提示词库</strong><span>访问 23 人 / 38 次 · 关键操作 15 人 / 29 次</span></div><span class="rank-value">65.2%</span></li><li class="rank-item"><span class="rank-no">5</span><div class="rank-copy"><strong>任务结果</strong><span>访问 19 人 / 34 次 · 关键操作 12 人 / 21 次</span></div><span class="rank-value">63.2%</span></li></ol></div>
+            </section>
+          </div>
+
+          <section class="panel section-block">
+            <div class="panel-head"><div><h3>客户端版本分布</h3><span>近 30 天活跃设备 · 每台设备取最后一次心跳版本</span></div><a class="metric-action" href="管理后台_版本发布.html">版本发布</a></div>
+            <div class="panel-body">
+              <div class="version-distribution">
+                <a class="version-card" href="管理后台_版本发布.html"><div class="version-card-head"><strong>1.4.0</strong><span class="version-badge">最新版本</span></div><div class="version-card-value"><strong>1</strong><span>台 · 1.0%</span></div><small>点击查看版本发布</small></a>
+                <a class="version-card" href="管理后台_版本发布.html"><div class="version-card-head"><strong>1.3.0.3</strong></div><div class="version-card-value"><strong>31</strong><span>台 · 30.7%</span></div><small>点击查看版本发布</small></a>
+                <a class="version-card" href="管理后台_版本发布.html"><div class="version-card-head"><strong>1.3.0.2</strong></div><div class="version-card-value"><strong>47</strong><span>台 · 46.5%</span></div><small>点击查看版本发布</small></a>
+                <a class="version-card" href="管理后台_版本发布.html"><div class="version-card-head"><strong>1.0.3</strong></div><div class="version-card-value"><strong>22</strong><span>台 · 21.8%</span></div><small>设备数合计 101 台</small></a>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-layer" id="date-modal"><div class="modal"><div class="modal-head"><h2>自定义时间</h2><button class="icon-btn" data-close="date-modal" aria-label="关闭">×</button></div><div class="modal-body"><div class="form-grid"><div class="field"><label for="date-start">开始日期</label><input class="input" id="date-start" type="date" max="2026-08-13" value="2026-08-01"></div><div class="field"><label for="date-end">结束日期</label><input class="input" id="date-end" type="date" max="2026-08-13" value="2026-08-12"></div><div class="field full"><div class="field-note">统计天数包含开始日和结束日，系统将自动选择 2 小时、天、自然周或自然月粒度。</div><div class="field-error" id="date-error">请选择有效范围，结束日期不能早于开始日期或晚于今日</div></div></div></div><div class="modal-foot"><button class="btn secondary" data-close="date-modal">取消</button><button class="btn primary" id="date-apply">应用</button></div></div></div>
+  <div class="toast-host" id="toast-host" aria-live="polite"></div>
+  <script>
+    const data = { '今日':[46,38,31,186,169,17,'90.9%',72], '近 7 天':[93,76,68,1248,1146,102,'91.8%',463], '近 30 天':[121,108,96,4826,4391,435,'91.0%',1712], '自定义':[117,94,83,3215,2948,267,'91.7%',1106] };
+    const labels = ['访问用户','活跃用户','任务用户','任务数','成功数','失败数','成功率','企业技能调用次数'];
+    const metricNotes = ['周期内去重','完成关键操作','发起有效任务','首次进入执行','最终状态成功','最终状态失败','成功 /（成功 + 失败）','企业技能实际开始执行'];
+    const axisPresets = {
+      '今日':['00:00-01:59','02:00-03:59','04:00-05:59','06:00-07:59','08:00-09:59'],
+      '近 7 天':['08-07','08-08','08-09','08-10','08-11','08-12','08-13'],
+      '近 30 天':['07-15~07-19','07-20~07-26','07-27~08-02','08-03~08-09','08-10~08-13']
+    };
+    function renderMetrics(period){ document.getElementById('period-metrics').innerHTML = labels.map((label,i)=>`<div class="metric"><div class="metric-label"><span>${label}</span></div><strong>${data[period][i]}</strong><small>${metricNotes[i]}</small></div>`).join(''); }
+    function formatDate(date){ return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+    function formatFullDate(date){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
+    function inclusiveDays(start,end){ return Math.round((end-start)/86400000)+1; }
+    function sample(items,max=7){ if(items.length<=max)return items; return Array.from({length:max},(_,i)=>items[Math.round(i*(items.length-1)/(max-1))]); }
+    function dailyAxis(start,end){ const items=[]; for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1))items.push(formatDate(d)); return sample(items); }
+    function weeklyAxis(start,end){ const items=[];let cursor=new Date(start);while(cursor<=end){let weekEnd=new Date(cursor);const untilSunday=(7-weekEnd.getDay())%7;weekEnd.setDate(weekEnd.getDate()+untilSunday);if(weekEnd>end)weekEnd=new Date(end);items.push(`${formatDate(cursor)}~${formatDate(weekEnd)}`);cursor=new Date(weekEnd);cursor.setDate(cursor.getDate()+1)}return sample(items); }
+    function monthlyAxis(start,end){ const items=[];let cursor=new Date(start.getFullYear(),start.getMonth(),1);while(cursor<=end){items.push(`${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}`);cursor.setMonth(cursor.getMonth()+1)}return sample(items); }
+    function twoHourAxis(){ return Array.from({length:12},(_,i)=>`${String(i*2).padStart(2,'0')}:00-${String(i*2+1).padStart(2,'0')}:59`); }
+    function renderAxis(items){ document.getElementById('chart-axis').innerHTML=items.map(item=>`<span>${item}</span>`).join(''); }
+    function setPeriod(period,custom){
+      document.querySelectorAll('.period-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===period || (period==='自定义'&&b.id==='custom-btn')));
+      let copy,trend,axis;
+      if(period==='今日'){copy='今日 00:00 至当前';trend='今日 · 每 2 小时统计';axis=axisPresets['今日'];}
+      else if(period==='近 7 天'){copy='2026-08-07 00:00 至当前';trend='近 7 天 · 按天统计';axis=axisPresets['近 7 天'];}
+      else if(period==='近 30 天'){copy='2026-07-15 00:00 至当前';trend='近 30 天 · 按自然周统计';axis=axisPresets['近 30 天'];}
+      else {const {start,end,days}=custom;copy=`${formatFullDate(start)} 至 ${formatFullDate(end)}（共 ${days} 天）`;if(days===1){trend='自定义 · 每 2 小时统计';axis=sample(twoHourAxis());}else if(days<=14){trend='自定义 · 按天统计';axis=dailyAxis(start,end);}else if(days<=90){trend='自定义 · 按自然周统计';axis=weeklyAxis(start,end);}else{trend='自定义 · 按自然月统计';axis=monthlyAxis(start,end);}}
+      document.getElementById('period-copy').textContent=copy;document.getElementById('trend-copy').textContent=trend;renderAxis(axis);renderMetrics(period);
+    }
+    document.querySelectorAll('[data-period]').forEach(b=>b.addEventListener('click',()=>setPeriod(b.dataset.period)));
+    document.querySelectorAll('[data-series]').forEach(button=>button.addEventListener('click',()=>{const line=document.querySelector(`[data-series-line="${button.dataset.series}"]`),hidden=button.classList.toggle('is-hidden');line.style.display=hidden?'none':'';}));
+    document.getElementById('custom-btn').addEventListener('click',()=>document.getElementById('date-modal').classList.add('show'));
+    document.getElementById('date-apply').addEventListener('click',()=>{ const startValue=document.getElementById('date-start').value,endValue=document.getElementById('date-end').value,start=new Date(`${startValue}T00:00:00`),end=new Date(`${endValue}T00:00:00`),today=new Date('2026-08-13T00:00:00'),invalid=!startValue||!endValue||end<start||end>today;document.getElementById('date-error').classList.toggle('show',invalid);if(invalid)return;const days=inclusiveDays(start,end);document.getElementById('date-modal').classList.remove('show');setPeriod('自定义',{start,end,days});toast(`已按${days===1?'2 小时':days<=14?'天':days<=90?'自然周':'自然月'}粒度更新趋势`); });
+    document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).classList.remove('show')));
+    document.getElementById('refresh-btn').addEventListener('click',e=>{ const b=e.currentTarget;b.disabled=true;b.textContent='刷新中…';setTimeout(()=>{b.disabled=false;b.textContent='↻ 刷新数据';toast('数据已刷新');},700); });
+    function toast(message){ const n=document.createElement('div');n.className='toast';n.textContent=message;document.getElementById('toast-host').appendChild(n);setTimeout(()=>n.remove(),2200); }
+    renderMetrics('今日');
+  </script>
+</body>
+</html>

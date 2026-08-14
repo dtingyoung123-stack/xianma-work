@@ -5,16 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>先马·Centaur V1.0 - 产品文档</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="../versions.js"></script>
 <style>
 :root{--primary:#667eea;--text:#1f2937;--text-dim:#6b7280;--bg:#f9fafb;--border:#e5e7eb;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--bg);}
 .top-banner{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:20px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-.banner-content{width:80%;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
-.banner-left h1{font-size:24px;font-weight:600;margin-bottom:4px;}
+.banner-content{width:80%;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.version-title{display:flex;align-items:center;gap:10px;white-space:nowrap;margin-bottom:4px;}
+.version-title h1{font-size:24px;font-weight:600;}
+.version-select{height:32px;padding:0 28px 0 10px;border:1px solid rgba(255,255,255,0.45);border-radius:6px;color:#fff;background:#5d66bd;cursor:pointer;font-size:14px;}
+.version-select:focus{outline:2px solid #fff;outline-offset:2px;}
+.version-select option{color:var(--text);background:#fff;}
 .banner-left .meta{font-size:13px;opacity:0.9;}
-.banner-right{display:flex;gap:12px;}
-.tab-btn{padding:8px 20px;border-radius:6px;font-size:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;transition:all .2s;}
+.banner-right{display:flex;gap:12px;flex:none;}
+.tab-btn{padding:8px 20px;border-radius:6px;font-size:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;transition:all .2s;white-space:nowrap;}
 .tab-btn:hover{background:rgba(255,255,255,0.2);}
 .tab-btn.active{background:#fff;color:#667eea;border:none;font-weight:600;}
 .changelog-bar{background:#fff3cd;border-bottom:1px solid #ffc107;padding:10px 0;font-size:13px;color:#856404;}
@@ -57,6 +62,17 @@ iframe{width:100%;height:calc(100vh - 140px);border:none;background:#fff;border-
 body.proto-mode .main-container{padding:0;max-width:100%;}
 body.proto-mode .content-wrapper{margin:0;}
 body.proto-mode iframe{height:calc(100vh - 105px);border-radius:0;box-shadow:none;display:block;}
+@media(max-width:1000px){
+  .banner-content{gap:8px;}
+  .version-title{gap:8px;}
+  .version-title h1{font-size:20px;}
+  .version-select{width:128px;}
+}
+@media(max-width:600px){
+  .banner-content{width:90%;align-items:flex-start;flex-direction:column;}
+  .version-title{align-items:flex-start;flex-direction:column;white-space:normal;}
+  .version-title h1{font-size:18px;}
+}
 </style>
 </head>
 <body>
@@ -64,7 +80,10 @@ body.proto-mode iframe{height:calc(100vh - 105px);border-radius:0;box-shadow:non
 <div class="top-banner">
   <div class="banner-content">
     <div class="banner-left">
-      <h1>先马·Centaur AI Agent 企业管理面板 · V1.0</h1>
+      <div class="version-title">
+        <h1>先马·Centaur AI Agent 企业管理面板</h1>
+        <select class="version-select" id="version-select" aria-label="切换产品版本"></select>
+      </div>
       <div class="meta">PRD 详单版 v1 · 编写人：梦蝶 · 2026年7月14日</div>
     </div>
     <div class="banner-right">
@@ -114,6 +133,20 @@ body.proto-mode iframe{height:calc(100vh - 105px);border-radius:0;box-shadow:non
 
 <script>
 let prdLoaded=false;
+const CURRENT_VERSION='v1';
+const versionSelect=document.getElementById('version-select');
+const versions=window.XIANMA_PRD_VERSIONS;
+versions.all.forEach(version=>{
+  const option=document.createElement('option');
+  option.value=version.id;
+  option.textContent=version.label+(version.latest?'（最新）':'');
+  option.selected=version.id===CURRENT_VERSION;
+  versionSelect.appendChild(option);
+});
+versionSelect.addEventListener('change',()=>{
+  const currentView=window.location.hash.slice(1)==='prd'?'prd':'app';
+  window.location.href=versions.targetFor(versionSelect.value,currentView);
+});
 function switchTab(tab){
   ['prototype','prd'].forEach(t=>{
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
