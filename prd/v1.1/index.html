@@ -87,7 +87,8 @@
       let prdLoaded = false;
 
       function syncHeaderHeight() {
-        document.documentElement.style.setProperty("--actual-header-height", header.offsetHeight + "px");
+        const occupiedHeight = header.offsetHeight + releaseBar.offsetHeight;
+        document.documentElement.style.setProperty("--actual-header-height", occupiedHeight + "px");
       }
       function setActiveView(view) {
         viewLinks.forEach((link) => link.classList.toggle("active", link.dataset.view === view));
