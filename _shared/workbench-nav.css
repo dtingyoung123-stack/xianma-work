@@ -1,0 +1,86 @@
+.workbench-home-link {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 2147483000;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 8px;
+  background: rgba(24, 28, 38, .92);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
+  color: #fff;
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background .16s, border-color .16s, box-shadow .16s, transform .16s;
+}
+
+.workbench-home-link:hover {
+  border-color: rgba(255, 255, 255, .38);
+  background: rgba(33, 39, 52, .98);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .3);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.workbench-home-link:focus-visible {
+  outline: 3px solid rgba(217, 53, 63, .42);
+  outline-offset: 3px;
+}
+
+.workbench-home-link svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.workbench-home-link::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  width: max-content;
+  max-width: 140px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: rgba(17, 20, 28, .96);
+  color: #fff;
+  font: 600 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  letter-spacing: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition: opacity .14s, transform .14s;
+  white-space: nowrap;
+}
+
+.workbench-home-link:hover::after,
+.workbench-home-link:focus-visible::after {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+@media (max-width: 640px) {
+  .workbench-home-link {
+    left: max(12px, env(safe-area-inset-left));
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: 40px;
+    height: 40px;
+  }
+
+  .workbench-home-link.workbench-home-link--raised {
+    bottom: max(84px, calc(68px + env(safe-area-inset-bottom)));
+  }
+}
+
+@media print {
+  .workbench-home-link { display: none !important; }
+}

@@ -97,6 +97,73 @@
     padding: 0 10%;
     margin: 0 0 26px;
     display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    position: relative;
+    flex: 1 1 300px;
+    max-width: 420px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    color: var(--muted-soft);
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
+  .search-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 44px 0 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 13.5px;
+    letter-spacing: 0;
+    transition: border-color .15s, background .15s, box-shadow .15s;
+  }
+  .search-input::placeholder { color: var(--muted-soft); }
+  .search-input::-webkit-search-cancel-button { appearance: none; }
+  .search-input:focus {
+    border-color: rgba(99,102,241,.65);
+    background: var(--surface-hover);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+  }
+  .search-clear {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transform: translateY(-50%);
+  }
+  .search-clear:hover,
+  .search-clear:focus-visible {
+    background: rgba(255,255,255,.07);
+    color: var(--text);
+    outline: none;
+  }
+  .search-clear svg { width: 17px; height: 17px; }
+  .search-clear[hidden] { display: none; }
+  .filter-controls {
+    display: flex;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
   }
@@ -128,6 +195,30 @@
     font-size: 11.5px;
     font-weight: 700;
     opacity: .7;
+  }
+  .filter-summary {
+    min-height: 20px;
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .empty-state {
+    margin: 0 10% 36px;
+    padding: 40px 24px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .empty-state strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+    font-size: 15px;
   }
 
   /* ===== 分隔行 ===== */
@@ -194,6 +285,10 @@
     box-shadow: 0 16px 48px rgba(99,102,241,.14), 0 0 0 1px rgba(99,102,241,.08);
   }
   .card:hover::after { opacity: 1; }
+  .card:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 3px;
+  }
 
   /* 卡片头部：图标 + 状态 */
   .card-head {
@@ -544,9 +639,14 @@
 
   /* ===== 响应式 ===== */
   @media (max-width: 768px) {
-    .header { padding: 32px 20px 28px; flex-direction: column; gap: 20px; }
+    .header { padding: 28px 20px 24px; flex-direction: column; gap: 16px; }
     .header-right { text-align: left; }
     .stats { justify-content: flex-start; }
+    .filter-bar { padding: 0 20px; gap: 12px; }
+    .search-box { flex-basis: 100%; max-width: none; }
+    .filter-controls { gap: 8px; }
+    .filter-summary { width: 100%; margin-left: 0; }
+    .empty-state { margin: 0 20px 28px; }
     .section-row { padding: 0 20px; }
     .grid { padding-bottom: 40px; }
     .project-group { padding: 0 20px; }
@@ -572,18 +672,39 @@
     <div class="header-right">
     <div class="header-date" id="todayDate"></div>
     <div class="stats">
-      <div class="stat-pill"><span class="stat-dot dot-green"></span>5 进行中</div>
-      <div class="stat-pill"><span class="stat-dot dot-dim"></span>5 个项目</div>
-      <div class="stat-pill">最近更新 2026-07-27</div>
+      <div class="stat-pill"><span class="stat-dot dot-green"></span><span id="activeCount">0</span> 进行中</div>
+      <div class="stat-pill"><span class="stat-dot dot-dim"></span><span id="projectCount">0</span> 个项目</div>
+      <div class="stat-pill">最近更新 <span id="latestUpdate">--</span></div>
     </div>
   </div>
 </div>
 
 <div class="filter-bar" id="filterBar">
-  <button class="filter-btn active" data-dim="all" type="button">全部</button>
-  <button class="filter-btn" data-dim="proto" type="button">🔧 原型</button>
-  <button class="filter-btn" data-dim="plan" type="button">📋 方案</button>
-  <button class="filter-btn" data-dim="train" type="button">📖 培训</button>
+  <div class="search-box">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    </svg>
+    <input class="search-input" id="projectSearch" type="search" placeholder="搜索项目名称、版本号或内容" autocomplete="off" aria-label="搜索工作台项目">
+    <button class="search-clear" id="searchClear" type="button" aria-label="清空搜索" title="清空搜索" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+  </div>
+  <div class="filter-controls" role="group" aria-label="内容类型筛选">
+    <button class="filter-btn active" data-dim="all" type="button">全部</button>
+    <button class="filter-btn" data-dim="proto" type="button">🔧 原型</button>
+    <button class="filter-btn" data-dim="plan" type="button">📋 方案</button>
+    <button class="filter-btn" data-dim="train" type="button">📖 培训</button>
+  </div>
+  <div class="filter-summary" id="filterSummary" aria-live="polite"></div>
+</div>
+
+<div class="empty-state" id="emptyState" hidden>
+  <strong>未找到相关项目</strong>
+  请更换关键词或调整内容类型
 </div>
 
 <div class="section-row">
@@ -790,7 +911,7 @@
   <div class="project-group">
     <div class="project-group-head">
       <span class="project-group-title">🎨 先马 AI 设计平台</span>
-      <span class="project-group-sub">/xianma-ai-design/</span>
+      <span class="project-group-sub">/xianma-ai-design/ · /xianma-ai-canvas/</span>
     </div>
     <div class="project-grid">
 
@@ -830,17 +951,6 @@
           </div>
         </div>
       </div>
-
-    </div>
-  </div>
-
-  <!-- ===== 项目分组：先马 AI 无限画布 ===== -->
-  <div class="project-group">
-    <div class="project-group-head">
-      <span class="project-group-title">🖼 先马 AI 无限画布</span>
-      <span class="project-group-sub">/xianma-ai-canvas/</span>
-    </div>
-    <div class="project-grid">
 
       <div class="card" onclick="location.href='./xianma-ai-canvas/v1/'" style="--c-accent: #0ea5e9;">
         <div class="card-head">
@@ -940,7 +1050,7 @@
   document.getElementById("todayDate").textContent =
     d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日 " + days[d.getDay()];
 
-  // ===== 维度筛选：靠卡片类型标签文字识别，不依赖逐张标注 =====
+  // ===== 搜索与维度筛选 =====
   function cardDim(card) {
     const tag = card.querySelector(".type-tag");
     const t = tag ? tag.textContent : "";
@@ -949,12 +1059,53 @@
     return "plan"; // 规划 / 方案 / 业务沟通 归入方案
   }
   const allCards = [...document.querySelectorAll(".card")];
-  allCards.forEach(c => c.dataset.dim = cardDim(c));
+  const projectSearch = document.getElementById("projectSearch");
+  const searchClear = document.getElementById("searchClear");
+  const filterSummary = document.getElementById("filterSummary");
+  const emptyState = document.getElementById("emptyState");
+  let activeDim = "all";
 
-  function applyFilter(dim) {
-    allCards.forEach(c => {
-      c.style.display = (dim === "all" || c.dataset.dim === dim) ? "" : "none";
+  function normalizeSearchText(value) {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLocaleLowerCase("zh-CN")
+      .replace(/\s+/g, "");
+  }
+
+  function cardSearchText(card) {
+    const group = card.closest(".project-group");
+    const groupTitle = group?.querySelector(".project-group-title")?.textContent || "";
+    const groupPath = group?.querySelector(".project-group-sub")?.textContent || "";
+    const route = card.getAttribute("onclick") || "";
+    return normalizeSearchText([groupTitle, groupPath, card.textContent, route].join(" "));
+  }
+
+  allCards.forEach(card => {
+    card.dataset.dim = cardDim(card);
+    card.dataset.search = cardSearchText(card);
+    card.tabIndex = 0;
+    card.setAttribute("role", "link");
+    const name = card.querySelector(".card-name")?.textContent.trim() || "项目";
+    card.setAttribute("aria-label", "打开" + name);
+    card.addEventListener("keydown", event => {
+      if (event.target !== card || (event.key !== "Enter" && event.key !== " ")) return;
+      event.preventDefault();
+      card.click();
     });
+  });
+
+  function applyFilters() {
+    const query = normalizeSearchText(projectSearch.value);
+    let visibleCount = 0;
+
+    allCards.forEach(card => {
+      const dimMatches = activeDim === "all" || card.dataset.dim === activeDim;
+      const searchMatches = !query || card.dataset.search.includes(query);
+      const visible = dimMatches && searchMatches;
+      card.style.display = visible ? "" : "none";
+      if (visible) visibleCount += 1;
+    });
+
     // 空的项目分组隐藏
     document.querySelectorAll(".project-group").forEach(g => {
       const visible = [...g.querySelectorAll(".card")].some(c => c.style.display !== "none");
@@ -967,6 +1118,11 @@
       const row = grid.previousElementSibling;
       if (row && row.classList.contains("section-row")) row.style.display = visible ? "" : "none";
     });
+
+    const filtering = Boolean(query) || activeDim !== "all";
+    filterSummary.textContent = filtering ? "找到 " + visibleCount + " 项" : "";
+    searchClear.hidden = !projectSearch.value;
+    emptyState.hidden = visibleCount !== 0;
   }
 
   document.getElementById("filterBar").addEventListener("click", e => {
@@ -974,8 +1130,33 @@
     if (!btn) return;
     document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    applyFilter(btn.dataset.dim);
+    activeDim = btn.dataset.dim;
+    applyFilters();
   });
+
+  projectSearch.addEventListener("input", applyFilters);
+  projectSearch.addEventListener("keydown", event => {
+    if (event.key === "Escape" && projectSearch.value) {
+      projectSearch.value = "";
+      applyFilters();
+    }
+  });
+  searchClear.addEventListener("click", () => {
+    projectSearch.value = "";
+    projectSearch.focus();
+    applyFilters();
+  });
+
+  // ===== 首页统计：从当前卡片自动计算 =====
+  const updateDates = allCards.map(card => {
+    const value = card.querySelector(".card-date")?.textContent.match(/\d{4}-\d{2}-\d{2}/)?.[0];
+    return value || "";
+  }).filter(Boolean).sort();
+  document.getElementById("activeCount").textContent = allCards.filter(card =>
+    card.querySelector(".badge-active")?.textContent.trim() === "进行中"
+  ).length;
+  document.getElementById("projectCount").textContent = document.querySelectorAll(".project-group").length;
+  document.getElementById("latestUpdate").textContent = updateDates.at(-1) || "--";
 
   const recordKey = "mengdie-workbench-records";
   const recordLauncher = document.getElementById("recordLauncher");
