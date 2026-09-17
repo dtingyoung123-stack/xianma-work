@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="先马·AI Studio V2.1.0 产品文档与交互原型">
+  <title>先马·AI Studio V2.1.0 - 产品文档</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="../versions.js"></script>
+  <style>
+    :root{--brand:#D9353F;--brand-dark:#B72832;--brand-soft:#FFF1F2;--ink:#1D232B;--text:#303742;--muted:#68717D;--line:#E2E5E9;--surface:#fff;--canvas:#F3F5F7;--header-h:88px}
+    *{box-sizing:border-box;letter-spacing:0}html{scroll-behavior:smooth;scroll-padding-top:116px}body{margin:0;color:var(--text);background:var(--canvas);font:15px/1.75 "Microsoft YaHei","PingFang SC",Arial,sans-serif}a{color:var(--brand-dark);text-decoration:none}button,select{font:inherit}
+    .site-header{position:sticky;top:0;z-index:30;min-height:var(--header-h);color:#fff;background:var(--ink);box-shadow:0 1px 0 rgba(255,255,255,.08)}
+    .header-inner{max-width:1500px;min-height:var(--header-h);margin:auto;padding:14px 34px;display:flex;align-items:center;justify-content:space-between;gap:28px}.brand{min-width:0;display:flex;align-items:center;gap:14px}.brand-mark{width:48px;height:48px;flex:none;display:grid;place-items:center;border-radius:6px;background:#fff;overflow:hidden}.brand-mark img{width:44px;height:44px;object-fit:contain}.brand-copy{min-width:0}.brand-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.brand-title strong{font-size:21px;line-height:1.35}.brand-copy>span{display:block;margin-top:3px;color:#C9CED5;font-size:12px}
+    .version-select{height:30px;padding:0 28px 0 9px;border:1px solid #606873;border-radius:5px;color:#fff;background:#2A3038;cursor:pointer}.version-select:focus{outline:2px solid var(--brand);outline-offset:2px}.version-select option{color:var(--ink);background:#fff}
+    .header-nav{display:flex;align-items:center;gap:8px;flex:none}.header-nav a{height:38px;display:inline-flex;align-items:center;padding:0 14px;border:1px solid #4A515B;border-radius:5px;color:#E7E9EC;font-size:13px}.header-nav a:hover{border-color:#858C95;background:#2A3038}.header-nav a.active{border-color:var(--brand);color:#fff;background:var(--brand)}
+    .release-bar{border-bottom:1px solid #F0D2D5;background:#FFF8F8}.release-inner{max-width:1500px;margin:auto;padding:10px 34px;display:flex;align-items:center;gap:10px;color:#764044;font-size:13px}.release-dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--brand)}
+    .prototype-view{height:calc(100dvh - var(--actual-header-height,var(--header-h)));background:#fff}.prototype-frame{width:100%;height:100%;display:block;border:0;background:#fff}.view-panel[hidden]{display:none!important}body.prototype-mode{overflow:hidden}
+    .layout{max-width:1500px;margin:0 auto;padding:26px 34px 54px;display:grid;grid-template-columns:270px minmax(0,1fr);gap:24px;align-items:start}.layout>section{min-width:0}.toc-panel{position:sticky;top:134px;max-height:calc(100vh - 154px);overflow:auto;padding:16px 10px 18px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}.toc-title{padding:0 10px 10px;color:var(--ink);font-size:14px;font-weight:700}.toc-list{margin:0;padding:0;list-style:none}.toc-list a{display:block;padding:7px 10px;border-left:2px solid transparent;border-radius:0 4px 4px 0;color:#59626E;font-size:13px;line-height:1.45}.toc-list a:hover{color:var(--ink);background:#F6F7F8}.toc-list a.active{border-left-color:var(--brand);color:var(--brand-dark);background:var(--brand-soft);font-weight:700}.toc-list .level-3 a{padding-left:24px;color:#7A838E;font-size:12px}.mobile-toc{display:none;margin-bottom:14px;border:1px solid var(--line);border-radius:6px;background:#fff}.mobile-toc summary{padding:12px 14px;color:var(--ink);font-weight:700;cursor:pointer}.mobile-toc .toc-list{padding:0 8px 12px;max-height:50vh;overflow:auto}
+    .doc-card{min-width:0;padding:38px 44px 60px;border:1px solid var(--line);border-radius:6px;background:var(--surface);box-shadow:0 8px 28px rgba(26,34,44,.05)}.doc-tools{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:20px;margin-bottom:8px;border-bottom:1px solid var(--line)}.doc-tools-copy strong{display:block;color:var(--ink);font-size:13px}.doc-tools-copy span{display:block;margin-top:2px;color:var(--muted);font-size:12px}.tool-actions{display:flex;gap:8px}.tool-btn{height:36px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border:1px solid #C9CED4;border-radius:5px;color:#3B434D;background:#fff;font-size:13px;cursor:pointer}.tool-btn:hover{border-color:#999FA8;background:#F6F7F8}
+    .markdown-body{min-width:0}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4{color:var(--ink);line-height:1.4}.markdown-body h1{margin:24px 0 22px;font-size:30px}.markdown-body h2{margin:46px 0 20px;padding-bottom:10px;border-bottom:2px solid var(--brand);font-size:23px}.markdown-body h3{margin:32px 0 14px;padding-left:12px;border-left:3px solid var(--brand);font-size:18px}.markdown-body h4{margin:24px 0 10px;font-size:16px}.markdown-body p{margin:10px 0}.markdown-body ul,.markdown-body ol{padding-left:25px}.markdown-body li{margin:4px 0}.markdown-body li::marker{color:var(--brand)}.markdown-body blockquote{margin:16px 0;padding:12px 16px;border-left:3px solid var(--brand);color:#5B6470;background:var(--brand-soft)}.markdown-body blockquote p{margin:0}.table-wrap{width:100%;margin:15px 0 22px;overflow-x:auto;border:1px solid var(--line);border-radius:5px}.markdown-body table{width:100%;min-width:680px;border-collapse:collapse;font-size:13px;line-height:1.55}.markdown-body th,.markdown-body td{padding:10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.markdown-body thead th{color:#252C34;background:#F2F4F6}.markdown-body code{padding:2px 5px;border-radius:3px;color:#A52B35;background:#F7ECEE;font-family:Consolas,monospace;font-size:.9em}.markdown-body pre{margin:14px 0 22px;padding:16px 18px;overflow:auto;border-radius:5px;color:#DCE1E7;background:#20262E;font-size:12px}.markdown-body pre code{padding:0;color:inherit;background:transparent}.loading,.load-error{padding:60px 20px;text-align:center;color:var(--muted)}.load-error{color:var(--brand-dark)}
+    .back-top{position:fixed;right:24px;bottom:24px;width:42px;height:42px;display:grid;place-items:center;border:1px solid #C9CED4;border-radius:50%;color:#fff;background:var(--ink);opacity:0;pointer-events:none}.back-top.show{opacity:1;pointer-events:auto}.back-top:hover{background:var(--brand)}
+    @media(max-width:1000px){.header-inner{padding:12px 20px}.brand-title strong{font-size:17px}.brand-copy>span{display:none}.layout{grid-template-columns:1fr;padding:18px 20px 40px}.toc-panel{display:none}.mobile-toc{display:block}.doc-card{padding:28px}.header-nav a{padding:0 10px}}
+    @media(max-width:720px){.header-inner{align-items:flex-start;flex-direction:column;gap:10px}.site-header{position:relative}.header-nav{width:100%;overflow-x:auto}.header-nav a{flex:none}.release-inner{padding:9px 20px;align-items:flex-start}.layout{padding:12px}.doc-card{padding:22px 16px 36px}.doc-tools{align-items:flex-start;flex-direction:column}.markdown-body h1{font-size:24px}.markdown-body h2{font-size:20px}.brand-mark{width:42px;height:42px}.brand-mark img{width:38px;height:38px}}
+    @media print{.site-header,.release-bar,.toc-panel,.mobile-toc,.doc-tools,.back-top{display:none!important}.layout{display:block;max-width:none;padding:0}.doc-card{padding:0;border:0;box-shadow:none}}
+  </style>
+  <link rel="stylesheet" href="/_shared/workbench-nav.css">
+  <script src="/_shared/workbench-nav.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark"><img src="prototype/icon.png" alt="先马小马 Logo"></div>
+        <div class="brand-copy">
+          <div class="brand-title"><strong>先马·AI Studio 产品文档</strong><select class="version-select" id="version-select" aria-label="切换产品版本"></select></div>
+          <span>需求提报、本地文件自动化与定时任务增量 PRD</span>
+        </div>
+      </div>
+      <nav class="header-nav" aria-label="文档入口">
+        <a href="#app" data-view="app">应用端原型</a>
+        <a href="#admin" data-view="admin">管理后台</a>
+        <a href="#prd" data-view="prd">PRD 文档</a>
+        <a href="#related" data-view="related">相关文件</a>
+      </nav>
+    </div>
+  </header>
+  <div class="release-bar"><div class="release-inner"><span class="release-dot"></span><strong>2026-09-17</strong><span>V2.1.0 · 产品规则已确认，待技术评审 · 静态原型与文档不代表生产实现</span></div></div>
+  <main class="prototype-view view-panel" id="prototype-view" hidden><iframe class="prototype-frame" id="prototype-frame" title="先马·AI Studio 交互原型"></iframe></main>
+  <main class="prototype-view view-panel" id="related-view" hidden><iframe class="prototype-frame" id="related-frame" title="先马·AI Studio 相关文件"></iframe></main>
+  <main class="layout view-panel" id="prd-view" hidden>
+    <aside class="toc-panel" aria-label="PRD 目录"><div class="toc-title">目录</div><ol class="toc-list" id="toc"></ol></aside>
+    <section>
+      <details class="mobile-toc"><summary>查看文档目录</summary><ol class="toc-list" id="mobile-toc-list"></ol></details>
+      <article class="doc-card">
+        <div class="doc-tools"><div class="doc-tools-copy"><strong>当前有效 PRD</strong><span>HermesVault 中的 Markdown 为维护源，当前页面为发布副本</span></div><div class="tool-actions"><a class="tool-btn" href="PRD.md" download="先马AI-Studio-V2.1.0-增量PRD.md">下载 Markdown</a><button class="tool-btn" type="button" id="print-btn">打印 / PDF</button></div></div>
+        <div class="markdown-body" id="prd-content"><div class="loading">正在加载 PRD...</div></div>
+      </article>
+    </section>
+  </main>
+  <a class="back-top" id="back-top" href="#prd" aria-label="返回顶部">↑</a>
+  <script>
+    (() => {
+      const CURRENT_VERSION = "v2.1.0";
+      const versionSelect = document.getElementById("version-select");
+      const versions = window.XIANMA_PRD_VERSIONS;
+      versions.all.forEach((version) => {
+        const option = document.createElement("option");
+        option.value = version.id;
+        option.textContent = version.label + (version.latest ? "（最新）" : "");
+        option.selected = version.id === CURRENT_VERSION;
+        versionSelect.appendChild(option);
+      });
+      versionSelect.addEventListener("change", () => {
+        const currentHash = location.hash.slice(1);
+        const view = currentHash === "app" || currentHash === "admin" ? currentHash : "prd";
+        location.href = versions.targetFor(versionSelect.value, view);
+      });
+
+      const header = document.querySelector(".site-header");
+      const releaseBar = document.querySelector(".release-bar");
+      const prdView = document.getElementById("prd-view");
+      const prototypeView = document.getElementById("prototype-view");
+      const prototypeFrame = document.getElementById("prototype-frame");
+      const relatedView = document.getElementById("related-view");
+      const relatedFrame = document.getElementById("related-frame");
+      const viewLinks = [...document.querySelectorAll("[data-view]")];
+      const backTop = document.getElementById("back-top");
+      const prototypeSources = {
+        app: "prototype/应用端/应用端_新对话.html",
+        admin: "prototype/管理后台/管理后台_首页.html"
+      };
+      let prdLoaded = false;
+
+      function syncHeaderHeight() {
+        const occupiedHeight = header.offsetHeight + releaseBar.offsetHeight;
+        document.documentElement.style.setProperty("--actual-header-height", occupiedHeight + "px");
+      }
+      function setActiveView(view) {
+        viewLinks.forEach((link) => link.classList.toggle("active", link.dataset.view === view));
+      }
+      async function loadPrd() {
+        if (prdLoaded) return;
+        prdLoaded = true;
+        const content = document.getElementById("prd-content");
+        try {
+          const response = await fetch("PRD.md");
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          marked.setOptions({ gfm: true });
+          content.innerHTML = marked.parse(await response.text());
+          content.querySelectorAll("table").forEach((table) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "table-wrap";
+            table.before(wrapper);
+            wrapper.appendChild(table);
+          });
+          buildToc();
+        } catch (error) {
+          content.innerHTML = `<div class="load-error">PRD 加载失败：${error.message}<br>请通过 HTTP 服务访问此页面。</div>`;
+        }
+      }
+      function buildToc() {
+        const headings = [...document.querySelectorAll("#prd-content h2, #prd-content h3")];
+        const used = new Set();
+        headings.forEach((heading, index) => {
+          let id = heading.textContent.trim().toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, "-").replace(/^-|-$/g, "") || "section-" + index;
+          while (used.has(id)) id += "-" + index;
+          used.add(id); heading.id = id;
+        });
+        const fill = (target) => {
+          target.innerHTML = "";
+          headings.forEach((heading) => {
+            const item = document.createElement("li");
+            item.className = "level-" + heading.tagName.slice(1);
+            item.innerHTML = `<a href="#${heading.id}" data-target="${heading.id}">${heading.textContent}</a>`;
+            target.appendChild(item);
+          });
+        };
+        fill(document.getElementById("toc"));
+        fill(document.getElementById("mobile-toc-list"));
+      }
+      function renderView() {
+        const view = location.hash.slice(1) || "app";
+        const prototypeMode = view === "app" || view === "admin";
+        const relatedMode = view === "related";
+        document.body.classList.toggle("prototype-mode", prototypeMode);
+        prototypeView.hidden = !prototypeMode;
+        relatedView.hidden = !relatedMode;
+        prdView.hidden = prototypeMode || relatedMode;
+        releaseBar.hidden = prototypeMode || relatedMode;
+        backTop.hidden = prototypeMode || relatedMode;
+        if (prototypeMode) {
+          if (prototypeFrame.dataset.view !== view) {
+            prototypeFrame.src = prototypeSources[view];
+            prototypeFrame.dataset.view = view;
+          }
+          setActiveView(view);
+        } else if (relatedMode) {
+          if (relatedFrame.dataset.view !== view) {
+            relatedFrame.src = "related.html";
+            relatedFrame.dataset.view = view;
+          }
+          setActiveView(view);
+        } else {
+          setActiveView("prd");
+          loadPrd();
+          if (view === "prd") window.scrollTo(0, 0);
+        }
+        syncHeaderHeight();
+      }
+      document.getElementById("print-btn").addEventListener("click", () => window.print());
+      window.addEventListener("hashchange", renderView);
+      window.addEventListener("resize", syncHeaderHeight, { passive: true });
+      window.addEventListener("scroll", () => backTop.classList.toggle("show", !prdView.hidden && scrollY > 700), { passive: true });
+      renderView();
+    })();
+  </script>
+</body>
+</html>

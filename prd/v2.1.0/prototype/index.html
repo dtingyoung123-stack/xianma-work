@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>先马·AI Studio V2.1.0 原型入口</title>
+  <link rel="stylesheet" href="assets/ui-tokens.css">
+  <link rel="stylesheet" href="assets/v210-requirement.css">
+</head>
+<body>
+<main class="prototype-index">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px">
+    <div><h1>先马·AI Studio V2.1.0 原型</h1><p>完整继承 V2.0.0 原型，并增量加入需求提报、本地文件自动化与定时任务 MVP。</p></div>
+    <span class="status success">V2.1.0</span>
+  </div>
+  <div class="notice info">本入口用于原型评审。页面中的文件、字段、需求、统计、角色和能力版本均为脱敏演示数据，不代表生产功能或真实业务数据。</div>
+  <section class="index-group">
+    <h2>本期新增 · 定时任务</h2>
+    <div class="index-list">
+      <a class="index-link" href="应用端/应用端_已安排.html"><strong>定时任务管理</strong><span>新增、编辑、启停、立即运行、补跑、删除与运行记录</span></a>
+      <a class="index-link" href="应用端/应用端_新对话.html?tool=scheduled&amp;message=每周一9点生成上周周报"><strong>对话创建定时任务</strong><span>发送预填内容后展示任务草稿、确认创建并回写当前对话</span></a>
+      <a class="index-link" href="应用端/应用端_新对话.html?tool=scheduled&amp;message=每天9点"><strong>缺少任务内容</strong><span>只有执行时间时继续追问，不创建空任务</span></a>
+    </div>
+  </section>
+  <section class="index-group">
+    <h2>本期新增 · 本地文件自动化</h2>
+    <div class="index-list">
+      <a class="index-link" href="应用端/应用端_任务_执行结果.html?skill=local-file&amp;scenario=file-excel&amp;message=将新品源表转填至固定登记模板&amp;trigger=auto"><strong>Excel 完整流程</strong><span>工作区授权、执行计划、字段映射、生成与逐项校验</span></a>
+      <a class="index-link" href="应用端/应用端_任务_执行结果.html?skill=local-file&amp;scenario=file-word&amp;message=整理这份新品上市资料并生成结构化Word&amp;trigger=auto"><strong>Word 简化流程</strong><span>指定段落授权、结构化整理与新文件结果</span></a>
+      <a class="index-link" href="应用端/应用端_任务_执行结果.html?skill=local-file&amp;scenario=file-ppt&amp;message=根据新品发布会提纲和固定模板生成PPT&amp;trigger=auto"><strong>PPT 简化流程</strong><span>提纲授权、套用模板、页数与页面提纲</span></a>
+      <a class="index-link" href="应用端/应用端_任务_执行结果.html?skill=local-file&amp;scenario=file-partial&amp;message=将新品源表转填至固定登记模板&amp;trigger=auto"><strong>Excel 部分成功</strong><span>正常项、异常项、未处理项与异常清单</span></a>
+      <a class="index-link" href="应用端/应用端_任务_执行结果.html?skill=local-file&amp;scenario=file-permission-denied&amp;message=整理这份新品上市资料并生成结构化Word&amp;trigger=auto"><strong>内容授权拒绝</strong><span>取消后保持未执行，不上传且不生成结果</span></a>
+      <a class="index-link" href="应用端/应用端_任务_执行结果.html?skill=local-file&amp;scenario=file-error&amp;message=将新品源表转填至固定登记模板&amp;trigger=auto"><strong>本地文件错误</strong><span>文件占用、加密、损坏和必要字段缺失</span></a>
+    </div>
+  </section>
+  <section class="index-group">
+    <h2>本期新增 · 需求提报</h2>
+    <div class="index-list">
+      <a class="index-link" href="应用端/应用端_需求提报.html"><strong>需求提报</strong><span>能力核对、逐轮追问、摘要、建议方案、确认与提交</span></a>
+      <a class="index-link" href="应用端/应用端_我的提报.html"><strong>我的提报（需求提报子页面）</strong><span>本人已提交需求列表与只读详情</span></a>
+    </div>
+  </section>
+  <section class="index-group">
+    <h2>本期新增 · 管理后台</h2>
+    <div class="index-list">
+      <a class="index-link" href="管理后台/管理后台_需求管理.html"><strong>需求管理</strong><span>统计、搜索筛选、需求列表和导出状态</span></a>
+      <a class="index-link" href="管理后台/管理后台_需求详情.html"><strong>需求详情</strong><span>完整分析、现有能力、建议方案、AI判断和导出记录</span></a>
+    </div>
+  </section>
+  <section class="index-group">
+    <h2>V2.0.0 基线代表页面</h2>
+    <div class="index-list">
+      <a class="index-link" href="应用端/应用端_新对话.html"><strong>应用端新对话</strong><span>自然语言、/本地文件工具与建议项统一入口</span></a>
+      <a class="index-link" href="应用端/应用端_技能库.html"><strong>应用端技能库</strong><span>保留技能库完整原型</span></a>
+      <a class="index-link" href="应用端/应用端_浏览器任务.html"><strong>应用端浏览器任务</strong><span>保留浏览器自动化原型</span></a>
+      <a class="index-link" href="管理后台/管理后台_首页.html"><strong>管理后台首页</strong><span>验证“需求管理”已接入模块顶部导航</span></a>
+    </div>
+  </section>
+  <section class="index-group">
+    <h2>规范与说明</h2>
+    <div class="index-list">
+      <a class="index-link" href="../related/UI_SPEC.md"><strong>UI_SPEC.md</strong><span>V2.0.0 完整规范 + V2.1.0 增量规范</span></a>
+      <a class="index-link" href="../related/本地文件自动化MVP-原型说明.md"><strong>本地文件自动化 MVP 原型说明</strong><span>范围、流程、授权、异常和验收口径</span></a>
+      <a class="index-link" href="../related/定时任务MVP-原型说明.md"><strong>定时任务 MVP 原型说明</strong><span>双入口、周期、状态、权限边界和验收口径</span></a>
+      <a class="index-link" href="../related/V2.1.0-需求提报原型说明.md"><strong>需求提报原型说明</strong><span>版本关系、页面范围、业务边界和交互检查清单</span></a>
+    </div>
+  </section>
+</main>
+</body>
+</html>

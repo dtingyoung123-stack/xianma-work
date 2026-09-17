@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>先马·AI Studio V2.1.0 - 我的技能</title>
+  <link rel="stylesheet" href="../assets/ui-tokens.css">
+<script src="../assets/v210-icon.js"></script><script src="../assets/v210-app-sidebar.js?v=20260915-scheduled"></script></head>
+<body>
+  <div class="prototype-page">
+    <div class="app-window">
+      <div class="titlebar" aria-hidden="true"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span></div>
+      <div class="app-body">
+        <xianma-app-sidebar></xianma-app-sidebar>
+
+        <main class="app-main">
+          <a class="back-link" href="应用端_技能库.html"><xianma-icon name="arrow-left"></xianma-icon>返回技能库</a>
+          <header class="page-head">
+            <div>
+              <div class="meta-row"><span class="tag">我的技能</span><span class="status" id="status-badge"></span></div>
+              <h1 id="skill-title">评论卖点提炼</h1>
+              <p id="skill-desc">从评论文本中提炼高频诉求、产品卖点和改进方向。</p>
+            </div>
+            <div class="head-actions" id="head-actions"></div>
+          </header>
+
+          <div class="content-grid">
+            <div>
+              <div class="notice" id="state-notice"></div>
+
+              <section class="section">
+                <h2>技能信息</h2>
+                <div class="kv"><span>分类</span><strong id="detail-category">商业运营</strong></div>
+                <div class="kv"><span>标签</span><strong id="detail-tags">评论、洞察、电商</strong></div>
+                <div class="kv"><span>导入来源</span><strong id="detail-source">GitHub 公开仓库 · 一次性复制</strong></div>
+                <div class="kv"><span>入口文件</span><strong>SKILL.md</strong></div>
+                <div class="kv"><span>个人可用</span><strong>是</strong></div>
+              </section>
+
+              <section class="section">
+                <h2>审批记录</h2>
+                <div class="timeline" id="timeline"></div>
+              </section>
+            </div>
+
+            <aside class="side-panel">
+              <h3>技能状态</h3>
+              <div class="kv"><span>更新时间</span><strong>2026-08-11 14:20</strong></div>
+              <div class="section" style="padding-bottom:0;">
+                <h3>企业副本</h3>
+                <p id="copy-note" style="margin:0;color:var(--text-muted);font-size:13px;line-height:1.65;">提交审批后，管理员只管理企业副本，不会删除你的个人技能。</p>
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="confirm-layer" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal">
+      <div class="modal-head"><h2 id="confirm-title"></h2><button class="icon-btn" aria-label="关闭" onclick="closeModal()"><xianma-icon name="x"></xianma-icon></button></div>
+      <div class="modal-body"><p id="confirm-copy" style="margin:0;line-height:1.7;color:var(--text-muted);"></p></div>
+      <div class="modal-foot"><button class="btn secondary" onclick="closeModal()">取消</button><button class="btn primary" id="confirm-action">确认</button></div>
+    </div>
+  </div>
+  <div class="modal-layer" id="edit-layer" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+    <div class="modal wide">
+      <div class="modal-head"><h2 id="edit-title">编辑技能</h2><button class="icon-btn" aria-label="关闭" onclick="closeEdit()"><xianma-icon name="x"></xianma-icon></button></div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field full"><label for="edit-name">技能名称</label><input class="input" id="edit-name"><div class="field-error" id="edit-name-error">请输入技能名称。</div></div>
+          <div class="field full"><label for="edit-desc">技能简介</label><textarea class="textarea" id="edit-desc"></textarea></div>
+          <div class="field"><label for="edit-category-search">分类</label><div class="choice-select" id="edit-category-select"><button class="choice-control" id="edit-category-control" type="button" aria-haspopup="listbox" aria-expanded="false"><span class="choice-current" id="edit-category-current">商业运营</span><span class="choice-arrow"><xianma-icon name="chevron-down"></xianma-icon></span></button><div class="choice-menu" id="edit-category-menu"><div class="choice-search-wrap"><input class="choice-search" id="edit-category-search" placeholder="搜索分类" autocomplete="off"></div><div id="edit-category-options" role="listbox" aria-label="分类选项"></div></div></div><div class="field-note">分类由管理后台统一维护，仅支持单选。</div></div>
+          <div class="field"><label for="edit-tag-search">标签</label><div class="tag-select" id="edit-tag-select"><div class="tag-value-area" id="edit-tag-values"><input class="tag-search" id="edit-tag-search" placeholder="输入检索或新增标签" autocomplete="off"></div><div class="tag-menu" id="edit-tag-menu"></div></div><div class="field-note">支持多选，没有匹配项时按回车新增。</div></div>
+          <div class="field full"><label for="edit-instructions">技能说明</label><textarea class="textarea" id="edit-instructions" style="min-height:130px;"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn secondary" onclick="closeEdit()">取消</button><button class="btn primary" id="save-edit">保存</button></div>
+    </div>
+  </div>
+  <div class="toast-host" id="toast-host" aria-live="polite"></div>
+
+  <script>
+    const params = new URL(location.href).searchParams;
+    let state = params.get('state') || '未提交';
+    const skillId = params.get('id') || 'review';
+    const badge = document.getElementById('status-badge');
+    const notice = document.getElementById('state-notice');
+    const actions = document.getElementById('head-actions');
+    const timeline = document.getElementById('timeline');
+    const modal = document.getElementById('confirm-layer');
+    const editLayer = document.getElementById('edit-layer');
+    let pendingAction = null;
+    let customTimelineEvent = null;
+
+    const skillMap = {
+      review:{name:'评论卖点提炼', desc:'从评论文本中提炼高频诉求、产品卖点和改进方向。', category:'商业运营', tags:['评论','洞察','电商'], source:'GitHub 公开仓库 · 一次性复制', instructions:'读取用户提供的评论文件，归类高频诉求，并输出产品卖点、购买阻碍和售后风险。'},
+      meeting:{name:'会议记录整理', desc:'把会议记录整理为结论、待办、责任人与待确认项。', category:'办公协同', tags:['会议','总结'], source:'本地 Skill 文件夹', instructions:'读取会议记录，输出会议结论、待办事项、责任人和待确认问题。'},
+      sku:{name:'SKU 信息清洗', desc:'检查并整理 SKU 表格中的空值、重复值和异常格式。', category:'数据分析', tags:['表格','清洗'], source:'ZIP 压缩包', instructions:'检查 SKU 表格中的空值、重复值和格式异常，生成问题清单，不覆盖原文件。'},
+      listing:{name:'商品上架检查', desc:'按渠道规则检查商品标题、类目、属性与素材是否齐全。', category:'商业运营', tags:['商品','检查'], source:'本地 Skill 文件夹', instructions:'根据目标渠道规则检查商品资料，输出缺失项和修改建议。'},
+      'old-export':{name:'旧版数据导出', desc:'旧版导出规则已停止企业分发，创建者仍可使用个人技能。', category:'数据分析', tags:['导出','历史'], source:'本地 Skill 文件夹', instructions:'按个人保留的字段映射规则导出数据。'}
+    };
+    const skill = skillMap[skillId] || skillMap.review;
+    const editCategories = ['办公协同','开发工具','投资理财','效率工具','内容创作','信息资讯','教育学习','数据分析','网站部署','生活服务','商业运营','知识与学习'];
+    const editAvailableTags = ['评论','洞察','电商','文案','表格','清洗','图片','批处理','会议','总结','自动化'];
+    let editCategory = skill.category;
+    let editTags = [];
+
+    const stateMap = {
+      '未提交': {
+        badge:'muted', label:'仅自己可用', notice:'该技能已在你的个人空间中生效。提交审批后，在审批完成前仍可继续使用。',
+        actions:[['使用','use','secondary'],['编辑','edit','secondary'],['删除','delete','text-danger'],['提交审批','submit','primary']],
+        timeline:[['导入成功','2026-08-11 14:20 · 已进入我的技能']]
+      },
+      '已撤回': {
+        badge:'muted', label:'仅自己可用', notice:'审批申请已撤回。你可以继续使用、修改、重新提交或删除个人技能。',
+        actions:[['使用','use','secondary'],['编辑','edit','secondary'],['删除个人技能','delete','text-danger'],['重新提交','resubmit','primary']],
+        timeline:[['撤回申请','刚刚 · 企业审批已停止'],['提交审批','2026-08-11 15:05 · 已提交管理员'],['导入成功','2026-08-11 14:20 · 已进入我的技能']]
+      },
+      '审批中': {
+        badge:'warning', label:'发布处理中', notice:'等待管理员审批。你可以继续使用个人技能；如需修改，请先撤回申请。',
+        actions:[['使用','use','secondary'],['撤回申请','withdraw','secondary']],
+        timeline:[['提交审批','2026-08-11 15:05 · 等待管理员处理'],['导入成功','2026-08-11 14:20 · 已进入我的技能']]
+      },
+      '已驳回': {
+        badge:'danger', label:'需修改', notice:'驳回原因：说明中缺少输出格式和失败处理。修改后可重新提交，不影响个人继续使用。',
+        actions:[['使用','use','secondary'],['编辑','edit','secondary'],['删除个人技能','delete','text-danger'],['重新提交','resubmit','primary']],
+        timeline:[['审批驳回','2026-08-11 16:40 · 请补充输出格式和失败处理'],['提交审批','2026-08-11 15:05 · 已提交管理员'],['导入成功','2026-08-11 14:20 · 已进入我的技能']]
+      },
+      '待发布': {
+        badge:'warning', label:'发布处理中', notice:'已通过，等待管理员发布。个人技能仍可正常使用。',
+        actions:[['使用','use','secondary'],['删除个人技能','delete','text-danger']],
+        timeline:[['审批通过','2026-08-11 16:40 · 等待管理员发布'],['提交审批','2026-08-11 15:05 · 已提交管理员'],['导入成功','2026-08-11 14:20 · 已进入我的技能']]
+      },
+      '已发布': {
+        badge:'success', label:'企业已发布', notice:'企业技能已发布，全体员工可在企业技能中搜索和调用。',
+        actions:[['使用','use','primary'],['删除个人技能','delete','text-danger']],
+        timeline:[['企业发布','2026-08-11 17:10 · 全体员工可调用'],['审批通过','2026-08-11 16:40 · 管理员审批'],['提交审批','2026-08-11 15:05 · 已提交管理员']]
+      },
+      '已下架': {
+        badge:'danger', label:'企业已下架', notice:'企业技能已下架，其他员工不能再调用。你的个人技能仍保留并可继续使用。',
+        actions:[['使用个人技能','use','primary'],['删除个人技能','delete','text-danger']],
+        timeline:[['企业下架','2026-08-12 10:00 · 企业员工已无法调用'],['企业发布','2026-08-11 17:10 · 全体员工可调用'],['审批通过','2026-08-11 16:40 · 管理员审批']]
+      }
+    };
+
+    function render(){
+      const item = stateMap[state] || stateMap['未提交'];
+      document.getElementById('skill-title').textContent = skill.name;
+      document.getElementById('skill-desc').textContent = skill.desc;
+      document.getElementById('detail-category').textContent = skill.category;
+      document.getElementById('detail-tags').textContent = skill.tags.join('、');
+      document.getElementById('detail-source').textContent = skill.source;
+      badge.className = `status ${item.badge}`;
+      badge.textContent = item.label;
+      notice.className = `notice ${item.badge === 'danger' ? 'danger' : item.badge === 'success' ? 'success' : ''}`;
+      notice.textContent = item.notice;
+      actions.innerHTML = item.actions.map(([label, action, type]) => `<button class="btn ${type}" data-action="${action}">${label}</button>`).join('');
+      const events = customTimelineEvent ? [customTimelineEvent, ...item.timeline] : item.timeline;
+      timeline.innerHTML = events.map(([title, detail]) => `<div class="timeline-item"><strong>${title}</strong><span>${detail}</span></div>`).join('');
+      document.getElementById('copy-note').textContent = state === '已下架'
+        ? '企业副本已停止分发；个人技能与审批记录仍保留。'
+        : '管理员只管理企业副本，不会删除你的个人技能。';
+      actions.querySelectorAll('button').forEach(button => button.addEventListener('click', () => handleAction(button.dataset.action)));
+    }
+
+    function handleAction(action){
+      if(action === 'use'){ location.href = `应用端_新对话.html?skill=${encodeURIComponent(skillId)}&name=${encodeURIComponent(skill.name)}`; return; }
+      if(action === 'edit'){ openEdit(); return; }
+      const config = {
+        submit:['提交审批','提交后技能进入审批中；审批期间仍可个人使用。','审批中','提交成功，等待管理员审批'],
+        resubmit:['重新提交','将当前修改内容重新提交管理员审批。','审批中','已重新提交审批'],
+        withdraw:['撤回申请','撤回后企业审批停止；你可以继续使用、修改、重新提交或删除个人技能。','已撤回','审批申请已撤回'],
+        delete:['删除个人技能',state==='未提交'||state==='已撤回'||state==='已驳回'?'删除后你将不能再调用该个人技能，且不可恢复。':'仅删除你的个人副本；已形成的企业技能及其发布状态不受影响。','deleted','个人技能已删除，企业副本不受影响']
+      }[action];
+      if(!config) return;
+      pendingAction = config;
+      document.getElementById('confirm-title').textContent = config[0];
+      document.getElementById('confirm-copy').textContent = config[1];
+      document.getElementById('confirm-action').className = `btn ${action === 'delete' ? 'danger' : 'primary'}`;
+      modal.classList.add('show');
+    }
+
+    document.getElementById('confirm-action').addEventListener('click', () => {
+      if(!pendingAction) return;
+      const next = pendingAction[2];
+      const message = pendingAction[3];
+      closeModal();
+      if(next === 'deleted') { toast(message); setTimeout(() => location.href = '应用端_技能库.html', 500); return; }
+      state = next;
+      render();
+      toast(message);
+    });
+
+    function closeModal(){ modal.classList.remove('show'); pendingAction = null; }
+    function openEdit(){
+      document.getElementById('edit-title').textContent = '编辑技能';
+      document.getElementById('edit-name').value = skill.name;
+      document.getElementById('edit-desc').value = skill.desc;
+      editCategory = skill.category;
+      document.getElementById('edit-category-current').textContent = editCategory;
+      document.getElementById('edit-category-search').value = '';
+      renderEditCategoryOptions();
+      document.getElementById('edit-instructions').value = skill.instructions;
+      document.getElementById('edit-name-error').classList.remove('show');
+      editTags = [...skill.tags];
+      renderEditTags();
+      renderEditTagMenu();
+      editLayer.classList.add('show');
+    }
+    function closeEdit(){ editLayer.classList.remove('show'); closeEditCategory(); document.getElementById('edit-tag-select').classList.remove('open'); }
+
+    const editCategorySelect = document.getElementById('edit-category-select');
+    const editCategoryControl = document.getElementById('edit-category-control');
+    const editCategoryCurrent = document.getElementById('edit-category-current');
+    const editCategorySearch = document.getElementById('edit-category-search');
+    const editCategoryOptions = document.getElementById('edit-category-options');
+    function renderEditCategoryOptions(){
+      const keyword=editCategorySearch.value.trim().toLowerCase(); const matches=editCategories.filter(item=>!keyword||item.toLowerCase().includes(keyword)); editCategoryOptions.innerHTML='';
+      matches.forEach(item=>{const option=document.createElement('button');option.type='button';option.className=`choice-option ${item===editCategory?'selected':''}`;option.setAttribute('role','option');option.setAttribute('aria-selected',String(item===editCategory));const label=document.createElement('span');label.textContent=item;const marker=document.createElement('span');marker.replaceChildren(item===editCategory?XianmaIcon.create('check'):'');option.append(label,marker);option.addEventListener('click',()=>selectEditCategory(item));editCategoryOptions.append(option);});
+      if(!matches.length){const empty=document.createElement('div');empty.className='choice-empty';empty.textContent='没有匹配的分类';editCategoryOptions.append(empty);}
+    }
+    function openEditCategory(){editCategorySelect.classList.add('open');editCategoryControl.setAttribute('aria-expanded','true');renderEditCategoryOptions();editCategorySearch.focus();}
+    function closeEditCategory(){editCategorySelect.classList.remove('open');editCategoryControl.setAttribute('aria-expanded','false');editCategorySearch.value='';}
+    function selectEditCategory(value){editCategory=value;editCategoryCurrent.textContent=value;closeEditCategory();}
+    editCategoryControl.addEventListener('click',event=>{event.stopPropagation();editCategorySelect.classList.contains('open')?closeEditCategory():openEditCategory();});
+    editCategorySearch.addEventListener('click',event=>event.stopPropagation());
+    editCategorySearch.addEventListener('input',renderEditCategoryOptions);
+    editCategorySearch.addEventListener('keydown',event=>{if(event.key==='Escape')closeEditCategory();});
+
+    const editTagSelect = document.getElementById('edit-tag-select');
+    const editTagValues = document.getElementById('edit-tag-values');
+    const editTagSearch = document.getElementById('edit-tag-search');
+    const editTagMenu = document.getElementById('edit-tag-menu');
+    function renderEditTags(){
+      editTagValues.querySelectorAll('.tag-chip').forEach(node => node.remove());
+      editTags.forEach(tag => {
+        const chip=document.createElement('span'); chip.className='tag-chip'; chip.append(document.createTextNode(tag));
+        const remove=document.createElement('button'); remove.type='button'; remove.append(XianmaIcon.create('x')); remove.setAttribute('aria-label',`移除标签${tag}`);
+        remove.addEventListener('click',event=>{event.stopPropagation();removeEditTag(tag);}); chip.append(remove); editTagValues.insertBefore(chip,editTagSearch);
+      });
+    }
+    function renderEditTagMenu(){
+      const keyword=editTagSearch.value.trim().toLowerCase();
+      editTagMenu.innerHTML='';
+      editAvailableTags.filter(tag=>!keyword||tag.toLowerCase().includes(keyword)).forEach(tag=>{
+        const option=document.createElement('button'); option.type='button'; option.className=`tag-option ${editTags.includes(tag)?'selected':''}`;
+        const label=document.createElement('span'); label.textContent=tag; const marker=document.createElement('span'); marker.textContent=editTags.includes(tag)?'已选':''; option.append(label,marker);
+        option.addEventListener('click',()=>toggleEditTag(tag)); editTagMenu.append(option);
+      });
+      const raw=editTagSearch.value.trim(); const exact=editAvailableTags.some(tag=>tag.toLowerCase()===keyword);
+      if(raw&&!exact){const create=document.createElement('button');create.type='button';create.className='tag-option tag-create';create.textContent=`新增标签“${raw}”`;create.addEventListener('click',()=>addEditTag(raw));editTagMenu.append(create);}
+    }
+    function addEditTag(tag){const value=tag.trim();if(!value||editTags.includes(value))return;if(!editAvailableTags.includes(value))editAvailableTags.push(value);editTags.push(value);editTagSearch.value='';renderEditTags();renderEditTagMenu();editTagSearch.focus();}
+    function removeEditTag(tag){const index=editTags.indexOf(tag);if(index>=0)editTags.splice(index,1);renderEditTags();renderEditTagMenu();}
+    function toggleEditTag(tag){editTags.includes(tag)?removeEditTag(tag):addEditTag(tag);}
+    editTagValues.addEventListener('click',()=>{editTagSelect.classList.add('open');editTagSearch.focus();renderEditTagMenu();});
+    editTagSearch.addEventListener('focus',()=>{editTagSelect.classList.add('open');renderEditTagMenu();});
+    editTagSearch.addEventListener('input',renderEditTagMenu);
+    editTagSearch.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();addEditTag(editTagSearch.value);}if(event.key==='Backspace'&&!editTagSearch.value&&editTags.length)removeEditTag(editTags[editTags.length-1]);if(event.key==='Escape')editTagSelect.classList.remove('open');});
+    document.getElementById('save-edit').addEventListener('click',()=>{
+      const name=document.getElementById('edit-name').value.trim();
+      const normalized=name.toLocaleLowerCase();
+      const existingNames=['日报 / 周报生成','商品图批量处理','电商文案润色','会议记录整理','SKU 信息清洗','商品上架检查','旧版数据导出'].filter(item=>item!==skill.name);
+      const duplicate=existingNames.some(item=>item.trim().toLocaleLowerCase()===normalized);
+      const nameError=document.getElementById('edit-name-error');
+      nameError.textContent=duplicate?'你的个人技能中已存在同名技能':'技能名称不能为空';
+      nameError.classList.toggle('show',!name||duplicate); if(!name||duplicate)return;
+      skill.name=name; skill.desc=document.getElementById('edit-desc').value.trim(); skill.category=editCategory; skill.tags=[...editTags]; skill.instructions=document.getElementById('edit-instructions').value.trim();
+      customTimelineEvent=['保存修改','刚刚 · 个人技能已更新'];
+      closeEdit(); render(); toast('技能修改已保存');
+    });
+    function toast(message){
+      const node = document.createElement('div');
+      node.className = 'toast';
+      node.textContent = message;
+      document.getElementById('toast-host').appendChild(node);
+      setTimeout(() => node.remove(), 2200);
+    }
+    modal.addEventListener('click', event => { if(event.target === modal) closeModal(); });
+    editLayer.addEventListener('click', event => { if(event.target === editLayer) closeEdit(); });
+    document.addEventListener('click', event => { if(!editTagSelect.contains(event.target)) editTagSelect.classList.remove('open'); if(!editCategorySelect.contains(event.target)) closeEditCategory(); });
+    render();
+  </script>
+</body>
+</html>

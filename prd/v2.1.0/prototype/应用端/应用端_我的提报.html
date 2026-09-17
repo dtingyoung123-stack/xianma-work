@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>先马·AI Studio V2.1.0 - 我的提报</title>
+  <link rel="stylesheet" href="../assets/ui-tokens.css">
+  <link rel="stylesheet" href="../assets/v210-requirement.css">
+  <style>
+    .page-head .btn{display:inline-flex;align-items:center;gap:7px}
+    .page-head .btn xianma-icon{--icon-size:16px}
+    .request-row .status{margin-right:4px}
+    .detail-title .status{flex:none;white-space:nowrap}
+  </style>
+  <script src="../assets/v210-icon.js"></script>
+<script src="../assets/v210-app-sidebar.js?v=20260915-scheduled"></script></head>
+<body>
+  <div class="prototype-page">
+    <div class="app-window">
+      <div class="titlebar">
+        <span class="window-dot red"></span>
+        <span class="window-dot yellow"></span>
+        <span class="window-dot green"></span>
+      </div>
+      <div class="app-body">
+        <xianma-app-sidebar></xianma-app-sidebar>
+        <main class="app-main">
+          <header class="page-head">
+            <div>
+              <div style="margin-bottom:8px;color:var(--text-faint);font-size:12px">需求提报 / 我的提报</div>
+              <h1>我的提报</h1>
+              <p>查看本人已正式提交的记录；未提交内容只保留为当前草稿。</p>
+            </div>
+            <button class="btn primary" id="new-requirement" type="button"><xianma-icon name="plus"></xianma-icon><span>提报新需求</span></button>
+          </header>
+          <div class="tabs"><button class="tab active" type="button">已提交 <span class="tab-count">3</span></button></div>
+          <div class="request-layout">
+            <section class="request-list" aria-label="已提交需求">
+              <button class="request-row active" type="button" data-id="excel">
+                <h3>自动将新品资料转填至固定 Excel 登记表</h3>
+                <div style="margin-bottom:8px"><span class="status success">建议提交</span><span class="status muted">已提交</span></div>
+                <div class="request-meta"><span>2026-08-31 14:19</span><span>当前无对应能力</span></div>
+              </button>
+              <button class="request-row" type="button" data-id="batch">
+                <h3>浏览器支持多个店铺批量执行相同任务</h3>
+                <div style="margin-bottom:8px"><span class="status success">建议提交</span><span class="status muted">已提交</span></div>
+                <div class="request-meta"><span>2026-08-28 10:32</span><span>现有能力部分解决</span></div>
+              </button>
+              <button class="request-row" type="button" data-id="insist">
+                <h3>提升内容生成结果的稳定性</h3>
+                <div style="margin-bottom:8px"><span class="status warning">暂不建议提交</span><span class="status warning">坚持提交</span><span class="status muted">已提交</span></div>
+                <div class="request-meta"><span>2026-08-26 16:08</span><span>暂时无法判断</span></div>
+              </button>
+            </section>
+            <article class="detail-sheet" id="detail"></article>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-layer" id="draft-modal" role="dialog" aria-modal="true" aria-labelledby="draft-modal-title">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="draft-modal-title">当前还有未完成的需求</h2>
+        <button class="icon-btn" id="draft-modal-close" type="button" aria-label="关闭"><xianma-icon name="x"></xianma-icon></button>
+      </div>
+      <div class="modal-body">
+        <p style="margin:0;color:var(--text-muted);line-height:1.7">本期只保留一条未提交草稿。你可以继续当前需求，或清除现有草稿后新建；清除后无法恢复。</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn secondary" id="continue-draft" type="button">继续当前需求</button>
+        <button class="btn danger" id="discard-and-new" type="button">放弃并新建</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const draftKey = 'xianma-ai-studio:v2.1.0:requirement-draft:standard:default';
+    const records = {
+      excel: {
+        title: '自动将新品资料转填至固定 Excel 登记表',
+        id: 'REQ-20260831-142',
+        time: '2026-08-31 14:19',
+        problem: '固定表格间重复复制粘贴耗时，且存在漏填、错填风险',
+        impact: '每次约 5 个新品，人工需要数小时',
+        match: '当前无对应能力',
+        solution: '固定源表与固定登记模板自动映射，生成新文件后逐项核对并输出异常清单。',
+        scope: '固定模板、约 5 个新品、新文件输出、异常识别与人工检查',
+        advice: '建议提交',
+        insisted: false
+      },
+      batch: {
+        title: '浏览器支持多个店铺批量执行相同任务',
+        id: 'REQ-20260828-108',
+        time: '2026-08-28 10:32',
+        problem: '同一任务需要在多个店铺重复操作',
+        impact: '店铺越多，重复操作和遗漏风险越高',
+        match: '现有能力部分解决',
+        solution: '复用现有单网站浏览器操作能力，只新增多账号任务清单、逐店执行与失败汇总。',
+        scope: '账号清单、逐店执行、失败汇总与人工接管',
+        advice: '建议提交',
+        insisted: false
+      },
+      insist: {
+        title: '提升内容生成结果的稳定性',
+        id: 'REQ-20260826-096',
+        time: '2026-08-26 16:08',
+        problem: '当前对“结果更好”的判断对象和成功标准仍不明确',
+        impact: '多轮重新生成增加了人工筛选和修改时间',
+        match: '暂时无法判断',
+        solution: '先限定使用场景、目标对象和可观察的质量标准，再开展小范围验证。',
+        scope: '固定场景、明确评价样本、记录采用情况与人工修改情况',
+        advice: '暂不建议提交',
+        insisted: true,
+        reason: '该问题已影响多个高频任务，需要保留记录继续评估。'
+      }
+    };
+
+    const detail = document.getElementById('detail');
+    const draftModal = document.getElementById('draft-modal');
+
+    function statusTone(record) {
+      if (record.advice === '暂不建议提交') return 'warning';
+      return 'success';
+    }
+
+    function matchTone(match) {
+      if (match.includes('部分') || match.includes('无法')) return 'warning';
+      return 'muted';
+    }
+
+    function show(record) {
+      detail.innerHTML = `
+        <div class="detail-title">
+          <div><h2>${record.title}</h2><p>需求 ID：${record.id} · 提交时间：${record.time}</p></div>
+          <span class="status muted">已提交</span>
+        </div>
+        <section class="requirement-section">
+          <h3>需求分析</h3>
+          <div class="kv-grid">
+            <div class="kv-card"><span>真实问题</span><strong>${record.problem}</strong></div>
+            <div class="kv-card"><span>主要影响</span><strong>${record.impact}</strong></div>
+          </div>
+        </section>
+        <section class="requirement-section">
+          <h3>现有能力对比</h3>
+          <p><span class="status ${matchTone(record.match)}">${record.match}</span></p>
+        </section>
+        <section class="requirement-section">
+          <h3>建议解决方向 <span class="tag">AI建议</span></h3>
+          <p><strong>首选方案：</strong>${record.solution}</p>
+          <p><strong>第一期范围：</strong>${record.scope}</p>
+          <div class="notice">该方向不等于正式 PRD、技术方案或开发授权。</div>
+        </section>
+        <section class="requirement-section">
+          <h3>AI判断与确认</h3>
+          <p><span class="status ${statusTone(record)}">${record.advice}</span>${record.insisted ? ' <span class="status warning">提报人坚持提交</span>' : ''}</p>
+          ${record.insisted ? `<div class="notice"><strong>坚持提交理由：</strong>${record.reason}</div>` : ''}
+          <ul>
+            <li>摘要已由提报人确认</li>
+            <li>已完成独立提交授权</li>
+            <li>${record.insisted ? '本记录由提报人坚持提交，保留 AI 原始判断' : '本记录不是坚持提交'}</li>
+          </ul>
+        </section>
+        <div class="notice">以上内容为提交时保存的只读版本。若需修改，请重新发起一条需求。</div>`;
+    }
+
+    function hasDraft() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(draftKey) || 'null');
+        return Boolean(saved?.state?.answers?.length);
+      } catch (error) {
+        console.warn('draft_check_failed', error);
+        return false;
+      }
+    }
+
+    function openDraftModal() {
+      draftModal.classList.add('show');
+      document.getElementById('continue-draft').focus();
+    }
+
+    function closeDraftModal() {
+      draftModal.classList.remove('show');
+    }
+
+    function goToRequirement() {
+      location.href = '应用端_需求提报.html';
+    }
+
+    document.querySelectorAll('.request-row').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.request-row').forEach(row => row.classList.toggle('active', row === button));
+        show(records[button.dataset.id]);
+      });
+    });
+    document.getElementById('new-requirement').addEventListener('click', () => {
+      if (hasDraft()) openDraftModal();
+      else goToRequirement();
+    });
+    document.getElementById('continue-draft').addEventListener('click', goToRequirement);
+    document.getElementById('discard-and-new').addEventListener('click', () => {
+      localStorage.removeItem(draftKey);
+      goToRequirement();
+    });
+    document.getElementById('draft-modal-close').addEventListener('click', closeDraftModal);
+    draftModal.addEventListener('click', event => { if (event.target === draftModal) closeDraftModal(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && draftModal.classList.contains('show')) closeDraftModal(); });
+    show(records.excel);
+  </script>
+  
+</body>
+</html>

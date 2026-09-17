@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>先马·AI Studio V2.1.0 - 技能库</title>
+  <link rel="stylesheet" href="../assets/ui-tokens.css">
+  <style>
+    .category-bar{display:flex;align-items:center;gap:8px;margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+    .category-bar::-webkit-scrollbar{display:none}
+    .category-option{flex:0 0 auto;border:0;background:transparent;color:var(--text-muted);padding:7px 10px;font-size:14px;cursor:pointer;border-bottom:2px solid transparent}
+    .category-option:hover{color:var(--text)}
+    .category-option.active{color:var(--text-strong);font-weight:700;border-bottom-color:var(--brand)}
+    .category-more{flex:0 0 auto;width:28px;height:28px;border:0;border-radius:50%;background:var(--surface-muted);color:var(--text-muted);cursor:pointer}
+  </style>
+<script src="../assets/v210-icon.js"></script><script src="../assets/v210-app-sidebar.js?v=20260915-scheduled"></script></head>
+<body>
+  <div class="prototype-page">
+    <div class="app-window">
+      <div class="titlebar" aria-hidden="true">
+        <span class="window-dot red"></span>
+        <span class="window-dot yellow"></span>
+        <span class="window-dot green"></span>
+      </div>
+      <div class="app-body">
+        <xianma-app-sidebar></xianma-app-sidebar>
+
+        <main class="app-main">
+          <header class="page-head">
+            <div>
+              <h1>技能库</h1>
+              <p>调用现成技能，或导入自己的工作方法。</p>
+            </div>
+            <div class="head-actions">
+          <button class="btn secondary" id="open-online-library" type="button"><xianma-icon name="globe"></xianma-icon>在线技能库</button>
+              <a class="btn primary" href="应用端_技能库_导入.html"><xianma-icon name="plus"></xianma-icon>导入技能</a>
+            </div>
+          </header>
+
+          <div class="tabs" role="tablist" aria-label="技能范围">
+            <button class="tab active" data-scope="all" role="tab">全部技能<span class="tab-count" id="count-all"></span></button>
+            <button class="tab" data-scope="mine" role="tab">我的技能<span class="tab-count" id="count-mine"></span></button>
+            <button class="tab" data-scope="enterprise" role="tab">企业技能<span class="tab-count" id="count-enterprise"></span></button>
+          </div>
+
+          <div class="toolbar">
+            <label class="search-field" aria-label="搜索技能">
+              <input class="input" id="search" type="search" placeholder="搜索技能名称、说明或标签">
+            </label>
+          </div>
+          <div class="category-bar" id="category-bar" role="tablist" aria-label="技能分类">
+            <button class="category-option active" type="button" data-category="all">全部</button>
+            <button class="category-option" type="button" data-category="办公协同">办公协同</button>
+            <button class="category-option" type="button" data-category="效率工具">效率工具</button>
+            <button class="category-option" type="button" data-category="内容创作">内容创作</button>
+            <button class="category-option" type="button" data-category="数据分析">数据分析</button>
+            <button class="category-option" type="button" data-category="商业运营">商业运营</button>
+            <button class="category-option" type="button" data-category="开发工具">开发工具</button>
+            <button class="category-option" type="button" data-category="信息资讯">信息资讯</button>
+            <button class="category-option" type="button" data-category="教育学习">教育学习</button>
+            <button class="category-option" type="button" data-category="网站部署">网站部署</button>
+            <button class="category-option" type="button" data-category="生活服务">生活服务</button>
+            <button class="category-option" type="button" data-category="知识与学习">知识与学习</button>
+            <button class="category-more" type="button" aria-label="查看更多分类" title="查看更多分类"><xianma-icon name="chevron-right"></xianma-icon></button>
+          </div>
+
+          <section class="skill-grid" id="skill-grid" aria-live="polite"></section>
+          <div class="empty-state" id="empty-state">
+            <strong>没有找到匹配的技能</strong>
+            <span>调整关键词或分类后再试。</span>
+            <button class="btn secondary" id="clear-filter">清空筛选</button>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="modal-layer" id="online-library-layer" role="dialog" aria-modal="true" aria-labelledby="online-library-title">
+    <div class="modal browser">
+      <div class="modal-head">
+        <div class="modal-head-copy"><h2 id="online-library-title">在线技能库</h2><p>搜索公开技能，或粘贴公开 GitHub 技能仓库地址。</p></div>
+        <button class="icon-btn" id="close-online-library" type="button" aria-label="关闭"><xianma-icon name="x"></xianma-icon></button>
+      </div>
+      <div class="modal-body online-library-body">
+        <div class="online-library-tools">
+          <div class="online-search">
+            <xianma-icon class="online-search-mark" name="search"></xianma-icon>
+            <input id="online-search-input" type="search" placeholder="搜索技能名称、说明或公开 GitHub 地址" autocomplete="off">
+            <button class="online-search-clear" id="online-search-clear" type="button" aria-label="清空搜索"><xianma-icon name="x"></xianma-icon></button>
+            <button class="btn neutral" id="online-search-btn" type="button">搜索</button>
+          </div>
+          <div class="online-summary"><span id="online-summary-copy"></span><span>安装后进入“我的技能”并立即可用</span></div>
+        </div>
+        <div class="online-skill-list" id="online-skill-list" aria-live="polite"></div>
+        <div class="online-empty" id="online-empty"><div><strong id="online-empty-title">没有找到匹配的技能</strong><span id="online-empty-copy">换个关键词，或粘贴公开 GitHub 仓库地址再试。</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="toast-host" id="toast-host" aria-live="polite"></div>
+
+  <script>
+    const skills = [
+      {id:'weekly', name:'日报 / 周报生成', mark:'周', desc:'整理指定时间范围内的工作内容，并按公司模板生成结构化周报。', category:'办公协同', tags:['文档','总结'], source:'enterprise', owner:'企业技能', status:'已发布'},
+      {id:'image', name:'商品图批量处理', mark:'图', desc:'批量调整商品图尺寸、格式和背景，输出到指定工作目录。', category:'效率工具', tags:['图片','批处理'], source:'enterprise', owner:'企业技能', status:'已发布'},
+      {id:'copywriting', name:'电商文案润色', mark:'文', desc:'按平台和活动语气改写商品卖点、活动标题与短文案。', category:'内容创作', tags:['文案','电商'], source:'enterprise', owner:'企业技能', status:'已发布'},
+      {id:'meeting', name:'会议记录整理', mark:'会', desc:'把会议记录整理为结论、待办、责任人与待确认项。', category:'办公协同', tags:['会议','总结'], source:'mine', owner:'我的技能', status:'审批中'},
+      {id:'sku', name:'SKU 信息清洗', mark:'数', desc:'检查并整理 SKU 表格中的空值、重复值和异常格式。', category:'数据分析', tags:['表格','清洗'], source:'mine', owner:'我的技能', status:'已驳回'},
+      {id:'review', name:'评论卖点提炼', mark:'评', desc:'从评论文本中提炼高频诉求、产品卖点和改进方向。', category:'商业运营', tags:['评论','洞察'], source:'mine', owner:'我的技能', status:'未提交'},
+      {id:'listing', name:'商品上架检查', mark:'检', desc:'按渠道规则检查商品标题、类目、属性与素材是否齐全。', category:'商业运营', tags:['商品','检查'], source:'mine', owner:'我的技能', status:'待发布'},
+      {id:'activity-copy', name:'活动文案检查', mark:'校', desc:'检查活动文案中的利益点、时间信息和平台合规表达，已发布为企业技能。', category:'内容创作', tags:['文案','检查'], source:'mine', owner:'我的技能', status:'已发布'},
+      {id:'old-export', name:'旧版数据导出', mark:'导', desc:'导出规则已停止企业分发，创建者仍可使用个人技能。', category:'数据分析', tags:['导出','历史'], source:'mine', owner:'我的技能', status:'已下架'}
+    ];
+    const onlineSkills = [
+      {id:'marketing-brochure', mark:'营', name:'营销宣传册设计 Marketing Brochure', desc:'从需求梳理到版式建议，生成完整营销宣传册方案。', publisher:'dlazy', category:'内容创作', tags:['营销','宣传册'], installed:false},
+      {id:'china-3c-marketing', mark:'中', name:'中国 3C 营销助手', desc:'面向 3C 新品上市，提供决策、创意策划、负面预警与上线复盘。', publisher:'Snakeyj', category:'商业运营', tags:['3C','营销'], installed:false},
+      {id:'marketing-compliance', mark:'审', name:'营销文案合规审查', desc:'检查商品详情、直播话术和社媒文案中的高风险营销表述。', publisher:'好人', category:'商业运营', tags:['合规','文案'], installed:false},
+      {id:'marketing-fullstack', mark:'全', name:'中文营销全栈 Skills', desc:'覆盖内容创作、SEO 优化、转化文案和用户增长等营销任务。', publisher:'momo', category:'内容创作', tags:['营销','增长'], installed:false},
+      {id:'marketing-assistant', mark:'市', name:'市场营销助手 Marketing Assistant', desc:'协助完成营销选题策划、推广海报文案和公众号文章起草。', publisher:'afeicn', category:'商业运营', tags:['策划','推广'], installed:false},
+      {id:'word-of-mouth', mark:'口', name:'口碑营销', desc:'提供口碑营销问答指南与 SOP，支持日常营销工作的调用。', publisher:'codenova58', category:'商业运营', tags:['口碑','SOP'], installed:false},
+      {id:'meeting-kit', mark:'会', name:'会议纪要增强工具', desc:'从会议原文提取结论、行动项和待确认事项。', publisher:'open-team', category:'办公协同', tags:['会议','总结'], installed:true}
+    ];
+
+    let scope = 'all';
+    const grid = document.getElementById('skill-grid');
+    const empty = document.getElementById('empty-state');
+    const search = document.getElementById('search');
+    let activeCategory = 'all';
+    const onlineLayer = document.getElementById('online-library-layer');
+    const onlineSearchInput = document.getElementById('online-search-input');
+    const onlineSearchClear = document.getElementById('online-search-clear');
+    const onlineList = document.getElementById('online-skill-list');
+    const onlineEmpty = document.getElementById('online-empty');
+    let onlineResults = [...onlineSkills];
+
+    function displayStatus(value){
+      if(value === '未提交' || value === '已撤回') return '仅自己可用';
+      if(value === '审批中' || value === '待发布') return '发布处理中';
+      if(value === '已驳回') return '需修改';
+      if(value === '已发布') return '企业已发布';
+      if(value === '已下架') return '企业已下架';
+      return value;
+    }
+
+    function statusClass(value){
+      if(value === '企业已发布') return 'success';
+      if(value === '发布处理中') return 'warning';
+      if(value === '需修改' || value === '企业已下架') return 'danger';
+      return 'muted';
+    }
+
+    function skillUseUrl(skill){
+      return `应用端_新对话.html?skill=${encodeURIComponent(skill.id)}&name=${encodeURIComponent(skill.name)}`;
+    }
+
+    function skillManageUrl(skill){
+      return `应用端_技能库_个人详情.html?id=${encodeURIComponent(skill.id)}&state=${encodeURIComponent(skill.status)}`;
+    }
+
+    function render(){
+      const keyword = search.value.trim().toLowerCase();
+      const filtered = skills.filter(skill => {
+        const availableEnterprise = skill.source !== 'enterprise' || skill.status === '已发布';
+        const matchScope = scope === 'all' || skill.source === scope;
+        const matchCategory = activeCategory === 'all' || skill.category === activeCategory;
+        const haystack = [skill.name, skill.desc, skill.category, ...skill.tags].join(' ').toLowerCase();
+        return availableEnterprise && matchScope && matchCategory && (!keyword || haystack.includes(keyword));
+      });
+
+      grid.innerHTML = filtered.map(skill => {
+        const isOffline = skill.status === '已下架' && skill.source === 'enterprise';
+        const action = isOffline
+          ? '<button class="btn small secondary" disabled title="该企业技能已下架">已下架</button>'
+          : skill.source === 'mine'
+            ? `<div class="card-action-group"><a class="btn small primary" href="${skillUseUrl(skill)}">使用</a><a class="btn small secondary" href="${skillManageUrl(skill)}">管理</a></div>`
+            : `<a class="btn small primary" href="${skillUseUrl(skill)}">使用</a>`;
+        return `<article class="skill-card">
+          <div class="skill-top">
+            <div class="skill-icon" aria-hidden="true">${skill.mark}</div>
+            <div class="skill-title"><h3 title="${skill.name}">${skill.name}</h3><div class="skill-owner">${skill.category}</div></div>
+            <span class="status ${scope === 'mine' ? statusClass(displayStatus(skill.status)) : 'muted'}">${scope === 'mine' ? displayStatus(skill.status) : skill.owner}</span>
+          </div>
+          <p class="skill-desc">${skill.desc}</p>
+          <div class="meta-row">${skill.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+          <div class="skill-actions"><span></span>${action}</div>
+        </article>`;
+      }).join('');
+
+      grid.style.display = filtered.length ? 'grid' : 'none';
+      empty.classList.toggle('show', !filtered.length);
+    }
+
+    function updateCounts(){
+      document.getElementById('count-all').textContent = skills.filter(item => item.source !== 'enterprise' || item.status === '已发布').length;
+      document.getElementById('count-mine').textContent = skills.filter(item => item.source === 'mine').length;
+      document.getElementById('count-enterprise').textContent = skills.filter(item => item.source === 'enterprise').length;
+    }
+
+    function renderOnlineSkills(){
+      onlineList.innerHTML = '';
+      onlineResults.forEach(item => {
+        const row = document.createElement('article'); row.className = 'online-skill-item';
+        const icon = document.createElement('div'); icon.className = 'online-skill-icon'; icon.textContent = item.mark;
+        const copy = document.createElement('div'); copy.className = 'online-skill-copy';
+        const title = document.createElement('h3'); title.textContent = item.name; title.title = item.name;
+        const desc = document.createElement('p'); desc.textContent = item.desc; desc.title = item.desc;
+        const meta = document.createElement('div'); meta.className = 'online-skill-meta'; meta.textContent = `仓库所有者 ${item.publisher} · 公开 GitHub 仓库 · 兼容当前版本`;
+        copy.append(title, desc, meta);
+        const install = document.createElement('button'); install.type = 'button'; install.className = `btn online-install ${item.installed ? 'secondary' : 'neutral'}`; install.textContent = item.installed ? '已安装' : '安装'; install.disabled = item.installed; install.setAttribute('aria-label', `${item.installed ? '已安装' : '安装'} ${item.name}`);
+        install.addEventListener('click', () => installOnlineSkill(item, install));
+        row.append(icon, copy, install); onlineList.append(row);
+      });
+      const hasResults = onlineResults.length > 0;
+      onlineList.style.display = hasResults ? '' : 'none';
+      onlineEmpty.classList.toggle('show', !hasResults);
+      document.getElementById('online-summary-copy').textContent = `找到 ${onlineResults.length} 个兼容技能，已过滤 4 个格式不兼容技能`;
+    }
+
+    function githubCandidate(value){
+      try{
+        const url = new URL(value);
+        const parts = url.pathname.split('/').filter(Boolean);
+        if(url.hostname !== 'github.com' || parts.length < 2) return null;
+        const publisher = parts[0].replace(/[^\w.-]/g, '');
+        const repo = parts[1].replace(/[^\w.-]/g, '').replace(/\.git$/i, '');
+        if(!publisher || !repo) return null;
+        return {id:`github-${publisher}-${repo}`, mark:'G', name:repo, desc:'从公开 GitHub 仓库识别到的技能，安装前将校验 SKILL.md 与客户端兼容性。', publisher, downloads:'GitHub', category:'效率工具', tags:['GitHub','公开技能'], installed:false};
+      }catch(error){ return null; }
+    }
+
+    function searchOnlineSkills(){
+      const query = onlineSearchInput.value.trim();
+      const github = githubCandidate(query);
+      if(github){
+        const existing = onlineSkills.find(item => item.id === github.id);
+        onlineResults = [existing || github];
+      }else{
+        const keyword = query.toLowerCase();
+        onlineResults = onlineSkills.filter(item => !keyword || [item.name,item.desc,item.publisher,...item.tags].join(' ').toLowerCase().includes(keyword));
+      }
+      document.getElementById('online-empty-title').textContent = query.includes('不兼容') ? '该技能与当前版本不兼容' : '没有找到匹配的技能';
+      document.getElementById('online-empty-copy').textContent = query.includes('不兼容') ? '该结果已被兼容性过滤，请选择其他技能。' : '换个关键词，或粘贴公开 GitHub 仓库地址再试。';
+      renderOnlineSkills();
+    }
+
+    function installOnlineSkill(item, button){
+      button.disabled = true; button.textContent = '安装中…'; button.className = 'btn secondary online-install';
+      setTimeout(() => {
+        item.installed = true;
+        if(!onlineSkills.some(skill => skill.id === item.id)) onlineSkills.unshift(item);
+        if(!skills.some(skill => skill.id === item.id)) skills.push({id:item.id,name:item.name,mark:item.mark,desc:item.desc,category:item.category,tags:[...item.tags],source:'mine',owner:'我的技能',status:'未提交'});
+        button.textContent = '已安装'; button.setAttribute('aria-label', `已安装 ${item.name}`);
+        updateCounts(); render();
+        toast(`“${item.name}”已安装到我的技能`);
+      }, 700);
+    }
+
+    function openOnlineLibrary(){ onlineLayer.classList.add('show'); onlineSearchInput.focus(); searchOnlineSkills(); }
+    function closeOnlineLibrary(){ onlineLayer.classList.remove('show'); }
+    function toast(message){
+      const node = document.createElement('div'); node.className = 'toast'; node.textContent = message;
+      document.getElementById('toast-host').appendChild(node);
+      setTimeout(() => node.remove(), 2400);
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+      tab.classList.add('active');
+      scope = tab.dataset.scope;
+      render();
+    }));
+
+    search.addEventListener('input', render);
+    document.querySelectorAll('.category-option').forEach(option => option.addEventListener('click', () => {
+      document.querySelectorAll('.category-option').forEach(item => item.classList.remove('active'));
+      option.classList.add('active');
+      activeCategory = option.dataset.category;
+      render();
+    }));
+    document.querySelector('.category-more').addEventListener('click', () => {
+      document.getElementById('category-bar').scrollBy({left:220,behavior:'smooth'});
+    });
+    document.getElementById('open-online-library').addEventListener('click', openOnlineLibrary);
+    document.getElementById('close-online-library').addEventListener('click', closeOnlineLibrary);
+    document.getElementById('online-search-btn').addEventListener('click', searchOnlineSkills);
+    onlineSearchClear.addEventListener('click', () => { onlineSearchInput.value = ''; searchOnlineSkills(); onlineSearchInput.focus(); });
+    onlineSearchInput.addEventListener('input', () => { onlineSearchClear.style.visibility = onlineSearchInput.value ? 'visible' : 'hidden'; });
+    onlineSearchInput.addEventListener('keydown', event => { if(event.key === 'Enter') searchOnlineSkills(); if(event.key === 'Escape') closeOnlineLibrary(); });
+    onlineLayer.addEventListener('click', event => { if(event.target === onlineLayer) closeOnlineLibrary(); });
+    document.addEventListener('keydown', event => { if(event.key === 'Escape' && onlineLayer.classList.contains('show')) closeOnlineLibrary(); });
+    document.getElementById('clear-filter').addEventListener('click', () => {
+      search.value = '';
+      activeCategory = 'all';
+      document.querySelectorAll('.category-option').forEach(item => item.classList.toggle('active', item.dataset.category === 'all'));
+      render();
+      search.focus();
+    });
+
+    updateCounts();
+    render();
+    renderOnlineSkills();
+    onlineSearchClear.style.visibility = 'hidden';
+  </script>
+</body>
+</html>

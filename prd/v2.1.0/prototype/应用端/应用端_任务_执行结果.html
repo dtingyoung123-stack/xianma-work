@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>先马·AI Studio 执行与结果页原型</title>
+<link rel="stylesheet" href="../assets/ui-tokens.css">
+<style>
+  :root{
+    --bg-page:#e9eaec;
+    --bg-window:#ffffff;
+    --bg-sidebar:#f7f7f8;
+    --text:#1c2128;
+    --text-dim:#6b7280;
+    --text-faint:#9aa0a6;
+    --border:#e5e7eb;
+    --accent:#d9353f;
+    --accent-soft:#fdeceb;
+    --hover:#eceef0;
+    --active:#eef0f2;
+    --good:#1a7f4b;
+    --good-soft:#e8f7ef;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:var(--bg-page);
+    font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+  }
+  .window{
+    width:1280px;height:820px;background:var(--bg-window);border-radius:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.18);overflow:hidden;display:flex;flex-direction:column;
+  }
+  .titlebar{height:36px;display:flex;align-items:center;padding:0 16px;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .dot{width:12px;height:12px;border-radius:50%;}
+  .dot.red{background:#ff5f57;} .dot.yellow{background:#febc2e;} .dot.green{background:#28c840;}
+  .body{flex:1;display:flex;min-height:0;}
+
+  .sidebar{width:260px;flex-shrink:0;background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 12px;}
+  .brand{display:flex;align-items:center;gap:8px;padding:4px 8px 16px;}
+  .brand img{width:24px;height:24px;object-fit:contain;}
+  .brand span{font-size:14px;font-weight:600;color:var(--text);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;color:var(--text);cursor:pointer;}
+  .nav-item:hover{background:var(--hover);}
+  .nav-item .icon{width:18px;text-align:center;font-size:15px;}
+  .nav-item .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;line-height:1;padding:3px 6px;border-radius:20px;}
+  .section-label{font-size:12px;color:var(--text-faint);padding:18px 10px 6px;}
+  .project-group{margin-bottom:4px;}
+  .project-title{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;}
+  .project-title:hover{background:var(--hover);}
+  .history-list{padding-left:8px;}
+  .history-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;color:var(--text-dim);cursor:pointer;white-space:nowrap;overflow:hidden;}
+  .history-item:hover{background:var(--hover);}
+  .history-item.active{background:var(--active);color:var(--text);}
+  .history-item .title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .history-item .time{flex-shrink:0;font-size:11px;color:var(--text-faint);margin-left:8px;}
+  .expand-link{padding:6px 10px;font-size:12px;color:var(--text-faint);cursor:pointer;}
+  .sidebar-spacer{flex:1;}
+  .account{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;}
+  .account:hover{background:var(--hover);}
+  .account .avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;}
+  .account .who{display:flex;flex-direction:column;}
+  .account .who .name{font-size:13px;color:var(--text);}
+  .account .who .sub{font-size:11px;color:var(--text-faint);}
+
+  /* 通用交互:toast / 账户菜单 / 设置面板 */
+  .toast-host{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+  .toast{background:rgba(28,33,40,.92);color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);opacity:0;transform:translateY(-8px);transition:opacity .2s ease,transform .2s ease;}
+  .toast.show{opacity:1;transform:translateY(0);}
+  .account-wrap{position:relative;}
+  .acct-menu{position:absolute;left:0;bottom:calc(100% + 6px);width:calc(100% - 4px);background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.16);padding:6px;display:none;z-index:60;}
+  .acct-menu.open{display:block;}
+  .acct-menu .am-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:13.5px;color:var(--text);cursor:pointer;}
+  .acct-menu .am-item:hover{background:var(--hover);}
+  .acct-menu .am-item.danger{color:var(--accent);}
+  .acct-menu .am-item .am-ic{width:18px;text-align:center;}
+  .acct-menu .am-sep{height:1px;background:var(--border);margin:4px 2px;}
+  .st-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:200;}
+  .st-overlay.show{display:flex;}
+  .settings-panel{width:520px;max-width:92vw;background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.28);overflow:hidden;}
+  .sp-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .sp-head h3{margin:0;font-size:16px;font-weight:600;color:var(--text);}
+  .sp-close{cursor:pointer;color:var(--text-faint);font-size:20px;line-height:1;}
+  .sp-close:hover{color:var(--text);}
+  .sp-body{padding:20px 22px;}
+  .sp-row{margin-bottom:20px;}.sp-row:last-child{margin-bottom:0;}
+  .sp-row .sp-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;}
+  .sp-row .sp-hint{font-size:12px;color:var(--text-faint);margin-top:6px;}
+  .sp-seg{display:flex;gap:8px;flex-wrap:wrap;}
+  .sp-pill{padding:7px 14px;border:1px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;color:var(--text-dim);}
+  .sp-pill.selected{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+  .sp-input{width:100%;height:40px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13.5px;color:var(--text);outline:none;}
+  .sp-input:focus{border-color:var(--accent);}
+  .sp-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--border);}
+  .sp-btn{height:38px;padding:0 18px;border-radius:8px;border:none;font-size:13.5px;cursor:pointer;}
+  .sp-btn.ghost{background:var(--hover);color:var(--text-dim);}
+  .sp-btn.primary{background:var(--text);color:#fff;}
+
+  /* 主区域:对话流 */
+  .main{flex:1;display:flex;flex-direction:column;min-height:0;}
+  .thread{flex:1;overflow-y:auto;padding:32px 48px 16px;}
+  .thread-inner{max-width:720px;margin:0 auto;}
+
+  .msg-user{
+    display:flex;justify-content:flex-end;margin-bottom:20px;
+  }
+  .msg-user-content{display:flex;flex-direction:column;align-items:flex-end;gap:8px;max-width:75%;}
+  .msg-user .bubble{
+    background:var(--accent);color:#fff;
+    border-radius:14px 14px 4px 14px;
+    padding:11px 16px;font-size:14.5px;line-height:1.5;
+    max-width:100%;
+  }
+  .message-command{display:inline-flex;align-items:center;margin-right:7px;padding:2px 7px;border-radius:5px;background:#fff;color:var(--accent);font-size:12.5px;font-weight:600;vertical-align:1px;}
+  .tool-call{display:inline-flex;align-items:center;gap:6px;margin:4px 0 8px;padding:5px 9px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:12.5px;font-weight:600;}
+  .user-files{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;}
+  .user-files:empty{display:none;}
+  .user-file{display:inline-flex;align-items:center;gap:6px;max-width:240px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text-dim);font-size:12.5px;}
+  .user-file span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .msg-assistant{margin-bottom:28px;}
+
+  .status-bar{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;color:var(--text-dim);
+    padding:8px 4px;
+  }
+  .status-bar .spinner{
+    width:13px;height:13px;border-radius:50%;
+    border:2px solid var(--border);border-top-color:var(--accent);
+    animation:spin 0.8s linear infinite;
+  }
+  .status-bar.done .spinner{
+    border:none;width:16px;height:16px;background:var(--good-soft);color:var(--good);
+    display:flex;align-items:center;justify-content:center;font-size:10px;animation:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .step-log{
+    margin-top:6px;
+    padding-left:4px;
+    display:flex;flex-direction:column;gap:5px;
+  }
+  .step-log .step{
+    font-size:12.5px;color:var(--text-faint);
+    display:flex;align-items:center;gap:6px;
+  }
+  .step-log .step.step-done{color:var(--text-dim);}
+  .step-log .step .mark{color:var(--good);}
+
+  /* 结果卡片 */
+  .result-card{
+    margin-top:14px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px 20px;
+    background:#fff;
+    display:none;
+  }
+  .result-card.show{display:block;}
+  .result-card .rc-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .result-card .rc-icon{
+    width:34px;height:34px;border-radius:9px;background:var(--good-soft);color:var(--good);
+    display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+  }
+  .result-card .rc-title{font-size:14.5px;font-weight:600;color:var(--text);}
+  .result-card .rc-body{font-size:13.5px;color:var(--text-dim);line-height:1.7;}
+  .result-card .rc-actions{display:flex;gap:8px;margin-top:14px;}
+  .result-card .rc-btn{
+    padding:7px 14px;border-radius:8px;border:1px solid var(--border);
+    font-size:12.5px;color:var(--text);background:#fff;cursor:pointer;
+  }
+  .result-card .rc-btn:hover{background:var(--hover);}
+
+  /* 对话内定时任务确认卡 */
+  .schedule-draft{margin-top:8px;border:1px solid var(--border);border-radius:8px;background:#fff;overflow:hidden;}
+  .schedule-draft-head{display:flex;align-items:center;gap:9px;padding:12px 14px;border-bottom:1px solid var(--border);}
+  .schedule-draft-head xianma-icon{--icon-size:17px;color:var(--accent);}
+  .schedule-draft-head strong{font-size:14px;color:var(--text);}
+  .schedule-draft-body{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;padding:14px;}
+  .schedule-draft-field{min-width:0;}
+  .schedule-draft-field.full{grid-column:1/-1;}
+  .schedule-draft-field span,.schedule-draft-field strong{display:block;}
+  .schedule-draft-field span{margin-bottom:4px;color:var(--text-faint);font-size:11px;}
+  .schedule-draft-field strong{overflow-wrap:anywhere;color:var(--text);font-size:13px;line-height:1.5;}
+  .schedule-draft-note{display:flex;align-items:flex-start;gap:7px;grid-column:1/-1;padding:9px 10px;border-radius:6px;background:#fffaf0;color:#715514;font-size:11px;line-height:1.5;}
+  .schedule-draft-note xianma-icon{--icon-size:14px;flex:none;margin-top:1px;}
+  .schedule-draft-actions{display:flex;justify-content:flex-end;gap:8px;padding:11px 14px;border-top:1px solid var(--border);}
+  .schedule-action-btn{height:34px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text-dim);font:inherit;font-size:12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;}
+  .schedule-action-btn:hover{background:var(--hover);}
+  .schedule-action-btn.primary{border-color:var(--accent);background:var(--accent);color:#fff;}
+  .schedule-success{padding:15px;}
+  .schedule-success-title{display:flex;align-items:center;gap:8px;color:var(--good);font-size:14px;font-weight:600;}
+  .schedule-success-title xianma-icon{--icon-size:18px;}
+  .schedule-success p{margin:8px 0 0;color:var(--text-dim);font-size:12px;line-height:1.6;}
+
+  /* 润色结果:可复制正文块 */
+  .rc-textbox{
+    margin-top:12px;border:1px solid var(--border);border-radius:10px;
+    background:#fafafa;padding:14px 16px;font-size:13.5px;color:var(--text);
+    line-height:1.75;white-space:pre-wrap;user-select:text;max-height:260px;overflow-y:auto;
+  }
+  /* 图片结果:缩略图网格 */
+  .rc-imggrid{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .rc-thumb{
+    position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;
+    background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 50%/16px 16px;
+    aspect-ratio:1/1;cursor:pointer;
+  }
+  .rc-thumb .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .rc-thumb .ph.c1{background:linear-gradient(135deg,#ffe3e0,#ffd0cb);}
+  .rc-thumb .ph.c2{background:linear-gradient(135deg,#e3ecff,#cddcff);}
+  .rc-thumb .ph.c3{background:linear-gradient(135deg,#e6f7ec,#cdeed8);}
+  .rc-thumb .tb-bar{
+    position:absolute;left:0;right:0;bottom:0;display:flex;gap:6px;justify-content:center;
+    padding:6px;background:rgba(0,0,0,.42);opacity:0;transition:opacity .15s;
+  }
+  .rc-thumb:hover .tb-bar{opacity:1;}
+  .rc-thumb .tb-btn{font-size:11px;color:#fff;background:rgba(255,255,255,.18);border-radius:6px;padding:3px 8px;}
+  .rc-thumb .tb-btn:hover{background:rgba(255,255,255,.32);}
+  /* 图片查看灯箱 */
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:300;}
+  .lightbox.show{display:flex;}
+  .lightbox .lb-inner{width:480px;height:480px;max-width:86vw;max-height:86vh;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:72px;box-shadow:0 24px 60px rgba(0,0,0,.4);}
+  .lightbox .lb-close{position:absolute;top:24px;right:28px;color:#fff;font-size:30px;cursor:pointer;}
+
+  /* 追加对话:AI 文本回复气泡 */
+  .msg-reply{font-size:14.5px;color:var(--text);line-height:1.7;padding:2px 4px;}
+  .msg-reply.typing{color:var(--text-faint);}
+
+  /* 底部继续输入 */
+  .compose{
+    padding:16px 48px 24px;
+    border-top:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .compose-inner{max-width:720px;margin:0 auto;position:relative;}
+  /* 技能引用标签 + 唤出浮层 */
+  .ref-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .ref-row:empty{display:none;}
+  .ref-chip{display:inline-flex;align-items:center;gap:5px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent);border-radius:16px;padding:3px 8px 3px 10px;font-size:12.5px;font-weight:500;}
+  .ref-chip .rc-x{cursor:pointer;font-size:13px;line-height:1;opacity:.7;}
+  .ref-chip .rc-x:hover{opacity:1;}
+  .skill-flyout{
+    position:absolute;left:0;bottom:calc(100% + 8px);width:340px;max-width:100%;
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 12px 32px rgba(0,0,0,.16);padding:6px;max-height:var(--flyout-max-height,320px);flex-direction:column;overflow:hidden;display:none;z-index:80;
+  }
+  .skill-flyout.open{display:flex;}
+  .skill-flyout .fly-title{flex:none;font-size:12px;color:var(--text-faint);padding:8px 10px 4px;}
+  #flyout-list{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;}
+  .skill-option{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;text-decoration:none;}
+  .skill-option:hover{background:var(--hover);}
+  .skill-option .so-icon{width:30px;height:30px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .skill-option .so-name{font-size:13.5px;color:var(--text);font-weight:500;}
+  .skill-option .so-source{margin-left:6px;color:var(--text-faint);font-size:11px;font-weight:400;}
+  .skill-option .so-desc{font-size:12px;color:var(--text-faint);margin-top:1px;}
+  .skill-flyout .fly-footer{flex:none;border-top:1px solid var(--border);margin-top:6px;padding-top:6px;}
+  .skill-flyout .fly-footer a{display:block;padding:8px 10px;font-size:13px;color:var(--text-dim);text-decoration:none;border-radius:9px;}
+  .skill-flyout .fly-footer a:hover{background:var(--hover);color:var(--text);}
+  .icon-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+  .input-card{
+    border:1px solid var(--border);border-radius:16px;background:#fff;
+    box-shadow:0 4px 16px rgba(0,0,0,0.05);padding:14px 16px 10px;
+  }
+  .input-card textarea{
+    width:100%;border:none;outline:none;resize:none;font-size:14.5px;
+    font-family:inherit;color:var(--text);min-height:24px;line-height:1.5;
+  }
+  .input-card textarea::placeholder{color:var(--text-faint);}
+  .input-toolbar{display:flex;align-items:center;margin-top:8px;}
+  .icon-btn{
+    width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text-dim);cursor:pointer;
+  }
+  .icon-btn:hover{background:var(--hover);}
+  .toolbar-spacer{flex:1;}
+  .send-btn{
+    width:32px;height:32px;border-radius:50%;background:var(--accent);border:none;color:#fff;
+    font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .send-btn:hover{background:#bd2c35;}
+  .send-btn xianma-icon{--icon-size:16px;transform:rotate(-90deg);}
+
+  /* 模型选择器 */
+  .model-select{
+    position:relative;
+    margin-right:10px;
+  }
+  .model-btn{
+    height:32px;
+    padding:0 10px 0 12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#fff;
+    display:flex;align-items:center;gap:6px;
+    font-size:13px;
+    color:var(--text-dim);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .model-btn:hover{background:var(--hover);}
+  .model-btn .arrow{font-size:10px;opacity:.6;}
+  .model-dropdown{
+    position:absolute;
+    bottom:calc(100% + 6px);
+    right:0;
+    width:200px;
+    max-height:320px;
+    overflow-y:auto;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:10px;
+    box-shadow:0 12px 32px rgba(0,0,0,.16);
+    padding:6px;
+    display:none;
+    z-index:100;
+  }
+  .model-dropdown.open{display:block;}
+  .model-option{
+    padding:9px 12px;
+    border-radius:8px;
+    font-size:13.5px;
+    color:var(--text);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .model-option:hover{background:var(--hover);}
+  .model-option.selected{background:var(--accent-soft);color:var(--accent);font-weight:600;}
+  .model-option .check{font-size:14px;}
+
+  /* 高风险操作确认弹窗 */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(20,22,26,0.35);
+    display:none;align-items:center;justify-content:center;z-index:50;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-confirm{
+    width:400px;background:#fff;border-radius:14px;padding:24px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  }
+  .modal-confirm .mc-icon{
+    width:38px;height:38px;border-radius:10px;background:#fff6e0;color:#9a6400;
+    display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;
+  }
+  .modal-confirm h3{font-size:15.5px;margin:0 0 8px;color:var(--text);}
+  .modal-confirm p{font-size:13.5px;color:var(--text-dim);line-height:1.6;margin:0 0 20px;}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+  .modal-actions .btn{
+    height:38px;padding:0 18px;border-radius:8px;border:none;font-size:13.5px;cursor:pointer;
+  }
+  .modal-actions .btn-cancel{background:var(--hover);color:var(--text-dim);}
+  .modal-actions .btn-cancel:hover{background:#e2e4e6;}
+  .modal-actions .btn-confirm{background:var(--accent);color:#fff;}
+  .modal-actions .btn-confirm:hover{background:#bd2c35;}
+
+  .detail-overlay{position:fixed;inset:0;display:none;justify-content:flex-end;background:rgba(20,22,26,.28);z-index:120;}
+  .detail-overlay.show{display:flex;}
+  .detail-drawer{width:520px;max-width:48vw;height:100%;display:flex;flex-direction:column;background:#fff;box-shadow:-16px 0 40px rgba(0,0,0,.18);}
+  .detail-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);}
+  .detail-head h3{margin:0;font-size:16px;color:var(--text);}
+  .detail-close{width:30px;height:30px;border:0;border-radius:6px;background:transparent;color:var(--text-dim);font-size:20px;cursor:pointer;}
+  .detail-close:hover{background:var(--hover);}
+  .detail-body{flex:1;overflow:auto;padding:18px 20px;}
+  .detail-section{padding:0 0 18px;margin-bottom:18px;border-bottom:1px solid var(--border);}
+  .detail-section:last-child{border-bottom:0;}
+  .detail-section h4{margin:0 0 10px;font-size:13.5px;color:var(--text);}
+  .detail-grid{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 12px;font-size:12.5px;line-height:1.5;}
+  .detail-grid .label{color:var(--text-faint);}.detail-grid .value{color:var(--text);word-break:break-word;}
+  .detail-events{display:flex;flex-direction:column;gap:8px;}
+  .detail-event{display:flex;gap:8px;color:var(--text-dim);font-size:12.5px;line-height:1.5;}
+  .detail-event xianma-icon{--icon-size:14px;flex:none;margin-top:2px;color:var(--good);}
+  .privacy-line{padding:10px 12px;border-radius:6px;background:#f7f8fa;color:var(--text-dim);font-size:12px;line-height:1.6;}
+  .local-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;margin-top:12px;padding:12px;background:#f7f8fa;border-radius:8px;}
+  .local-summary .item{min-width:0;}
+  .local-summary .label{display:block;margin-bottom:3px;font-size:11.5px;color:var(--text-faint);}
+  .local-summary .value{display:block;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;color:var(--text);white-space:nowrap;}
+  .local-notice{display:flex;align-items:flex-start;gap:8px;margin-top:12px;padding:10px 12px;border:1px solid #ead9a7;border-radius:8px;background:#fffaf0;color:#715514;font-size:12.5px;line-height:1.55;}
+  .local-notice xianma-icon{--icon-size:15px;flex:none;margin-top:2px;}
+  .local-result-list{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
+  .local-result-row{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.55;color:var(--text-dim);}
+  .local-result-row xianma-icon{--icon-size:15px;flex:none;margin-top:2px;}
+  .local-result-row.good xianma-icon{color:var(--good);}
+  .local-result-row.warn xianma-icon{color:#9a6400;}
+  .result-card .rc-actions{flex-wrap:wrap;}
+  @media(max-width:1100px){
+    .thread{padding-left:32px;padding-right:32px;}
+    .compose{padding-left:32px;padding-right:32px;}
+    .detail-drawer{max-width:62vw;}
+  }
+  @media(max-width:760px){.schedule-draft-body{grid-template-columns:1fr;}.schedule-draft-field.full,.schedule-draft-note{grid-column:auto;}}
+
+  .note{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:12px;color:#9aa0a6;}
+/* 历史对话删除按钮 */
+  .history-item{position:relative;}
+  .history-item .hist-del{flex-shrink:0;margin-left:6px;width:18px;height:18px;border-radius:5px;display:none;align-items:center;justify-content:center;font-size:13px;line-height:1;color:var(--text-faint);}
+  .history-item:hover .hist-del{display:flex;}
+  .history-item:hover .time{display:none;}
+  .history-item .hist-del:hover{background:var(--accent-soft);color:var(--accent);}
+</style>
+<script src="../assets/v210-icon.js"></script><script src="../assets/v210-app-sidebar.js?v=20260915-scheduled"></script></head>
+<body class="v210-app-page">
+
+<div class="window app-window">
+  <div class="titlebar">
+    <div class="dot window-dot red"></div><div class="dot window-dot yellow"></div><div class="dot window-dot green"></div>
+  </div>
+
+  <div class="body app-body">
+    <xianma-app-sidebar></xianma-app-sidebar>
+
+    <div class="main app-main">
+      <div class="thread" id="thread">
+        <div class="thread-inner">
+          <div class="msg-user">
+            <div class="msg-user-content">
+              <div class="bubble" id="user-msg">帮我生成本周周报</div>
+              <div class="user-files" id="user-files"></div>
+            </div>
+          </div>
+
+          <div class="msg-assistant">
+            <div class="status-bar" id="status-bar">
+              <span class="spinner"></span>
+              <span id="status-text">正在读取内容来源…</span>
+            </div>
+            <div class="step-log" id="step-log"></div>
+
+            <div class="result-card" id="result-card">
+              <div class="rc-head">
+                <div class="rc-icon"><xianma-icon name="circle-check"></xianma-icon></div>
+                <div class="rc-title" id="rc-title">本周周报.docx 已生成</div>
+              </div>
+              <div class="rc-body" id="rc-body"></div>
+              <div class="rc-rich" id="rc-rich"></div>
+              <div class="rc-actions" id="rc-actions"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compose">
+        <div class="compose-inner">
+          <div class="skill-flyout" id="flyout">
+            <div class="fly-title">技能与工具</div>
+            <div id="flyout-list">
+            <a class="skill-option" onclick="pickSkill('browser','globe','浏览器','tool');return false;">
+              <div class="so-icon"><xianma-icon name="globe"></xianma-icon></div>
+              <div><div class="so-name">浏览器</div><div class="so-desc">打开网页并完成点击、输入、上传或下载</div></div>
+            </a>
+            <a class="skill-option" onclick="pickSkill('local-file','file','本地文件','tool');return false;">
+              <div class="so-icon"><xianma-icon name="file"></xianma-icon></div>
+              <div><div class="so-name">本地文件</div><div class="so-desc">查找、整理并处理授权工作区中的 Excel、Word、PPT</div></div>
+            </a>
+            <a class="skill-option" onclick="pickSkill('scheduled','clock-3','定时任务','tool');return false;">
+              <div class="so-icon"><xianma-icon name="clock-3"></xianma-icon></div>
+              <div><div class="so-name">定时任务</div><div class="so-desc">让当前任务按单次、每天或每周自动执行</div></div>
+            </a>
+            <a class="skill-option" onclick="pickSkill('weekly','📅','日报 / 周报生成');return false;">
+              <div class="so-icon">📅</div>
+              <div><div class="so-name">日报 / 周报生成 <span class="so-source">企业技能</span></div><div class="so-desc">按时间范围整理内容,自动排版输出</div></div>
+            </a>
+            <a class="skill-option" onclick="pickSkill('image','🖼️','P图 / 图片处理');return false;">
+              <div class="so-icon">🖼️</div>
+              <div><div class="so-name">P图 / 图片处理 <span class="so-source">企业技能</span></div><div class="so-desc">批量去背景、加水印、格式转换</div></div>
+            </a>
+            <a class="skill-option" onclick="pickSkill('copywriting','✍️','文案润色 / 改写');return false;">
+              <div class="so-icon">✍️</div>
+              <div><div class="so-name">文案润色 / 改写 <span class="so-source">企业技能</span></div><div class="so-desc">调整语气、精简或扩写一段文字</div></div>
+            </a>
+            <a class="skill-option" onclick="pickSkill('meeting','📝','会议记录整理');return false;">
+              <div class="so-icon">📝</div>
+              <div><div class="so-name">会议记录整理 <span class="so-source">我的技能</span></div><div class="so-desc">生成摘要与待办事项清单</div></div>
+            </a>
+            </div>
+            <div class="fly-footer"><a href="应用端_技能库.html">查看全部技能 <xianma-icon name="arrow-right"></xianma-icon></a></div>
+          </div>
+          <div class="input-card">
+            <div class="ref-row" id="ref-row"></div>
+            <textarea rows="1" id="follow-input" placeholder="继续输入,或用 / 引用技能…" oninput="handleFollowInput(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFollow();}"></textarea>
+            <div class="input-toolbar">
+              <button class="icon-btn" id="plus-btn" type="button" title="引用技能 / 上传文件" aria-label="引用技能或上传文件" onclick="toggleFlyout()"><xianma-icon name="plus"></xianma-icon></button>
+              <div class="toolbar-spacer"></div>
+              <div class="model-select">
+                <div class="model-btn" onclick="toggleModelDropdown(event)">
+                  <span id="current-model">5.5</span>
+                  <span class="arrow"><xianma-icon name="chevron-down"></xianma-icon></span>
+                </div>
+                <div class="model-dropdown" id="model-dropdown">
+                  <div class="model-option" onclick="selectModel('5.6 Sol')">5.6 Sol</div>
+                  <div class="model-option" onclick="selectModel('5.6 Terra')">5.6 Terra</div>
+                  <div class="model-option" onclick="selectModel('5.6 Luna')">5.6 Luna</div>
+                  <div class="model-option selected" onclick="selectModel('5.5')">5.5 <span class="check"><xianma-icon name="check"></xianma-icon></span></div>
+                  <div class="model-option" onclick="selectModel('5.4')">5.4</div>
+                  <div class="model-option" onclick="selectModel('5.4 Mini')">5.4 Mini</div>
+                  <div class="model-option" onclick="selectModel('5.2')">5.2</div>
+                </div>
+              </div>
+              <div class="send-btn" role="button" aria-label="发送" title="发送" onclick="sendFollow()"><xianma-icon name="arrow-right"></xianma-icon></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 高风险操作确认弹窗 -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-confirm">
+    <div class="mc-icon"><xianma-icon name="triangle-alert"></xianma-icon></div>
+    <h3 id="modal-title">检测到同名文件,是否覆盖?</h3>
+    <p id="modal-text">工作区中已存在「本周周报.docx」,继续执行将覆盖原文件内容,此操作无法撤销。</p>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="modal-cancel-btn" onclick="cancelModal()">取消</button>
+      <button class="btn btn-confirm" id="modal-confirm-btn" onclick="confirmModal()">确认覆盖</button>
+    </div>
+  </div>
+</div>
+
+<div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this)closeExecutionDetail()">
+  <aside class="detail-drawer" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="detail-head"><h3 id="detail-title">执行详情</h3><button class="detail-close" aria-label="关闭执行详情" onclick="closeExecutionDetail()"><xianma-icon name="x"></xianma-icon></button></div>
+    <div class="detail-body" id="detail-body"></div>
+  </aside>
+</div>
+
+<!-- 图片查看灯箱 -->
+<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <span class="lb-close" role="button" aria-label="关闭预览" onclick="closeLightbox()"><xianma-icon name="x"></xianma-icon></span>
+  <div class="lb-inner"></div>
+</div>
+
+<div class="toast-host" id="toast-host"></div>
+<div class="st-overlay" id="st-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-panel">
+    <div class="sp-head"><h3>设置</h3><button type="button" class="sp-close" aria-label="关闭设置" onclick="closeSettings()"><xianma-icon name="x"></xianma-icon></button></div>
+    <div class="sp-body">
+      <div class="sp-row"><div class="sp-label">外观主题</div><div class="sp-seg"><div class="sp-pill selected" onclick="pickPill(this)">浅色</div><div class="sp-pill" onclick="pickPill(this)">深色</div><div class="sp-pill" onclick="pickPill(this)">跟随系统</div></div></div>
+      <div class="sp-row"><div class="sp-label">工作区目录</div><input class="sp-input" value="~/先马AI Studio/工作区" readonly><div class="sp-hint">Agent 的读写操作被限定在此目录内(原型展示)</div></div>
+      <div class="sp-row"><div class="sp-label">默认模型</div><div class="sp-seg"><div class="sp-pill selected" onclick="pickPill(this)">标准</div><div class="sp-pill" onclick="pickPill(this)">高性能</div></div></div>
+    </div>
+    <div class="sp-foot"><button class="sp-btn ghost" onclick="closeSettings()">取消</button><button class="sp-btn primary" onclick="closeSettings();toast('设置已保存')">保存</button></div>
+  </div>
+</div>
+
+<script>
+  function toast(msg){
+    const host=document.getElementById('toast-host');
+    const t=document.createElement('div');t.className='toast';t.textContent=msg;
+    host.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));
+    setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),200);},2200);
+  }
+  function toggleAcctMenu(e){e&&e.stopPropagation();document.getElementById('acct-menu').classList.toggle('open');}
+  function closeAcctMenu(){const m=document.getElementById('acct-menu');m&&m.classList.remove('open');}
+  function openSettings(){document.getElementById('st-overlay').classList.add('show');}
+  function closeSettings(){document.getElementById('st-overlay').classList.remove('show');}
+  function pickPill(el){el.parentNode.querySelectorAll('.sp-pill').forEach(p=>p.classList.remove('selected'));el.classList.add('selected');}
+  function logout(){location.href='应用端_登录.html';}
+  function sendFollow(){
+    const el=document.getElementById('follow-input');
+    const v=(el.value||'').trim();
+    if(!v && refs.length===0){toast('请输入内容或引用一个技能');return;}
+    if(window.__followBusy){toast('正在生成回复,请稍候…');return;}
+    const selectedRef=refs[0];
+    if(selectedRef&&selectedRef.id==='browser'&&!v){toast('请在 /浏览器 后输入要完成的网页任务');return;}
+    if(selectedRef&&selectedRef.id==='local-file'&&!v){toast('请在 /本地文件 后输入具体处理任务');return;}
+    const scheduledIntent=getFollowScheduledIntent(v,selectedRef&&selectedRef.id==='scheduled');
+    if(scheduledIntent.kind==='ask'){
+      el.value='';refs.length=0;renderRefs();closeFlyout();appendScheduledQuestion(v,scheduledIntent.message,selectedRef);return;
+    }
+    if(scheduledIntent.kind==='draft'){
+      el.value='';refs.length=0;renderRefs();closeFlyout();appendScheduledDraft(v,scheduledIntent.task,selectedRef);return;
+    }
+    el.value='';
+    refs.length = 0; renderRefs(); closeFlyout();
+    if(selectedRef&&selectedRef.id==='browser'){
+      appendBrowserFollow(v,selectedRef);
+      return;
+    }
+    if(selectedRef&&selectedRef.id==='local-file'){
+      const localScenario=/PPT|演示文稿/i.test(v)?'file-ppt':/Word|文档/i.test(v)?'file-word':'file-excel';
+      const taskId=`local-file-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+      const defaults=localScenario==='file-word'?['新品上市资料.docx']:localScenario==='file-ppt'?['新品发布会提纲.docx','先马汇报模板.pptx']:['新品资料.xlsx','新品登记模板.xlsx'];
+      localStorage.setItem(`xianmaLocalFileTaskState:${taskId}`,JSON.stringify({state:'plan',scenario:localScenario,message:v,files:defaults.map(name=>({name})),workspace:'~/先马AI Studio/工作区',workspaceAuthorized:false,contentAuthorized:null,events:['已识别本地文件任务，尚未读取文件内容'],startedAt:Date.now(),updatedAt:Date.now()}));
+      const params=new URLSearchParams({skill:'local-file',scenario:localScenario,message:v,trigger:'command',taskId});
+      defaults.forEach(file=>params.append('files',file));
+      location.href=`应用端_任务_执行结果.html?${params.toString()}`;
+      return;
+    }
+    appendTurn(v,selectedRef);
+  }
+
+  /* 引用技能:+ 或 / 唤出浮层,选中插入引用标签 */
+  const commandRefs=[
+    {id:'browser',icon:'globe',name:'浏览器',type:'tool'},
+    {id:'local-file',icon:'file',name:'本地文件',type:'tool'},
+    {id:'scheduled',icon:'clock-3',name:'定时任务',type:'tool'},
+    {id:'weekly',icon:'📅',name:'日报 / 周报生成',type:'skill',source:'企业技能'},
+    {id:'image',icon:'🖼️',name:'P图 / 图片处理',type:'skill',source:'企业技能'},
+    {id:'copywriting',icon:'✍️',name:'文案润色 / 改写',type:'skill',source:'企业技能'},
+    {id:'meeting',icon:'📝',name:'会议记录整理',type:'skill',source:'我的技能'}
+  ];
+  const refs = [];
+  function toggleFlyout(){
+    updateFlyoutMaxHeight();
+    document.getElementById('flyout').classList.toggle('open');
+    document.getElementById('plus-btn').classList.toggle('active');
+  }
+  function updateFlyoutMaxHeight(){
+    const flyout=document.getElementById('flyout');
+    const anchor=document.querySelector('.compose-inner');
+    const boundary=document.querySelector('.main');
+    if(!flyout||!anchor||!boundary)return;
+    const available=Math.floor(anchor.getBoundingClientRect().top-boundary.getBoundingClientRect().top-16);
+    flyout.style.setProperty('--flyout-max-height',`${Math.max(180,available)}px`);
+  }
+  function closeFlyout(){
+    const f=document.getElementById('flyout'); if(f) f.classList.remove('open');
+    const b=document.getElementById('plus-btn'); if(b) b.classList.remove('active');
+  }
+  function handleFollowInput(el){
+    const matchedRef=commandRefs.find(ref=>el.value===`/${ref.name}`||el.value.startsWith(`/${ref.name} `));
+    if(matchedRef){
+      el.value=el.value.slice(matchedRef.name.length+1).trimStart();
+      setFollowRef(matchedRef);
+      return;
+    }
+    if(el.value.endsWith('/')){
+      el.value = el.value.slice(0,-1);
+      updateFlyoutMaxHeight();
+      document.getElementById('flyout').classList.add('open');
+      document.getElementById('plus-btn').classList.add('active');
+    }
+  }
+  function setFollowRef(ref){refs.splice(0,refs.length,ref);renderRefs();}
+  function pickSkill(id, icon, name, type='skill'){
+    const matched=commandRefs.find(ref=>ref.id===id);
+    setFollowRef({id,icon,name,type,source:matched&&matched.source});
+    closeFlyout();
+    document.getElementById('follow-input').focus();
+  }
+  function removeRef(id){
+    const i=refs.findIndex(r=>r.id===id);
+    if(i>-1){ refs.splice(i,1); renderRefs(); }
+  }
+  function renderRefs(){
+    const row=document.getElementById('ref-row');
+    row.innerHTML = refs.map(r=>
+      `<span class="ref-chip">/${r.name}${r.type==='skill'&&r.source?` · ${r.source}`:''}<span class="rc-x" role="button" aria-label="移除命令${r.name}" onclick="removeRef('${r.id}')"><xianma-icon name="x"></xianma-icon></span></span>`
+    ).join('');
+  }
+document.addEventListener('click',closeAcctMenu);
+
+  /* 模型选择器 */
+  function toggleModelDropdown(e){
+    e.stopPropagation();
+    document.getElementById('model-dropdown').classList.toggle('open');
+  }
+  function selectModel(name){
+    document.getElementById('current-model').textContent=name;
+    document.querySelectorAll('.model-option').forEach(opt=>{
+      const isSelected=(opt.getAttribute('onclick')||'').includes("'"+name+"'");
+      opt.classList.toggle('selected',isSelected);
+      const check=opt.querySelector('.check');
+      if(check) check.remove();
+      if(isSelected) opt.innerHTML+=` <span class="check"><xianma-icon name="check"></xianma-icon></span>`;
+    });
+    document.getElementById('model-dropdown').classList.remove('open');
+    toast('已切换模型:'+name);
+  }
+  document.addEventListener('click',()=>{
+    const dropdown=document.getElementById('model-dropdown');
+    if(dropdown) dropdown.classList.remove('open');
+  });
+  window.addEventListener('resize',()=>{
+    if(document.getElementById('flyout').classList.contains('open'))updateFlyoutMaxHeight();
+  });
+
+  /* 历史对话删除：悬停显示删除按钮，点击后不触发条目跳转。 */
+  function initHistDelete(){
+    document.querySelectorAll('.history-item').forEach(item=>{
+      if(item.querySelector('.hist-del')) return;
+      const del=document.createElement('span');
+      del.className='hist-del';del.append(XianmaIcon.create('trash'));del.title='删除这条对话';del.setAttribute('aria-label','删除这条对话');
+      del.addEventListener('click',e=>{
+        e.stopPropagation();
+        const name=(item.querySelector('.title')||{}).textContent||'该对话';
+        item.remove();
+        if(typeof toast==='function') toast('已删除:'+name);
+      });
+      item.appendChild(del);
+    });
+  }
+  initHistDelete();
+</script>
+
+<script>
+  const SCENARIOS = {
+    weekly:{
+      userMsg:'帮我生成本周周报',
+      historyTitle:'本周周报生成',
+      steps:['正在读取内容来源…','正在按模板整理周报格式…','检测到同名文件,等待确认…'],
+      needsConfirm:true,
+      confirmText:'工作区中已存在「本周周报.docx」,继续执行将覆盖原文件内容,此操作无法撤销。',
+      afterConfirmSteps:['正在生成文档…'],
+      resultTitle:'本周周报.docx 已生成',
+      resultBody:'已整理本周工作内容,共 3 个板块 · 12 条要点,文档已保存至工作区根目录。'
+    },
+    image:{
+      userMsg:'帮我把这批图片去背景',
+      historyTitle:'产品图批量去背景',
+      steps:['正在读取图片…','正在去除背景…','正在导出结果…'],
+      needsConfirm:false,
+      resultTitle:'图片处理已完成',
+      resultBody:'已处理 6 张图片,全部转为透明背景 PNG,可直接查看或下载。',
+      resultImages:6
+    },
+    copywriting:{
+      userMsg:'润色一段文案,语气更正式一点',
+      historyTitle:'618活动文案润色',
+      steps:['正在读取原文…','正在按目标语气润色…'],
+      needsConfirm:false,
+      resultTitle:'文案润色已完成',
+      resultBody:'已将原文调整为更正式的语气,长度与原文基本一致。可直接选中下方文字复制,或点「复制全文」。',
+      resultText:'尊敬的各位客户:\n\n值此 618 年中大促之际,我们谨向长期以来给予支持与信赖的您致以诚挚感谢。本次活动我们精选全场热销商品,推出满减、折扣与赠品等多重优惠,力求以更具诚意的价格回馈每一位客户。\n\n活动期间下单还可享受优先发货与专属客服服务,让您的每一次购物都安心、省心。期待与您在 618 相见,共享品质好物。'
+    },
+    meeting:{
+      userMsg:'整理今天的会议记录',
+      historyTitle:'周会会议记录整理',
+      steps:['正在读取会议记录…','正在生成摘要…','正在整理待办事项…'],
+      needsConfirm:false,
+      resultTitle:'会议记录整理已完成',
+      resultBody:'已生成会议摘要,并提取 5 项待办事项,标注了负责人与截止时间(示例内容)。'
+    },
+    review:{
+      userMsg:'提炼这批评论中的商品卖点',
+      historyTitle:'评论卖点提炼',
+      steps:['正在读取评论文件…','正在归类高频诉求…','正在提炼卖点与改进方向…'],
+      needsConfirm:false,
+      resultTitle:'评论洞察已生成',
+      resultBody:'已整理高频卖点、购买阻碍和售后风险，可继续补充筛选条件。'
+    },
+    sku:{
+      userMsg:'检查这份 SKU 表格',
+      historyTitle:'SKU 信息清洗',
+      steps:['正在读取表格…','正在检查空值与重复值…','正在整理异常项…'],
+      needsConfirm:false,
+      resultTitle:'SKU 检查已完成',
+      resultBody:'已生成异常项清单，原始文件未修改。'
+    },
+    listing:{
+      userMsg:'检查商品上架资料',
+      historyTitle:'商品上架检查',
+      steps:['正在读取商品资料…','正在匹配渠道规则…','正在生成缺失项清单…'],
+      needsConfirm:false,
+      resultTitle:'上架检查已完成',
+      resultBody:'已整理商品信息与素材缺失项，可按清单补充。'
+    },
+    'old-export':{
+      userMsg:'用我的个人技能导出这份数据',
+      historyTitle:'旧版数据导出',
+      steps:['正在读取个人技能版本…','正在整理导出字段…'],
+      needsConfirm:false,
+      resultTitle:'个人技能执行完成',
+      resultBody:'已按个人技能版本完成导出；企业副本仍处于下架状态。'
+    },
+    browser:{
+      userMsg:'使用浏览器完成网页操作',
+      historyTitle:'浏览器任务',
+      steps:[],
+      needsConfirm:false,
+      resultTitle:'网页操作已完成',
+      resultBody:'目标操作已完成；操作摘要、人工确认和执行日志已保存。'
+    },
+    'local-file':{
+      userMsg:'处理本地 Office 文件',
+      historyTitle:'本地文件处理',
+      steps:[],
+      needsConfirm:false,
+      resultTitle:'本地文件任务',
+      resultBody:'等待确认执行计划。'
+    },
+    custom:{
+      userMsg:'（自由对话任务）',
+      historyTitle:'自由对话任务',
+      steps:['正在理解你的需求…','正在执行任务…'],
+      needsConfirm:false,
+      resultTitle:'任务已完成',
+      resultBody:'已按你的描述完成任务,如需调整可以在下方继续补充说明。'
+    }
+  };
+
+  function getParam(name){
+    return new URL(window.location.href).searchParams.get(name);
+  }
+
+  const skillId = getParam('skill') || 'weekly';
+  const scenario = SCENARIOS[skillId] || SCENARIOS.weekly;
+  const requestedSkillName = getParam('name');
+  const requestedMessage = getParam('message');
+  const requestedBrowserUrl = getParam('url') || 'https://service.example.com/records';
+  const requestedBrowserTaskId = getParam('taskId') || 'default';
+  const requestedTrigger = getParam('trigger') || 'auto';
+  const requestedScheduledTaskId = getParam('scheduledTaskId') || '';
+  const requestedBrowserMode = getParam('mode') || 'execute';
+  const requestedFiles = new URL(window.location.href).searchParams.getAll('files');
+  const requestedLocalScenario = getParam('scenario') || getParam('demo') || 'file-excel';
+  const requestedLocalTaskId = getParam('taskId') || `local-demo-${Date.now().toString(36)}`;
+
+  function renderUserMessage(target,message,commandName){
+    target.innerHTML='';
+    if(commandName){const command=document.createElement('span');command.className='message-command';command.textContent=`/${commandName}`;target.appendChild(command);}
+    target.appendChild(document.createTextNode(message||scenario.userMsg));
+  }
+  renderUserMessage(document.getElementById('user-msg'),requestedMessage||scenario.userMsg,requestedTrigger==='scheduled'?'定时任务':skillId==='browser'&&requestedTrigger==='command'?'浏览器':skillId==='local-file'?'本地文件':requestedSkillName);
+  function updateActiveHistoryTitle(){
+    const title=document.querySelector('.side-history.active span');
+    if(title) title.textContent=requestedSkillName?`${requestedSkillName}任务`:scenario.historyTitle;
+  }
+  document.addEventListener('xianma-sidebar-ready',updateActiveHistoryTitle,{once:true});
+  updateActiveHistoryTitle();
+  const userFiles = document.getElementById('user-files');
+  requestedFiles.forEach(fileName=>{
+    const chip=document.createElement('span');chip.className='user-file';
+    const icon=document.createElement('span');icon.append(XianmaIcon.create('file'));
+    const name=document.createElement('span');name.textContent=fileName;name.title=fileName;
+    chip.append(icon,name);userFiles.appendChild(chip);
+  });
+
+  const statusText = document.getElementById('status-text');
+  const statusBar = document.getElementById('status-bar');
+  const stepLog = document.getElementById('step-log');
+  const resultCard = document.getElementById('result-card');
+
+  let stepIndex = 0;
+  const doneSteps = [];
+
+  function renderStepLog(){
+    stepLog.innerHTML = doneSteps.map(s=>`<div class="step step-done"><span class="mark"><xianma-icon name="check"></xianma-icon></span>${s}</div>`).join('');
+  }
+
+  function runSteps(steps, onFinish){
+    if(stepIndex >= steps.length){
+      onFinish();
+      return;
+    }
+    statusText.textContent = steps[stepIndex];
+    setTimeout(()=>{
+      doneSteps.push(steps[stepIndex].replace(/[…\.]+$/,''));
+      renderStepLog();
+      stepIndex++;
+      runSteps(steps, onFinish);
+    }, 900);
+  }
+
+  function showFinalResult(){
+    statusBar.classList.add('done');
+    statusText.textContent = '已完成';
+    statusBar.querySelector('.spinner').replaceChildren(XianmaIcon.create('circle-check'));
+    document.getElementById('rc-title').textContent = scenario.resultTitle;
+    document.getElementById('rc-body').textContent = scenario.resultBody;
+
+    const rich = document.getElementById('rc-rich');
+    const actions = document.getElementById('rc-actions');
+    rich.innerHTML = '';
+    actions.innerHTML = '';
+
+    if(scenario.resultText){
+      // 润色:直接展示可复制正文
+      const box = document.createElement('div');
+      box.className = 'rc-textbox';
+      box.id = 'rc-textbox';
+      box.textContent = scenario.resultText;
+      rich.appendChild(box);
+      actions.innerHTML =
+        '<div class="rc-btn" onclick="copyResultText()">复制全文</div>'+
+        '<div class="rc-btn" onclick="toast(\'原型演示:文件已开始下载\')">下载为 Word</div>';
+    } else if(scenario.resultImages){
+      // 图片:缩略图网格,可查看/下载
+      const grid = document.createElement('div');
+      grid.className = 'rc-imggrid';
+      const emojis = ['👟','👜','⌚','🧴','👕','🎧'];
+      let html = '';
+      for(let i=0;i<scenario.resultImages;i++){
+        const c = 'c'+((i%3)+1);
+        const em = emojis[i%emojis.length];
+        html += `<div class="rc-thumb" onclick="viewImage('${c}','${em}')">
+            <div class="ph ${c}">${em}</div>
+            <div class="tb-bar">
+              <span class="tb-btn" onclick="event.stopPropagation();viewImage('${c}','${em}')">查看</span>
+              <span class="tb-btn" onclick="event.stopPropagation();toast('原型演示:图片${i+1} 已开始下载')">下载</span>
+            </div>
+          </div>`;
+      }
+      grid.innerHTML = html;
+      rich.appendChild(grid);
+      actions.innerHTML = '<div class="rc-btn" onclick="toast(\'原型演示:已打包下载全部图片\')">下载全部</div>';
+    } else {
+      // 文档类(周报/会议/自由):文件操作
+      actions.innerHTML =
+        '<div class="rc-btn" onclick="toast(\'原型演示:文件已开始下载\')">下载文件</div>'+
+        '<div class="rc-btn" onclick="toast(\'原型演示:已在文件夹中定位\')">在文件夹中显示</div>';
+    }
+    resultCard.classList.add('show');
+    recordScheduledRun('success',scenario.resultTitle||'任务执行完成');
+  }
+
+  let scheduledRunRecorded=false;
+  function recordScheduledRun(status,summary){
+    if(scheduledRunRecorded||requestedTrigger!=='scheduled'||!requestedScheduledTaskId)return;
+    let tasks=[];
+    try{const stored=JSON.parse(localStorage.getItem('xianmaScheduledTasksV210')||'[]');if(Array.isArray(stored))tasks=stored;}catch(error){return;}
+    const task=tasks.find(item=>item.id===requestedScheduledTaskId);if(!task)return;
+    const now='2026-09-15 '+new Date().toTimeString().slice(0,5);
+    task.runs=task.runs||[];
+    task.runs.unshift({status,time:now,summary:status==='success'?`执行成功：${summary}`:`执行失败：${summary}`});
+    if(status==='success'&&task.frequency==='once'){task.status='completed';task.enabled=false;}else{task.status=task.enabled?'active':'paused';}
+    localStorage.setItem('xianmaScheduledTasksV210',JSON.stringify(tasks));
+    scheduledRunRecorded=true;
+  }
+
+  function copyResultText(){
+    const box = document.getElementById('rc-textbox');
+    if(!box) return;
+    const text = box.textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>toast('已复制到剪贴板')).catch(()=>fallbackCopy(text));
+    } else { fallbackCopy(text); }
+  }
+  function fallbackCopy(text){
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast('已复制到剪贴板');}catch(e){toast('复制失败,请手动选中复制');}
+    ta.remove();
+  }
+  function viewImage(cls,em){
+    const lb=document.getElementById('lightbox');
+    const inner=lb.querySelector('.lb-inner');
+    inner.className='lb-inner ph '+cls;
+    inner.textContent=em;
+    lb.classList.add('show');
+  }
+  function closeLightbox(){document.getElementById('lightbox').classList.remove('show');}
+
+  function cancelModal(){
+    document.getElementById('modal-overlay').classList.remove('show');
+    if(localModalMode){handleLocalModalCancel();return;}
+    if(browserModalMode){browserModalMode=false;cancelBrowserTask();return;}
+    statusText.textContent = '已取消,未覆盖原文件';
+    statusBar.classList.add('done');
+    statusBar.querySelector('.spinner').replaceChildren(XianmaIcon.create('circle-x'));
+    recordScheduledRun('failed','用户取消了高风险操作，任务未执行');
+  }
+
+  function confirmModal(){
+    document.getElementById('modal-overlay').classList.remove('show');
+    if(localModalMode){handleLocalModalConfirm();return;}
+    if(browserModalMode){browserModalMode=false;writeBrowserControl('approved','已确认外部数据变更',{confirmed:true,confirmedAt:Date.now()});return;}
+    stepIndex = 0;
+    runSteps(scenario.afterConfirmSteps, showFinalResult);
+  }
+
+  const browserStateKey=`xianmaBrowserTaskState:${requestedBrowserTaskId}`;
+  let browserResumeState='running';
+  let browserModalMode=false;
+  let browserWindowRef=null;
+  function openBrowserTaskWindow(){
+    if(browserWindowRef&&!browserWindowRef.closed){browserWindowRef.focus();return;}
+    const params=new URLSearchParams({skill:'browser',message:requestedMessage||scenario.userMsg,url:requestedBrowserUrl,taskId:requestedBrowserTaskId});
+    requestedFiles.forEach(file=>params.append('files',file));
+    browserWindowRef=window.open(`应用端_浏览器任务.html?${params.toString()}`,`xianma-browser-${requestedBrowserTaskId}`);
+    if(!browserWindowRef){toast('浏览器窗口被拦截，请允许此站点打开弹窗');return;}
+    const task=readBrowserTaskState();
+    const events=[...(task.events||[]),'正在打开受控浏览器'];
+    writeBrowserTaskState('opening',{openedAt:Date.now(),events});
+  }
+  function readBrowserTaskState(){
+    try{return JSON.parse(localStorage.getItem(browserStateKey)||'{}');}catch(e){return {};}
+  }
+  function writeBrowserTaskState(next,extra={}){
+    const current=readBrowserTaskState();
+    localStorage.setItem(browserStateKey,JSON.stringify({...current,...extra,state:next,updatedAt:Date.now()}));
+    renderBrowserTaskState();
+  }
+  function writeBrowserControl(next,label,extra={}){
+    const task=readBrowserTaskState();
+    const controls=[...(task.controls||[]),`${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})} ${label}`];
+    writeBrowserTaskState(next,{...extra,controls});
+  }
+  function cancelBrowserTask(){
+    const task=readBrowserTaskState();
+    if(task.externalEffects){
+      writeBrowserControl('partial','取消后续操作',{completedAt:Date.now(),resultTitle:'浏览器任务部分完成',resultBody:'任务已停止，但取消前已有外部操作生效。请核对已完成和未完成事项。'});
+      return;
+    }
+    writeBrowserControl('cancelled','取消任务',{completedAt:Date.now()});
+  }
+  function toggleBrowserPause(){
+    const task=readBrowserTaskState();
+    if(task.state==='paused'){writeBrowserControl(browserResumeState,'继续执行');return;}
+    browserResumeState=task.state||'running';writeBrowserControl('paused','暂停任务');
+  }
+  function toggleBrowserTakeover(){
+    const task=readBrowserTaskState();
+    if(task.state==='takeover'){writeBrowserControl(browserResumeState,'交还 AI');return;}
+    browserResumeState=task.state||'running';writeBrowserControl('takeover','人工接管');
+  }
+  function showBrowserConfirm(task){
+    const detail=task.confirmation||{};
+    browserModalMode=true;
+    document.getElementById('modal-title').textContent=detail.title||'确认网页操作';
+    document.getElementById('modal-text').innerHTML=`${detail.description||'这项操作会修改外部系统数据。'}<br><br><strong>执行动作：</strong>${detail.action||'提交网页表单'}<br><strong>关键内容：</strong>${detail.content||'以当前页面为准'}${detail.file?`<br><strong>上传文件：</strong>${detail.file}`:''}`;
+    document.getElementById('modal-confirm-btn').textContent='确认提交';
+    document.getElementById('modal-overlay').classList.add('show');
+  }
+  function browserLog(items){
+    stepLog.innerHTML=items.map(item=>`<div class="step step-done"><span class="mark"><xianma-icon name="check"></xianma-icon></span>${item}</div>`).join('');
+  }
+  function showBrowserWaiting(title,body,logs){
+    statusBar.classList.remove('done');
+    statusBar.querySelector('.spinner').textContent='';
+    statusText.textContent=title;
+    browserLog(logs);
+    document.getElementById('rc-title').textContent='浏览器任务进行中';
+    document.getElementById('rc-body').textContent=body;
+    document.getElementById('rc-rich').innerHTML='';
+    document.getElementById('rc-actions').innerHTML='<div class="rc-btn" onclick="openBrowserTaskWindow()">查看页面</div><div class="rc-btn" onclick="toggleBrowserPause()">暂停</div>';
+    resultCard.classList.add('show');
+    if(!task.autoOpened){
+      window.setTimeout(()=>{
+        const current=readBrowserTaskState();
+        if(['pending_open','preparing'].includes(current.state)){
+          openBrowserTaskWindow();
+          connectBrowserPage('auto');
+        }
+      },350);
+    }
+  }
+  function renderPendingBrowser(task){
+    statusBar.classList.remove('done');statusBar.querySelector('.spinner').textContent='';statusText.textContent='正在准备浏览器…';
+    browserLog(task.events||['已识别为浏览器任务']);
+    document.getElementById('rc-title').textContent='正在准备网页任务';
+    document.getElementById('rc-body').innerHTML=`<span class="tool-call"><xianma-icon name="globe"></xianma-icon> /浏览器</span><br>AI 正在根据任务自动匹配当前页面或打开受控页面，任务状态会持续显示在这里。`;
+    document.getElementById('rc-rich').innerHTML='';
+    document.getElementById('rc-actions').innerHTML='<div class="rc-btn" onclick="openBrowserTaskWindow()">查看页面</div><div class="rc-btn" onclick="toggleBrowserPause()">暂停</div>';
+    resultCard.classList.add('show');
+  }
+  function connectBrowserPage(mode){
+    const label=mode==='current'?'已匹配当前页面':'已打开并匹配受控页面';
+    const task=readBrowserTaskState();
+    const events=[...(task.events||[]),label];
+    if(requestedBrowserMode==='navigate'){
+      writeBrowserTaskState('complete',{pageMode:mode,events:[...events,`已导航到 ${requestedBrowserUrl}`],completedAt:Date.now(),resultTitle:'网页已打开',resultBody:`已在可控浏览器中打开 ${requestedBrowserUrl}，未执行其他操作。`});
+    }else if(requestedBrowserMode==='read'){
+      writeBrowserTaskState('complete',{pageMode:mode,events:[...events,'已读取并总结页面内容，全程未执行写操作'],completedAt:Date.now(),resultTitle:'页面内容已总结',resultBody:`已读取 ${requestedBrowserUrl} 的页面内容并生成摘要，未点击操作入口、填写或提交数据。`});
+    }else{
+      writeBrowserTaskState('running',{pageMode:mode,events});
+    }
+    toast(label);
+  }
+  function renderBrowserTaskState(){
+    const task=readBrowserTaskState();
+    if(task.message&&!requestedMessage)document.getElementById('user-msg').textContent=task.message;
+    if(task.state==='complete'){
+      browserLog(task.events||['网页操作已完成']);
+      scenario.resultTitle=task.resultTitle||scenario.resultTitle;
+      scenario.resultBody=task.resultBody||scenario.resultBody;
+      showFinalResult();
+      let actions='<div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>';
+      if(requestedBrowserMode==='execute')actions+='<div class="rc-btn" onclick="openBrowserTaskWindow()">查看页面</div>';
+      if(task.download)actions+='<div class="rc-btn" onclick="toast(\'已打开 '+task.download.name+'\')">打开下载文件</div><div class="rc-btn" onclick="toast(\'已在文件夹中定位\')">在文件夹中显示</div>';
+      document.getElementById('rc-actions').innerHTML=actions;
+      return;
+    }
+    if(task.state==='partial'){
+      statusBar.classList.add('done');statusBar.querySelector('.spinner').replaceChildren(XianmaIcon.create('triangle-alert'));statusText.textContent='部分成功';
+      browserLog(task.events||['任务已停止，部分外部操作已经生效']);
+      document.getElementById('rc-title').textContent=task.resultTitle||'浏览器任务部分完成';
+      document.getElementById('rc-body').textContent=task.resultBody||'部分操作已完成，剩余操作已取消。';
+      const completed=(task.completedActions||['已完成的外部操作请在执行详情中核对']).map(item=>`<div class="detail-event"><xianma-icon name="circle-check"></xianma-icon><span>已完成：${item}</span></div>`).join('');
+      const pending=(task.pendingActions||['后续操作已停止']).map(item=>`<div class="detail-event"><xianma-icon name="circle-x"></xianma-icon><span>未完成：${item}</span></div>`).join('');
+      document.getElementById('rc-rich').innerHTML=`<div class="detail-events">${completed}${pending}</div>`;
+      document.getElementById('rc-actions').innerHTML='<div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div><div class="rc-btn" onclick="retryRemainingBrowserTask()">重试剩余事项</div>';
+      resultCard.classList.add('show');return;
+    }
+    if(task.state==='failed'||task.state==='uncertain'||task.state==='blocked'){
+      statusBar.classList.add('done');statusBar.querySelector('.spinner').replaceChildren(XianmaIcon.create(task.state==='failed'?'circle-x':'triangle-alert'));statusText.textContent=task.state==='uncertain'?'状态待确认':task.state==='blocked'?'禁止执行':'执行失败';
+      browserLog(task.events||['任务未完成']);
+      document.getElementById('rc-title').textContent=task.state==='uncertain'?'写入结果待确认':task.state==='blocked'?'该操作不允许由 AI 执行':'浏览器任务失败';
+      document.getElementById('rc-body').textContent=task.error||'请查看执行详情后决定是否重试。';
+      document.getElementById('rc-rich').innerHTML='';
+      document.getElementById('rc-actions').innerHTML=task.state==='blocked'?'<div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>':'<div class="rc-btn" onclick="openBrowserTaskWindow()">查看页面</div><div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div><div class="rc-btn" onclick="retryRemainingBrowserTask()">确认后重试</div>';
+      resultCard.classList.add('show');return;
+    }
+    if(task.state==='cancelled'){
+      statusBar.classList.add('done');statusBar.querySelector('.spinner').replaceChildren(XianmaIcon.create('circle-x'));statusText.textContent='已取消';
+      browserLog(['浏览器任务已停止，未继续执行后续操作']);
+      document.getElementById('rc-title').textContent='浏览器任务已取消';
+      document.getElementById('rc-body').textContent='AI 已停止操作，当前任务未继续提交外部数据。';
+      document.getElementById('rc-rich').innerHTML='';
+      document.getElementById('rc-actions').innerHTML='<div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>';
+      resultCard.classList.add('show');return;
+    }
+    const state=task.state||'preparing';
+    if(state==='pending_open'||state==='preparing'){renderPendingBrowser(task);return;}
+    const map={
+      opening:['正在打开受控浏览器…','浏览器窗口正在启动。'],
+      launching:['正在打开受控浏览器…','浏览器窗口正在启动。'],
+      login:['等待员工登录…','AI 不读取账号密码，登录后将从当前页面继续。'],
+      running:['AI 正在操作网页…','每次操作后都会重新读取页面，并动态决定下一动作。'],
+      retry:['页面加载失败，正在自动重试…','仅重试读取或导航；达到 2 次后将转人工处理。'],
+      verifying:['正在核验写入结果…','提交响应不明确时不会直接重复提交，正在重新读取页面确认外部系统状态。'],
+      page_unavailable:['当前页面暂时不可用…','请检查网页登录或页面状态，完成后点击“继续”。'],
+      confirm:['等待员工确认提交…','确认前不会向外部系统写入数据或上传文件。'],
+      paused:['浏览器任务已暂停…','AI 已停止操作。你可以自行在页面处理，完成后点击“继续”。'],
+      takeover:['浏览器任务已暂停…','AI 已停止操作。你可以自行在页面处理，完成后点击“继续”。']
+    };
+    const view=map[state]||map.launching;
+    showBrowserWaiting(view[0],view[1],task.events||[view[0].replace(/…/g,'')]);
+    if(state==='confirm'&&!document.getElementById('modal-overlay').classList.contains('show'))showBrowserConfirm(task);
+    if(state==='paused'||state==='takeover')document.getElementById('rc-actions').innerHTML='<div class="rc-btn" onclick="openBrowserTaskWindow()">查看页面</div><div class="rc-btn" onclick="toggleBrowserPause()">继续</div>';
+    if(state==='page_unavailable')document.getElementById('rc-actions').innerHTML='<div class="rc-btn" onclick="openBrowserTaskWindow()">查看页面</div><div class="rc-btn" onclick="toggleBrowserPause()">暂停</div>';
+  }
+  function retryRemainingBrowserTask(){
+    const task=readBrowserTaskState();
+    const newTaskId=`browser-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+    const next=new URL(location.href);next.searchParams.set('taskId',newTaskId);next.searchParams.set('message',`继续处理未完成事项：${task.message||requestedMessage||scenario.userMsg}`);next.searchParams.set('trigger','command');
+    localStorage.setItem(`xianmaBrowserTaskState:${newTaskId}`,JSON.stringify({state:'preparing',url:task.url||requestedBrowserUrl,message:next.searchParams.get('message'),trigger:'command',events:['已在当前对话创建独立重试任务，正在准备页面'],startedAt:Date.now(),updatedAt:Date.now()}));
+    setTimeout(()=>{location.href=next.toString();},300);
+  }
+  function initBrowserTaskResult(){
+    renderBrowserTaskState();
+    window.addEventListener('storage',event=>{if(event.key===browserStateKey)renderBrowserTaskState();});
+    window.setInterval(renderBrowserTaskState,700);
+  }
+  function browserStateLabel(state){
+    return {pending_open:'准备页面',preparing:'准备页面',opening:'正在打开',launching:'正在打开',login:'等待登录',running:'执行中',retry:'自动重试',verifying:'写入结果核验',page_unavailable:'页面不可用',confirm:'等待确认',paused:'已暂停',takeover:'已暂停',complete:'已完成',partial:'部分成功',failed:'执行失败',uncertain:'状态待确认',blocked:'禁止执行',cancelled:'已取消'}[state]||'待确认';
+  }
+  function openExecutionDetail(){
+    if(skillId==='local-file'){openLocalFileDetail();return;}
+    const task=readBrowserTaskState();
+    const started=task.startedAt?new Date(task.startedAt):new Date();
+    const completed=task.completedAt?new Date(task.completedAt):new Date(task.updatedAt||Date.now());
+    const duration=Math.max(1,Math.round((completed-started)/1000));
+    const events=(task.events||[]).map(item=>`<div class="detail-event"><xianma-icon name="check"></xianma-icon><span>${item}</span></div>`).join('')||'<div class="detail-event"><xianma-icon name="circle-help"></xianma-icon><span>暂无操作记录</span></div>';
+    const confirmText=task.confirmed?`已确认外部数据变更${task.confirmedAt?' · '+new Date(task.confirmedAt).toLocaleString('zh-CN'):''}`:'本次未记录确认动作';
+    const download=task.download?`${task.download.name} · ${task.download.type} · ${task.download.status}<br>${task.download.location}`:'本次没有下载文件';
+    const controls=(task.controls||[]).length?(task.controls||[]).join('<br>'):'本次没有暂停或停止操作';
+    document.getElementById('detail-body').innerHTML=`
+      <section class="detail-section"><h4>任务信息</h4><div class="detail-grid"><span class="label">任务编号</span><span class="value">${requestedBrowserTaskId}</span><span class="label">最终状态</span><span class="value">${browserStateLabel(task.state)}</span><span class="label">发起时间</span><span class="value">${started.toLocaleString('zh-CN')}</span><span class="label">耗时</span><span class="value">约 ${duration} 秒</span><span class="label">调用方式</span><span class="value">${requestedTrigger==='command'?'/浏览器 显式调用':'自然语言自动调用'}</span><span class="label">目标网站</span><span class="value">${requestedBrowserUrl}</span></div></section>
+      <section class="detail-section"><h4>操作记录</h4><div class="detail-events">${events}</div></section>
+      <section class="detail-section"><h4>确认与人工控制</h4><div class="detail-grid"><span class="label">风险确认</span><span class="value">${confirmText}</span><span class="label">人工操作</span><span class="value">${controls}</span></div></section>
+      <section class="detail-section"><h4>结果与文件</h4><div class="detail-grid"><span class="label">结果摘要</span><span class="value">${task.resultBody||'暂无结果摘要'}</span><span class="label">下载文件</span><span class="value">${download}</span><span class="label">异常信息</span><span class="value">${task.error||'无'}</span></div></section>
+      <div class="privacy-line">执行详情不记录密码、验证码、Cookie、Token、完整网页源码或文件正文。</div>`;
+    document.getElementById('detail-overlay').classList.add('show');
+  }
+  function closeExecutionDetail(){document.getElementById('detail-overlay').classList.remove('show');}
+
+  /* ---------- 本地文件自动化 MVP（静态原型） ---------- */
+  const localStateKey=`xianmaLocalFileTaskState:${requestedLocalTaskId}`;
+  let localModalMode='';
+  const LOCAL_FILE_FLOWS={
+    excel:{
+      title:'新品登记表转填',
+      inputs:['新品资料.xlsx','新品登记模板.xlsx'],
+      output:'新品登记表_处理后.xlsx',
+      scope:'新品资料.xlsx / 商品信息 Sheet / SKU、商品名称、规格、条码、建议零售价；新品登记模板.xlsx / 登记表 Sheet',
+      plan:['校验文件格式、工作表和必要字段','按固定映射转填至登记模板','生成新文件并逐项校验'],
+      steps:['已校验 2 个文件和必要字段','已完成固定字段映射','已生成新文件，原件未修改','已完成逐项校验']
+    },
+    word:{
+      title:'Word 结构化整理',
+      inputs:['新品上市资料.docx'],
+      output:'新品上市资料_结构化整理版.docx',
+      scope:'新品上市资料.docx / 标题与正文第 1-12 段 / 用于提取结构和摘要',
+      plan:['校验 Word 文件','取得指定段落的单次内容授权','生成结构化整理版 Word'],
+      steps:['已读取授权范围内的 12 个段落','已提取标题、摘要和行动项','已生成结构化整理版 Word','已校验输出文件']
+    },
+    ppt:{
+      title:'PPT 方案生成',
+      inputs:['新品发布会提纲.docx','先马汇报模板.pptx'],
+      output:'新品发布会方案.pptx',
+      scope:'新品发布会提纲.docx / 标题与正文第 1-16 段；先马汇报模板.pptx / 版式结构 / 用于生成页面提纲',
+      plan:['校验提纲和登记模板','取得提纲内容的单次授权','按模板生成 PPT 并校验页数'],
+      steps:['已读取授权范围内的提纲','已生成 8 页页面结构','已套用固定登记模板','已校验页面标题和输出文件']
+    }
+  };
+  function localFlowType(){
+    if(requestedLocalScenario==='file-word'||requestedLocalScenario==='file-permission-denied')return 'word';
+    if(requestedLocalScenario==='file-ppt')return 'ppt';
+    return 'excel';
+  }
+  function localFlow(){return LOCAL_FILE_FLOWS[localFlowType()];}
+  function escapeLocal(value){return String(value==null?'':value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+  function readLocalTaskState(){
+    try{return JSON.parse(localStorage.getItem(localStateKey)||'{}');}catch(e){return {};}
+  }
+  function writeLocalTaskState(next,extra={}){
+    const current=readLocalTaskState();
+    localStorage.setItem(localStateKey,JSON.stringify({...current,...extra,state:next,updatedAt:Date.now()}));
+    renderLocalFileTaskState();
+  }
+  function initLocalTaskState(){
+    const existing=readLocalTaskState();
+    if(existing.state)return;
+    const flow=localFlow();
+    const files=requestedFiles.length?requestedFiles:flow.inputs;
+    localStorage.setItem(localStateKey,JSON.stringify({
+      state:'plan',scenario:requestedLocalScenario,message:requestedMessage||scenario.userMsg,
+      files:files.map(name=>({name})),workspace:'~/先马AI Studio/工作区',workspaceAuthorized:false,
+      contentAuthorized:null,output:flow.output,events:['已识别本地文件任务，尚未读取文件内容'],
+      startedAt:Date.now(),updatedAt:Date.now()
+    }));
+  }
+  function localLog(items){
+    stepLog.innerHTML=(items||[]).map(item=>`<div class="step step-done"><span class="mark"><xianma-icon name="check"></xianma-icon></span>${escapeLocal(item)}</div>`).join('');
+  }
+  function setLocalStatus(label,kind='working'){
+    statusBar.classList.toggle('done',kind!=='working');
+    const spinner=statusBar.querySelector('.spinner');
+    spinner.replaceChildren();
+    if(kind!=='working')spinner.append(XianmaIcon.create(kind==='success'?'circle-check':kind==='warning'?'triangle-alert':'circle-x'));
+    statusText.textContent=label;
+  }
+  function setLocalResult(title,body,rich,actions,kind='success'){
+    document.getElementById('rc-title').textContent=title;
+    document.getElementById('rc-body').textContent=body;
+    document.getElementById('rc-rich').innerHTML=rich||'';
+    document.getElementById('rc-actions').innerHTML=actions||'';
+    const icon=document.querySelector('#result-card .rc-icon');
+    icon.replaceChildren(XianmaIcon.create(kind==='success'?'circle-check':kind==='warning'?'triangle-alert':'circle-x'));
+    icon.style.background=kind==='success'?'var(--good-soft)':kind==='warning'?'#fff6e0':'var(--accent-soft)';
+    icon.style.color=kind==='success'?'var(--good)':kind==='warning'?'#9a6400':'var(--accent)';
+    resultCard.classList.add('show');
+    requestAnimationFrame(()=>{const thread=document.getElementById('thread');thread.scrollTop=thread.scrollHeight;});
+  }
+  function localFileRows(files){
+    return (files||[]).map(file=>`<div class="local-result-row good"><xianma-icon name="file"></xianma-icon><span>${escapeLocal(file.name||file)}</span></div>`).join('');
+  }
+  function renderLocalPlan(task){
+    const flow=localFlow();
+    setLocalStatus('等待确认执行计划','warning');
+    localLog(task.events||[]);
+    const files=task.files&&task.files.length?task.files:flow.inputs.map(name=>({name}));
+    const rich=`<div class="local-summary">
+      <div class="item"><span class="label">输入文件</span><span class="value">${escapeLocal(files.map(file=>file.name||file).join('、'))}</span></div>
+      <div class="item"><span class="label">输出文件</span><span class="value">${escapeLocal(task.output||flow.output)}</span></div>
+      <div class="item"><span class="label">授权工作区</span><span class="value">${escapeLocal(task.workspace||'~/先马AI Studio/工作区')}</span></div>
+      <div class="item"><span class="label">原件处理</span><span class="value">保留原件，生成新文件</span></div>
+    </div><div class="local-result-list">${flow.plan.map(item=>`<div class="local-result-row good"><xianma-icon name="circle-check"></xianma-icon><span>${escapeLocal(item)}</span></div>`).join('')}</div>
+    <div class="local-notice"><xianma-icon name="lock"></xianma-icon><span>确认后仅访问上述工作区和文件。越界文件必须重新选择；原型不会读取真实内容。</span></div>`;
+    let actions='<div class="rc-btn" onclick="authorizeLocalWorkspace()">授权工作区并开始</div>';
+    if(localFlowType()==='excel')actions+='<div class="rc-btn" onclick="showLocalCollision()">演示同名文件</div>';
+    actions+='<div class="rc-btn" onclick="cancelLocalFileTask()">取消任务</div>';
+    setLocalResult(`${flow.title} · 执行计划`,'请核对输入文件、操作范围和输出位置。确认前不会读取文件内容。',rich,actions,'warning');
+  }
+  function authorizeLocalWorkspace(){
+    const task=readLocalTaskState();
+    const events=[...(task.events||[]),'已允许本次访问授权工作区'];
+    if(localFlowType()==='word'||localFlowType()==='ppt'){
+      writeLocalTaskState('consent',{workspaceAuthorized:true,events});
+    }else{
+      writeLocalTaskState('running',{workspaceAuthorized:true,events:[...events,'已确认执行计划，开始本地处理']});
+      runLocalFileSteps();
+    }
+  }
+  function showLocalContentConsent(task){
+    if(document.getElementById('modal-overlay').classList.contains('show'))return;
+    const flow=localFlow();
+    localModalMode='consent';
+    document.getElementById('modal-title').textContent='允许模型读取本次指定内容？';
+    document.getElementById('modal-text').innerHTML=`<strong>内容范围：</strong>${escapeLocal(flow.scope)}<br><br><strong>用途：</strong>${localFlowType()==='word'?'提取结构和摘要并生成整理版 Word':'根据提纲生成页面结构和演示文稿'}<br><br>授权仅对本任务有效；取消后任务保持未执行，不会上传或生成文件。`;
+    document.getElementById('modal-cancel-btn').textContent='取消';
+    document.getElementById('modal-confirm-btn').textContent='允许本次';
+    document.getElementById('modal-overlay').classList.add('show');
+  }
+  function showLocalCollision(){
+    localModalMode='collision-choice';
+    document.getElementById('modal-title').textContent='检测到同名输出文件';
+    document.getElementById('modal-text').innerHTML='工作区中已存在「新品登记表_处理后.xlsx」。默认保存为副本，不修改已有文件；如选择覆盖，还需要再次确认。';
+    document.getElementById('modal-cancel-btn').textContent='保存为副本';
+    document.getElementById('modal-confirm-btn').textContent='选择覆盖';
+    document.getElementById('modal-overlay').classList.add('show');
+  }
+  function handleLocalModalCancel(){
+    const mode=localModalMode;localModalMode='';
+    document.getElementById('modal-cancel-btn').textContent='取消';
+    if(mode==='collision-choice'){
+      const task=readLocalTaskState();
+      writeLocalTaskState('running',{workspaceAuthorized:true,output:'新品登记表_处理后 (1).xlsx',events:[...(task.events||[]),'检测到同名文件，已选择保存为副本','开始本地处理']});
+      runLocalFileSteps();return;
+    }
+    if(mode==='consent'){
+      const task=readLocalTaskState();
+      writeLocalTaskState('permission_denied',{contentAuthorized:false,events:[...(task.events||[]),'已取消模型内容授权，任务未执行'],completedAt:Date.now(),error:'未获得本次内容授权'});
+      return;
+    }
+    renderLocalFileTaskState();
+  }
+  function handleLocalModalConfirm(){
+    const mode=localModalMode;localModalMode='';
+    document.getElementById('modal-cancel-btn').textContent='取消';
+    if(mode==='collision-choice'){
+      localModalMode='collision-confirm';
+      document.getElementById('modal-title').textContent='再次确认覆盖文件';
+      document.getElementById('modal-text').innerHTML='覆盖「新品登记表_处理后.xlsx」后无法恢复当前版本。源表和登记模板仍不会被修改。';
+      document.getElementById('modal-confirm-btn').textContent='确认覆盖';
+      document.getElementById('modal-overlay').classList.add('show');return;
+    }
+    const task=readLocalTaskState();
+    if(mode==='collision-confirm'){
+      writeLocalTaskState('running',{workspaceAuthorized:true,overwriteConfirmed:true,output:'新品登记表_处理后.xlsx',events:[...(task.events||[]),'已二次确认覆盖同名输出文件','开始本地处理']});
+      runLocalFileSteps();return;
+    }
+    if(mode==='consent'){
+      writeLocalTaskState('running',{contentAuthorized:true,contentAuthorizedAt:Date.now(),events:[...(task.events||[]),'已允许模型读取本次指定内容','开始生成新文件']});
+      runLocalFileSteps();return;
+    }
+  }
+  function runLocalFileSteps(){
+    const flow=localFlow();
+    let index=0;
+    function next(){
+      if(index>=flow.steps.length){finishLocalFileRun();return;}
+      const task=readLocalTaskState();
+      setLocalStatus(flow.steps[index]+'…','working');
+      writeLocalTaskState('running',{events:[...(task.events||[]),flow.steps[index]]});
+      index++;
+      window.setTimeout(next,420);
+    }
+    next();
+  }
+  function finishLocalFileRun(){
+    const task=readLocalTaskState();
+    if(requestedLocalScenario==='file-error'){
+      writeLocalTaskState('failed',{errorType:'occupied',error:'输出文件正在被其他程序占用，未生成或覆盖任何文件。',events:[...(task.events||[]),'输出文件被占用，已停止执行'],completedAt:Date.now()});return;
+    }
+    if(requestedLocalScenario==='file-partial'){
+      writeLocalTaskState('partial',{normalCount:24,exceptionCount:3,pendingCount:3,events:[...(task.events||[]),'24 条记录处理成功，3 条因必要字段缺失未写入'],completedAt:Date.now()});return;
+    }
+    writeLocalTaskState('complete',{normalCount:localFlowType()==='excel'?27:null,exceptionCount:0,events:[...(task.events||[]),'结果文件已生成并完成校验'],completedAt:Date.now()});
+  }
+  function cancelLocalFileTask(){
+    const task=readLocalTaskState();
+    writeLocalTaskState('cancelled',{events:[...(task.events||[]),'用户取消任务，未读取文件内容'],completedAt:Date.now()});
+  }
+  function renderLocalComplete(task){
+    const flow=localFlow();
+    setLocalStatus('已完成','success');localLog(task.events);
+    let rows='';let body='';
+    if(localFlowType()==='excel'){
+      body=`已转填并校验 ${task.normalCount||27} 条新品记录，原始文件和登记模板未修改。`;
+      rows='<div class="local-result-row good"><xianma-icon name="circle-check"></xianma-icon><span>正常项：27 条，字段与格式校验通过</span></div><div class="local-result-row good"><xianma-icon name="circle-check"></xianma-icon><span>异常项：0 条</span></div>';
+    }else if(localFlowType()==='word'){
+      body='已在授权范围内提取标题、摘要和行动项，并生成结构化整理版 Word。';
+      rows='<div class="local-result-row good"><xianma-icon name="circle-check"></xianma-icon><span>提取摘要：3 个主题、6 项行动项</span></div>';
+    }else{
+      body='已根据授权提纲和固定模板生成 8 页 PPT，原提纲和模板未修改。';
+      rows='<div class="local-result-row good"><xianma-icon name="circle-check"></xianma-icon><span>页面提纲：背景、目标、用户、方案、流程、价值、风险、下一步</span></div>';
+    }
+    const rich=`<div class="local-summary"><div class="item"><span class="label">结果文件</span><span class="value">${escapeLocal(task.output||flow.output)}</span></div><div class="item"><span class="label">保存位置</span><span class="value">${escapeLocal(task.workspace||'~/先马AI Studio/工作区')}</span></div></div><div class="local-result-list">${rows}</div>`;
+    setLocalResult(`${task.output||flow.output} 已生成`,body,rich,'<div class="rc-btn" onclick="toast(\'原型演示：已打开结果文件\')">打开文件</div><div class="rc-btn" onclick="toast(\'原型演示：已在文件夹中定位\')">在文件夹中显示</div><div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>','success');
+  }
+  function renderLocalPartial(task){
+    setLocalStatus('部分成功','warning');localLog(task.events);
+    const rich='<div class="local-result-list"><div class="local-result-row good"><xianma-icon name="circle-check"></xianma-icon><span>正常项：24 条，已写入结果文件</span></div><div class="local-result-row warn"><xianma-icon name="triangle-alert"></xianma-icon><span>异常项：3 条，SKU 或建议零售价缺失</span></div><div class="local-result-row warn"><xianma-icon name="circle-x"></xianma-icon><span>未处理：3 条，未静默补值</span></div></div>';
+    setLocalResult('新品登记表_处理后.xlsx 已部分生成','已生成包含 24 条正常记录的新文件；3 条异常记录未写入，请按异常清单补充后重试。',rich,'<div class="rc-btn" onclick="toast(\'原型演示：已打开结果文件\')">打开文件</div><div class="rc-btn" onclick="toast(\'原型演示：已打开异常清单\')">查看异常清单</div><div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>','warning');
+  }
+  const LOCAL_ERRORS={
+    occupied:'输出文件正在被其他程序占用，未生成或覆盖任何文件。请关闭占用程序后重试。',
+    encrypted:'该文件已加密，本期不支持读取。请选择未加密的 .xlsx、.csv、.docx 或 .pptx 文件。',
+    corrupt:'文件结构损坏，无法完成格式和工作表校验。请修复文件或重新选择。',
+    missing:'固定模板缺少必要字段“SKU”，任务已停止，未生成结果文件。'
+  };
+  function showLocalError(type){
+    const task=readLocalTaskState();
+    writeLocalTaskState('failed',{errorType:type,error:LOCAL_ERRORS[type],events:[...(task.events||[]),`错误演示已切换为：${type}`],completedAt:Date.now()});
+  }
+  function renderLocalFailed(task){
+    setLocalStatus('执行失败','error');localLog(task.events);
+    const rich=`<div class="local-notice"><xianma-icon name="triangle-alert"></xianma-icon><span>${escapeLocal(task.error||LOCAL_ERRORS.occupied)}</span></div>`;
+    const actions='<div class="rc-btn" onclick="showLocalError(\'occupied\')">文件被占用</div><div class="rc-btn" onclick="showLocalError(\'encrypted\')">加密文件</div><div class="rc-btn" onclick="showLocalError(\'corrupt\')">文件损坏</div><div class="rc-btn" onclick="showLocalError(\'missing\')">必要字段缺失</div><div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>';
+    setLocalResult('未生成结果文件','任务已停止，原文件和已有输出文件均未修改。',rich,actions,'error');
+  }
+  function renderLocalFileTaskState(){
+    const task=readLocalTaskState();
+    if(task.state==='plan'){renderLocalPlan(task);return;}
+    if(task.state==='consent'){
+      setLocalStatus('等待内容授权','warning');localLog(task.events);
+      setLocalResult('需要单次内容授权','模型只会读取下方列明的文件与段落范围；取消后不执行、不上传、不生成结果。',`<div class="local-notice"><xianma-icon name="lock"></xianma-icon><span>${escapeLocal(localFlow().scope)}</span></div>`,'<div class="rc-btn" onclick="showLocalContentConsent(readLocalTaskState())">查看并决定</div>','warning');
+      showLocalContentConsent(task);return;
+    }
+    if(task.state==='running'){
+      setLocalStatus('正在本地处理…','working');localLog(task.events);
+      setLocalResult('正在执行本地文件任务','仅处理已授权的文件范围；原件保持不变。','', '<div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>','warning');return;
+    }
+    if(task.state==='complete'){renderLocalComplete(task);return;}
+    if(task.state==='partial'){renderLocalPartial(task);return;}
+    if(task.state==='failed'){renderLocalFailed(task);return;}
+    if(task.state==='permission_denied'){
+      setLocalStatus('未执行','error');localLog(task.events);
+      setLocalResult('未获得内容授权','任务依赖模型理解指定内容。你已取消本次授权，因此没有读取、上传或生成任何文件。','<div class="local-notice"><xianma-icon name="lock"></xianma-icon><span>授权决定只记录“已取消”，不记录文件正文。</span></div>','<div class="rc-btn" onclick="writeLocalTaskState(\'consent\',{contentAuthorized:null})">重新授权</div><div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>','error');return;
+    }
+    if(task.state==='cancelled'){
+      setLocalStatus('已取消','error');localLog(task.events);
+      setLocalResult('本地文件任务已取消','未读取文件内容，未生成结果文件。','','<div class="rc-btn" onclick="restartLocalFileTask()">重新开始</div><div class="rc-btn" onclick="openExecutionDetail()">查看执行详情</div>','error');
+    }
+  }
+  function restartLocalFileTask(){localStorage.removeItem(localStateKey);initLocalTaskState();renderLocalFileTaskState();}
+  function openLocalFileDetail(){
+    const task=readLocalTaskState();const flow=localFlow();
+    const events=(task.events||[]).map(item=>`<div class="detail-event"><xianma-icon name="circle-check"></xianma-icon><span>${escapeLocal(item)}</span></div>`).join('');
+    const files=(task.files||flow.inputs).map(file=>escapeLocal(file.name||file)).join('<br>');
+    const auth=task.workspaceAuthorized?'已允许本次工作区访问':'未授权工作区访问';
+    const content=task.contentAuthorized===true?'已允许本次指定内容':task.contentAuthorized===false?'已取消内容授权':'未请求或未决定';
+    document.getElementById('detail-body').innerHTML=`<section class="detail-section"><h4>任务信息</h4><div class="detail-grid"><span class="label">任务编号</span><span class="value">${escapeLocal(requestedLocalTaskId)}</span><span class="label">演示场景</span><span class="value">${escapeLocal(requestedLocalScenario)}</span><span class="label">最终状态</span><span class="value">${escapeLocal(task.state||'plan')}</span><span class="label">调用方式</span><span class="value">${requestedTrigger==='command'?'/本地文件 显式调用':'自然语言或演示入口'}</span></div></section><section class="detail-section"><h4>文件与授权</h4><div class="detail-grid"><span class="label">输入文件</span><span class="value">${files}</span><span class="label">输出文件</span><span class="value">${task.state==='complete'||task.state==='partial'?escapeLocal(task.output||flow.output):'未生成'}</span><span class="label">工作区授权</span><span class="value">${auth}</span><span class="label">内容授权</span><span class="value">${content}</span></div></section><section class="detail-section"><h4>操作记录</h4><div class="detail-events">${events||'暂无操作记录'}</div></section><section class="detail-section"><h4>结果与错误</h4><div class="detail-grid"><span class="label">结果</span><span class="value">${task.state==='complete'?'已生成并校验':task.state==='partial'?'部分生成':'未生成结果文件'}</span><span class="label">异常信息</span><span class="value">${escapeLocal(task.error||'无')}</span></div></section><div class="privacy-line">执行详情仅保存路径元数据、动作、授权决定、结果和错误；不展示文件正文。本页为静态原型。</div>`;
+    document.getElementById('detail-overlay').classList.add('show');
+  }
+  function initLocalFileTaskResult(){initLocalTaskState();renderLocalFileTaskState();}
+
+  // 启动执行流程
+  stepIndex = 0;
+  if(skillId==='browser'){
+    initBrowserTaskResult();
+  }else if(skillId==='local-file'){
+    initLocalFileTaskResult();
+  }else{
+    runSteps(scenario.steps, ()=>{
+      if(scenario.needsConfirm){
+        document.getElementById('modal-text').textContent = scenario.confirmText;
+        document.getElementById('modal-overlay').classList.add('show');
+      } else {
+        showFinalResult();
+      }
+    });
+  }
+
+  /* ---------- 多轮对话 ---------- */
+  const threadEl = document.getElementById('thread');
+  const threadInner = document.querySelector('.thread-inner');
+
+  function scrollBottom(){ threadEl.scrollTop = threadEl.scrollHeight; }
+
+  // 依据用户输入挑一句贴合场景的模拟回复(纯原型,非真实模型)
+  function pickReply(text){
+    const t = text.toLowerCase();
+    if(/(改|再|调整|重|换|优化|更|长|短|精简|扩)/.test(text)){
+      return {steps:['正在理解你的调整要求…','正在重新生成…'],
+        reply:'已按你的新要求重新调整并更新到上方结果,若还需要微调可以继续说。'};
+    }
+    if(/(导出|下载|保存|发|发送|文件|word|pdf|excel)/.test(text)){
+      return {steps:['正在准备导出…'],
+        reply:'已准备好导出文件,可点击上方结果卡的「下载文件」保存到本地(原型演示)。'};
+    }
+    if(/(谢谢|好的|可以|不用了|没问题|收到)/.test(text)){
+      return {steps:[], reply:'好的,随时叫我。需要的话可以直接在下面继续提要求。'};
+    }
+    return {steps:['正在理解你的需求…','正在处理…'],
+      reply:'已根据你的补充完成处理(原型演示内容),你可以继续追加要求或换个任务。'};
+  }
+
+  function createUserTurn(userText,commandName){
+    const u=document.createElement('div');u.className='msg-user';u.innerHTML='<div class="bubble"></div>';
+    renderUserMessage(u.querySelector('.bubble'),userText,commandName);
+    threadInner.appendChild(u);return u;
+  }
+  let followScheduledDraft=null;
+  function getFollowScheduledIntent(text,explicit){
+    const source=(text||'').trim();
+    const scheduleSignal=explicit||/(每天|每日|每周[一二三四五六日]?|单次|明天|定时|按时)/.test(source);
+    if(!scheduleSignal)return {kind:'none'};
+    if(!source)return {kind:'ask',message:'请说明执行周期和时间，例如“每天 18 点执行这个任务”。'};
+    let frequency='';
+    if(/每天|每日/.test(source))frequency='daily';
+    else if(/每周/.test(source))frequency='weekly';
+    else if(/单次|明天/.test(source))frequency='once';
+    if(!frequency)return {kind:'ask',message:'请选择执行周期：单次、每天或每周。'};
+    const timeMatch=source.match(/([01]?\d|2[0-3])\s*(?:[:：点时])\s*([0-5]?\d)?/);
+    if(!timeMatch)return {kind:'ask',message:'请补充具体执行时间，例如“每天 18 点”或“每周一 9 点”。'};
+    const weekdayMatch=source.match(/每周([一二三四五六日])/);
+    if(frequency==='weekly'&&!weekdayMatch)return {kind:'ask',message:'请补充每周星期几执行。'};
+    const hour=String(Number(timeMatch[1])).padStart(2,'0');
+    const minute=String(Number(timeMatch[2]||0)).padStart(2,'0');
+    let instruction=source.replace(/^\s*(?:每天|每日|每周[一二三四五六日]|单次|明天)\s*/,'').replace(/^\s*([01]?\d|2[0-3])\s*(?:[:：点时])\s*([0-5]?\d)?\s*/,'').replace(/^[-—，,：:\s]+/,'').trim();
+    const usesCurrentTask=/^(?:执行|运行|重复)?\s*(?:这个|当前|该)任务$/.test(instruction);
+    if(!instruction)return {kind:'ask',message:'请补充到点后需要执行的具体任务，或输入“执行这个任务”。'};
+    const currentTitle=requestedSkillName||scenario.historyTitle||'当前任务';
+    if(usesCurrentTask)instruction=requestedMessage||scenario.userMsg;
+    const name=usesCurrentTask?`定时执行：${currentTitle}`:instruction.includes('周报')?'生成上周周报':instruction.includes('工作记录')?'整理每日工作记录':instruction.slice(0,18);
+    const workspace=/(图片|设计|海报|素材)/.test(instruction)?'设计工作':'运营工作';
+    const icon=instruction.includes('周报')?'📅':/(图片|设计|海报|素材)/.test(instruction)?'🖼️':'📝';
+    return {kind:'draft',task:{name,instruction,frequency,weekday:weekdayMatch?weekdayMatch[1]:'一',date:frequency==='once'?'2026-09-16':'',time:`${hour}:${minute}`,workspace,icon}};
+  }
+  function followScheduleText(task){if(task.frequency==='once')return `单次 · ${task.date} ${task.time}`;if(task.frequency==='weekly')return `每周${task.weekday} · ${task.time}`;return `每天 · ${task.time}`;}
+  function escapeFollowSchedule(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+  function appendScheduledQuestion(userText,message,selectedRef){
+    createUserTurn(userText,selectedRef?'定时任务':'');
+    const reply=document.createElement('div');reply.className='msg-assistant';reply.innerHTML=`<div class="status-bar done"><span class="spinner"><xianma-icon name="circle-check"></xianma-icon></span><span>还需要一项信息</span></div><div class="msg-reply">${escapeFollowSchedule(message)}</div>`;
+    threadInner.appendChild(reply);scrollBottom();document.getElementById('follow-input').focus();
+  }
+  function appendScheduledDraft(userText,task,selectedRef){
+    createUserTurn(userText,selectedRef?'定时任务':'');
+    const reply=document.createElement('div');reply.className='msg-assistant';
+    reply.innerHTML=`<div class="status-bar done"><span class="spinner"><xianma-icon name="circle-check"></xianma-icon></span><span>已整理执行计划，请确认</span></div><section class="schedule-draft"><header class="schedule-draft-head"><xianma-icon name="clock-3"></xianma-icon><strong>定时任务草稿</strong></header><div class="schedule-draft-body"><div class="schedule-draft-field"><span>任务名称</span><strong>${escapeFollowSchedule(task.name)}</strong></div><div class="schedule-draft-field"><span>执行计划</span><strong>${escapeFollowSchedule(followScheduleText(task))}</strong></div><div class="schedule-draft-field full"><span>任务指令</span><strong>${escapeFollowSchedule(task.instruction)}</strong></div><div class="schedule-draft-field"><span>工作区</span><strong>${escapeFollowSchedule(task.workspace)}</strong></div><div class="schedule-draft-field"><span>创建后状态</span><strong>立即启用</strong></div><div class="schedule-draft-note"><xianma-icon name="triangle-alert"></xianma-icon><span>仅在客户端在线或后台常驻时执行；关闭期间错过的任务可在定时任务页人工补跑。</span></div></div><footer class="schedule-draft-actions"><button class="schedule-action-btn" type="button" onclick="cancelFollowScheduledDraft()">取消</button><button class="schedule-action-btn" type="button" onclick="modifyFollowScheduledDraft()">修改</button><button class="schedule-action-btn primary" type="button" onclick="confirmFollowScheduledDraft()">确认创建</button></footer></section>`;
+    threadInner.appendChild(reply);followScheduledDraft={...task,original:userText,node:reply};scrollBottom();
+  }
+  function confirmFollowScheduledDraft(){
+    if(!followScheduledDraft)return;
+    let tasks=[];try{const stored=JSON.parse(localStorage.getItem('xianmaScheduledTasksV210')||'[]');if(Array.isArray(stored))tasks=stored;}catch(error){}
+    const task={id:`schedule-${Date.now().toString(36)}`,icon:followScheduledDraft.icon,name:followScheduledDraft.name,instruction:followScheduledDraft.instruction,frequency:followScheduledDraft.frequency,weekday:followScheduledDraft.weekday,date:followScheduledDraft.date,time:followScheduledDraft.time,workspace:followScheduledDraft.workspace,enabled:true,status:'active',createdFrom:'conversation',runs:[]};
+    tasks.unshift(task);localStorage.setItem('xianmaScheduledTasksV210',JSON.stringify(tasks));
+    followScheduledDraft.node.innerHTML=`<section class="schedule-draft"><div class="schedule-success"><div class="schedule-success-title"><xianma-icon name="circle-check"></xianma-icon>定时任务已创建</div><p>${escapeFollowSchedule(task.name)}将按“${escapeFollowSchedule(followScheduleText(task))}”执行，结果会回写任务对话并进入运行记录。</p></div><footer class="schedule-draft-actions"><a class="schedule-action-btn primary" href="应用端_已安排.html">查看定时任务</a></footer></section>`;
+    followScheduledDraft=null;toast('定时任务已创建');scrollBottom();
+  }
+  function modifyFollowScheduledDraft(){
+    if(!followScheduledDraft)return;const original=followScheduledDraft.original;followScheduledDraft.node.remove();followScheduledDraft=null;setFollowRef(commandRefs.find(ref=>ref.id==='scheduled'));const input=document.getElementById('follow-input');input.value=original;input.focus();scrollBottom();
+  }
+  function cancelFollowScheduledDraft(){
+    if(!followScheduledDraft)return;followScheduledDraft.node.innerHTML='<div class="status-bar done"><span class="spinner"><xianma-icon name="circle-x"></xianma-icon></span><span>已取消，未创建定时任务</span></div>';followScheduledDraft=null;scrollBottom();
+  }
+  function appendBrowserFollow(userText,ref){
+    window.__followBusy=true;
+    createUserTurn(userText,ref.name);
+    const currentTask=skillId==='browser'?readBrowserTaskState():{};
+    const suppliedUrl=(userText.match(/https?:\/\/[^\s，。；]+/i)||[])[0]||'';
+    let changedWebsite=false;
+    try{changedWebsite=!!(suppliedUrl&&currentTask.url&&new URL(suppliedUrl).host!==new URL(currentTask.url).host);}catch(e){}
+    const changedGoal=/(改为|换成|不要.*改|另一个网站|新的任务|重新开始)/.test(userText);
+    if(skillId==='browser'&&!['complete','cancelled','failed','partial','uncertain','blocked'].includes(currentTask.state)&&!changedWebsite&&!changedGoal){
+      const supplements=[...(currentTask.supplements||[]),userText];
+      const events=[...(currentTask.events||[]),`已收到补充指令：${userText}`];
+      writeBrowserTaskState(currentTask.state||'preparing',{supplements,events});
+      const reply=document.createElement('div');reply.className='msg-assistant';reply.innerHTML='<div class="status-bar done"><span class="spinner"><xianma-icon name="circle-check"></xianma-icon></span><span>已加入当前浏览器任务</span></div><div class="msg-reply">AI 将结合当前网页状态继续处理这条补充指令。</div>';
+      threadInner.appendChild(reply);scrollBottom();window.__followBusy=false;return;
+    }
+    if(skillId==='browser'&&currentTask.state){
+      writeBrowserTaskState('superseded',{confirmationInvalidated:true,events:[...(currentTask.events||[]),'网站或核心目标已改变，旧确认失效，已在当前对话创建独立任务']});
+    }
+    const newTaskId=`browser-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+    const targetUrl=(userText.match(/https?:\/\/[^\s，。；]+/i)||[])[0]||requestedBrowserUrl;
+    const next=new URL(location.href);next.searchParams.set('skill','browser');next.searchParams.set('message',userText);next.searchParams.set('url',targetUrl);next.searchParams.set('trigger','command');next.searchParams.set('taskId',newTaskId);
+    localStorage.setItem(`xianmaBrowserTaskState:${newTaskId}`,JSON.stringify({state:'preparing',url:targetUrl,message:userText,trigger:'command',events:['已在当前对话创建新的独立浏览器任务，正在准备页面'],startedAt:Date.now(),updatedAt:Date.now()}));
+    setTimeout(()=>{location.href=next.toString();},500);
+  }
+  function appendTurn(userText,selectedRef){
+    window.__followBusy = true;
+
+    // 用户气泡
+    createUserTurn(userText,selectedRef?selectedRef.name:'');
+
+    // AI 回合:状态条 + 步骤
+    const a = document.createElement('div');
+    a.className = 'msg-assistant';
+    a.innerHTML =
+      '<div class="status-bar"><span class="spinner"></span><span class="st-txt">正在思考…</span></div>'+
+      '<div class="step-log"></div>'+
+      '<div class="msg-reply" style="display:none;"></div>';
+    threadInner.appendChild(a);
+    scrollBottom();
+
+    const bar = a.querySelector('.status-bar');
+    const txt = a.querySelector('.st-txt');
+    const log = a.querySelector('.step-log');
+    const replyEl = a.querySelector('.msg-reply');
+    const plan = pickReply(userText);
+    const done = [];
+    let i = 0;
+
+    function finish(){
+      bar.classList.add('done');
+      txt.textContent = '已完成';
+      bar.querySelector('.spinner').replaceChildren(XianmaIcon.create('circle-check'));
+      replyEl.style.display = 'block';
+      replyEl.textContent = plan.reply;
+      scrollBottom();
+      window.__followBusy = false;
+    }
+    function step(){
+      if(i >= plan.steps.length){ finish(); return; }
+      txt.textContent = plan.steps[i];
+      setTimeout(()=>{
+        done.push(plan.steps[i].replace(/[…\.]+$/,''));
+        log.innerHTML = done.map(s=>`<div class="step step-done"><span class="mark"><xianma-icon name="check"></xianma-icon></span>${s}</div>`).join('');
+        i++; scrollBottom(); step();
+      }, 800);
+    }
+    if(plan.steps.length===0){ setTimeout(finish, 400); } else { step(); }
+  }
+</script>
+</body>
+</html>
