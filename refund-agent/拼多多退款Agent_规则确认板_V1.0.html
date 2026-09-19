@@ -501,7 +501,7 @@
     <header class="header">
       <div>
         <h1>拼多多退款 Agent 规则确认板</h1>
-        <p>规则基线：《拼多多退货退款Agent_PRD_V1.0.md》 · V1.0 · 本次补充更新 2026-08-10</p>
+        <p>规则基线：《拼多多退货退款Agent_PRD_V1.0.md》 · V1.0 · 本次补充更新 2026-08-14</p>
       </div>
       <div class="status">待业务确认</div>
     </header>
@@ -687,7 +687,7 @@
             <h3>钉钉转人工</h3>
             <ul>
               <li>标题固定为“拼多多退款工单转人工”。</li>
-              <li>发送至“天猫抖音退款Agent通知群”（群号 189925002005）。</li>
+              <li>发送至“拼多多工单Agent对接群”（群号 193120000457）。</li>
               <li>自动处理成功不通知；转人工和系统异常发送通知。</li>
               <li>同一售后单只创建一条人工工单并发送一次通知。</li>
               <li>结果未知时提示“先核查平台状态，禁止直接再次退款”。</li>
@@ -714,7 +714,7 @@
               <tr><td>长沙口径</td><td>轨迹出现“长沙”即可，不要求到达或签收长沙。</td></tr>
               <tr><td>系统边界</td><td>不访问或登记 OMS，不依赖 TMS，不自动拒绝退款。</td></tr>
               <tr><td>试点方式</td><td>PANAPOPO医疗保健官方旗舰店、松藤Yazc海外好物馆、PANAPOPO医疗器械官方旗舰店直接执行真实退款，无影子模式。</td></tr>
-              <tr><td>人工兜底</td><td>发送至“天猫抖音退款Agent通知群”（群号 189925002005）；成功订单不通知，转人工和系统异常固定逐一 @ 10 位指定人员。</td></tr>
+              <tr><td>人工兜底</td><td>发送至“拼多多工单Agent对接群”（群号 193120000457）；成功订单不通知，转人工和系统异常固定逐一 @ 9 位指定人员。</td></tr>
             </tbody>
           </table>
         </div>
@@ -728,8 +728,8 @@
       <section class="panel" id="notification" role="tabpanel" aria-labelledby="tab-notification" hidden>
         <h2 class="section-title">通知配置 <span>转人工和系统异常触发</span></h2>
         <div class="notice-facts">
-          <div class="notice-fact"><strong>通知群</strong><span>天猫抖音退款Agent通知群</span></div>
-          <div class="notice-fact"><strong>钉钉群号</strong><span>189925002005</span></div>
+          <div class="notice-fact"><strong>通知群</strong><span>拼多多工单Agent对接群</span></div>
+          <div class="notice-fact"><strong>钉钉群号</strong><span>193120000457</span></div>
           <div class="notice-fact"><strong>成功订单</strong><span>自动处理成功不通知</span></div>
         </div>
         <div class="notice-scope">
@@ -737,20 +737,19 @@
           <span>PANAPOPO医疗保健官方旗舰店、松藤Yazc海外好物馆、PANAPOPO医疗器械官方旗舰店</span>
         </div>
         <div class="notice-rule">
-          <strong>固定 @ 10位指定人员</strong>
+          <strong>固定 @ 9位指定人员</strong>
           <span>每次通知均逐一 @ 以下人员，不使用“@所有人”，群内其他成员不 @。</span>
         </div>
         <div class="contact-grid" aria-label="固定通知人员">
-          <div class="contact">张欣（子宁）</div>
-          <div class="contact">易嘉豪（狄云）</div>
-          <div class="contact">何紫辉（婉安）</div>
-          <div class="contact">陈姣群（梨花）</div>
-          <div class="contact">蔡妍（今夏）</div>
-          <div class="contact">彭心雨（听竹）</div>
-          <div class="contact">彭玉洁（青顾）</div>
-          <div class="contact">曾昶（霜寒）</div>
-          <div class="contact">刘敏（秦桑）</div>
-          <div class="contact">崔志文（行云）</div>
+          <div class="contact">狄云</div>
+          <div class="contact">青顾</div>
+          <div class="contact">行云</div>
+          <div class="contact">今夏</div>
+          <div class="contact">婉安</div>
+          <div class="contact">子宁</div>
+          <div class="contact">霜寒</div>
+          <div class="contact">听竹</div>
+          <div class="contact">梨花</div>
         </div>
       </section>
     </div>

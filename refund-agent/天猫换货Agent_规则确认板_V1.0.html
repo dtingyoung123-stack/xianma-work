@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>天猫换货 Agent 规则确认板 V1.0</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --brand: #d9353f;
+      --brand-soft: #fff1f2;
+      --ink: #202124;
+      --muted: #687076;
+      --line: #dfe3e6;
+      --surface: #ffffff;
+      --surface-alt: #f6f7f8;
+      --auto: #16794b;
+      --auto-soft: #e9f7ef;
+      --oms: #2463a6;
+      --oms-soft: #eaf3fc;
+      --wait: #996300;
+      --wait-soft: #fff5d9;
+      --manual: #b4232d;
+      --manual-soft: #fdecef;
+      --neutral: #5f6670;
+      --neutral-soft: #eef0f2;
+      --shadow: 0 8px 24px rgba(23, 29, 33, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--surface-alt);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.58;
+    }
+    button { font: inherit; }
+    .page {
+      width: min(94vw, 1400px);
+      margin: 24px auto 40px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      align-items: flex-start;
+      padding: 24px 28px 20px;
+      border-top: 5px solid var(--brand);
+      border-bottom: 1px solid var(--line);
+    }
+    .header h1 { margin: 0 0 6px; font-size: 24px; line-height: 1.3; font-weight: 600; }
+    .header p { margin: 0; color: var(--muted); }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 30px;
+      padding: 5px 10px;
+      color: var(--manual);
+      background: var(--manual-soft);
+      border-radius: 6px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--manual);
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tab, .print-button {
+      min-height: 36px;
+      padding: 7px 13px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .tab[aria-selected="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .tab:focus-visible, .print-button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+    .panel { padding: 20px 28px 28px; }
+    .panel[hidden] { display: none; }
+    .section-title { margin: 4px 0 14px; font-size: 18px; font-weight: 600; }
+    .section-title span { color: var(--muted); font-size: 14px; font-weight: 400; margin-left: 10px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .summary-item {
+      background: var(--surface-alt);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .summary-item span { display: block; color: var(--muted); font-size: 13px; }
+    .summary-item strong { display: block; font-size: 16px; margin-top: 4px; font-weight: 600; }
+    .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 16px; }
+    .flow-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 12px;
+      max-width: 240px;
+    }
+    .step-number {
+      flex: 0 0 auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--ink);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .step-condition { font-weight: 600; }
+    .arrow { color: var(--muted); font-weight: 600; }
+    .action { padding: 3px 8px; border-radius: 5px; font-weight: 600; white-space: nowrap; }
+    .action.auto { background: var(--auto-soft); color: var(--auto); }
+    .action.manual { background: var(--manual-soft); color: var(--manual); }
+    .action.wait { background: var(--wait-soft); color: var(--wait); }
+    .action.neutral { background: var(--neutral-soft); color: var(--neutral); }
+    .rule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .rule-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: var(--surface);
+    }
+    .rule-block h3 { margin: 0 0 8px; font-size: 15px; }
+    .rule-block ul { margin: 0; padding-left: 18px; }
+    .rule-block li { margin: 4px 0; }
+    .table-wrap { overflow-x: auto; margin-bottom: 20px; }
+    .rule-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .rule-table th, .rule-table td {
+      border: 1px solid var(--line);
+      padding: 9px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .rule-table th { background: var(--surface-alt); font-weight: 600; white-space: nowrap; }
+    .rule-table tr:nth-child(even) td { background: #fafbfb; }
+    .label {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 5px;
+      font-weight: 600;
+      white-space: nowrap;
+      font-size: 12.5px;
+    }
+    .label-auto { background: var(--auto-soft); color: var(--auto); }
+    .label-manual { background: var(--manual-soft); color: var(--manual); }
+    .label-wait { background: var(--wait-soft); color: var(--wait); }
+    .label-oms { background: var(--oms-soft); color: var(--oms); }
+    .time-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .time-item { background: var(--surface-alt); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+    .time-item strong { display: block; color: var(--muted); font-size: 13px; font-weight: 600; }
+    .time-item .time-value { font-size: 20px; font-weight: 700; color: var(--brand); margin: 4px 0; }
+    .time-item p { margin: 0; font-size: 13px; color: var(--muted); }
+    .speech {
+      background: var(--surface-alt);
+      border-left: 3px solid var(--brand);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      margin: 10px 0;
+      font-size: 13.5px;
+    }
+    .speech strong { display: block; margin-bottom: 3px; color: var(--ink); }
+    .qa-block { margin-bottom: 22px; }
+    .qa-block h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      padding: 7px 12px;
+      background: var(--brand-soft);
+      border-left: 4px solid var(--brand);
+      border-radius: 0 6px 6px 0;
+    }
+    .qa-table td:first-child { white-space: nowrap; font-weight: 600; }
+    .qa-table .impact { color: var(--muted); font-size: 12.5px; }
+    .risk-banner {
+      background: var(--manual-soft);
+      border: 1px solid #f3c3c8;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 18px 0;
+    }
+    .risk-banner strong { color: var(--manual); }
+    .risk-banner p { margin: 6px 0 0; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 14px 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      background: var(--surface);
+    }
+    .notice {
+      background: var(--wait-soft);
+      border: 1px solid #ecd9a0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 14px 0;
+      font-size: 13.5px;
+    }
+    .notice strong { color: var(--wait); }
+    @media print {
+      body { background: #fff; }
+      .page { width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
+      .toolbar { display: none; }
+      .panel { display: block !important; page-break-before: always; }
+      .panel:first-of-type { page-break-before: auto; }
+      .tab[aria-selected="true"] { background: transparent; color: inherit; border-color: var(--line); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div>
+      <h1>天猫换货 Agent 规则确认板</h1>
+      <p>规则来源：《天猫换货流程.xlsx》· 交叉参考：天猫退款 Agent 规则确认板 V1.0 · 更新日期 2026-09-19</p>
+    </div>
+    <div class="status">业务已确认</div>
+  </header>
+
+  <div class="toolbar">
+    <div class="tabs" role="tablist" aria-label="规则确认板分页">
+      <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="overview" id="tab-overview">规则总览</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="mainflow" id="tab-mainflow">换货主流程</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="decision" id="tab-decision">判断规则</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="time" id="tab-time">时效与话术</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="qa" id="tab-qa">确认结果</button>
+    </div>
+    <button class="print-button" type="button" id="printBtn">打印 / 存为 PDF</button>
+  </div>
+
+  <!-- ============ 规则总览 ============ -->
+  <section class="panel" id="overview" role="tabpanel" aria-labelledby="tab-overview">
+    <h2 class="section-title">规则总览</h2>
+    <div class="summary-grid">
+      <div class="summary-item"><span>售后类型</span><strong>换货</strong></div>
+      <div class="summary-item"><span>店铺范围</span><strong>11家 · 已确认</strong></div>
+      <div class="summary-item"><span>订单状态</span><strong>待收货 / 交易成功</strong></div>
+      <div class="summary-item"><span>自动换货触发</span><strong>物流显示长沙</strong></div>
+      <div class="summary-item"><span>拒绝节点</span><strong>倒计时 &lt; 48小时</strong></div>
+      <div class="summary-item"><span>换货时效</span><strong>10天 / 2天发货</strong></div>
+    </div>
+
+    <h2 class="section-title">决策流程 <span>2026-09-19 业务已确认</span></h2>
+    <div class="flow">
+      <div class="flow-step"><span class="step-number">1</span><span class="step-condition">扫描换货售后</span><span class="arrow">→</span><span class="action neutral">筛选换货类型</span></div>
+      <div class="flow-step"><span class="step-number">2</span><span class="step-condition">命中硬转人工</span><span class="arrow">→</span><span class="action manual">件数&gt;10 / 客服备注 / 件数=2</span></div>
+      <div class="flow-step"><span class="step-number">3</span><span class="step-condition">物流异地签收</span><span class="arrow">→</span><span class="action manual">留言并转人工</span></div>
+      <div class="flow-step"><span class="step-number">4</span><span class="step-condition">物流显示长沙</span><span class="arrow">→</span><span class="action auto">同意换货</span></div>
+      <div class="flow-step"><span class="step-number">5</span><span class="step-condition">倒计时&lt;48h未到</span><span class="arrow">→</span><span class="action manual">拒绝换货</span></div>
+      <div class="flow-step"><span class="step-number">6</span><span class="step-condition">3天无物流更新</span><span class="arrow">→</span><span class="action manual">留言并转人工</span></div>
+    </div>
+
+    <div class="rule-grid">
+      <article class="rule-block">
+        <h3>适用范围</h3>
+        <ul>
+          <li>平台：天猫；商品：全品类。</li>
+          <li>店铺：已确认 11 家（2026-09-19 业务账号表）：zeamo旗舰店、恒源祥先马专卖店、艾漫旗舰店、pakeqi医疗器械旗舰店、恒源祥鸿远专卖店、冈朴制药旗舰店、veevco医疗器械旗舰店、drboja旗舰店、draddo旗舰店、dranlove旗舰店、zeamo快马专卖店；海外店及皆花、prowaves 不在本期。</li>
+          <li>订单状态：待收货、交易成功。</li>
+        </ul>
+      </article>
+      <article class="rule-block">
+        <h3>自动换货条件</h3>
+        <ul>
+          <li>退货物流轨迹出现“长沙”（发往/到达长沙）即可操作换货，无需等待签收。</li>
+          <li>物流口径已确认（B1）：轨迹出现“长沙”字段即视为发往长沙，无需等待签收。</li>
+          <li>信息缺失、冲突或结果不明确时转人工，不猜测。</li>
+        </ul>
+      </article>
+      <article class="rule-block">
+        <h3>系统边界</h3>
+        <ul>
+          <li>天猫商家后台：筛选换货售后、查看物流、留言、插旗备注。</li>
+          <li>OMS：生成换货订单、修改商品/尺码、结算金额改 0、手工配货。</li>
+          <li>两套系统登录与操作权限已确认具备（业务确认 2026-09-19）。</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="notice">
+      <strong>文档状态：</strong>本板为 V1.0，业务已确认（2026-09-19），可进入研发评审。
+    </div>
+    <div class="notice">
+      <strong>确认结论（2026-09-19）：</strong>24 项待确认问题已全部确认：C1 生成换货单即点同意；其余按建议口径执行；店铺范围按业务账号表确认为 11 家、海外店不在本期（详见“确认结果”页签）。此前已确认系统权限与通知规则（第 6.1 节）。
+    </div>
+  </section>
+
+  <!-- ============ 换货主流程 ============ -->
+  <section class="panel" id="mainflow" role="tabpanel" aria-labelledby="tab-mainflow" hidden>
+    <h2 class="section-title">换货主流程 <span>SOP 操作步骤整理为 Agent 自动执行链路</span></h2>
+    <div class="flow">
+      <div class="flow-step"><span class="step-number">1</span><span class="step-condition">平台定位</span><span class="arrow">→</span><span class="action neutral">退款管理 → 待处理售后 → 换货筛选</span></div>
+      <div class="flow-step"><span class="step-number">2</span><span class="step-condition">已发往长沙</span><span class="arrow">→</span><span class="action oms">OMS 生成换货订单</span></div>
+      <div class="flow-step"><span class="step-number">3</span><span class="step-condition">核对尺码</span><span class="arrow">→</span><span class="action oms">修改商品 · 金额改0 · 手工配货</span></div>
+      <div class="flow-step"><span class="step-number">4</span><span class="step-condition">配货成功</span><span class="arrow">→</span><span class="action auto">插旗“已换出+日期+工号”</span></div>
+      <div class="flow-step"><span class="step-number">5</span><span class="step-condition">缺货</span><span class="arrow">→</span><span class="action wait">留言缺货话术 · 插旗引导退款</span></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="rule-table">
+        <thead>
+          <tr><th style="width:60px">步骤</th><th>执行内容</th><th>系统</th><th>判定 / 备注</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>①</td><td>商家后台 → 交易 → 退款管理 → 待处理售后【全部】→ 售后单查询处点击【换货】→ 查看退货物流是否发往长沙</td><td><span class="label label-neutral">天猫后台</span></td><td>已确认：生成换货单即点同意，无需单独点击（C1）</td></tr>
+          <tr><td>②</td><td>已发往长沙 → OMS → 订单管理 → 换货申请 → 搜索交易号 → 选择 → 生成换货订单 → 确定</td><td><span class="label label-oms">OMS</span></td><td>唯一标识：售后单号（退款编号）；同一订单可能多个产品</td></tr>
+          <tr><td>③</td><td>OMS 搜索订单号 → 查看换货尺码是否与平台申请一致 → 不一致点击【修改商品】→ 结算金额修改为【0】→ 手工配货（可感知是否缺货）</td><td><span class="label label-oms">OMS</span></td><td>已确认：同款不同尺码自动改；价差换货转人工；无价差改 0（B2/B3/C2/C3）</td></tr>
+          <tr><td>④</td><td>返回平台：配货成功 → 插旗备注“已换出 + 日期 + 工号”；缺货 → 留言缺货话术 + 插旗备注“缺货引导退款 + 时间”</td><td><span class="label label-neutral">天猫后台</span></td><td>已确认：Agent 专用工号（C6）；缺货后转人工跟进退款（C5）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rule-grid">
+      <article class="rule-block">
+        <h3>成功判定</h3>
+        <p style="margin:0">配货正常即换货成功。换新商品发货由仓库执行（包裹签收后 2 天内发货），Agent 不跟踪发货（D3 已确认）。</p>
+      </article>
+      <article class="rule-block">
+        <h3>异常处理</h3>
+        <ul>
+          <li>换货件数为 2、需拆分发货订单 → 转人工</li>
+          <li>平台报错、不明原因 → 转人工</li>
+          <li>客服备注需换货其他商品 / 修改换货件数 → 转人工</li>
+          <li>操作结果不明确 → 禁止重复操作，转人工核验</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 判断规则 ============ -->
+  <section class="panel" id="decision" role="tabpanel" aria-labelledby="tab-decision" hidden>
+    <h2 class="section-title">判断规则 <span>四类动作 · 转人工硬条件优先</span></h2>
+    <div class="table-wrap">
+      <table class="rule-table">
+        <thead>
+          <tr><th>动作</th><th>触发条件</th><th>Agent 动作</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="label label-auto">同意换货</span></td>
+            <td>退货物流轨迹显示“长沙”，且未命中任何转人工 / 拒绝条件</td>
+            <td>执行完整链路：生成换货单 → 核对尺码 → 金额改 0 → 手工配货 → 插旗“已换出”</td>
+          </tr>
+          <tr>
+            <td><span class="label label-manual">拒绝换货</span></td>
+            <td>退货申请倒计时 &lt; 48 小时，退货物流依旧未显示到长沙</td>
+            <td>留言拒绝申请话术并点击“拒绝换货”按钮（已确认）</td>
+          </tr>
+          <tr>
+            <td><span class="label label-wait">协商退款</span></td>
+            <td>买家换货物流异常</td>
+            <td>留言协商/提醒话术并转人工，V1 不自动发起平台协商退款（已确认 B6）</td>
+          </tr>
+          <tr>
+            <td><span class="label label-manual">转人工</span></td>
+            <td>① 退货物流签收地与退货地址不一致<br>② 订单商品件数 &gt; 10 件<br>③ 上传单号后超 3 天无物流更新<br>④ 换货件数为 2、需拆分发货<br>⑤ 平台报错、原因不明<br>⑥ 客服备注需换货其他商品 / 修改换货件数<br>⑦ 信息缺失、冲突或结果不明确</td>
+            <td>按场景留言对应话术（如有）并转人工，停止自动操作</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="notice">
+      <strong>优先级（已确认 B7）：</strong>转人工硬条件 &gt; 地址不一致 &gt; 拒绝（临期）&gt; 同意 / 等待。同一售后命中多条规则时，转人工与拒绝优先，不执行同意。
+    </div>
+
+    <h2 class="section-title">触发条件与风控边界</h2>
+    <div class="rule-grid">
+      <article class="rule-block">
+        <h3>触发条件</h3>
+        <p style="margin:0">SOP 原文：“跟上线标准、判断规则一致”。即：扫描到换货类型售后即进入判断，物流显示长沙即操作，未显示按临期/停滞规则分流。</p>
+      </article>
+      <article class="rule-block">
+        <h3>风控边界</h3>
+        <p style="margin:0">SOP 原文：“与上线标准、触发条件、判断规则”，表述不完整；边界以本板判断规则为准（E2 已确认）。</p>
+      </article>
+      <article class="rule-block">
+        <h3>唯一标识</h3>
+        <p style="margin:0">售后单号（退款编号）为唯一标识；同一订单可能存在多个产品（多售后单），须按售后单维度处理并防重复。</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 时效与话术 ============ -->
+  <section class="panel" id="time" role="tabpanel" aria-labelledby="tab-time" hidden>
+    <h2 class="section-title">时效要求</h2>
+    <div class="time-grid">
+      <div class="time-item"><strong>换货时效</strong><div class="time-value">10天</div><p>买家寄回后，待商家收货时效</p></div>
+      <div class="time-item"><strong>换新发货</strong><div class="time-value">2天内</div><p>包裹签收后倒计时，仓库执行</p></div>
+      <div class="time-item"><strong>拒绝节点</strong><div class="time-value">&lt;48小时</div><p>物流未到长沙时拒绝换货</p></div>
+      <div class="time-item"><strong>停滞节点</strong><div class="time-value">&gt;3天</div><p>上传单号后无物流更新，转人工</p></div>
+    </div>
+    <div class="notice">
+      <strong>口径（D1 已确认）：</strong>退款场景为“填写物流后 7 天平台倒计时”，换货 SOP 为“换货时效 10 天”，一律以天猫平台页面实时倒计时为准。
+    </div>
+
+    <h2 class="section-title">话术模板 <span>SOP 原文 4 套</span></h2>
+    <div class="speech"><strong>① 买家退货物流无更新</strong>亲亲，您的退货单号已经停滞几天无物流更新了，还麻烦您核对下快递单号是否正确，或与寄出的快递员联系了解下物流什么情况，以免耽误您的退款进度，感谢亲的理解跟配合/:086</div>
+    <div class="speech"><strong>② 买家退货物流异地签收</strong>亲亲，您上传的退货快递单号显示在其他地址签收，我们的退货仓在湖南长沙哦，辛苦您尽快核对下快递单号是否填错了，避免耽误您的退货申请，核对后可联系店铺人工客服提供正确退回单号哦</div>
+    <div class="speech"><strong>③ 拒绝申请</strong>亲亲，商品退回后才可退款哦，目前您的退货物流存在异常，小店未收到您退回的产品，退款即将超时暂时拒绝您的申请，后续找到正确单号了您重新申请一下或者联系人工客服处理哦</div>
+    <div class="speech"><strong>④ 换货缺货</strong>亲，实在不好意思，我们在给您质检出库时，发现产品有一点点小瑕疵，我们也知道您购买宝贝也是看中质量问题，所以避免您收到会有此问题，我们这边决定全部退回返厂，重新制作！保证好质量 先给您处理退款可以嘛</div>
+  </section>
+
+  <!-- ============ 待业务确认 ============ -->
+  <section class="panel" id="qa" role="tabpanel" aria-labelledby="tab-qa" hidden>
+    <h2 class="section-title">确认结果 <span>2026-09-19 · 24 项全部确认</span></h2>
+    <div class="notice">
+      <strong>确认记录：</strong>2026-09-19 客服确认：C1 生成换货单即点同意；其余按建议口径执行。下表“确认口径”列为最终执行规则，可进入研发评审。
+    </div>
+
+    <div class="qa-block">
+      <h3>A. 范围类（4 项）</h3>
+      <div class="table-wrap">
+        <table class="rule-table qa-table">
+          <thead><tr><th style="width:44px">#</th><th>问题</th><th>确认口径</th><th class="impact">影响</th></tr></thead>
+          <tbody>
+            <tr><td>A1</td><td>SOP“处理类型”写“退货退款”，但全篇为换货流程，确认本期处理类型为换货？</td><td>换货</td><td class="impact">规则匹配入口</td></tr>
+            <tr><td>A2</td><td>换货店铺范围是 SOP 的 15 家，还是与退款确认板一致剔除皆花旗舰店、prowaves旗舰店（13 家）？首批试点店铺是哪几家？</td><td>按业务账号表确认为 11 家（首批即全部）</td><td class="impact">扫描与操作范围</td></tr>
+            <tr><td>A3</td><td>zeamo海外旗舰店、dranlove海外旗舰店换货目标退货地址是否为长沙？（退款场景海外店为义乌/金华）</td><td>海外店不在账号表内，本期不处理海外店换货</td><td class="impact">物流判断</td></tr>
+            <tr><td>A4</td><td>订单状态“待收货、交易成功”都处理换货？</td><td>按 SOP 两者都处理</td><td class="impact">触发范围</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="qa-block">
+      <h3>B. 判断规则类（7 项）</h3>
+      <div class="table-wrap">
+        <table class="rule-table qa-table">
+          <thead><tr><th style="width:44px">#</th><th>问题</th><th>确认口径</th><th class="impact">影响</th></tr></thead>
+          <tbody>
+            <tr><td>B1</td><td>“发往长沙”与“显示长沙”统一为什么？是否 = 轨迹出现“长沙”即可、无需签收/入库？</td><td>轨迹含“长沙”即可操作</td><td class="impact">同意换货触发点</td></tr>
+            <tr><td>B2</td><td>件数口径：本次换货件数还是整单总件数？件数=2 转人工、3–10 自动、&gt;10 转人工，确认？</td><td>任一口径 &gt;10 转人工；=2 转人工</td><td class="impact">转人工判断</td></tr>
+            <tr><td>B3</td><td>SOP 金额规则为空。换货是否沿用“金额任一 &gt;500 元转人工”？结算金额改 0 的依据？价差换货如何处理？</td><td>沿用 &gt;500 转人工；价差换货转人工</td><td class="impact">金额边界与操作</td></tr>
+            <tr><td>B4</td><td>“倒计时 &lt; 48 小时”指平台哪个字段？=48 小时整如何处理？</td><td>平台实时倒计时，严格 &lt;48h</td><td class="impact">拒绝触发点</td></tr>
+            <tr><td>B5</td><td>“上传单号后超 3 天无物流更新”起算点：上传日+3 天，还是最新物流节点距当前 &gt;3 天？</td><td>最新物流节点距当前 &gt;72 小时</td><td class="impact">转人工触发点</td></tr>
+            <tr><td>B6</td><td>“协商退款”具体操作：仅发话术提醒，还是发起平台协商退款？金额全额/部分？未达成怎么办？</td><td>V1 发话术提醒并转人工</td><td class="impact">协商退款动作</td></tr>
+            <tr><td>B7</td><td>同一售后命中多条规则（如 3 天无更新 + &lt;48h）时优先级？</td><td>转人工/拒绝优先</td><td class="impact">决策优先级</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="qa-block">
+      <h3>C. 操作执行类（7 项）</h3>
+      <div class="table-wrap">
+        <table class="rule-table qa-table">
+          <thead><tr><th style="width:44px">#</th><th>问题</th><th>确认口径</th><th class="impact">影响</th></tr></thead>
+          <tbody>
+            <tr><td>C1</td><td>生成换货单前是否需在平台点击“同意换货”？</td><td>生成换货单即点同意：OMS 生成换货订单即视为同意，无需单独点击</td><td class="impact">操作步骤</td></tr>
+            <tr><td>C2</td><td>尺码不一致时 OMS“修改商品”自动执行？不同商品（跨 SKU）换货如何判定转人工？</td><td>同款不同尺码自动改；跨商品转人工</td><td class="impact">修改商品边界</td></tr>
+            <tr><td>C3</td><td>结算金额改 0 是否所有换货单执行？金额规则 B13 为空，是否补充金额操作规范？</td><td>无价差改 0；价差转人工</td><td class="impact">金额操作</td></tr>
+            <tr><td>C4</td><td>手工配货由 Agent 在 OMS 执行？失败/页面异常如何处理？</td><td>Agent 执行；失败转人工</td><td class="impact">OMS 操作自动化</td></tr>
+            <tr><td>C5</td><td>缺货闭环：留言+插旗后换货单如何收尾？买家同意退款后谁操作？超时未回复？</td><td>缺货后转人工跟进退款</td><td class="impact">缺货分支</td></tr>
+            <tr><td>C6</td><td>插旗备注“已换出+日期+工号”的工号：用 Agent 登录账号工号？是否分配专用工号？</td><td>业务分配 Agent 专用工号</td><td class="impact">记录规范</td></tr>
+            <tr><td>C7</td><td>V1 是否读取客服聊天记录判断“换货其他商品/修改件数”？</td><td>仅读取结构化订单备注字段</td><td class="impact">转人工识别</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="qa-block">
+      <h3>D. 时效与监控类（3 项）</h3>
+      <div class="table-wrap">
+        <table class="rule-table qa-table">
+          <thead><tr><th style="width:44px">#</th><th>问题</th><th>确认口径</th><th class="impact">影响</th></tr></thead>
+          <tbody>
+            <tr><td>D1</td><td>换货 10 天时效与退款场景“填写物流后 7 天倒计时”不一致，以平台实时倒计时为准？</td><td>以平台实时倒计时为准</td><td class="impact">拒绝触发</td></tr>
+            <tr><td>D2</td><td>扫描频率与排序：沿用退款场景每 30 分钟扫描、按临期从短到长？</td><td>沿用 30 分钟</td><td class="impact">监控节奏</td></tr>
+            <tr><td>D3</td><td>成功判定 = 配货正常；签收后 2 天发货由仓库执行，Agent 是否跟踪发货与买家通知？</td><td>成功 = 配货成功，发货跟踪不在本期</td><td class="impact">完成边界</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="qa-block">
+      <h3>E. 通知与风控类（4 项）</h3>
+      <div class="table-wrap">
+        <table class="rule-table qa-table">
+          <thead><tr><th style="width:44px">#</th><th>问题</th><th>确认口径</th><th class="impact">影响</th></tr></thead>
+          <tbody>
+            <tr><td>E1</td><td>同一买家当前换货售后数量上限？（退款场景为 &gt;3 个转人工）</td><td>沿用 &gt;3 转人工</td><td class="impact">风控边界</td></tr>
+            <tr><td>E2</td><td>SOP“风控边界”表述不完整（“与上线标准、触发条件、判断规则”后无内容），确认是否有遗漏？</td><td>以本板判断规则为准</td><td class="impact">文档闭环</td></tr>
+            <tr><td>E3</td><td>拒绝换货后买家重新申请，Agent 是否重新进入自动判断？是否限制重复次数？</td><td>重新进入自动判断；异常重复转人工</td><td class="impact">重复处理</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="risk-banner">
+      <strong>需要业务知晓并确认：AI 无法保证 100% 准确，仍可能出错</strong>
+      <p>自动换货涉及 OMS 生成换货单、改金额、手工配货、插旗等真实业务操作。页面变化、信息识别错误、物流更新延迟、人工同时操作或平台/OMS 异常，都可能导致误操作、重复操作或漏处理。业务确认表示已清楚了解上述风险，并同意按确认后规则执行真实操作；出现异常时由人工及时接管，并可暂停相关店铺或业务场景。</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>内部资料 · 仅用于天猫换货 Agent 需求确认</span>
+    <span>业务已确认（2026-09-19）· 可进入研发评审</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function selectTab(tab) {
+    tabs.forEach(function (item) {
+      item.setAttribute('aria-selected', String(item === tab));
+    });
+    tabs.forEach(function (item) {
+      var panel = document.getElementById(item.getAttribute('aria-controls'));
+      if (panel) { panel.hidden = item !== tab; }
+    });
+    if (window.print) { /* noop */ }
+  }
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () { selectTab(tab); });
+    tab.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTab(tab); }
+    });
+  });
+  var printBtn = document.getElementById('printBtn');
+  if (printBtn) {
+    printBtn.addEventListener('click', function () { window.print(); });
+  }
+})();
+</script>
+</body>
+</html>

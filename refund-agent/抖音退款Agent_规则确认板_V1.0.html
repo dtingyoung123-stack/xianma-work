@@ -523,7 +523,7 @@
     <header class="header">
       <div>
         <h1>抖音退款 Agent 规则确认板</h1>
-        <p>规则基线：抖音退款 SOP 2.0 · V1.0 · 本次补充更新 2026-08-10</p>
+        <p>规则基线：抖音退款 SOP 2.0 · V1.0 · 本次补充更新 2026-08-14</p>
       </div>
       <div class="status">已业务确认</div>
     </header>
@@ -571,7 +571,7 @@
           <article class="flow-card">
             <div class="flow-head"><h2><span class="number">2</span>已发货退款</h2><span class="action wait">状态驱动</span></div>
             <div class="flow-body">
-              <div class="flow-row"><span class="condition">OMS低值品</span><span class="arrow">→</span><span class="action auto">弃件并立即退款</span></div>
+              <div class="flow-row"><span class="condition">OMS低值品</span><span class="arrow">→</span><span class="action auto">弃件工单完成后退款</span></div>
               <div class="flow-row"><span class="condition">普通订单</span><span class="arrow">→</span><span class="action info">创建TMS拦截工单</span></div>
               <div class="flow-row"><span class="condition">工单已完成</span><span class="arrow">→</span><span class="action auto">执行退款</span></div>
               <div class="flow-row"><span class="condition">待处理且 ＞12h</span><span class="arrow">→</span><span class="action wait">等待复查</span></div>
@@ -646,29 +646,28 @@
       <section class="panel" id="notification" role="tabpanel" aria-labelledby="tab-notification" hidden>
         <h2 class="section-title">通知配置 <span>转人工和系统异常触发</span></h2>
         <div class="notice-facts">
-          <div class="notice-fact"><strong>通知群</strong><span>天猫抖音退款Agent通知群</span></div>
-          <div class="notice-fact"><strong>钉钉群号</strong><span>189925002005</span></div>
+          <div class="notice-fact"><strong>通知群</strong><span>以群号唯一定位，名称以钉钉显示为准</span></div>
+          <div class="notice-fact"><strong>钉钉群号</strong><span>193120000457</span></div>
           <div class="notice-fact"><strong>成功订单</strong><span>自动处理成功不通知</span></div>
         </div>
         <div class="notice-scope">
           <strong>首批运行店铺(3家)</strong>
-          <span>Panapopo护肤旗舰店、Panapopo官方旗舰店、Panapopo陆吾个人护理专卖店</span>
+          <span>Panapopo护肤旗舰店、Panapopo官方旗舰店、Panapopo陆吾个人护理专卖店；按精确名称识别并作为内部键</span>
         </div>
         <div class="notice-rule">
-          <strong>固定 @ 10位指定人员</strong>
+          <strong>固定 @ 9位指定人员</strong>
           <span>每次通知均逐一@以下人员，不使用“@所有人”，群内其他成员不@。</span>
         </div>
         <div class="contact-grid" aria-label="固定通知人员">
-          <div class="contact">张欣(子宁)</div>
-          <div class="contact">易嘉豪(狄云)</div>
-          <div class="contact">何紫辉(婉安)</div>
-          <div class="contact">陈姣群(梨花)</div>
-          <div class="contact">蔡妍(今夏)</div>
-          <div class="contact">彭心雨(听竹)</div>
-          <div class="contact">彭玉洁(青顾)</div>
-          <div class="contact">曾昶(霜寒)</div>
-          <div class="contact">刘敏(秦桑)</div>
-          <div class="contact">崔志文(行云)</div>
+          <div class="contact">狄云</div>
+          <div class="contact">青顾</div>
+          <div class="contact">行云</div>
+          <div class="contact">今夏</div>
+          <div class="contact">婉安</div>
+          <div class="contact">子宁</div>
+          <div class="contact">霜寒</div>
+          <div class="contact">听竹</div>
+          <div class="contact">梨花</div>
         </div>
       </section>
 
@@ -687,6 +686,7 @@
 
         <div class="message-box">
           <strong>退货物流异常留言</strong>
+          <p>退回物流只读取结构化目的地或签收地址；规范化后包含“长沙/长沙市”即匹配，不从物流轨迹、聊天或备注自由文本推断。</p>
           <p>亲，我这边查到您填写的退货物流未发往或未签收至商家指定退货地址，因此本次退款申请暂时无法通过。辛苦您核实退货地址及物流信息，如有异常请联系发件快递确认哦～</p>
         </div>
       </section>
