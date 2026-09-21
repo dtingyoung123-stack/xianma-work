@@ -463,7 +463,19 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
 .tag-info { background: #E8F3FF; color: var(--info); }
 
 /* ===== 场景分布列表 ===== */
-.scene-list { display: flex; flex-direction: column; gap: 12px; }
+.scene-list { display: flex; flex-direction: column; gap: 12px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+.scene-list::-webkit-scrollbar { width: 6px; }
+.scene-list::-webkit-scrollbar-thumb { background: #D9D9D9; border-radius: 3px; }
+.scene-list::-webkit-scrollbar-track { background: transparent; }
+
+/* ===== 表格分页 ===== */
+.pager { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-top: 1px solid #F2F3F7; }
+.pager-info { font-size: 13px; color: var(--text-tertiary, #86909C); }
+.pager-btns { display: flex; gap: 4px; align-items: center; }
+.page-btn { min-width: 28px; height: 28px; padding: 0 10px; border: 1px solid #E5E6EB; background: #fff; border-radius: 4px; cursor: pointer; font-size: 12px; color: #4E5969; transition: all 0.15s; }
+.page-btn:hover:not(:disabled):not(.active) { border-color: #D9353F; color: #D9353F; }
+.page-btn.active { background: #D9353F; color: #fff; border-color: #D9353F; }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .scene-item {
   display: flex;
   align-items: center;
@@ -710,10 +722,6 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
         <div class="topbar-filter">
           <select id="globalSceneFilter" onchange="if(currentView==='overview'){renderOverviewWithFilters();}else if(currentView==='detail'&&currentPlatform!=='all'){renderDetailWithFilters(currentPlatform,document.getElementById('globalShopFilter').value,this.value);}">
             <option value="all">全部场景</option>
-            <option value="退货退款">退货退款</option>
-            <option value="在途无理由退款">在途无理由退款</option>
-            <option value="已发货无轨迹退款">已发货无轨迹退款</option>
-            <option value="异常网点预警">异常网点预警</option>
           </select>
         </div>
         <button class="btn-proposal" onclick="showProposal()">查看方案</button>
@@ -859,27 +867,26 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
           </div>
           <table class="data-table" style="table-layout:fixed">
             <colgroup>
-              <col style="width:14%">
-              <col style="width:12%">
-              <col style="width:14%">
-              <col style="width:18%">
-              <col style="width:12%">
-              <col style="width:14%">
               <col style="width:16%">
+              <col style="width:13%">
+              <col style="width:15%">
+              <col style="width:20%">
+              <col style="width:13%">
+              <col style="width:23%">
             </colgroup>
             <thead>
               <tr>
                 <th>工单号</th>
                 <th>下单时间</th>
-                <th>平台/店铺</th>
+                <th>店铺</th>
                 <th>业务场景</th>
                 <th>处理状态</th>
                 <th>处理结果</th>
-                <th>处理耗时</th>
               </tr>
             </thead>
             <tbody id="orderTableBody"></tbody>
           </table>
+          <div class="pager" id="orderPager"></div>
         </div>
       </div>
 
@@ -1027,7 +1034,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
           </div>
           <div class="confirm-card">
             <h4>确认项2：订单明细表字段</h4>
-            <p>当前demo展示：工单号、下单时间、平台/店铺、业务场景、处理状态、处理结果、处理耗时。是否需要增加或调整字段？（如：买家信息、客服/Agent、备注等）</p>
+            <p>当前demo展示：工单号、下单时间、平台/店铺、业务场景、处理状态、处理结果（分页展示，每页10条）。是否需要增加或调整字段？（如：买家信息、客服/Agent、备注等）</p>
           </div>
           <div class="confirm-card">
             <h4>确认项3：退货退款拆分口径</h4>
@@ -1115,11 +1122,15 @@ const platforms = {
     fail: 3216,
     hasRefund: true,
     scenes: [
-      { name: '退货退款', success: 48, fail: 12 },
-      { name: '在途无理由退款', success: 22, fail: 3 },
-      { name: '已发货无轨迹退款', success: 10, fail: 2 },
-      { name: '异常网点预警', success: 5, fail: 8 },
-      { name: '消费者拒收问题', success: 2, fail: 1 },
+      { name: '退货验收核实', success: 86400, fail: 2413 },
+      { name: '拦截件', success: 17600, fail: 584 },
+      { name: '催派件', success: 3080, fail: 116 },
+      { name: '物流主动', success: 1920, fail: 66 },
+      { name: '修改收件人信息', success: 1230, fail: 40 },
+      { name: '异常物流中无更新', success: 850, fail: 36 },
+      { name: '同步工单', success: 720, fail: 28 },
+      { name: '签收未收到-拦截', success: 310, fail: 12 },
+      { name: '签收未收到-催派', success: 238, fail: 7 },
     ],
     hourly: [2, 5, 8, 12, 18, 25, 42, 58, 72, 65, 52, 45, 38, 42, 48, 55, 62, 58, 45, 32, 22, 15, 8, 4],
     trend: [45, 52, 68, 75, 82, 78, 87]
@@ -1136,13 +1147,22 @@ const platforms = {
     fail: 31,
     hasRefund: true,
     scenes: [
-      { name: '退货退款', success: 56, fail: 12 },
-      { name: '在途无理由退款处理', success: 33, fail: 0 },
-      { name: '已发货无轨迹退款', success: 18, fail: 5 },
-      { name: '异常网点预警', success: 8, fail: 6 },
-      { name: '消费者拒收问题处理', success: 6, fail: 4 },
-      { name: '商品少发', success: 3, fail: 2 },
-      { name: '承诺补寄', success: 2, fail: 1 },
+      { name: '退货退款', success: 42, fail: 8 },
+      { name: '在途无理由退款处理', success: 22, fail: 2 },
+      { name: '逆向物流已签收退款', success: 18, fail: 3 },
+      { name: '已发货无轨迹退款', success: 14, fail: 4 },
+      { name: '消费者申请退款后提示拦截', success: 8, fail: 1 },
+      { name: '异常网点预警', success: 6, fail: 5 },
+      { name: '物流异常主动服务', success: 5, fail: 1 },
+      { name: '消费者拒收问题处理', success: 4, fail: 3 },
+      { name: '消费者担忧货物无法送达', success: 4, fail: 1 },
+      { name: '消费者反馈未收到货', success: 3, fail: 1 },
+      { name: '商品少发', success: 2, fail: 1 },
+      { name: '承诺补寄', success: 2, fail: 0 },
+      { name: '好人好事服务单-加急发货', success: 1, fail: 0 },
+      { name: '消费者申请修改地址', success: 1, fail: 0 },
+      { name: '消费者要求改地址', success: 1, fail: 0 },
+      { name: '已签收地址', success: 1, fail: 0 },
     ],
     hourly: [5, 8, 12, 18, 25, 35, 52, 68, 75, 62, 48, 38, 32, 38, 45, 52, 58, 52, 38, 25, 18, 12, 8, 6],
     trend: [98, 112, 125, 138, 145, 152, 157]
@@ -1181,9 +1201,8 @@ const platforms = {
     fail: 9,
     hasRefund: true,
     scenes: [
-      { name: '退货退款', success: 28, fail: 6 },
-      { name: '未发货退款', success: 6, fail: 2 },
-      { name: '换货', success: 4, fail: 1 },
+      { name: '退货签收核实', success: 32, fail: 7 },
+      { name: '不可删除15', success: 6, fail: 2 },
     ],
     hourly: [1, 2, 3, 5, 8, 12, 18, 22, 25, 22, 18, 15, 12, 14, 16, 18, 20, 18, 12, 8, 5, 3, 2, 1],
     trend: [28, 32, 38, 42, 45, 46, 47]
@@ -1200,9 +1219,7 @@ const platforms = {
     fail: 5,
     hasRefund: true,
     scenes: [
-      { name: '退货退款', success: 18, fail: 3 },
-      { name: '仅退款', success: 4, fail: 1 },
-      { name: '换货', success: 2, fail: 1 },
+      { name: '退货退款', success: 24, fail: 5 },
     ],
     hourly: [0.5, 1, 1.5, 2, 3, 5, 8, 10, 12, 10, 8, 7, 6, 7, 8, 9, 10, 9, 7, 5, 3, 2, 1, 0.5],
     trend: [18, 20, 22, 25, 27, 28, 29]
@@ -1219,7 +1236,9 @@ const platforms = {
     fail: 0,
     hasRefund: false,
     scenes: [
-      { name: '退货退款', success: 0, fail: 0 },
+      { name: '支付18~24小时未揽收', success: 0, fail: 0 },
+      { name: '已揽收待物流更新即将超时', success: 0, fail: 0 },
+      { name: '运输中待派送即将超时', success: 0, fail: 0 },
     ],
     hourly: new Array(24).fill(0.2),
     trend: [2, 1, 0, 0, 0, 0, 0]
@@ -1235,7 +1254,15 @@ const platforms = {
     rate: 0,
     fail: 0,
     hasRefund: false,
-    scenes: [],
+    scenes: [
+      { name: '揽收预警', success: 0, fail: 0 },
+      { name: '揽运预警', success: 0, fail: 0 },
+      { name: '停滞预警', success: 0, fail: 0 },
+      { name: '揽收超时', success: 0, fail: 0 },
+      { name: '揽运超时', success: 0, fail: 0 },
+      { name: '物流停滞', success: 0, fail: 0 },
+      { name: '派签超时', success: 0, fail: 0 },
+    ],
     hourly: new Array(24).fill(0),
     trend: [0, 0, 0, 0, 0, 0, 0]
   }
@@ -1587,7 +1614,7 @@ function generateMockOrders(platformName) {
     orders.push({
       no: 'WO' + (20260919000 + i),
       time: '09/19 ' + (9 + Math.floor(i/3)) + ':' + (10 + i*7),
-      shop: platformName + '·店铺' + ((i % 4) + 1),
+      shop: '店铺' + ((i % 4) + 1),
       shopKey: 'shop' + ((i % 4) + 1),
       scene: scenes[i % scenes.length],
       status: st.s,
@@ -1608,6 +1635,9 @@ function renderOrderTable() {
   filterOrders();
 }
 
+let currentPage = 1;
+const PAGE_SIZE = 10;
+
 function filterOrders() {
   const shop = document.getElementById('globalShopFilter').value;
   const scene = document.getElementById('globalSceneFilter').value;
@@ -1616,12 +1646,29 @@ function filterOrders() {
   if (shop !== 'all') filtered = filtered.filter(o => o.shopKey === shop);
   if (scene !== 'all') filtered = filtered.filter(o => o.scene === scene);
 
+  window._currentFiltered = filtered;
+  currentPage = 1;
+  renderOrderPage();
+}
+
+function goOrderPage(p) {
+  currentPage = p;
+  renderOrderPage();
+}
+
+function renderOrderPage() {
+  const filtered = window._currentFiltered || [];
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageData = filtered.slice(start, start + PAGE_SIZE);
+
   const tbody = document.getElementById('orderTableBody');
   let html = '';
-  if (filtered.length === 0) {
-    html = '<tr><td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:40px 0">暂无符合条件的订单</td></tr>';
+  if (pageData.length === 0) {
+    html = '<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:40px 0">暂无符合条件的订单</td></tr>';
   } else {
-    filtered.forEach((o, i) => {
+    pageData.forEach((o) => {
       html += `<tr>
         <td style="font-family:monospace;font-size:12px">${o.no}</td>
         <td>${o.time}</td>
@@ -1629,12 +1676,23 @@ function filterOrders() {
         <td>${o.scene}</td>
         <td><span class="tag ${o.statusClass}">${o.status}</span></td>
         <td>${o.result}</td>
-        <td style="font-family:monospace">${o.duration}</td>
       </tr>`;
     });
   }
   tbody.innerHTML = html;
-  document.getElementById('orderTableSub').textContent = `共 ${filtered.length} 条记录 · 示例数据`;
+
+  const pager = document.getElementById('orderPager');
+  let pagesHtml = '';
+  for (let p = 1; p <= totalPages; p++) {
+    pagesHtml += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goOrderPage(${p})">${p}</button>`;
+  }
+  pager.innerHTML = `
+    <div class="pager-info">共 ${filtered.length} 条记录 · 第 ${currentPage}/${totalPages} 页 · 示例数据</div>
+    <div class="pager-btns">
+      <button class="page-btn" onclick="goOrderPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>上一页</button>
+      ${pagesHtml}
+      <button class="page-btn" onclick="goOrderPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一页</button>
+    </div>`;
 }
 
 // ===== 视图切换 =====
@@ -1643,9 +1701,11 @@ function switchView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
 
-  // 更新导航高亮
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  // 更新导航高亮（detail视图由goDetail按平台设置，这里不重复覆盖）
+  if (view !== 'detail') {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  }
 
   // 更新标题
   if (view === 'overview') {
@@ -1671,11 +1731,35 @@ function switchView(view) {
   }, 50);
 }
 
+function updateSceneOptions(platformKey) {
+  const sel = document.getElementById('globalSceneFilter');
+  if (!sel) return;
+  sel.innerHTML = '<option value="all">全部场景</option>';
+  let names = [];
+  if (platformKey && platforms[platformKey] && platforms[platformKey].scenes) {
+    names = platforms[platformKey].scenes.map(s => s.name);
+  } else {
+    const seen = new Set();
+    Object.keys(platforms).forEach(k => {
+      (platforms[k].scenes || []).forEach(s => {
+        if (!seen.has(s.name)) { seen.add(s.name); names.push(s.name); }
+      });
+    });
+  }
+  names.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n; opt.textContent = n;
+    sel.appendChild(opt);
+  });
+  sel.value = 'all';
+}
+
 function goDetail(platformKey) {
   currentPlatform = platformKey;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const navItem = document.querySelector(`[data-platform="${platformKey}"]`);
   if (navItem) navItem.classList.add('active');
+  updateSceneOptions(platformKey);
   switchView('detail');
 }
 
@@ -1756,6 +1840,7 @@ function selectSceneFilter(sceneName) {
 }
 
 function goOverview() {
+  updateSceneOptions(null);
   switchView('overview');
 }
 
@@ -2081,12 +2166,20 @@ function onTimeChange(range, btn) {
 }
 
 // ===== 初始化 =====
+updateSceneOptions(null);
 renderOverviewTable();
 renderTrendChart();
 renderRateChart();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
