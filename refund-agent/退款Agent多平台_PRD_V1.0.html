@@ -6475,7 +6475,7 @@
 版本：V1.0<br>
 编制日期：2026-09-19<br>
 适用平台：淘宝（天猫店铺）<br>
-首批试运行店铺（11 家）：zeamo旗舰店、恒源祥先马专卖店、艾漫旗舰店、pakeqi医疗器械旗舰店、恒源祥鸿远专卖店、冈朴制药旗舰店、veevco医疗器械旗舰店、drboja旗舰店、draddo旗舰店、dranlove旗舰店、zeamo快马专卖店<br>
+换货本期仅 2 家（客服 2026-09-21 确认）：zeamo旗舰店、恒源祥先马专卖店；退款场景为 11 家非海外店铺（见 3.4）<br>
 事实优先级：《天猫换货Agent_规则确认稿_V1.0》 &gt; 《天猫换货流程.xlsx》SOP</p>
 </blockquote>
 <hr>
@@ -6526,7 +6526,7 @@
 <h2>2. 目标与非目标</h2>
 <h3>2.1 V1.0 目标</h3>
 <ul>
-<li>在首批 11 家店铺内自动处理"换货"类型售后，订单状态覆盖待收货与交易成功。</li>
+<li>在换货本期 2 家店铺（zeamo旗舰店、恒源祥先马专卖店）内自动处理"换货"类型售后，订单状态覆盖待收货与交易成功。</li>
 <li>自动完成：筛选换货 → 判断物流 → OMS 生成换货订单 → 修改商品/尺码 → 结算金额改 0 → 手工配货 → 插旗"已换出+日期+工号"。</li>
 <li>临期未到长沙自动拒绝并留言；物流停滞、件数/金额超限、价差、跨商品、缺货等场景转人工。</li>
 </ul>
@@ -6542,7 +6542,7 @@
 <h2>3. 核心业务规则</h2>
 <h3>3.1 规则原则</h3>
 <ul>
-<li>只处理店铺范围（11 家）内的换货售后；店铺外不扫描。</li>
+<li>只处理换货店铺范围（2 家：zeamo旗舰店、恒源祥先马专卖店）内的换货售后；其余店铺换货不扫描。</li>
 <li>唯一标识为售后单号（退款编号）；同一订单可能多个产品（多售后单），按售后单维度处理并防重复。</li>
 <li>信息缺失、冲突或结果不明确时转人工，不猜测。</li>
 <li>人工已处理/已接管的售后，Agent 停止自动操作并记录。</li>
@@ -6566,12 +6566,12 @@
 </ul>
 <h3>3.4 店铺适用范围</h3>
 <div class="table-scroll"><table>
-<thead><tr><th>店铺</th><th align="right">换货</th><th>说明</th></tr></thead>
+<thead><tr><th>店铺</th><th align="right">换货</th><th align="right">退款</th><th>说明</th></tr></thead>
 <tbody>
-<tr><td>zeamo旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>恒源祥先马专卖店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>艾漫旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>pakeqi医疗器械旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>恒源祥鸿远专卖店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>冈朴制药旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>veevco医疗器械旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>drboja旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>draddo旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>dranlove旗舰店</td><td align="right">适用</td><td>首批试运行</td></tr><tr><td>zeamo快马专卖店</td><td align="right">适用</td><td>首批试运行</td></tr>
-<tr><td>zeamo海外旗舰店</td><td align="right">不适用</td><td>本期不处理海外店</td></tr><tr><td>dranlove海外旗舰店</td><td align="right">不适用</td><td>本期不处理海外店</td></tr>
+<tr><td>zeamo旗舰店</td><td align="right">适用</td><td align="right">适用</td><td>换货首批试运行</td></tr><tr><td>恒源祥先马专卖店</td><td align="right">适用</td><td align="right">适用</td><td>换货首批试运行</td></tr><tr><td>艾漫旗舰店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>pakeqi医疗器械旗舰店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>恒源祥鸿远专卖店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>冈朴制药旗舰店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>veevco医疗器械旗舰店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>drboja旗舰店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>draddo旗舰店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>dranlove旗舰店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr><tr><td>zeamo快马专卖店</td><td align="right">不适用</td><td align="right">适用</td><td>仅退款</td></tr>
+<tr><td>zeamo海外旗舰店</td><td align="right">不适用</td><td align="right">不适用</td><td>本期不处理海外店</td></tr><tr><td>dranlove海外旗舰店</td><td align="right">不适用</td><td align="right">不适用</td><td>本期不处理海外店</td></tr>
 </tbody></table></div>
-<p>已移出本期：皆花旗舰店、prowaves旗舰店。原因：已退回运营，客服不再承接处理，不进入 Agent 扫描和自动处理范围。海外店（zeamo海外旗舰店、dranlove海外旗舰店）不在 11 家账号表内，本期不处理。店铺外不扫描，店铺名单调整属配置变更，需记录审批人与生效时间。</p>
+<p>范围口径（客服 2026-09-21 确认）：<strong>换货本期仅 zeamo旗舰店、恒源祥先马专卖店 2 家</strong>；退款场景为上述 11 家非海外店铺。已移出本期：皆花旗舰店、prowaves旗舰店（已退回运营，客服不再承接）。海外店（zeamo海外、dranlove海外）本期不处理。店铺外不扫描，店铺名单调整属配置变更，需记录审批人与生效时间。</p>
 <hr>
 <h2>4. 系统操作流程</h2>
 <div class="table-scroll"><table>
@@ -6635,7 +6635,7 @@
 <h2>9. 验收标准</h2>
 <h3>9.1 正常换货用例</h3>
 <ul>
-<li>11 家店铺内换货售后、物流轨迹含"长沙"、件数 ≤10、无价差、同款同尺码：Agent 自动生成换货单、金额改 0、配货成功、插旗"已换出+日期+Agent工号"，全链路无人工介入。</li>
+<li>换货本期 2 家店铺（zeamo旗舰店、恒源祥先马专卖店）内换货售后、物流轨迹含"长沙"、件数 ≤10、无价差、同款同尺码：Agent 自动生成换货单、金额改 0、配货成功、插旗"已换出+日期+Agent工号"，全链路无人工介入。</li>
 <li>同款不同尺码：Agent 自动修改尺码后继续配货。</li>
 </ul>
 <h3>9.2 拒绝用例</h3>
@@ -6656,7 +6656,7 @@
 <h2>10. 依赖与待提供项</h2>
 <h3>10.1 待业务提供</h3>
 <ul>
-<li>11 家店铺的准确店铺 ID（用于扫描范围过滤）。</li>
+<li>换货本期 2 家店铺（zeamo旗舰店、恒源祥先马专卖店）的准确店铺 ID（用于换货扫描范围过滤）。</li>
 <li>换货 4 套话术与退款场景话术的差异确认（停滞、异地签收、拒绝、缺货）。</li>
 <li>转人工钉钉通知模板中换货场景的标题与字段口径。</li>
 </ul>
@@ -6667,7 +6667,7 @@
 <li>任务锁、操作幂等、attempt_id、人工并发处理实现（复用退款场景）。</li>
 <li>场景开关关闭时对执行中任务的安全停止实现。</li>
 </ul>
-<p>以上待确认项不得改变已确认的 11 家店铺范围、物流到长沙口径、&lt;48h 拒绝、&gt;72h 停滞转人工、件数/金额阈值、OMS 操作链路、Agent 专用工号和人工兜底规则。实现需要扩大范围或改变规则时，必须重新发起业务确认。</p>
+<p>以上待确认项不得改变已确认的换货 2 家/退款 11 家店铺范围、物流到长沙口径、&lt;48h 拒绝、&gt;72h 停滞转人工、件数/金额阈值、OMS 操作链路、Agent 专用工号和人工兜底规则。实现需要扩大范围或改变规则时，必须重新发起业务确认。</p>
 </article>
 
       </main>
