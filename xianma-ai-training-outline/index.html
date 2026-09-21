@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>先马 AI 平台全员使用培训｜内容大纲</title>
+  <style>
+    :root {
+      --red: #d9353f;
+      --red-dark: #b9232d;
+      --red-pale: #fff1f2;
+      --ink: #17191c;
+      --muted: #69717b;
+      --line: #e5e8ec;
+      --canvas: #f5f6f8;
+      --white: #fff;
+      --shadow: 0 12px 32px rgba(20, 28, 38, .07);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font: 15px/1.75 "Microsoft YaHei", "PingFang SC", Arial, sans-serif; }
+    a { color: inherit; text-decoration: none; }
+    .topbar { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
+    .topbar-inner { max-width: 1320px; min-height: 88px; margin: 0 auto; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .brand-mark { width: 50px; height: 50px; display: grid; place-items: center; flex: 0 0 50px; }
+    .brand-mark img { width: 50px; height: 50px; object-fit: contain; display: block; }
+    .brand h1 { margin: 0; color: var(--red-dark); font-size: 23px; line-height: 1.25; letter-spacing: 0; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .pill { padding: 5px 12px; border: 1px solid #f1b7bb; border-radius: 5px; color: var(--red-dark); background: var(--red-pale); font-size: 12px; white-space: nowrap; }
+    .print-btn { border: 1px solid #f0b5b9; border-radius: 5px; padding: 8px 13px; background: #fff; color: var(--red-dark); cursor: pointer; font: inherit; font-size: 12px; }
+    .print-btn:hover { background: var(--red-pale); }
+    .notice { border-bottom: 1px solid #f2a3a8; background: #fff8f8; color: var(--red-dark); text-align: center; padding: 10px 22px; font-weight: 700; font-size: 13px; }
+    .layout { max-width: 1320px; margin: 0 auto; padding: 30px 28px 70px; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 38px; }
+    .toc { position: sticky; top: 122px; align-self: start; border-right: 1px solid var(--line); padding-right: 18px; }
+    .toc-title { margin: 0 0 11px; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .toc a { display: block; margin: 2px 0; padding: 8px 10px; border-left: 3px solid transparent; color: #59616b; font-size: 13px; line-height: 1.35; }
+    .toc a:hover, .toc a.active { border-left-color: var(--red); color: var(--red-dark); background: #fff0f1; font-weight: 700; }
+    main { min-width: 0; }
+    .hero { position: relative; overflow: hidden; background: var(--white); border: 1px solid #f0c7ca; border-left: 5px solid var(--red); border-radius: 6px; padding: 30px 34px 28px; box-shadow: var(--shadow); }
+    .hero:after { content: "AI TRAINING"; position: absolute; right: 22px; bottom: 12px; color: rgba(217,53,63,.055); font-size: 60px; font-weight: 900; letter-spacing: 2px; pointer-events: none; }
+    .eyebrow { color: var(--red); font-size: 12px; font-weight: 800; letter-spacing: 1px; }
+    .hero h2 { max-width: 790px; margin: 9px 0 12px; font-size: 35px; line-height: 1.3; letter-spacing: 0; }
+    .hero .lead { max-width: 820px; margin: 0; color: #525c67; font-size: 16px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .tag { border-radius: 4px; padding: 4px 10px; background: #f0f2f4; color: #424a54; font-size: 12px; }
+    .section { margin-top: 42px; scroll-margin-top: 124px; }
+    .section-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+    .section-num { display: inline-grid; width: 34px; height: 34px; place-items: center; border-radius: 6px; background: var(--red); color: #fff; font-size: 18px; font-weight: 800; }
+    .section h3 { margin: 0; font-size: 25px; line-height: 1.25; }
+    .section-intro { margin: 12px 0 18px; color: #5c6570; }
+    .subhead { margin: 24px 0 10px; font-size: 18px; }
+    .table-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 5px 18px rgba(20,28,38,.04); }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { padding: 13px 15px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #fafafa; color: #4b535d; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    td { color: #353c44; font-size: 13px; }
+    tr:last-child td { border-bottom: 0; }
+    .time { color: var(--red-dark); font-weight: 800; white-space: nowrap; }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
+    .card h4 { margin: 0 0 7px; font-size: 16px; }
+    .card p { margin: 0; color: #626b75; font-size: 13px; }
+    .domain { border-top: 3px solid var(--red); }
+    .domain code { display: inline-block; margin-top: 5px; color: var(--red-dark); font-size: 12px; word-break: break-all; }
+    .screenshots { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin-top: 16px; }
+    .screenshots.three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .screenshots.one { grid-template-columns: minmax(0, 1fr); max-width: 900px; }
+    .shot { overflow: hidden; margin: 0; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+    .shot img { display: block; width: 100%; height: 230px; object-fit: cover; object-position: top center; }
+    .screenshots.one .shot img { height: auto; max-height: 520px; object-fit: contain; background: #f7f8fa; }
+    .shot figcaption { padding: 9px 12px; color: var(--muted); font-size: 12px; }
+    .callout { margin: 16px 0; padding: 14px 16px; border-left: 4px solid var(--red); background: #fff8f8; color: #4b4244; }
+    .callout strong { color: var(--red-dark); }
+    .steps { counter-reset: step; display: grid; gap: 10px; }
+    .step { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 10px; align-items: start; }
+    .step:before { counter-increment: step; content: counter(step); display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: var(--red-pale); color: var(--red-dark); font-weight: 800; font-size: 12px; }
+    .step p { margin: 0; }
+    .quote { margin: 16px 0; padding: 14px 18px; background: #f7f8f9; border-left: 3px solid #bac0c6; color: #4c555e; }
+    .checklist { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px 20px; padding: 0; margin: 0; list-style: none; }
+    .checklist li:before { content: "✓"; margin-right: 8px; color: var(--red); font-weight: 800; }
+    .footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--line); color: #7a828b; font-size: 12px; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; padding: 22px 18px 54px; }
+      .toc { position: static; display: flex; overflow-x: auto; gap: 3px; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 10px; }
+      .toc-title { display: none; }
+      .toc a { flex: 0 0 auto; border-left: 0; border-bottom: 3px solid transparent; padding: 7px 9px; white-space: nowrap; }
+      .toc a:hover, .toc a.active { border-left: 0; border-bottom-color: var(--red); }
+      .cards { grid-template-columns: 1fr; }
+      .screenshots { grid-template-columns: 1fr; }
+      .screenshots.three { grid-template-columns: 1fr; }
+      .screenshots.one { grid-template-columns: 1fr; }
+      .shot img { height: 220px; }
+      .hero h2 { font-size: 28px; }
+    }
+    @media (max-width: 600px) {
+      .topbar-inner { padding: 14px 16px; min-height: 74px; }
+      .brand h1 { font-size: 18px; }
+      .brand p { display: none; }
+      .top-actions .pill { display: none; }
+      .hero { padding: 24px 20px; }
+      .hero:after { font-size: 35px; }
+      .section { margin-top: 34px; }
+      .section h3 { font-size: 22px; }
+      .checklist { grid-template-columns: 1fr; }
+    }
+    @media print {
+      .topbar { position: static; }
+      .top-actions, .toc, .notice { display: none; }
+      .layout { display: block; padding: 0; }
+      .hero, .table-wrap, .card { box-shadow: none; }
+      .section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark"><img src="assets/xianma-mascot.png" alt="先马小马 Logo"></div>
+        <div>
+          <h1>先马电商 · AI 平台全员使用培训</h1>
+          <p>培训内容大纲　|　对象：先马集团全体员工　|　建议时长：约 25 分钟</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="pill">内容大纲 V1.0</span>
+        <button class="print-btn" type="button" onclick="window.print()">打印 / 导出 PDF</button>
+      </div>
+    </div>
+  </header>
+  <div class="notice">课程主线：找到入口 → 选对平台 → 完成任务 → 复用提示词与技能 → 沉淀公司 AI 资产</div>
+
+  <div class="layout">
+    <nav class="toc" aria-label="目录">
+      <div class="toc-title">目录</div>
+      <a href="#overview">0. 总表</a>
+      <a href="#s1">1. 使用价值</a>
+      <a href="#s2">2. 平台定位</a>
+      <a href="#s3">3. 入口与安装</a>
+      <a href="#s4">4. 提示词库</a>
+      <a href="#s5">5. 技能库</a>
+      <a href="#s6">6. 资产沉淀</a>
+      <a href="#s7">7. 晒晒与反馈</a>
+      <a href="#s8">8. 行动任务</a>
+    </nav>
+
+    <main>
+      <section class="hero" id="overview">
+        <div class="eyebrow">EXECUTIVE SUMMARY</div>
+        <h2>让 AI 进入岗位流程，把个人经验变成公司能力</h2>
+        <p class="lead">本课程面向全体员工，先讲清楚各平台入口和使用选择，再通过提示词库、技能库和真实办公案例，带大家完成一次从使用到沉淀的完整闭环。</p>
+        <div class="tags">
+          <span class="tag">钉钉工作台首入口</span>
+          <span class="tag">统一入口与平台选型</span>
+          <span class="tag">提示词高效复用</span>
+          <span class="tag">技能调用与沉淀</span>
+          <span class="tag">公司级 AI 资产</span>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="summary-title">
+        <div class="section-head"><span class="section-num">0</span><h3 id="summary-title">培训章节总表</h3></div>
+        <p class="section-intro">建议采用“短讲解 + 屏幕演示 + 课后行动”的视频结构，先让员工知道去哪，再让员工完成一次真实任务。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>章节</th><th>建议时长</th><th>核心内容</th><th>建议演示</th></tr></thead>
+            <tbody>
+              <tr><td>1. 开场：为什么全员要使用先马 AI 平台</td><td class="time">2 分钟</td><td>公司级平台定位；从个人尝鲜转向岗位提效和企业资产沉淀</td><td>展示平台整体能力和使用价值</td></tr>
+              <tr><td>2. 平台定位与使用选择</td><td class="time">4 分钟</td><td>区分钉钉工作台中的智酷先马 AI 工作台、AI Studio 网页版和桌面版；说明什么情况下选什么</td><td>展示平台关系图和选型表</td></tr>
+              <tr><td>3. 全部平台入口、域名与下载安装</td><td class="time">4 分钟</td><td>以钉钉工作台为核心入口，介绍各平台域名、网址收藏、应用端下载安装与登录</td><td>从钉钉进入 AI 工作台，展示业务大脑中的平台入口并安装 AI Studio</td></tr>
+              <tr><td>4. 提示词库高效使用</td><td class="time">4 分钟</td><td>提示词的搜索、筛选、收藏、复制、使用和个人沉淀</td><td>以日报周报、会议纪要或文案整理为例</td></tr>
+              <tr><td>5. 技能库高效使用</td><td class="time">5 分钟</td><td>提示词与技能的区别；个人技能与企业技能；技能查找、调用和复用</td><td>演示选择技能、补充任务、执行并查看结果</td></tr>
+              <tr><td>6. 从个人使用到企业 AI 资产</td><td class="time">3 分钟</td><td>个人验证、优化、提交、审批、企业发布和员工复用</td><td>演示个人提示词或技能提交企业沉淀</td></tr>
+              <tr><td>7. 使用要求、晾晒通报与问题反馈</td><td class="time">2 分钟</td><td>持续使用要求；部门使用和资产贡献晾晒；反馈格式与安全边界</td><td>展示反馈入口和标准问题反馈</td></tr>
+              <tr><td>8. 结尾：“三个一”行动</td><td class="time">1 分钟</td><td>进入一次、完成一次、沉淀一次</td><td>展示培训后的行动清单</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="s1" aria-labelledby="s1-title">
+        <div class="section-head"><span class="section-num">1</span><h3 id="s1-title">为什么全员要使用先马 AI 平台</h3></div>
+        <p class="section-intro">开场先建立共识：AI 不是一次性体验，而是进入岗位流程、形成可复用资产的工作基础设施。</p>
+        <div class="cards">
+          <article class="card"><h4>从高频工作开始</h4><p>优先选择日报周报、会议纪要、文案整理、信息汇总等重复性高、风险可控的任务。</p></article>
+          <article class="card"><h4>让岗位经验可复用</h4><p>把个人验证有效的做法整理成提示词、技能或模板，降低其他同事的重复试错成本。</p></article>
+          <article class="card"><h4>从工具使用到平台共建</h4><p>平台不仅提供对话入口，也承载企业知识、技能、提示词和业务能力的持续沉淀。</p></article>
+        </div>
+        <div class="quote">建议话术：<strong>先马 AI 平台的价值，不只是让每个人拥有一个 AI 助手，更重要的是把员工验证过的工作方法沉淀下来，形成其他同事也能复用的公司能力。</strong></div>
+      </section>
+
+      <section class="section" id="s2" aria-labelledby="s2-title">
+        <div class="section-head"><span class="section-num">2</span><h3 id="s2-title">平台定位与使用选择</h3></div>
+        <p class="section-intro">这一章解决“我应该打开哪个平台”的问题：钉钉工作台是统一入口，智酷先马 AI 工作台负责导航，AI Studio 负责完成 AI 任务，专业平台负责具体业务。</p>
+        <div class="cards">
+          <article class="card domain"><h4>智酷先马 AI 工作台</h4><code>核心入口：钉钉工作台 → 工作台应用<br>备用网址：https://agent.xianmaec.com</code><p>本次培训的核心入口。进入后可从业务大脑、知识中心、能力中心和应用中心找到对应平台；也可使用备用网址访问。</p></article>
+          <article class="card domain"><h4>先马·AI Studio 网页版</h4><code>https://xmai.xianmaec.com</code><p>从 AI 工作台的 XM·AI Studio 卡片点击“进入网页版”。适合文档、图片和日常工作。</p></article>
+          <article class="card domain"><h4>先马·AI Studio 桌面版</h4><code>智酷先马 AI 工作台 → 下载</code><p>从 AI 工作台下载并安装。创建技能、导入技能和浏览器自动化需要使用桌面版。</p></article>
+        </div>
+        <h4 class="subhead">专业业务平台域名</h4>
+        <div class="cards">
+          <article class="card"><h4>AI 售后工单</h4><code>https://yf.xianmaec.com</code><p>售后评价、工单处理与客服协同。</p></article>
+          <article class="card"><h4>AI 内容与视觉平台</h4><code>https://cv.xianmaec.com</code><p>图片、文案、视觉内容、提示词和素材相关工作。</p></article>
+          <article class="card"><h4>AI 人才管理</h4><code>https://xmrcpd.xianmaec.com</code><p>人才管理及相关人事业务。</p></article>
+        </div>
+        <div class="callout"><strong>选型口诀：</strong>先打开钉钉工作台；需要找平台和资源，进入智酷先马 AI 工作台；做文档、图片和日常工作，进入 AI Studio 网页版；要创建技能、导入技能或使用浏览器自动化，下载 AI Studio 桌面版；需要做具体业务，进入对应专业 AI 平台。</div>
+      </section>
+
+      <section class="section" id="s3" aria-labelledby="s3-title">
+        <div class="section-head"><span class="section-num">3</span><h3 id="s3-title">全部平台入口、域名与下载安装</h3></div>
+        <p class="section-intro">这一章要让员工能独立完成第一次进入和安装。</p>
+        <div class="steps">
+          <div class="step"><p>打开钉钉，进入左侧“工作台”，找到并打开“智酷先马 AI 工作台”。</p></div>
+          <div class="step"><p>在 AI 工作台的业务大脑或应用中心，选择 XM·AI Studio：日常文档、图片和基础工作点击“进入网页版”；创建技能、导入技能和浏览器自动化点击“下载桌面版”。</p></div>
+          <div class="step"><p>如需备用访问，可打开 <strong>https://agent.xianmaec.com</strong>，通过钉钉授权登录。</p></div>
+          <div class="step"><p>完成桌面版安装和登录后，将钉钉工作台、AI 工作台和常用平台收藏到便于访问的位置。</p></div>
+        </div>
+        <div class="screenshots">
+          <figure class="shot"><img src="assets/dingtalk-ai-workbench.png" alt="钉钉工作台中的智酷先马 AI 工作台入口"><figcaption>图示：钉钉工作台中的“智酷先马 AI 工作台”入口</figcaption></figure>
+          <figure class="shot"><img src="assets/ai-workbench-business-brain.png" alt="智酷先马 AI 工作台业务大脑页面"><figcaption>图示：业务大脑中的 XM·AI Studio 网页版和桌面版入口</figcaption></figure>
+          <figure class="shot"><img src="assets/ai-studio-web.png" alt="XM·AI Studio 网页版对话页面"><figcaption>图示：AI Studio 网页版，适合文档、图片和日常工作</figcaption></figure>
+        </div>
+        <div class="callout"><strong>录制提示：</strong>域名和安装包地址属于高频变更信息，录制时应以最新通知和当前页面为准；历史域名切换状态也应在发布前复核。</div>
+      </section>
+
+      <section class="section" id="s4" aria-labelledby="s4-title">
+        <div class="section-head"><span class="section-num">4</span><h3 id="s4-title">提示词库高效使用</h3></div>
+        <p class="section-intro">提示词解决“怎么说”，重点是学会找到可复用模板，并根据自己的任务补齐背景和要求。</p>
+        <div class="screenshots one">
+          <figure class="shot"><img src="assets/prompt-library.png" alt="提示词库页面"><figcaption>图示：提示词库页面，可搜索标题、内容、标签或作者</figcaption></figure>
+        </div>
+        <div class="cards">
+          <article class="card"><h4>一条好提示词包含什么</h4><p>角色、任务目标、背景信息、输入材料、处理要求、输出格式和质量标准。</p></article>
+          <article class="card"><h4>高效搜索关键词</h4><p>组合使用任务词、岗位词、输出词和结果词，例如“运营 + 周报 + 表格 + 总结”。</p></article>
+          <article class="card"><h4>值得沉淀的标准</h4><p>任务重复出现、输入稳定、输出明确、结果经过验证且其他同事也可能使用。</p></article>
+        </div>
+        <h4 class="subhead">建议演示：周报整理</h4>
+        <div class="steps">
+          <div class="step"><p>在提示词库搜索“周报生成”或“工作总结”。</p></div>
+          <div class="step"><p>查看适用场景，选择、复制或收藏合适提示词。</p></div>
+          <div class="step"><p>补充岗位、时间范围、工作记录和输出格式。</p></div>
+          <div class="step"><p>执行后检查是否遗漏事实、虚构数据或改变原意。</p></div>
+          <div class="step"><p>将验证有效的版本保存为个人提示词，后续继续优化。</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="s5" aria-labelledby="s5-title">
+        <div class="section-head"><span class="section-num">5</span><h3 id="s5-title">技能库高效使用</h3></div>
+        <p class="section-intro">技能解决“怎么做”，适合沉淀固定步骤、输入要求、处理规则和结果交付方式。</p>
+        <div class="cards">
+          <article class="card"><h4>个人技能</h4><p>个人导入或整理，先供本人验证和使用。</p></article>
+          <article class="card"><h4>企业技能</h4><p>经过审核发布，供其他员工搜索和复用。</p></article>
+          <article class="card"><h4>使用边界</h4><p>先确认适用场景；涉及外部系统写入、发送和变更时进行人工确认。</p></article>
+        </div>
+        <h4 class="subhead">5.1 技能库：查找与调用</h4>
+        <div class="screenshots one">
+          <figure class="shot"><img src="assets/skill-library.png" alt="技能库页面"><figcaption>图示一：技能库总览、搜索和“使用”入口</figcaption></figure>
+        </div>
+        <div class="steps">
+          <div class="step"><p>进入技能库，按场景或关键词搜索技能。</p></div>
+          <div class="step"><p>查看技能简介、适用范围、输入要求和来源状态。</p></div>
+          <div class="step"><p>点击“使用”，补充任务描述和必要材料，执行后查看结果。</p></div>
+        </div>
+        <h4 class="subhead">5.2 创建技能：把方法写成可复用流程</h4>
+        <div class="screenshots one">
+          <figure class="shot"><img src="assets/skill-create.png" alt="创建技能页面"><figcaption>图示二：创建技能，填写基本信息和执行规范</figcaption></figure>
+        </div>
+        <div class="steps">
+          <div class="step"><p>填写技能名称、技能标识、分类和技能说明。</p></div>
+          <div class="step"><p>补充适用场景、输入要求、输出要求、执行流程和异常处理。</p></div>
+          <div class="step"><p>使用示例或完整示例快速填充，再替换为自己的岗位场景。</p></div>
+        </div>
+        <h4 class="subhead">5.3 导入技能：选择来源并完成校验</h4>
+        <div class="screenshots one">
+          <figure class="shot"><img src="assets/skill-import.png" alt="导入技能页面"><figcaption>图示三：导入技能，选择本地文件夹、GitHub 地址或 ZIP 压缩包</figcaption></figure>
+        </div>
+        <div class="steps">
+          <div class="step"><p>选择本地技能文件夹、公开 GitHub 地址或 ZIP 压缩包。</p></div>
+          <div class="step"><p>确认技能包包含可识别的 <code>SKILL.md</code>，并通过兼容性和安全校验。</p></div>
+          <div class="step"><p>校验通过后进入“我的技能”，先由本人验证，再决定是否提交企业审核。</p></div>
+        </div>
+        <div class="callout"><strong>本次培训范围：</strong>按当前实际技能库进行基础使用演示，重点讲解技能库浏览、创建技能和导入技能；不展开复杂配置和高级自动化。</div>
+      </section>
+
+      <section class="section" id="s6" aria-labelledby="s6-title">
+        <div class="section-head"><span class="section-num">6</span><h3 id="s6-title">从个人使用到企业 AI 资产</h3></div>
+        <p class="section-intro">个人使用不是终点，经过验证的方法才有机会成为团队和公司的复用能力。</p>
+        <div class="callout"><strong>沉淀闭环：</strong>个人尝试 → 真实任务验证 → 优化提示词或技能 → 提交企业审核 → 企业发布 → 其他员工复用 → 根据使用结果持续优化。</div>
+        <div class="cards">
+          <article class="card"><h4>适合提交的内容</h4><p>高频重复、步骤稳定、输出标准清晰、已实际验证、能帮助其他同事提效的方法。</p></article>
+          <article class="card"><h4>提交前检查</h4><p>名称、适用岗位、输入材料、输出结果、敏感信息、人工确认和失败处理是否清楚。</p></article>
+          <article class="card"><h4>平台级意义</h4><p>每一次有效使用都在帮助公司积累可复用的方法、技能和经验。</p></article>
+        </div>
+      </section>
+
+      <section class="section" id="s7" aria-labelledby="s7-title">
+        <div class="section-head"><span class="section-num">7</span><h3 id="s7-title">使用要求、晾晒通报与问题反馈</h3></div>
+        <p class="section-intro">把使用变成日常习惯，同时让使用结果和资产贡献可被持续观察。</p>
+        <div class="cards">
+          <article class="card"><h4>持续使用</h4><p>完成安装或登录，从岗位高频任务开始，持续验证并沉淀可复用方法。</p></article>
+          <article class="card"><h4>晾晒关注点</h4><p>可关注有效任务、重复使用、企业技能复用和资产提交/审批通过情况，最终以人力资源部制定并发布的规则为准。</p></article>
+          <article class="card"><h4>问题反馈</h4><p>通过钉钉群“先马·AI Studio 项目问题反馈群”反馈，并提供页面截图、问题描述、操作步骤、期望结果和实际结果。</p></article>
+        </div>
+        <div class="screenshots one">
+          <figure class="shot"><img src="assets/ai-studio-feedback-qr.png" alt="先马 AI Studio 项目问题反馈群二维码"><figcaption>问题反馈渠道：扫码加入“先马·AI Studio 项目问题反馈群”（内部群）</figcaption></figure>
+        </div>
+        <div class="callout"><strong>口径提醒：</strong>登录次数只能说明访问过平台，不能单独代表 AI 使用成果；更重要的是是否完成真实任务，以及是否形成可复用的公司资产。</div>
+        <div class="callout"><strong>规则说明：</strong>部门使用情况和 AI 资产沉淀贡献的具体统计周期、指标、展示范围及通报方式，由人力资源部统一制定，最终以人力资源部发布的规则为准。</div>
+        <div class="callout"><strong>安全边界：</strong>不得上传客户、订单、财务、账号、密码、Token 等敏感信息；AI 输出和对外发布内容必须经过人工检查。</div>
+      </section>
+
+      <section class="section" id="s8" aria-labelledby="s8-title">
+        <div class="section-head"><span class="section-num">8</span><h3 id="s8-title">结尾：“三个一”行动</h3></div>
+        <p class="section-intro">课程结束不以“看完视频”为完成标准，而以一次真实使用和一次资产沉淀作为行动起点。</p>
+        <div class="cards">
+          <article class="card"><h4>进入一次</h4><p>从钉钉工作台打开智酷先马 AI 工作台，完成 AI Studio 登录或安装。</p></article>
+          <article class="card"><h4>完成一次</h4><p>使用一个提示词或技能完成真实岗位任务。</p></article>
+          <article class="card"><h4>沉淀一次</h4><p>保存一条个人提示词，或整理一个可复用技能候选。</p></article>
+        </div>
+        <div class="quote">结尾话术：<strong>今天不要求大家一次学会所有功能，但希望每个人完成一次真实使用，并把验证有效的方法留下来。先从自己的高频工作开始，让 AI 真正进入岗位流程。</strong></div>
+      </section>
+
+      <section class="section" aria-labelledby="check-title">
+        <div class="section-head"><span class="section-num">✓</span><h3 id="check-title">录制前核验清单</h3></div>
+        <ul class="checklist">
+          <li>核对钉钉工作台中“智酷先马 AI 工作台”的最新展示界面</li>
+          <li>准备 AI Studio 网页版的文档、图片和日常工作演示</li>
+          <li>准备桌面版创建技能、导入技能和浏览器自动化演示</li>
+          <li>确认桌面版安装包从智酷先马 AI 工作台下载</li>
+          <li>确认第五章使用当前实际技能进行基础培训</li>
+          <li>晾晒指标和通报方式以人力资源部发布规则为准</li>
+          <li>演示数据全部使用合成内容</li>
+          <li>发布前复核所有域名、链接和二维码</li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+  <script>
+    const tocLinks = [...document.querySelectorAll('.toc a')];
+    const sections = [...document.querySelectorAll('.section[id]')];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        tocLinks.forEach((link) => link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id));
+      });
+    }, { rootMargin: '-22% 0px -65% 0px', threshold: 0 });
+    sections.forEach((section) => observer.observe(section));
+  </script>
+</body>
+</html>
