@@ -665,6 +665,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
 .date-filter-ui { max-width:100%; display:flex; align-items:center; gap:9px; flex-wrap:wrap; font-size:13px; }
 .date-filter-label { color:#606775; white-space:nowrap; }
 .date-range-field { display:flex; align-items:center; height:34px; width:350px; max-width:100%; border:1px solid #DCDFE6; border-radius:4px; background:#fff; transition:border-color .15s; }
+.date-range-field[hidden] { display:none; }
 .date-range-field.open,.date-range-field:focus-within { border-color:#D9353F; }
 .calendar-toggle { display:flex; justify-content:center; align-items:center; width:34px; height:30px; flex:none; border:0; background:none; color:#A4AAB3; cursor:pointer; }
 .date-range-field input { min-width:0; width:calc((100% - 62px)/2); padding:0 6px; border:0; outline:0; font:inherit; text-align:center; color:#606775; background:transparent; }
@@ -700,7 +701,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
 @media(max-width:560px) { .date-filter-ui { width:100%; } .date-range-field { width:calc(100% - 66px); } .calendar-months { grid-template-columns:1fr; } .calendar-month + .calendar-month { border-left:0; border-top:1px solid #EBEEF5; } }
 
 
-/* 查询区下拉样式：选择只更新条件，查询后才应用。 */
+/* 查询区下拉样式：选择后自动更新对应数据。 */
 .query-select { position:relative; display:inline-flex; min-width:150px; max-width:100%; }
 .query-select-native { display:none; }
 .query-select-trigger { width:100%; min-height:34px; display:flex; align-items:center; justify-content:space-between; gap:22px; padding:6px 12px; border:1px solid #DCDFE6; border-radius:6px; background:#fff; color:#606775; font:inherit; font-size:13px; text-align:left; cursor:pointer; }
@@ -788,12 +789,12 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
       </div>
       <div class="topbar-right">
         <div class="date-filter-ui">
-          <span class="date-filter-label">日期范围</span>
-          <div class="date-range-field" id="dateRangeField">
+          <div class="time-filter" id="datePresetControls" role="group" aria-label="日期范围"></div>
+          <div class="date-range-field" id="dateRangeField" hidden>
             <button type="button" id="calendarToggle" class="calendar-toggle" aria-label="打开日期范围日历" aria-haspopup="dialog" aria-expanded="false" aria-controls="dateCalendar" onclick="toggleDateCalendar()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor"/><path d="M6 2v4m8-4v4M3 8h14M6 11h2m3 0h2m-7 3h2m3 0h2" stroke="currentColor"/></svg></button>
-            <input type="text" id="startDate" aria-label="开始日期" value="2026-09-22" placeholder="YYYY-MM-DD" maxlength="10" onclick="openDateCalendar()" onkeydown="if(event.key==='Enter'){onCustomDateChange()}" autocomplete="off">
+            <input type="text" id="startDate" aria-label="开始日期" value="2026-09-22" placeholder="YYYY-MM-DD" maxlength="10" onclick="openDateCalendar()" onchange="onCustomDateChange()" onkeydown="if(event.key==='Enter'){onCustomDateChange()}" autocomplete="off">
             <span class="range-separator">至</span>
-            <input type="text" id="endDate" aria-label="结束日期" value="2026-09-28" placeholder="YYYY-MM-DD" maxlength="10" onclick="openDateCalendar()" onkeydown="if(event.key==='Enter'){onCustomDateChange()}" autocomplete="off">
+            <input type="text" id="endDate" aria-label="结束日期" value="2026-09-28" placeholder="YYYY-MM-DD" maxlength="10" onclick="openDateCalendar()" onchange="onCustomDateChange()" onkeydown="if(event.key==='Enter'){onCustomDateChange()}" autocomplete="off">
           </div>
         </div>
         <div class="topbar-filter">
@@ -810,8 +811,6 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
             <option value="all">全部场景</option>
           </select>
         </div>
-          <button type="button" class="range-query" onclick="onCustomDateChange()"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="m12 12 5 5" stroke="currentColor" stroke-width="1.5"/></svg>查询</button>
-          <button type="button" class="range-reset" onclick="resetTimeFilter()"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 6a6.5 6.5 0 1 1-1 6M4 2v4h4" stroke="currentColor" stroke-width="1.5"/></svg>重置</button>
       </div>
     </header>
 
@@ -909,7 +908,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
           <div class="card-header">
             <div>
               <div class="card-title" id="orderTableTitle">订单明细</div>
-              <div class="card-subtitle" id="orderTableSub">点击查询后更新</div>
+              <div class="card-subtitle" id="orderTableSub">随筛选条件自动更新</div>
             </div>
             <div class="order-query-controls">
               <select id="orderStatusFilter" aria-label="处理状态筛选" style="height:30px;border:1px solid #E5E6EB;border-radius:4px;padding:0 8px;font-size:12px;color:#4E5969;background:#fff">
@@ -929,8 +928,6 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
                 <option value="接口超时">接口超时</option>
                 <option value="等待人工确认">等待人工确认</option>
               </select>
-              <button type="button" class="range-query" onclick="applyOrderFilters()">查询</button>
-              <button type="button" class="range-reset" onclick="resetOrderFilters()">重置</button>
             </div>
           </div>
           <table class="data-table" style="table-layout:fixed">
@@ -1182,6 +1179,7 @@ const CATEGORY_NAMES = ['退货退款', '仅退款', '换货', '其他工单'];
 let currentView = 'overview';
 let currentPlatform = 'all';
 let currentTimeRange = '7d';
+let draftTimeRange = '7d';
 let currentPage = 1;
 let currentOrders = [];
 let activeDates = { start: '2026-09-22', end: DEMO_TODAY };
@@ -1473,6 +1471,8 @@ function switchView(view) {
   closeDateCalendar();
   closeCategoryBreakdown();
   currentView = view;
+  draftTimeRange = currentTimeRange;
+  renderDatePresets();
   byId('startDate').value = activeDates.start;
   byId('endDate').value = activeDates.end;
   byId('globalShopFilter').value = appliedFilters.shop;
@@ -1491,7 +1491,7 @@ function switchView(view) {
 function goDetail(key) { appliedOrderFilters = {status:'all',result:'all'}; currentPlatform = key; updateSceneOptions(key); byId('orderStatusFilter').value = 'all'; byId('orderResultFilter').value = 'all'; switchView('detail'); }
 function goOverview() { switchView('overview'); }
 function showProposal() { switchView('proposal'); }
-function selectSceneFilter(name) { byId('globalSceneFilter').value = name; syncQuerySelects(); byId('globalSceneFilterTrigger').scrollIntoView({ behavior:'smooth', block:'center' }); byId('globalSceneFilterTrigger').focus(); }
+function selectSceneFilter(name) { byId('globalSceneFilter').value = name; onCustomDateChange(); syncQuerySelects(); byId('globalSceneFilterTrigger').scrollIntoView({ behavior:'smooth', block:'center' }); byId('globalSceneFilterTrigger').focus(); }
 function updateBreadcrumb() {
   const show = document.body.classList.contains('demo-hierarchy') && currentView === 'detail';
   byId('breadcrumb').classList.toggle('show', show);
@@ -1562,7 +1562,7 @@ function selectCalendarDate(value) {
   const [start, end] = [pendingCalendarStart, value].sort();
   byId('startDate').value = start;
   byId('endDate').value = end;
-  byId('filterError').hidden = true;
+  onCustomDateChange();
   closeDateCalendar(true);
 }
 function renderDateCalendar() {
@@ -1585,15 +1585,29 @@ function renderDateCalendar() {
     return `<section class="calendar-month"><div class="calendar-month-heading"><div class="calendar-nav ${index === 1 ? 'next' : ''}">${controls}</div><strong>${first.getUTCFullYear()} 年 ${first.getUTCMonth()+1} 月</strong></div><div class="calendar-weekdays">${['日','一','二','三','四','五','六'].map(day=>'<span>'+day+'</span>').join('')}</div><div class="calendar-days">${days}</div></section>`;
   }).join('');
 }
+function renderDatePresets() {
+  const choices = [['today','今日'],['7d','近七天'],['30d','近30天'],['custom','自定义']];
+  byId('datePresetControls').innerHTML = choices.map(([key,label]) => `<button type="button" class="${draftTimeRange === key ? 'active' : ''}" aria-pressed="${draftTimeRange === key}" onclick="selectTimeRange('${key}')">${label}</button>`).join('');
+  byId('dateRangeField').hidden = draftTimeRange !== 'custom';
+}
+function selectTimeRange(range) {
+  draftTimeRange = range;
+  closeDateCalendar();
+  byId('filterError').hidden = true;
+  renderDatePresets();
+  onCustomDateChange();
+}
 function onCustomDateChange() {
-  const start = byId('startDate').value.trim(), end = byId('endDate').value.trim();
+  const custom = draftTimeRange === 'custom';
+  const start = custom ? byId('startDate').value.trim() : addDays(DEMO_TODAY, draftTimeRange === '30d' ? -29 : draftTimeRange === '7d' ? -6 : 0);
+  const end = custom ? byId('endDate').value.trim() : DEMO_TODAY;
   const count = (dateFrom(end) - dateFrom(start)) / 86400000;
   if (!validDate(start) || !validDate(end) || count < 0 || count > 366) {
     byId('filterError').textContent = '请输入有效的起止日期（YYYY-MM-DD），结束日期不得早于开始日期。此演示单次最多展示367天。';
     byId('filterError').hidden = false;
     return;
   }
-  activeDates = { start, end }; currentTimeRange = 'custom';
+  activeDates = { start, end }; currentTimeRange = draftTimeRange;
   appliedFilters = {
     shop:byId('globalShopFilter').value, scene:byId('globalSceneFilter').value,
     shopLabel:byId('globalShopFilter').selectedOptions[0].textContent,
@@ -1605,12 +1619,15 @@ function onCustomDateChange() {
   refreshDashboard();
 }
 function resetTimeFilter() {
+  draftTimeRange = '7d';
+  renderDatePresets();
   byId('startDate').value = addDays(DEMO_TODAY,-6); byId('endDate').value = DEMO_TODAY;
   byId('globalShopFilter').value = 'all'; byId('globalSceneFilter').value = 'all';
   syncQuerySelects();
   byId('filterError').hidden = true;
   closeDateCalendar();
   closeCategoryBreakdown();
+  onCustomDateChange();
 }
 document.addEventListener('click', event => {
   if (!byId('dateCalendar').hidden && !byId('dateCalendar').contains(event.target) && !byId('dateRangeField').contains(event.target)) closeDateCalendar();
@@ -1652,7 +1669,11 @@ function openQuerySelectMenu(id, focusOption = false) {
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'query-select-option'; button.setAttribute('role', 'option');
     button.setAttribute('aria-selected', String(option.value === select.value)); button.textContent = option.textContent;
-    button.addEventListener('click', () => { select.value = option.value; syncQuerySelects(); closeQuerySelect(true); });
+    button.addEventListener('click', () => {
+      select.value = option.value; syncQuerySelects(); closeQuerySelect(true);
+      if (id === 'orderStatusFilter' || id === 'orderResultFilter') applyOrderFilters();
+      else onCustomDateChange();
+    });
     list.appendChild(button);
   });
   menu.hidden = false; trigger.setAttribute('aria-expanded', 'true');
@@ -1701,6 +1722,7 @@ function initQuerySelects() {
   syncQuerySelects();
 }
 
+renderDatePresets();
 initQuerySelects();
 updateSceneOptions(null);
 syncQuerySelects();
