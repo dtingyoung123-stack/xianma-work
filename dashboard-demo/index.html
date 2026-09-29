@@ -13,7 +13,7 @@
   --primary: #D9353F;
   --primary-light: #FFF0F1;
   --primary-dark: #B82830;
-  --bg: #F2F3F7;
+  --bg: #F5F7FA;
   --card-bg: #FFFFFF;
   --text-primary: #1D2129;
   --text-secondary: #4E5969;
@@ -627,6 +627,94 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
   .main { margin-left: 0; }
   .kpi-row { grid-template-columns: 1fr; }
 }
+
+/* 本轮业务确认：沿用现有卡片、筛选与品牌样式 */
+.kpi-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.filter-error { color:#B82830; background:#FFF0F1; padding:10px 16px; margin-bottom:12px; border-radius:6px; }
+.table-scroll { overflow-x:auto; }
+#overviewTable { min-width:780px; }
+.scene-item { border:0; border-bottom:1px solid #F2F3F7; background:white; width:100%; text-align:left; font:inherit; }
+.topbar { flex-wrap:wrap; gap:12px; }
+.topbar-right { flex-wrap:wrap; width:100%; justify-content:flex-start; font-size:13px; }
+.topbar-filter select { height:34px; border-radius:4px; font-size:13px; }
+#orderTableCard .card-header { flex-wrap:wrap; gap:12px; }
+.order-query-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; width:100%; font-size:13px; }
+.proposal-section p + p { margin-top:12px; }
+@media(max-width:1200px) { .kpi-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:768px) { .kpi-row { grid-template-columns:1fr; } .topbar-right { width:100%; } }
+
+
+.kpi-label-with-icon { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:26px; }
+.breakdown-trigger { display:inline-flex; align-items:center; justify-content:center; flex:0 0 28px; width:28px; height:28px; padding:0; border:1px solid #F5C7CB; border-radius:7px; background:#FFF5F6; color:#D9353F; cursor:pointer; }
+.breakdown-trigger:hover,.breakdown-trigger[aria-expanded="true"] { background:#FFE5E8; border-color:#D9353F; }
+.breakdown-trigger:focus-visible,.breakdown-close:focus-visible { outline:2px solid #D9353F; outline-offset:3px; }
+.category-popover { position:fixed; z-index:1000; box-sizing:border-box; padding:16px 18px; border:1px solid #F0B8BE; border-radius:10px; background:#fff; box-shadow:0 10px 35px rgba(29,33,41,.16); overflow-y:auto; }
+.category-popover[hidden] { display:none; }
+.breakdown-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; }
+.breakdown-close { border:0; padding:0 4px; color:#86909C; background:transparent; font-size:22px; line-height:24px; cursor:pointer; }
+.breakdown-basis { color:#86909C; font-size:12px; margin:4px 0 8px; text-align:right; }
+.breakdown-row { display:grid; grid-template-columns:minmax(0,1fr) 58px 62px; align-items:start; gap:10px; padding:9px 0; font-size:13px; }
+.breakdown-row strong,.breakdown-percent { text-align:right; font-variant-numeric:tabular-nums; }
+.breakdown-percent { color:#4E5969; }
+.breakdown-name { display:flex; align-items:center; gap:8px; flex-wrap:wrap; color:#4E5969; }
+.breakdown-name i { width:8px; height:8px; border-radius:50%; flex:none; margin-top:2px; }
+.breakdown-name small { flex-basis:100%; margin-left:16px; color:#86909C; font-size:11px; }
+.breakdown-note { border-top:1px solid #F2F3F7; margin-top:8px; padding-top:10px; font-size:11px; color:#86909C; line-height:1.6; }
+
+
+.date-filter-ui { max-width:100%; display:flex; align-items:center; gap:9px; flex-wrap:wrap; font-size:13px; }
+.date-filter-label { color:#606775; white-space:nowrap; }
+.date-range-field { display:flex; align-items:center; height:34px; width:350px; max-width:100%; border:1px solid #DCDFE6; border-radius:4px; background:#fff; transition:border-color .15s; }
+.date-range-field.open,.date-range-field:focus-within { border-color:#D9353F; }
+.calendar-toggle { display:flex; justify-content:center; align-items:center; width:34px; height:30px; flex:none; border:0; background:none; color:#A4AAB3; cursor:pointer; }
+.date-range-field input { min-width:0; width:calc((100% - 62px)/2); padding:0 6px; border:0; outline:0; font:inherit; text-align:center; color:#606775; background:transparent; }
+.range-separator { width:28px; flex:none; text-align:center; color:#303133; }
+.range-query,.range-reset { display:inline-flex; gap:6px; align-items:center; justify-content:center; height:34px; padding:0 15px; border-radius:4px; font:inherit; cursor:pointer; }
+.range-query { border:1px solid #D9353F; background:#D9353F; color:#fff; }
+.range-query:hover { background:#B82830; }
+.range-reset { border:1px solid #DCDFE6; background:#fff; color:#606775; }
+.range-reset:hover { border-color:#D9353F; color:#D9353F; }
+.date-calendar { position:fixed; z-index:1100; background:#fff; border:1px solid #E4E7ED; border-radius:4px; box-shadow:0 3px 16px rgba(0,0,0,.14); box-sizing:border-box; overflow:auto; }
+.date-calendar[hidden] { display:none; }
+.calendar-months { display:grid; grid-template-columns:1fr 1fr; }
+.calendar-month { padding:18px 16px 12px; }
+.calendar-month + .calendar-month { border-left:1px solid #EBEEF5; }
+.calendar-month-heading { position:relative; height:34px; text-align:center; color:#606266; }
+.calendar-month-heading strong { font-size:16px; font-weight:500; }
+.calendar-nav { display:flex; position:absolute; left:0; top:-3px; gap:4px; }
+.calendar-nav.next { left:auto; right:0; }
+.calendar-nav button { width:22px; height:28px; border:0; background:none; color:#606266; cursor:pointer; font-size:19px; }
+.calendar-nav button:hover { color:#D9353F; }
+.calendar-weekdays,.calendar-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); }
+.calendar-weekdays { border-bottom:1px solid #EBEEF5; padding:6px 0 10px; font-size:13px; color:#606266; text-align:center; }
+.calendar-days { padding-top:4px; row-gap:6px; }
+.calendar-day { border:0; height:32px; padding:3px 0; background:transparent; color:#606266; font-size:12px; cursor:pointer; }
+.calendar-day.other-month { color:#B6BAC3; }
+.calendar-day.in-range { background:#F2F6FC; }
+.calendar-day span { display:flex; width:25px; height:25px; align-items:center; justify-content:center; margin:auto; border-radius:50%; }
+.calendar-day:hover span { color:#D9353F; background:#FFF0F1; }
+.calendar-day.endpoint span { background:#D9353F; color:white; font-weight:600; }
+.calendar-day:focus-visible { outline:1px solid #D9353F; outline-offset:-1px; }
+.calendar-day:disabled { cursor:not-allowed; }
+.calendar-footer { display:flex; justify-content:space-between; gap:12px; padding:10px 16px; border-top:1px solid #EBEEF5; font-size:12px; color:#909399; }
+@media(max-width:560px) { .date-filter-ui { width:100%; } .date-range-field { width:calc(100% - 66px); } .calendar-months { grid-template-columns:1fr; } .calendar-month + .calendar-month { border-left:0; border-top:1px solid #EBEEF5; } }
+
+
+/* 查询区下拉样式：选择只更新条件，查询后才应用。 */
+.query-select { position:relative; display:inline-flex; min-width:150px; max-width:100%; }
+.query-select-native { display:none; }
+.query-select-trigger { width:100%; min-height:34px; display:flex; align-items:center; justify-content:space-between; gap:22px; padding:6px 12px; border:1px solid #DCDFE6; border-radius:6px; background:#fff; color:#606775; font:inherit; font-size:13px; text-align:left; cursor:pointer; }
+.query-select-trigger[data-empty="true"] { color:#98A2B3; }
+.query-select-trigger:hover { border-color:#C0C4CC; }
+.query-select-trigger[aria-expanded="true"],.query-select-trigger:focus-visible { outline:0; border-color:#F6CDD1; box-shadow:0 0 0 2px #FBE1E3; }
+.query-select-arrow { width:7px; height:7px; flex:none; border-right:1px solid #98A2B3; border-bottom:1px solid #98A2B3; transform:rotate(45deg); margin:0 3px 4px 0; }
+.query-select-trigger[aria-expanded="true"] .query-select-arrow { transform:rotate(225deg); margin-top:6px; }
+.query-select-menu { position:fixed; z-index:1200; padding:6px 0; border:1px solid #D8DEE8; border-radius:16px; background:#fff; box-shadow:0 8px 20px rgba(16,24,40,.20); }
+.query-select-menu[hidden] { display:none; }
+.query-select-menu::before { content:""; position:absolute; left:50%; top:-6px; width:10px; height:10px; transform:rotate(45deg); background:#fff; border-top:1px solid #D8DEE8; border-left:1px solid #D8DEE8; }
+.query-select-options { position:relative; max-height:260px; overflow-y:auto; border-radius:11px; outline:0; }
+.query-select-option { display:block; width:100%; border:0; background:#fff; padding:9px 20px; font:inherit; font-size:13px; color:#101828; text-align:left; white-space:nowrap; cursor:pointer; }
+.query-select-option[aria-selected="true"],.query-select-option:hover,.query-select-option:focus-visible { background:#F2F4F7; outline:0; }
 </style>
 </head>
 <body>
@@ -687,7 +775,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
       </div>
     </nav>
     <div class="sidebar-footer">
-      Demo版本 v1.0 · 数据为示例
+      业务确认原型 · 全部为演示数据
     </div>
   </aside>
 
@@ -699,19 +787,17 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
         <p id="page-subtitle">所有业务线工单处理情况一览</p>
       </div>
       <div class="topbar-right">
-        <div class="time-filter" id="timeFilter">
-          <button data-range="today" onclick="onTimeChange('today', this)">今日</button>
-          <button data-range="7d" class="active" onclick="onTimeChange('7d', this)">近7天</button>
-          <button data-range="30d" onclick="onTimeChange('30d', this)">近30天</button>
-          <button data-range="custom" onclick="onTimeChange('custom', this)">自定义</button>
-        </div>
-        <div class="custom-date" id="customDatePicker" style="display:none">
-          <input type="date" id="startDate" value="2026-09-13">
-          <span class="date-sep">至</span>
-          <input type="date" id="endDate" value="2026-09-19">
+        <div class="date-filter-ui">
+          <span class="date-filter-label">日期范围</span>
+          <div class="date-range-field" id="dateRangeField">
+            <button type="button" id="calendarToggle" class="calendar-toggle" aria-label="打开日期范围日历" aria-haspopup="dialog" aria-expanded="false" aria-controls="dateCalendar" onclick="toggleDateCalendar()"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor"/><path d="M6 2v4m8-4v4M3 8h14M6 11h2m3 0h2m-7 3h2m3 0h2" stroke="currentColor"/></svg></button>
+            <input type="text" id="startDate" aria-label="开始日期" value="2026-09-22" placeholder="YYYY-MM-DD" maxlength="10" onclick="openDateCalendar()" onkeydown="if(event.key==='Enter'){onCustomDateChange()}" autocomplete="off">
+            <span class="range-separator">至</span>
+            <input type="text" id="endDate" aria-label="结束日期" value="2026-09-28" placeholder="YYYY-MM-DD" maxlength="10" onclick="openDateCalendar()" onkeydown="if(event.key==='Enter'){onCustomDateChange()}" autocomplete="off">
+          </div>
         </div>
         <div class="topbar-filter">
-          <select id="globalShopFilter" onchange="if(currentView==='overview'){renderOverviewWithFilters();}else if(currentView==='detail'&&currentPlatform!=='all'){renderDetailWithFilters(currentPlatform,this.value,document.getElementById('globalSceneFilter').value);}">
+          <select id="globalShopFilter" aria-label="店铺筛选">
             <option value="all">全部店铺</option>
             <option value="shop1">店铺1</option>
             <option value="shop2">店铺2</option>
@@ -720,15 +806,17 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
           </select>
         </div>
         <div class="topbar-filter">
-          <select id="globalSceneFilter" onchange="if(currentView==='overview'){renderOverviewWithFilters();}else if(currentView==='detail'&&currentPlatform!=='all'){renderDetailWithFilters(currentPlatform,document.getElementById('globalShopFilter').value,this.value);}">
+          <select id="globalSceneFilter" aria-label="业务线或场景筛选">
             <option value="all">全部场景</option>
           </select>
         </div>
-        <button class="btn-proposal" onclick="showProposal()">查看方案</button>
+          <button type="button" class="range-query" onclick="onCustomDateChange()"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="m12 12 5 5" stroke="currentColor" stroke-width="1.5"/></svg>查询</button>
+          <button type="button" class="range-reset" onclick="resetTimeFilter()"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 6a6.5 6.5 0 1 1-1 6M4 2v4h4" stroke="currentColor" stroke-width="1.5"/></svg>重置</button>
       </div>
     </header>
 
     <main class="content">
+      <div class="filter-error" id="filterError" role="alert" hidden></div>
       <!-- 面包屑（Demo2层级模式显示） -->
       <div class="breadcrumb" id="breadcrumb">
         <a onclick="goOverview()">首页</a>
@@ -737,61 +825,20 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
       </div>
       <!-- ===== 总览页视图 ===== -->
       <div class="view active" id="view-overview">
-        <!-- 全局KPI条 -->
-        <div class="kpi-row">
-          <div class="kpi-card featured">
-            <div class="kpi-label">总处理工单量</div>
-            <div class="kpi-value" id="kpiTotal">126,582<span class="unit">单</span></div>
-            <div class="kpi-sub">近7天 · 全平台累计</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">其中：退货退款</div>
-            <div class="kpi-value" id="kpiRefund" style="color:var(--warning)">8,647<span class="unit">单</span></div>
-            <div class="kpi-sub">占总工单 6.8%</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">自动化成功</div>
-            <div class="kpi-value" id="kpiSuccess" style="color:var(--success)">118,920<span class="unit">单</span></div>
-            <div class="kpi-sub">自动处理完成</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">整体自动化率</div>
-            <div class="kpi-value" id="kpiRate" style="color:var(--info)">93.9<span class="unit">%</span></div>
-            <div class="kpi-sub">自动化成功 / 总工单</div>
-          </div>
-        </div>
+        <div class="kpi-row" id="overviewKpiRow"></div>
 
         <!-- 业务线对比表格 -->
         <div class="card">
           <div class="card-header">
             <div>
               <div class="card-title">各业务线处理对比</div>
-              <div class="card-subtitle">点击业务线名称可进入详情页</div>
+              <div class="card-subtitle" id="overviewScope">点击业务线名称可进入详情页</div>
             </div>
           </div>
-          <table class="data-table" style="table-layout:fixed">
-            <colgroup>
-              <col style="width:16%">
-              <col style="width:14%">
-              <col style="width:14%">
-              <col style="width:14%">
-              <col style="width:14%">
-              <col style="width:14%">
-              <col style="width:14%">
-            </colgroup>
-            <thead>
-              <tr>
-                <th>业务线</th>
-                <th>今日处理</th>
-                <th>其中退货退款</th>
-                <th>自动化成功</th>
-                <th>自动化率</th>
-                <th>累计处理</th>
-                <th>状态</th>
-              </tr>
-            </thead>
+          <div class="table-scroll"><table class="data-table" id="overviewTable">
+            <thead><tr><th>业务线</th><th>所选时段总量</th><th>已完成</th><th>Agent纯自动完成</th><th>人工完成</th><th>尚未完成</th><th>自动化率</th></tr></thead>
             <tbody id="overviewTableBody"></tbody>
-          </table>
+          </table></div>
         </div>
 
         <!-- 趋势对比 + 自动化率排名 -->
@@ -800,7 +847,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
             <div class="card-header">
               <div>
                 <div class="card-title">各业务线处理量趋势</div>
-                <div class="card-subtitle">近7天每日处理量对比</div>
+                <div class="card-subtitle" id="trendScope"></div>
               </div>
             </div>
             <div class="chart-container" id="trendChart"></div>
@@ -809,7 +856,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
             <div class="card-header">
               <div>
                 <div class="card-title">自动化率排名</div>
-                <div class="card-subtitle">按自动化率从高到低</div>
+                <div class="card-subtitle" id="rateScope">Agent纯自动完成 / 所选时段总量</div>
               </div>
             </div>
             <div class="chart-container" id="rateChart"></div>
@@ -820,7 +867,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
       <!-- ===== 详情页视图 ===== -->
       <div class="view" id="view-detail">
         <!-- KPI条（方案A：三层递进，动态生成） -->
-        <div class="kpi-row" id="detailKpiRow" style="grid-template-columns: repeat(5, 1fr);">
+        <div class="kpi-row" id="detailKpiRow">
         </div>
 
 
@@ -828,8 +875,8 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
         <div class="card">
           <div class="card-header">
             <div>
-              <div class="card-title">处理量增长趋势</div>
-              <div class="card-subtitle">每个点均可查看对应日期和单量</div>
+              <div class="card-title">所选时段业务量趋势</div>
+              <div class="card-subtitle" id="detailTrendScope"></div>
             </div>
           </div>
           <div class="chart-container" id="detailTrendChart" style="height:280px"></div>
@@ -841,7 +888,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
             <div class="card-header">
               <div>
                 <div class="card-title">24小时处理时段分布</div>
-                <div class="card-subtitle">查看哪个时间段处理工单最多</div>
+                <div class="card-subtitle">独立24小时时段示例 · 不随顶部筛选变化</div>
               </div>
             </div>
             <div class="chart-container" id="hourlyChart" style="height:280px"></div>
@@ -862,17 +909,39 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
           <div class="card-header">
             <div>
               <div class="card-title" id="orderTableTitle">订单明细</div>
-              <div class="card-subtitle" id="orderTableSub">跟随筛选条件实时更新</div>
+              <div class="card-subtitle" id="orderTableSub">点击查询后更新</div>
+            </div>
+            <div class="order-query-controls">
+              <select id="orderStatusFilter" aria-label="处理状态筛选" style="height:30px;border:1px solid #E5E6EB;border-radius:4px;padding:0 8px;font-size:12px;color:#4E5969;background:#fff">
+                <option value="all">全部状态</option>
+                <option value="success">Agent纯自动完成</option>
+                <option value="manual">人工完成</option>
+                <option value="processing">处理中/待验证</option>
+                <option value="fail">待人工处理</option>
+                <option value="abnormal">异常中断</option>
+              </select>
+              <select id="orderResultFilter" aria-label="处理结果筛选" style="height:30px;border:1px solid #E5E6EB;border-radius:4px;padding:0 8px;font-size:12px;color:#4E5969;background:#fff">
+                <option value="all">全部结果</option>
+                <option value="Agent独立处理完成">Agent独立处理完成</option>
+                <option value="人工处理完成">人工处理完成</option>
+                <option value="Agent处理中">Agent处理中</option>
+                <option value="需人工介入">需人工介入</option>
+                <option value="接口超时">接口超时</option>
+                <option value="等待人工确认">等待人工确认</option>
+              </select>
+              <button type="button" class="range-query" onclick="applyOrderFilters()">查询</button>
+              <button type="button" class="range-reset" onclick="resetOrderFilters()">重置</button>
             </div>
           </div>
           <table class="data-table" style="table-layout:fixed">
             <colgroup>
-              <col style="width:16%">
-              <col style="width:13%">
-              <col style="width:15%">
-              <col style="width:20%">
-              <col style="width:13%">
-              <col style="width:23%">
+              <col style="width:14%">
+              <col style="width:11%">
+              <col style="width:11%">
+              <col style="width:17%">
+              <col style="width:11%">
+              <col style="width:19%">
+              <col style="width:17%">
             </colgroup>
             <thead>
               <tr>
@@ -882,6 +951,7 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
                 <th>业务场景</th>
                 <th>处理状态</th>
                 <th>处理结果</th>
+                <th>处理完成时间</th>
               </tr>
             </thead>
             <tbody id="orderTableBody"></tbody>
@@ -890,203 +960,40 @@ body.demo-hierarchy .nav-item[data-view="overview"] { display: flex !important; 
         </div>
       </div>
 
-      <!-- ===== 方案说明页视图 ===== -->
       <div class="view" id="view-proposal">
-        <div class="proposal-hero">
-          <h1>智能工单Agent数据看板重构方案</h1>
-          <p>统一指标体系 · 统一交互框架 · 统一视觉语言 | Demo版本 v1.0</p>
+        <div class="proposal-hero"><h1>看板本轮调整说明</h1><p>先确认原型，业务确认后再编写PRD</p></div>
+        <div class="proposal-section"><h2>本轮确认的5项内容</h2>
+          <table class="compare-table"><thead><tr><th>需求</th><th>本轮原型表现</th></tr></thead><tbody>
+            <tr><td>条件筛选</td><td>保留店铺、业务线/场景、明细状态与结果筛选。</td></tr>
+            <tr><td>处理完成时间</td><td>展示实际完成的日期与时间；尚未完成显示“—”，不把转人工时间视为完成。</td></tr>
+            <tr><td>人工与Agent处理量</td><td>已完成＝Agent纯自动完成＋人工完成。人工介入后完成归人工，尚未完成不计入两者。</td></tr>
+            <tr><td>筛选联动</td><td>除独立24小时报表外，所有统计、对比、趋势、分类和明细随筛选范围更新；累计量为所选时段累计。</td></tr>
+            <tr><td>业务类型拆分</td><td>在业务总量和已完成总量旁点击图标查看分类数量及占比；已完成只统计完成记录。有完整数据展示四类，有部分数据只展示支持的类型，没有拆分则不展示图标。支持但当期无记录显示0；缺少维度不补0、不用差额补为其他工单。</td></tr>
+          </tbody></table>
         </div>
-
-        <!-- 现状问题 -->
-        <div class="proposal-section">
-          <h2>一、当前存在的问题</h2>
-          <div class="issue-card">
-            <h4>问题1：三个平台看板风格不统一</h4>
-            <p>阿里系、拼多多、抖音三个页面各自一套KPI体系、图表布局和筛选交互，业务方需要切换页面才能对比，口径不一致。</p>
-          </div>
-          <div class="issue-card">
-            <h4>问题2：缺少跨平台总览视角</h4>
-            <p>没有一个页面能同时看到所有业务线的处理量、自动化率对比，领导和运营无法快速掌握全局。</p>
-          </div>
-          <div class="issue-card">
-            <h4>问题3：时间筛选不联动</h4>
-            <p>筛选日期后，KPI卡片仍显示今日数据，只有趋势图跟着变；且不支持月度数据查看。</p>
-          </div>
-          <div class="issue-card">
-            <h4>问题4：下钻链路不顺畅</h4>
-            <p>从场景分布无法直接点进订单明细，必须先点"自动化成功"才能看；抖音只能看总数，看不到具体业务类型数据。</p>
-          </div>
-          <div class="issue-card">
-            <h4>问题5：退货退款未单独拆分</h4>
-            <p>总工单量里退货退款是重要组成部分，但目前只有拼多多做了拆分展示，其他平台没有。</p>
-          </div>
-          <div class="issue-card">
-            <h4>问题6：缺少时段分布视角</h4>
-            <p>看不到一天中哪个时间段处理工单最多，无法判断人力/资源投入的高峰时段。</p>
-          </div>
-        </div>
-
-        <!-- 修改方向与建议 -->
-        <div class="proposal-section">
-          <h2>二、修改方向与建议</h2>
-
-          <h3 style="font-size:16px; margin: 20px 0 12px; color: var(--text-primary);">2.1 信息架构：两层结构</h3>
-          <table class="compare-table">
-            <thead>
-              <tr>
-                <th style="width:30%">层级</th>
-                <th style="width:35%">改造前</th>
-                <th style="width:35%">改造后</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>第一层</strong></td>
-                <td class="before">三个独立页面，各自为政</td>
-                <td class="after">跨平台总览页：7条业务线拉平对比</td>
-              </tr>
-              <tr>
-                <td><strong>第二层</strong></td>
-                <td class="before">每个平台一套布局，风格各异</td>
-                <td class="after">各业务线详情页：统一5模块模板</td>
-              </tr>
-              <tr>
-                <td><strong>下钻链路</strong></td>
-                <td class="before">总览 → 平台 → 场景 → 订单（路径长）</td>
-                <td class="after">总览 → 业务线 → 场景（可直接点） → 订单明细</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--text-primary);">2.2 统一KPI指标体系</h3>
-          <div class="suggestion-card">
-            <h4>统一5个核心指标</h4>
-            <p>总工单量 → 其中退货退款量 → 自动化成功量 → 自动化率 → 未成功/异常量</p>
-          </div>
-          <div class="suggestion-card">
-            <h4>全局时间筛选联动</h4>
-            <p>顶部统一筛选器：今日 / 近7天 / 近30天 / 本月 / 自定义区间。选择后所有KPI、图表、表格全部联动更新。</p>
-          </div>
-
-          <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--text-primary);">2.3 详情页统一模板（5个模块）</h3>
-          <table class="compare-table">
-            <thead>
-              <tr>
-                <th style="width:20%">模块</th>
-                <th style="width:40%">内容</th>
-                <th style="width:40%">对应需求</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>模块1：KPI条</strong></td>
-                <td>5个核心指标横向排列</td>
-                <td>需求1、6：工单拆分 + 各平台自动化率</td>
-              </tr>
-              <tr>
-                <td><strong>模块2：趋势图</strong></td>
-                <td>工单量趋势折线图，随时间筛选联动</td>
-                <td>需求7：筛选日期后数据联动</td>
-              </tr>
-              <tr>
-                <td><strong>模块3：时段分布</strong></td>
-                <td>24小时处理量柱状图</td>
-                <td>需求2、8：哪个时段处理最多</td>
-              </tr>
-              <tr>
-                <td><strong>模块4：场景分布</strong></td>
-                <td>业务场景/类型分布，可点击下钻</td>
-                <td>需求3、5：从场景直接看订单</td>
-              </tr>
-              <tr>
-                <td><strong>模块5：订单明细</strong></td>
-                <td>从场景点进来的具体工单列表</td>
-                <td>需求3：订单详情查看</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--text-primary);">2.4 总览页布局（4个模块）</h3>
-          <div class="suggestion-card">
-            <h4>模块1：全局KPI条</h4>
-            <p>总处理工单量 / 其中退货退款 / 自动化成功 / 整体自动化率</p>
-          </div>
-          <div class="suggestion-card">
-            <h4>模块2：业务线对比表格</h4>
-            <p>7条业务线横向对比：今日处理、退货退款、自动化成功、自动化率、累计处理</p>
-          </div>
-          <div class="suggestion-card">
-            <h4>模块3：处理量趋势对比</h4>
-            <p>多线折线图，各业务线每日处理量放在同一张图对比</p>
-          </div>
-          <div class="suggestion-card">
-            <h4>模块4：自动化率排名</h4>
-            <p>横向条形图，按自动化率从高到低排序</p>
-          </div>
-        </div>
-
-        <!-- 待业务确认 -->
-        <div class="proposal-section">
-          <h2>三、待业务确认事项</h2>
-          <div class="confirm-card">
-            <h4>确认项1：总览页对比颗粒度</h4>
-            <p>当前方案按业务线拉平对比（7条线：大健康/天猫国际/淘宝/淘工厂/小红书/拼多多/抖音）。是否需要额外增加"按大平台汇总"视图（阿里系汇总/拼多多/抖音）？</p>
-          </div>
-          <div class="confirm-card">
-            <h4>确认项2：订单明细表字段</h4>
-            <p>当前demo展示：工单号、下单时间、平台/店铺、业务场景、处理状态、处理结果（分页展示，每页10条）。是否需要增加或调整字段？（如：买家信息、客服/Agent、备注等）</p>
-          </div>
-          <div class="confirm-card">
-            <h4>确认项3：退货退款拆分口径</h4>
-            <p>当前方案：总工单量下面单独拆出"退货退款"指标。各业务线是否都有这个拆分？还是只有部分平台需要？</p>
-          </div>
-          <div class="confirm-card">
-            <h4>确认项4：详情页模块灵活度</h4>
-            <p>统一5模块框架下，是否允许各业务线在模块内容上做微调？（如：拼多多展示13个业务场景，抖音展示7种业务类型，位置相同但内容不同）</p>
-          </div>
-          <div class="confirm-card" style="border-left: 3px solid var(--success);">
-            <h4>确认项5：导航架构选择 <span class="confirmed-tag" style="background:var(--success);">已确认</span></h4>
-            <p>两种导航方案已在Demo中对比（左上角切换）：<br>
-               • 方案一（平铺式）：左侧导航直接列出所有业务线，随时可切<br>
-               • 方案二（层级式）：只有总览入口，点进详情后用面包屑返回<br>
-               <b style="color:var(--success)">已确认：选择方案一（平铺式导航），2026-09-21 与客服开发确认。</b></p>
-          </div>
-          <div class="confirm-card">
-            <h4>确认项6：权限范围</h4>
-            <p>当前Demo仅做<b>页面级权限</b>（控制不同角色能看到哪些页面/菜单），暂不做数据级权限（控制同页面内看到哪些数据）。<br>
-               是否需要数据级权限？如：客服只能看自己负责的业务线、主管能看全部等。</p>
-          </div>
-        </div>
-
-        <!-- 客服需求对照表 -->
-        <div class="proposal-section">
-          <h2>四、客服需求覆盖对照表</h2>
-          <table class="compare-table">
-            <thead>
-              <tr>
-                <th style="width:8%">序号</th>
-                <th style="width:42%">需求内容</th>
-                <th style="width:30%">方案对应模块</th>
-                <th style="width:20%">覆盖状态</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>1</td><td>工单总量拆分：整体 → 工单 → 退货退款</td><td>详情页模块1 KPI条</td><td class="after">已覆盖</td></tr>
-              <tr><td>2</td><td>每日时间展示，哪个时段处理最多</td><td>详情页模块3 时段分布</td><td class="after">已覆盖</td></tr>
-              <tr><td>3</td><td>从场景分布点击查看订单详情</td><td>详情页模块4+5 下钻链路</td><td class="after">已覆盖</td></tr>
-              <tr><td>4</td><td>一个页面看各平台数据 + 多平台对比</td><td>总览页 全部模块</td><td class="after">已覆盖</td></tr>
-              <tr><td>5</td><td>抖音只能看总数，要能看具体数据</td><td>详情页模块4 场景分布</td><td class="after">已覆盖</td></tr>
-              <tr><td>6</td><td>各平台总工单/自动化量/自动化占比</td><td>总览页模块2 对比表格</td><td class="after">已覆盖</td></tr>
-              <tr><td>7</td><td>筛选日期后所有数据联动，支持月度</td><td>全局时间筛选器</td><td class="after">已覆盖</td></tr>
-              <tr><td>8</td><td>天猫退款自动化：每日量+数值+时段</td><td>详情页模块1+3</td><td class="after">已覆盖</td></tr>
-            </tbody>
-          </table>
+        <div class="proposal-section"><h2>业务评审说明</h2>
+          <p>分类浮层按各业务线的数据支持情况展示，示例不表示任何平台已具备对应分类能力。四类完整且口径一致时，分类合计等于总量；部分拆分时不要求合计相等。</p>
+          <p>本原型采用2026-09-28作为演示“今日”，示例记录覆盖近60天。筛选演示按任务进入日期组织；实际统计日期归属沿用各业务线口径，统一取数规则留待业务核对。处理完成时间独立展示。</p>
+          <p>自动化率演示沿用“Agent纯自动完成 / 总量”，不把人工完成并入Agent。实际各平台的数据支持清单、历史数据和取数能力仍待核对。</p>
+          <p>平铺式导航沿用已有确认；本次不调整权限规则。当前仅为本地原型，无真实业务操作。</p>
         </div>
       </div>
     </main>
   </div>
 </div>
 
+<div id="dateCalendar" class="date-calendar" onclick="event.stopPropagation()" role="dialog" aria-modal="false" aria-label="选择日期范围" hidden>
+  <div id="calendarMonths" class="calendar-months"></div>
+  <div class="calendar-footer"><span id="calendarHint" role="status">请选择开始日期和结束日期</span><span>选择后点击查询</span></div>
+</div>
+<div id="categoryPopover" class="category-popover" role="dialog" aria-modal="false" aria-labelledby="categoryPopoverTitle" hidden>
+  <div class="breakdown-heading"><strong id="categoryPopoverTitle">业务类型拆分</strong><button type="button" class="breakdown-close" aria-label="关闭业务类型拆分" onclick="closeCategoryBreakdown(true)">×</button></div>
+  <div class="breakdown-basis" id="categoryPopoverBasis"></div>
+  <div id="categoryPopoverRows"></div>
+  <div class="breakdown-note" id="categoryPopoverNote"></div>
+</div>
+
+<div id="querySelectMenu" class="query-select-menu" hidden><div id="querySelectOptions" class="query-select-options" role="listbox"></div></div>
 <script>
 // ===== 模拟数据 =====
 const platforms = {
@@ -1220,6 +1127,7 @@ const platforms = {
     hasRefund: true,
     scenes: [
       { name: '退货退款', success: 24, fail: 5 },
+      { name: '换货', success: 0, fail: 0 },
     ],
     hourly: [0.5, 1, 1.5, 2, 3, 5, 8, 10, 12, 10, 8, 7, 6, 7, 8, 9, 10, 9, 7, 5, 3, 2, 1, 0.5],
     trend: [18, 20, 22, 25, 27, 28, 29]
@@ -1268,911 +1176,542 @@ const platforms = {
   }
 };
 
-// ===== 状态 =====
+// 本轮原型的所有联动使用同一组脱敏合成明细，避免汇总与明细互相矛盾。
+const DEMO_TODAY = '2026-09-28';
+const CATEGORY_NAMES = ['退货退款', '仅退款', '换货', '其他工单'];
 let currentView = 'overview';
 let currentPlatform = 'all';
-let currentRange = '7d';
-let trendChartInstance = null;
-let rateChartInstance = null;
-let detailTrendChartInstance = null;
-let hourlyChartInstance = null;
-
-// ===== 工具函数 =====
-function formatNum(n) {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-
-// ===== 渲染总览页表格 =====
-function renderOverviewTable() {
-  const tbody = document.getElementById('overviewTableBody');
-  const items = Object.entries(platforms).filter(([k]) => k !== 'all');
-  let html = '';
-  items.forEach(([key, p]) => {
-    const statusTag = p.rate >= 90 ? '<span class="tag tag-success">良好</span>' :
-                      p.rate >= 70 ? '<span class="tag tag-warning">待优化</span>' :
-                      '<span class="tag tag-danger">需关注</span>';
-    const rateColor = p.rate >= 90 ? 'var(--success)' : p.rate >= 70 ? 'var(--warning)' : 'var(--danger)';
-    html += `<tr>
-      <td><span class="clickable" onclick="goDetail('${key}')" style="color:${p.color};font-weight:600">● ${p.name}</span></td>
-      <td style="font-weight:600">${p.today}</td>
-      <td style="color:var(--warning)">${p.refund > 0 ? p.refund : '--'}</td>
-      <td style="color:var(--success)">${formatNum(p.success)}</td>
-      <td>
-        <span class="rate-bar"><span class="rate-bar-fill" style="width:${p.rate}%;background:${rateColor}"></span></span>
-        <span style="font-weight:600;color:${rateColor}">${p.rate}%</span>
-      </td>
-      <td>${formatNum(p.total)}</td>
-      <td>${statusTag}</td>
-    </tr>`;
-  });
-  tbody.innerHTML = html;
-}
-
-// ===== 渲染趋势对比图 =====
-function renderTrendChart() {
-  const el = document.getElementById('trendChart');
-  if (!el) return;
-  if (trendChartInstance) trendChartInstance.dispose();
-  trendChartInstance = echarts.init(el);
-
-  const days = ['09/13','09/14','09/15','09/16','09/17','09/18','09/19'];
-  const series = Object.entries(platforms)
-    .filter(([k]) => k !== 'all' && k !== 'xhs' && k !== 'taogongchang')
-    .map(([k, p]) => ({
-      name: p.name,
-      type: 'line',
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 6,
-      lineStyle: { width: 2.5 },
-      itemStyle: { color: p.color },
-      data: p.trend
-    }));
-
-  trendChartInstance.setOption({
-    tooltip: { trigger: 'axis', confine: true },
-    legend: { bottom: 0, icon: 'circle', itemWidth: 8, itemHeight: 8 },
-    grid: { left: 40, right: 20, top: 20, bottom: 50 },
-    xAxis: {
-      type: 'category',
-      data: days,
-      axisLine: { lineStyle: { color: '#E5E6EB' } },
-      axisLabel: { color: '#86909C', fontSize: 11 }
-    },
-    yAxis: {
-      type: 'value',
-      splitLine: { lineStyle: { color: '#F2F3F7' } },
-      axisLabel: { color: '#86909C', fontSize: 11 }
-    },
-    series: series
-  });
-}
-
-// ===== 渲染自动化率排名 =====
-function renderRateChart() {
-  const el = document.getElementById('rateChart');
-  if (!el) return;
-  if (rateChartInstance) rateChartInstance.dispose();
-  rateChartInstance = echarts.init(el);
-
-  const items = Object.entries(platforms)
-    .filter(([k, p]) => k !== 'all' && p.total > 0)
-    .sort((a, b) => b[1].rate - a[1].rate);
-
-  rateChartInstance.setOption({
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true },
-    grid: { left: 80, right: 40, top: 10, bottom: 20 },
-    xAxis: {
-      type: 'value',
-      max: 100,
-      splitLine: { show: false },
-      axisLabel: { color: '#86909C', fontSize: 11, formatter: '{value}%' }
-    },
-    yAxis: {
-      type: 'category',
-      data: items.map(([k, p]) => p.name),
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { color: '#4E5969', fontSize: 12 }
-    },
-    series: [{
-      type: 'bar',
-      barWidth: 16,
-      itemStyle: {
-        borderRadius: [0, 4, 4, 0],
-        color: function(params) {
-          const colors = ['#00B42A', '#00B42A', '#FF7D00', '#FF7D00', '#F53F3F'];
-          return colors[params.dataIndex] || '#86909C';
-        }
-      },
-      label: {
-        show: true,
-        position: 'right',
-        formatter: '{c}%',
-        fontSize: 12,
-        fontWeight: 600,
-        color: '#1D2129'
-      },
-      data: items.map(([k, p]) => p.rate)
-    }]
-  });
-}
-
-// ===== 渲染详情页 =====
-function renderDetail(platformKey) {
-  const p = platforms[platformKey];
-  if (!p) return;
-
-  document.getElementById('page-title').textContent = p.name + ' Agent 运营总览';
-  document.getElementById('page-subtitle').textContent = '近7天工单处理数据';
-
-  // 方案A：三层递进KPI
-  const kpiRow = document.getElementById('detailKpiRow');
-  let kpiHtml = '';
-
-  // 第一层：总工单量
-  const totalDone = Math.round(p.today * p.rate / 100);
-  kpiHtml += `
-    <div class="kpi-card featured">
-      <div class="kpi-label">总工单量</div>
-      <div class="kpi-value">${formatNum(p.today)}<span class="unit">单</span></div>
-      <div class="kpi-sub">已处理 ${totalDone} · 完成率 ${p.rate}%</div>
-    </div>
-  `;
-
-  // 第二层：售后工单
-  const afterSaleDone = Math.round(p.afterSale * p.rate / 100);
-  kpiHtml += `
-    <div class="kpi-card">
-      <div class="kpi-label">其中：售后工单</div>
-      <div class="kpi-value" style="color:var(--primary)">${formatNum(p.afterSale)}<span class="unit">单</span></div>
-      <div class="kpi-sub">已处理 ${afterSaleDone} · 完成率 ${(p.rate).toFixed(1)}%</div>
-    </div>
-  `;
-
-  // 第三层：退货退款（只有有退款的平台显示）
-  if (p.hasRefund && p.refund > 0) {
-    const refundDone = Math.round(p.refund * p.rate / 100);
-    kpiHtml += `
-      <div class="kpi-card">
-        <div class="kpi-label">其中：退货退款</div>
-        <div class="kpi-value" style="color:var(--warning)">${formatNum(p.refund)}<span class="unit">单</span></div>
-        <div class="kpi-sub">已处理 ${refundDone} · 完成率 ${(p.rate).toFixed(1)}%</div>
-      </div>
-    `;
-  }
-
-  // 自动化成功率
-  kpiHtml += `
-    <div class="kpi-card">
-      <div class="kpi-label">自动化成功率</div>
-      <div class="kpi-value" style="color:var(--success)">${p.rate}<span class="unit">%</span></div>
-      <div class="kpi-sub">自动化成功 / 总工单</div>
-    </div>
-  `;
-
-  // 未成功/异常
-  kpiHtml += `
-    <div class="kpi-card">
-      <div class="kpi-label">未成功 / 异常</div>
-      <div class="kpi-value" style="color:var(--danger)">${formatNum(p.fail)}<span class="unit">单</span></div>
-      <div class="kpi-sub">需人工介入</div>
-    </div>
-  `;
-
-  kpiRow.innerHTML = kpiHtml;
-
-  // 趋势图
-  renderDetailTrendChart(p);
-
-  // 时段分布
-  renderHourlyChart(p);
-
-  // 场景分布
-  renderSceneList(p);
-
-  // 渲染订单表
-  renderOrderTable();
-}
-
-function renderDetailTrendChart(p) {
-  const el = document.getElementById('detailTrendChart');
-  if (!el) return;
-  if (detailTrendChartInstance) detailTrendChartInstance.dispose();
-  detailTrendChartInstance = echarts.init(el);
-
-  const days = ['09/13','09/14','09/15','09/16','09/17','09/18','09/19'];
-
-  detailTrendChartInstance.setOption({
-    tooltip: { trigger: 'axis', confine: true },
-    grid: { left: 50, right: 30, top: 30, bottom: 30 },
-    xAxis: {
-      type: 'category',
-      data: days,
-      boundaryGap: false,
-      axisLine: { lineStyle: { color: '#E5E6EB' } },
-      axisLabel: { color: '#86909C', fontSize: 11 }
-    },
-    yAxis: {
-      type: 'value',
-      splitLine: { lineStyle: { color: '#F2F3F7' } },
-      axisLabel: { color: '#86909C', fontSize: 11 }
-    },
-    series: [{
-      name: '处理单量',
-      type: 'line',
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 8,
-      lineStyle: { width: 3, color: p.color },
-      itemStyle: { color: p.color },
-      areaStyle: {
-        color: {
-          type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-          colorStops: [
-            { offset: 0, color: p.color + '33' },
-            { offset: 1, color: p.color + '05' }
-          ]
-        }
-      },
-      label: {
-        show: true,
-        position: 'top',
-        fontSize: 11,
-        color: '#4E5969',
-        formatter: '{c}单'
-      },
-      data: p.trend
-    }]
-  });
-}
-
-function renderHourlyChart(p) {
-  const el = document.getElementById('hourlyChart');
-  if (!el) return;
-  if (hourlyChartInstance) hourlyChartInstance.dispose();
-  hourlyChartInstance = echarts.init(el);
-
-  const hours = Array.from({length: 24}, (_, i) => i + ':00');
-
-  hourlyChartInstance.setOption({
-    tooltip: { trigger: 'axis', confine: true, formatter: function(params) {
-      const d = params[0];
-      return d.name + '<br/>处理量：' + d.value + ' 单';
-    }},
-    grid: { left: 40, right: 20, top: 20, bottom: 30 },
-    xAxis: {
-      type: 'category',
-      data: hours,
-      axisLine: { lineStyle: { color: '#E5E6EB' } },
-      axisLabel: { color: '#86909C', fontSize: 10, interval: 2 }
-    },
-    yAxis: {
-      type: 'value',
-      splitLine: { lineStyle: { color: '#F2F3F7' } },
-      axisLabel: { color: '#86909C', fontSize: 11 }
-    },
-    series: [{
-      type: 'bar',
-      barWidth: '60%',
-      itemStyle: {
-        color: function(params) {
-          // 高峰时段用深红色
-          if (params.value > 100) return '#B82830';
-          if (params.value > 50) return '#D9353F';
-          return '#FFB3BA';
-        },
-        borderRadius: [3, 3, 0, 0]
-      },
-      data: p.hourly
-    }]
-  });
-}
-
-function renderSceneList(p) {
-  const el = document.getElementById('sceneList');
-  if (!el) return;
-  if (!p.scenes || p.scenes.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:#86909C;padding:40px 0">暂无场景数据</div>';
-    return;
-  }
-  const maxTotal = Math.max(...p.scenes.map(s => s.success + s.fail));
-  let html = '';
-  p.scenes.forEach((s, idx) => {
-    const total = s.success + s.fail;
-    const pct = (total / maxTotal * 100).toFixed(0);
-    html += `<div class="scene-item" onclick="selectSceneFilter('${s.name}')">
-      <div class="scene-name">${s.name}</div>
-      <div class="scene-bar-wrap">
-        <div class="scene-bar" style="width:${pct}%;background:${idx === 0 ? '#D9353F' : '#FFB3BA'}"></div>
-      </div>
-      <div class="scene-stats">
-        <span class="success">${s.success}成功</span> · <span class="fail">${s.fail}未成功</span>
-      </div>
-    </div>`;
-  });
-  el.innerHTML = html;
-}
-
-// ===== 订单明细 =====
-// 生成模拟订单数据
-function generateMockOrders(platformName) {
-  const statuses = [
-    { s: '自动化成功', c: 'tag-success', r: '自动处理完成', t: '2.3s', key: 'success' },
-    { s: '自动化成功', c: 'tag-success', r: '自动处理完成', t: '1.8s', key: 'success' },
-    { s: '处理中', c: 'tag-info', r: 'Agent处理中', t: '--', key: 'processing' },
-    { s: '未成功', c: 'tag-danger', r: '需人工介入', t: '5.2min', key: 'fail' },
-    { s: '自动化成功', c: 'tag-success', r: '自动处理完成', t: '3.1s', key: 'success' },
-    { s: '异常中断', c: 'tag-warning', r: '接口超时', t: '2.1min', key: 'abnormal' },
-    { s: '自动化成功', c: 'tag-success', r: '自动处理完成', t: '1.5s', key: 'success' },
-    { s: '待验证', c: 'tag-info', r: '等待人工确认', t: '--', key: 'processing' },
-  ];
-  const scenes = ['退货退款', '在途无理由退款', '已发货无轨迹退款', '异常网点预警'];
-  const orders = [];
-  for (let i = 1; i <= 16; i++) {
-    const st = statuses[i % statuses.length];
-    orders.push({
-      no: 'WO' + (20260919000 + i),
-      time: '09/19 ' + (9 + Math.floor(i/3)) + ':' + (10 + i*7),
-      shop: '店铺' + ((i % 4) + 1),
-      shopKey: 'shop' + ((i % 4) + 1),
-      scene: scenes[i % scenes.length],
-      status: st.s,
-      statusClass: st.c,
-      statusKey: st.key,
-      result: st.r,
-      duration: st.t
-    });
-  }
-  return orders;
-}
-
+let currentTimeRange = '7d';
+let currentPage = 1;
 let currentOrders = [];
+let activeDates = { start: '2026-09-22', end: DEMO_TODAY };
+let appliedFilters = { shop:'all', scene:'all', shopLabel:'全部店铺', sceneLabel:'全部业务线' };
+let appliedOrderFilters = { status:'all', result:'all' };
+const PAGE_SIZE = 10;
+const charts = {};
+// 复用现有场景归类；场景存在与当期数量是否为零分别判断。
+function getSceneCategory(scene) {
+  return scene.includes('换货') ? '换货' : scene.includes('退货') ? '退货退款' : scene.includes('退款') ? '仅退款' : '其他工单';
+}
+function getSceneCategories(key) {
+  const categories = new Set(platforms[key].scenes.map(scene => getSceneCategory(scene.name)));
+  return CATEGORY_NAMES.filter(name => categories.has(name));
+}
+const byId = id => document.getElementById(id);
+const formatNum = n => Number(n).toLocaleString('zh-CN');
+const dateFrom = text => new Date(text + 'T00:00:00Z');
+const dateText = date => date.toISOString().slice(0, 10);
+const addDays = (text, count) => { const date = dateFrom(text); date.setUTCDate(date.getUTCDate() + count); return dateText(date); };
+const timeText = value => value ? value.replace('T', ' ').slice(0, 16) : '—';
 
-function renderOrderTable() {
-  const platformName = platforms[currentPlatform] ? platforms[currentPlatform].name : '';
-  currentOrders = generateMockOrders(platformName);
+function makeDemoRecords() {
+  const records = [];
+  const states = [
+    ['Agent纯自动完成', 'success', 'Agent独立处理完成', 'tag-success'],
+    ['人工完成', 'manual', '人工处理完成', 'tag-info'],
+    ['处理中', 'processing', 'Agent处理中', 'tag-info'],
+    ['待人工处理', 'fail', '需人工介入', 'tag-warning'],
+    ['异常中断', 'abnormal', '接口超时', 'tag-warning'],
+    ['待验证', 'processing', '等待人工确认', 'tag-info']
+  ];
+  Object.entries(platforms).filter(([key]) => key !== 'all').forEach(([key, platform], pi) => {
+    for (let day = 0; day < 60; day++) {
+      const date = addDays(DEMO_TODAY, -day);
+      // 小红书保留当前无业务量的演示；是否拆分由场景判断。
+      const count = key === 'xhs' ? 0 : 14 + ((day * 3 + pi * 5) % 15);
+      for (let i = 0; i < count; i++) {
+        const seed = day * 31 + i * 7 + pi * 13;
+        const choice = seed % 12;
+        const state = states[choice < 7 ? 0 : choice < 9 ? 1 : choice - 7];
+        const hour = 8 + i % 12;
+        const minute = String((i * 7) % 60).padStart(2, '0');
+        const createdAt = date + 'T' + String(hour).padStart(2, '0') + ':' + minute;
+        const done = state[1] === 'success' || state[1] === 'manual';
+        const finished = new Date(createdAt + ':00Z');
+        finished.setUTCMinutes(finished.getUTCMinutes() + (state[1] === 'manual' ? 45 : 5));
+        const scene = platform.scenes[(day + i) % platform.scenes.length].name;
+        const category = getSceneCategory(scene);
+        records.push({
+          no: 'DEMO-' + (pi + 1) + '-' + date.replaceAll('-', '') + '-' + String(i + 1).padStart(3, '0'),
+          platform: key, date, time: createdAt, completedAt: done ? finished.toISOString().slice(0, 16) : null,
+          shop: '店铺' + (i % 4 + 1), shopKey: 'shop' + (i % 4 + 1),
+          scene, category,
+          status: state[0], statusKey: state[1], result: state[2], statusClass: state[3]
+        });
+      }
+    }
+  });
+  return records;
+}
+const demoRecords = makeDemoRecords();
+
+function getRangeDays() {
+  const dates = [];
+  for (let date = activeDates.start; date <= activeDates.end; date = addDays(date, 1)) dates.push(date);
+  return dates;
+}
+function getScopeText() {
+  const shop = appliedFilters.shopLabel;
+  const scene = appliedFilters.sceneLabel;
+  return activeDates.start + ' 至 ' + activeDates.end + ' · ' + shop + ' · ' + scene;
+}
+function getSelectedKeys() {
+  if (currentView === 'detail') return [currentPlatform];
+  const key = appliedFilters.scene;
+  return key === 'all' ? Object.keys(platforms).filter(k => k !== 'all') : [key];
+}
+function getFilteredRecords() {
+  const keys = getSelectedKeys();
+  const shop = appliedFilters.shop;
+  const scene = appliedFilters.scene;
+  return demoRecords.filter(r => keys.includes(r.platform) && r.date >= activeDates.start && r.date <= activeDates.end
+    && (shop === 'all' || r.shopKey === shop) && (currentView !== 'detail' || scene === 'all' || r.scene === scene));
+}
+function summarize(records) {
+  const auto = records.filter(r => r.statusKey === 'success').length;
+  const manual = records.filter(r => r.statusKey === 'manual').length;
+  return { total: records.length, auto, manual, completed: auto + manual, pending: records.length - auto - manual,
+    rate: records.length ? Number((auto / records.length * 100).toFixed(1)) : null };
+}
+const categoryBreakdowns = new Map();
+let activeBreakdownButton = null;
+function getCategoryBreakdown(records) {
+  const keys = getSelectedKeys();
+  const supports = getSceneCategories;
+  const hasAfterSale = keys.some(key => supports(key).some(name => name !== '其他工单'));
+  if (!hasAfterSale) return { rows:[], total:records.length, complete:false };
+  const rows = CATEGORY_NAMES.flatMap(name => {
+    const covered = keys.filter(key => supports(key).includes(name));
+    if (!covered.length) return [];
+    const count = records.filter(r => r.category === name && covered.includes(r.platform)).length;
+    return [{ name, count, percent: records.length ? (count / records.length * 100).toFixed(1) + '%' : '—',
+      coverage: covered.length === keys.length ? '' : '仅统计：' + covered.map(key => platforms[key].name).join('、') }];
+  });
+  return { rows, total: records.length, complete: records.every(record => supports(record.platform).includes(record.category)) };
+}
+function closeCategoryBreakdown(restoreFocus = false) {
+  byId('categoryPopover').hidden = true;
+  if (activeBreakdownButton) {
+    activeBreakdownButton.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) activeBreakdownButton.focus();
+  }
+  activeBreakdownButton = null;
+}
+function positionCategoryBreakdown() {
+  if (!activeBreakdownButton) return;
+  const popup = byId('categoryPopover');
+  const rect = activeBreakdownButton.getBoundingClientRect();
+  const margin = 12;
+  const width = Math.min(356, window.innerWidth - margin * 2);
+  popup.style.width = width + 'px';
+  popup.style.maxHeight = Math.max(120, window.innerHeight - margin * 2) + 'px';
+  const height = popup.offsetHeight;
+  const left = Math.max(margin, Math.min(rect.right - width, window.innerWidth - width - margin));
+  const above = rect.top - height - 12 >= margin;
+  const top = above ? rect.top - height - 12 : Math.min(rect.bottom + 12, window.innerHeight - height - margin);
+  popup.style.left = left + 'px';
+  popup.style.top = Math.max(margin, top) + 'px';
+  popup.dataset.placement = above ? 'above' : 'below';
+  popup.style.setProperty('--arrow-left', Math.max(18, Math.min(width - 18, rect.left + rect.width / 2 - left)) + 'px');
+}
+function showCategoryBreakdown(button, key) {
+  if (activeBreakdownButton === button && !byId('categoryPopover').hidden) { closeCategoryBreakdown(); return; }
+  closeCategoryBreakdown();
+  closeDateCalendar();
+  const data = categoryBreakdowns.get(key);
+  if (!data || !data.rows.length) return;
+  const popup = byId('categoryPopover');
+  byId('categoryPopoverTitle').textContent = data.completed ? '已完成业务类型拆分' : '业务类型拆分';
+  byId('categoryPopoverBasis').textContent = data.completed ? '占已完成总量' : '占所选时段业务总量';
+  byId('categoryPopoverRows').innerHTML = data.rows.map((row, i) => `<div class="breakdown-row"><div class="breakdown-name"><i style="background:${['#D9353F','#16B88A','#2997EF','#F5A623'][CATEGORY_NAMES.indexOf(row.name)]}"></i><span>${row.name}</span>${row.coverage ? '<small>' + row.coverage + '</small>' : ''}</div><strong>${formatNum(row.count)}</strong><span class="breakdown-percent">${row.percent}</span></div>`).join('');
+  byId('categoryPopoverNote').textContent = data.complete ? '各类型互不重复，合计 ' + formatNum(data.total) + ' 单' : '仅展示已支持的分类；缺失不补0，占比仍以对应卡片总量为分母。';
+  activeBreakdownButton = button;
+  button.setAttribute('aria-expanded', 'true');
+  popup.hidden = false;
+  positionCategoryBreakdown();
+}
+document.addEventListener('click', event => {
+  if (activeBreakdownButton && !byId('categoryPopover').contains(event.target) && !activeBreakdownButton.contains(event.target)) closeCategoryBreakdown();
+});
+document.addEventListener('keydown', event => { if (event.key === 'Escape') closeCategoryBreakdown(true); });
+window.addEventListener('resize', () => closeCategoryBreakdown());
+window.addEventListener('scroll', event => { if (!byId('categoryPopover').contains(event.target)) closeCategoryBreakdown(); }, true);
+
+function renderKpis(id, records) {
+  const d = summarize(records);
+  const cards = [
+    ['所选时段业务总量', d.total, '包含已完成与尚未完成', ''],
+    ['已完成总量', d.completed, 'Agent纯自动完成 ＋ 人工完成', ''],
+    ['Agent纯自动完成', d.auto, '无需人工介入，独立完成', 'var(--success)'],
+    ['人工完成', d.manual, '人工介入并实际完成', 'var(--info)'],
+    ['尚未完成', d.pending, '处理中、待人工、异常或待验证', 'var(--warning)'],
+    ['自动化率', d.rate, 'Agent纯自动完成 / 业务总量', 'var(--primary)']
+  ];
+  const breakdownIcon = (i, label) => {
+    if (i > 1) return '';
+    const data = getCategoryBreakdown(i === 1 ? records.filter(r => r.statusKey === 'success' || r.statusKey === 'manual') : records);
+    const key = id + '-' + i;
+    categoryBreakdowns.set(key, { ...data, completed: i === 1 });
+    if (!data.rows.length) return '';
+    return `<button type="button" class="breakdown-trigger" aria-label="查看${label}的业务类型拆分" aria-expanded="false" aria-controls="categoryPopover" onclick="showCategoryBreakdown(this, '${key}')"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2v8h8M7 3a7.5 7.5 0 1 0 10 10M13 2.8A7.5 7.5 0 0 1 17.2 7H13V2.8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+  };
+  byId(id).innerHTML = cards.map(([label, value, sub, color], i) => `<div class="kpi-card ${i === 0 ? 'featured' : ''}"><div class="kpi-label kpi-label-with-icon"><span>${label}</span>${breakdownIcon(i,label)}</div><div class="kpi-value" style="color:${color || 'inherit'}">${value === null ? '—' : formatNum(value)}${value === null ? '' : '<span class="unit">' + (i === 5 ? '%' : '单') + '</span>'}</div><div class="kpi-sub">${sub}</div></div>`).join('');
+}
+function setChart(id, option) {
+  const el = byId(id);
+  if (typeof echarts === 'undefined') { el.textContent = '图表资源未加载，请联网后刷新；上方统计与明细仍可查看。'; return; }
+  if (!charts[id]) charts[id] = echarts.init(el);
+  charts[id].setOption(option, true);
+  charts[id].resize();
+}
+function renderTrend(id, records, keys) {
+  const days = getRangeDays();
+  setChart(id, {
+    tooltip: { trigger: 'axis', confine: true },
+    legend: { bottom: 0, type: 'scroll', icon: 'circle' },
+    grid: { left: 45, right: 25, top: 25, bottom: 60 },
+    xAxis: { type: 'category', data: days.map(d => d.slice(5).replace('-', '/')), boundaryGap: false },
+    yAxis: { type: 'value', minInterval: 1, splitLine: { lineStyle: { color: '#F2F3F7' } } },
+    series: keys.map(key => ({ name: platforms[key].name, type: 'line', smooth: true, symbolSize: 5,
+      itemStyle: { color: platforms[key].color }, data: days.map(day => records.filter(r => r.platform === key && r.date === day).length) }))
+  });
+}
+function renderRate(records, keys) {
+  const items = keys.map(key => ({ key, ...summarize(records.filter(r => r.platform === key)) })).filter(p => p.rate !== null).sort((a, b) => a.rate - b.rate);
+  setChart('rateChart', { tooltip: { trigger: 'axis', confine: true }, grid: { left: 85, right: 45, top: 25, bottom: 30 },
+    title: items.length ? undefined : { text: '所选范围暂无数据', left: 'center', top: 'center', textStyle: { color: '#86909C', fontSize: 14, fontWeight: 'normal' } },
+    xAxis: { type: 'value', max: 100, axisLabel: { formatter: '{value}%' } },
+    yAxis: { type: 'category', data: items.map(p => platforms[p.key].name) },
+    series: [{ type: 'bar', barWidth: 18, itemStyle: { color: '#D9353F', borderRadius: [0, 4, 4, 0] }, label: { show: true, position: 'right', formatter: '{c}%' }, data: items.map(p => p.rate) }] });
+}
+function renderHourlyChart(platform) {
+  // 独立24小时示例不随顶部时间、店铺、场景或分类预览缩放。
+  setChart('hourlyChart', { tooltip: { trigger: 'axis', confine: true }, grid: { left: 45, right: 20, top: 25, bottom: 30 },
+    xAxis: { type: 'category', data: Array.from({ length: 24 }, (_, i) => i + ':00'), axisLabel: { interval: 2 } },
+    yAxis: { type: 'value', minInterval: 1 }, series: [{ type: 'bar', data: platform.hourly.map(Math.round), barWidth: '60%', itemStyle: { color: '#D9353F', borderRadius: [3, 3, 0, 0] } }] });
+}
+function renderSceneList(records) {
+  const scenes = platforms[currentPlatform].scenes;
+  const selected = appliedFilters.scene;
+  const visible = selected === 'all' ? scenes : scenes.filter(s => s.name === selected);
+  byId('sceneList').innerHTML = visible.map(scene => {
+    const d = summarize(records.filter(r => r.scene === scene.name));
+    return `<button class="scene-item" data-scene="${scene.name}"><div class="scene-name">${scene.name}</div><div class="scene-stats">${d.total}单 · <span class="success">Agent ${d.auto}</span> · 人工 ${d.manual} · 待完成 ${d.pending}</div></button>`;
+  }).join('');
+  byId('sceneList').querySelectorAll('[data-scene]').forEach(button => button.addEventListener('click', () => selectSceneFilter(button.dataset.scene)));
+}
+function renderOverviewWithFilters() {
+  const records = getFilteredRecords();
+  const keys = getSelectedKeys();
+  const scope = getScopeText();
+  byId('page-subtitle').textContent = scope;
+  byId('overviewScope').textContent = scope + ' · 数量均为所选时段累计';
+  byId('trendScope').textContent = scope + ' · 每日业务量';
+  byId('rateScope').textContent = scope + ' · Agent纯自动完成 / 总量';
+  renderKpis('overviewKpiRow', records);
+  byId('overviewTableBody').innerHTML = keys.map(key => {
+    const d = summarize(records.filter(r => r.platform === key));
+    return `<tr><td><button class="line-link" data-key="${key}" style="color:${platforms[key].color};border:0;background:none;font:inherit;font-weight:600;cursor:pointer">● ${platforms[key].name}</button></td><td>${formatNum(d.total)}</td><td>${formatNum(d.completed)}</td><td style="color:var(--success)">${formatNum(d.auto)}</td><td style="color:var(--info)">${formatNum(d.manual)}</td><td>${formatNum(d.pending)}</td><td>${d.rate === null ? '—' : d.rate + '%'}</td></tr>`;
+  }).join('');
+  byId('overviewTableBody').querySelectorAll('[data-key]').forEach(b => b.addEventListener('click', () => goDetail(b.dataset.key)));
+  renderTrend('trendChart', records, keys);
+  renderRate(records, keys);
+}
+function renderDetailWithFilters() {
+  const records = getFilteredRecords();
+  const scope = getScopeText();
+  byId('page-title').textContent = platforms[currentPlatform].name + ' Agent运营总览';
+  byId('page-subtitle').textContent = scope;
+  byId('detailTrendScope').textContent = scope + ' · 每日业务量';
+  byId('orderTableSub').textContent = scope + ' · 未完成记录不填写完成时间';
+  renderKpis('detailKpiRow', records);
+  renderTrend('detailTrendChart', records, [currentPlatform]);
+  renderHourlyChart(platforms[currentPlatform]);
+  renderSceneList(records);
+  currentOrders = records.slice().sort((a, b) => b.time.localeCompare(a.time));
   filterOrders();
 }
-
-let currentPage = 1;
-const PAGE_SIZE = 10;
-
+function applyOrderFilters() {
+  appliedOrderFilters = { status:byId('orderStatusFilter').value, result:byId('orderResultFilter').value };
+  filterOrders();
+}
+function resetOrderFilters() {
+  byId('orderStatusFilter').value = 'all';
+  byId('orderResultFilter').value = 'all';
+  syncQuerySelects();
+}
 function filterOrders() {
-  const shop = document.getElementById('globalShopFilter').value;
-  const scene = document.getElementById('globalSceneFilter').value;
-
-  let filtered = currentOrders;
-  if (shop !== 'all') filtered = filtered.filter(o => o.shopKey === shop);
-  if (scene !== 'all') filtered = filtered.filter(o => o.scene === scene);
-
-  window._currentFiltered = filtered;
+  const { status, result } = appliedOrderFilters;
+  window._currentFiltered = currentOrders.filter(r => (status === 'all' || r.statusKey === status) && (result === 'all' || r.result === result));
   currentPage = 1;
   renderOrderPage();
 }
-
-function goOrderPage(p) {
-  currentPage = p;
-  renderOrderPage();
-}
-
+function goOrderPage(page) { currentPage = page; renderOrderPage(); }
 function renderOrderPage() {
-  const filtered = window._currentFiltered || [];
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  if (currentPage > totalPages) currentPage = totalPages;
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const pageData = filtered.slice(start, start + PAGE_SIZE);
-
-  const tbody = document.getElementById('orderTableBody');
-  let html = '';
-  if (pageData.length === 0) {
-    html = '<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:40px 0">暂无符合条件的订单</td></tr>';
-  } else {
-    pageData.forEach((o) => {
-      html += `<tr>
-        <td style="font-family:monospace;font-size:12px">${o.no}</td>
-        <td>${o.time}</td>
-        <td>${o.shop}</td>
-        <td>${o.scene}</td>
-        <td><span class="tag ${o.statusClass}">${o.status}</span></td>
-        <td>${o.result}</td>
-      </tr>`;
-    });
-  }
-  tbody.innerHTML = html;
-
-  const pager = document.getElementById('orderPager');
-  let pagesHtml = '';
-  for (let p = 1; p <= totalPages; p++) {
-    pagesHtml += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goOrderPage(${p})">${p}</button>`;
-  }
-  pager.innerHTML = `
-    <div class="pager-info">共 ${filtered.length} 条记录 · 第 ${currentPage}/${totalPages} 页 · 示例数据</div>
-    <div class="pager-btns">
-      <button class="page-btn" onclick="goOrderPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>上一页</button>
-      ${pagesHtml}
-      <button class="page-btn" onclick="goOrderPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>下一页</button>
-    </div>`;
+  const rows = window._currentFiltered || [];
+  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  currentPage = Math.max(1, Math.min(currentPage, totalPages));
+  const pageRows = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  byId('orderTableBody').innerHTML = pageRows.length ? pageRows.map(r => `<tr><td style="font-family:monospace;font-size:11px;overflow-wrap:anywhere">${r.no}</td><td>${timeText(r.time)}</td><td>${r.shop}</td><td>${r.scene}</td><td><span class="tag ${r.statusClass}">${r.status}</span></td><td>${r.result}</td><td style="font-size:12px">${timeText(r.completedAt)}</td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;color:#86909C">暂无符合条件的订单</td></tr>';
+  const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1].filter(p => p >= 1 && p <= totalPages));
+  byId('orderPager').innerHTML = `<div class="pager-info">共 ${rows.length} 条记录 · 第 ${currentPage}/${totalPages} 页 · 示例数据</div><div class="pager-btns"><button class="page-btn" onclick="goOrderPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一页</button>${[...pages].sort((a,b) => a-b).map(p => `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goOrderPage(${p})">${p}</button>`).join('')}<button class="page-btn" onclick="goOrderPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一页</button></div>`;
 }
-
-// ===== 视图切换 =====
-function switchView(view) {
-  currentView = view;
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + view).classList.add('active');
-
-  // 更新导航高亮（detail视图由goDetail按平台设置，这里不重复覆盖）
-  if (view !== 'detail') {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelector(`[data-view="${view}"]`).classList.add('active');
-  }
-
-  // 更新标题
-  if (view === 'overview') {
-    document.getElementById('page-title').textContent = '跨平台总览';
-    document.getElementById('page-subtitle').textContent = '所有业务线工单处理情况一览';
-  } else if (view === 'proposal') {
-    document.getElementById('page-title').textContent = '看板重构方案说明';
-    document.getElementById('page-subtitle').textContent = '当前问题 · 修改方向 · 待确认事项';
-  }
-
-  // 更新面包屑
-  updateBreadcrumb();
-
-  // 重新渲染图表
-  setTimeout(() => {
-    if (view === 'overview') {
-      renderOverviewTable();
-      renderTrendChart();
-      renderRateChart();
-    } else if (view === 'detail') {
-      renderDetail(currentPlatform);
-    }
-  }, 50);
+function refreshDashboard() {
+  syncQuerySelects();
+  closeCategoryBreakdown();
+  if (currentView === 'overview') renderOverviewWithFilters();
+  if (currentView === 'detail') renderDetailWithFilters();
 }
-
 function updateSceneOptions(platformKey) {
-  const sel = document.getElementById('globalSceneFilter');
-  if (!sel) return;
-  sel.innerHTML = '<option value="all">全部场景</option>';
-  let names = [];
-  if (platformKey && platforms[platformKey] && platforms[platformKey].scenes) {
-    names = platforms[platformKey].scenes.map(s => s.name);
-  } else {
-    const seen = new Set();
-    Object.keys(platforms).forEach(k => {
-      (platforms[k].scenes || []).forEach(s => {
-        if (!seen.has(s.name)) { seen.add(s.name); names.push(s.name); }
-      });
-    });
-  }
-  names.forEach(n => {
-    const opt = document.createElement('option');
-    opt.value = n; opt.textContent = n;
-    sel.appendChild(opt);
-  });
-  sel.value = 'all';
+  appliedFilters.scene = 'all';
+  appliedFilters.sceneLabel = platformKey ? '全部场景' : '全部业务线';
+  const select = byId('globalSceneFilter');
+  select.innerHTML = platformKey ? '<option value="all">全部场景</option>' + platforms[platformKey].scenes.map(s => `<option value="${s.name}">${s.name}</option>`).join('') : '<option value="all">全部业务线</option>' + Object.entries(platforms).filter(([k]) => k !== 'all').map(([k, p]) => `<option value="${k}">${p.name}</option>`).join('');
 }
-
-function goDetail(platformKey) {
-  currentPlatform = platformKey;
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const navItem = document.querySelector(`[data-platform="${platformKey}"]`);
-  if (navItem) navItem.classList.add('active');
-  updateSceneOptions(platformKey);
-  switchView('detail');
+function switchView(view) {
+  closeQuerySelect();
+  closeDateCalendar();
+  closeCategoryBreakdown();
+  currentView = view;
+  byId('startDate').value = activeDates.start;
+  byId('endDate').value = activeDates.end;
+  byId('globalShopFilter').value = appliedFilters.shop;
+  byId('globalSceneFilter').value = appliedFilters.scene;
+  byId('filterError').hidden = true;
+  document.querySelectorAll('.view').forEach(node => node.classList.remove('active'));
+  byId('view-' + view).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(node => node.classList.remove('active'));
+  const nav = view === 'detail' ? document.querySelector(`[data-platform="${currentPlatform}"]`) : document.querySelector(`[data-view="${view}"]`);
+  if (nav) nav.classList.add('active');
+  if (view === 'overview') { currentPlatform = 'all'; updateSceneOptions(null); byId('page-title').textContent = '跨平台总览'; }
+  if (view === 'proposal') { byId('page-title').textContent = '看板本轮调整说明'; byId('page-subtitle').textContent = '原型评审阶段 · 业务确认后再输出PRD'; }
+  updateBreadcrumb();
+  refreshDashboard();
 }
-
-function showProposal() {
-  switchView('proposal');
+function goDetail(key) { appliedOrderFilters = {status:'all',result:'all'}; currentPlatform = key; updateSceneOptions(key); byId('orderStatusFilter').value = 'all'; byId('orderResultFilter').value = 'all'; switchView('detail'); }
+function goOverview() { switchView('overview'); }
+function showProposal() { switchView('proposal'); }
+function selectSceneFilter(name) { byId('globalSceneFilter').value = name; syncQuerySelects(); byId('globalSceneFilterTrigger').scrollIntoView({ behavior:'smooth', block:'center' }); byId('globalSceneFilterTrigger').focus(); }
+function updateBreadcrumb() {
+  const show = document.body.classList.contains('demo-hierarchy') && currentView === 'detail';
+  byId('breadcrumb').classList.toggle('show', show);
+  if (show) byId('breadcrumbCurrent').textContent = platforms[currentPlatform].name;
 }
-
-// ===== 导航绑定 =====
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', function() {
-    const view = this.dataset.view;
-    if (view === 'detail') {
-      goDetail(this.dataset.platform);
-    } else {
-      switchView(view);
-    }
-  });
-});
-
-
-// 自定义日期选择
-const startDateInput = document.getElementById('startDate');
-const endDateInput = document.getElementById('endDate');
-
-function onCustomDateChange() {
-  currentRange = 'custom';
-}
-
-startDateInput.addEventListener('change', onCustomDateChange);
-endDateInput.addEventListener('change', onCustomDateChange);
-
-
-// ===== 窗口resize =====
-window.addEventListener('resize', function() {
-  if (trendChartInstance) trendChartInstance.resize();
-  if (rateChartInstance) rateChartInstance.resize();
-  if (detailTrendChartInstance) detailTrendChartInstance.resize();
-  if (hourlyChartInstance) hourlyChartInstance.resize();
-});
-
-// ===== Demo方案切换 =====
 function switchDemoMode(mode) {
-  document.body.classList.remove('demo-flat', 'demo-hierarchy');
-  document.body.classList.add('demo-' + mode);
-  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`[data-demo="${mode}"]`).classList.add('active');
-
-  // Demo2模式下，从详情页回到总览
-  if (mode === 'hierarchy' && currentView === 'detail') {
-    goOverview();
-  }
+  document.body.classList.remove('demo-flat', 'demo-hierarchy'); document.body.classList.add('demo-' + mode);
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.toggle('active', b.dataset.demo === mode));
+  if (mode === 'hierarchy' && currentView === 'detail') goOverview();
   updateBreadcrumb();
 }
-
-function updateBreadcrumb() {
-  const bc = document.getElementById('breadcrumb');
-  const current = document.getElementById('breadcrumbCurrent');
-  if (document.body.classList.contains('demo-hierarchy')) {
-    bc.classList.add('show');
-    if (currentView === 'detail' && currentPlatform !== 'all') {
-      const p = platforms[currentPlatform];
-      current.textContent = p ? p.name : '详情';
-    } else if (currentView === 'proposal') {
-      current.textContent = '重构方案说明';
-    } else {
-      current.textContent = '跨平台总览';
-    }
-  } else {
-    bc.classList.remove('show');
+let calendarMonth = activeDates.start.slice(0, 7) + '-01';
+let pendingCalendarStart = null;
+function validDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = dateFrom(value);
+  return Number.isFinite(date.getTime()) && dateText(date) === value && Number(value.slice(0,4)) >= 1900 && Number(value.slice(0,4)) <= 2100;
+}
+function shiftMonth(value, count) {
+  const date = dateFrom(value);
+  date.setUTCMonth(date.getUTCMonth() + count, 1);
+  return dateText(date);
+}
+function positionCalendar() {
+  const panel = byId('dateCalendar');
+  const rect = byId('dateRangeField').getBoundingClientRect();
+  const width = Math.min(648, window.innerWidth - 24);
+  panel.style.width = width + 'px';
+  panel.style.maxHeight = Math.max(160, window.innerHeight - 24) + 'px';
+  panel.style.left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12)) + 'px';
+  const height = panel.offsetHeight;
+  panel.style.top = Math.max(12, rect.bottom + 8 + height <= window.innerHeight - 12 ? rect.bottom + 8 : rect.top - height - 8) + 'px';
+}
+function openDateCalendar() {
+  closeQuerySelect();
+  if (!byId('dateCalendar').hidden) return;
+  closeCategoryBreakdown();
+  calendarMonth = (validDate(byId('startDate').value) ? byId('startDate').value : activeDates.start).slice(0, 7) + '-01';
+  pendingCalendarStart = null;
+  byId('dateCalendar').hidden = false;
+  byId('dateRangeField').classList.add('open');
+  byId('calendarToggle').setAttribute('aria-expanded', 'true');
+  renderDateCalendar();
+  positionCalendar();
+}
+function closeDateCalendar(restoreFocus = false) {
+  byId('dateCalendar').hidden = true;
+  pendingCalendarStart = null;
+  byId('dateRangeField').classList.remove('open');
+  byId('calendarToggle').setAttribute('aria-expanded', 'false');
+  if (restoreFocus) byId('calendarToggle').focus();
+}
+function toggleDateCalendar() {
+  if (byId('dateCalendar').hidden) openDateCalendar(); else closeDateCalendar();
+}
+function changeCalendarMonth(amount) {
+  const next = shiftMonth(calendarMonth, amount);
+  if (next < '1900-01-01' || next > '2100-11-01') return;
+  calendarMonth = next;
+  renderDateCalendar();
+}
+function selectCalendarDate(value) {
+  if (!pendingCalendarStart) {
+    pendingCalendarStart = value;
+    renderDateCalendar();
+    return;
   }
+  const [start, end] = [pendingCalendarStart, value].sort();
+  byId('startDate').value = start;
+  byId('endDate').value = end;
+  byId('filterError').hidden = true;
+  closeDateCalendar(true);
 }
-
-function selectSceneFilter(sceneName) {
-  document.getElementById('globalSceneFilter').value = sceneName;
-  filterOrders();
-  // 滚动到订单表
-  document.getElementById('orderTableCard').scrollIntoView({ behavior: 'smooth' });
+function renderDateCalendar() {
+  const start = pendingCalendarStart || byId('startDate').value;
+  const end = pendingCalendarStart || byId('endDate').value;
+  byId('calendarHint').textContent = pendingCalendarStart ? '请选择结束日期' : '请选择开始日期和结束日期';
+  byId('calendarMonths').innerHTML = [0, 1].map(index => {
+    const month = shiftMonth(calendarMonth, index);
+    const first = dateFrom(month);
+    const firstDay = addDays(month, -first.getUTCDay());
+    const controls = index === 0 ? '<button type="button" aria-label="上一年" onclick="changeCalendarMonth(-12)">«</button><button type="button" aria-label="上一月" onclick="changeCalendarMonth(-1)">‹</button>' : '<button type="button" aria-label="下一月" onclick="changeCalendarMonth(1)">›</button><button type="button" aria-label="下一年" onclick="changeCalendarMonth(12)">»</button>';
+    const days = Array.from({length:42}, (_, i) => {
+      const date = addDays(firstDay, i);
+      const inMonth = date.slice(0,7) === month.slice(0,7);
+      const endpoint = inMonth && (date === start || date === end);
+      const inRange = inMonth && validDate(start) && validDate(end) && date >= start && date <= end;
+      const disabled = date < '1900-01-01' || date > '2100-12-31';
+      return `<button type="button" class="calendar-day ${date.slice(0,7) !== month.slice(0,7) ? 'other-month' : ''} ${inRange ? 'in-range' : ''} ${endpoint ? 'endpoint' : ''}" aria-label="${date}" aria-pressed="${endpoint}" onclick="selectCalendarDate('${date}')" ${disabled ? 'disabled' : ''}><span>${Number(date.slice(8))}</span></button>`;
+    }).join('');
+    return `<section class="calendar-month"><div class="calendar-month-heading"><div class="calendar-nav ${index === 1 ? 'next' : ''}">${controls}</div><strong>${first.getUTCFullYear()} 年 ${first.getUTCMonth()+1} 月</strong></div><div class="calendar-weekdays">${['日','一','二','三','四','五','六'].map(day=>'<span>'+day+'</span>').join('')}</div><div class="calendar-days">${days}</div></section>`;
+  }).join('');
 }
-
-function goOverview() {
-  updateSceneOptions(null);
-  switchView('overview');
+function onCustomDateChange() {
+  const start = byId('startDate').value.trim(), end = byId('endDate').value.trim();
+  const count = (dateFrom(end) - dateFrom(start)) / 86400000;
+  if (!validDate(start) || !validDate(end) || count < 0 || count > 366) {
+    byId('filterError').textContent = '请输入有效的起止日期（YYYY-MM-DD），结束日期不得早于开始日期。此演示单次最多展示367天。';
+    byId('filterError').hidden = false;
+    return;
+  }
+  activeDates = { start, end }; currentTimeRange = 'custom';
+  appliedFilters = {
+    shop:byId('globalShopFilter').value, scene:byId('globalSceneFilter').value,
+    shopLabel:byId('globalShopFilter').selectedOptions[0].textContent,
+    sceneLabel:byId('globalSceneFilter').selectedOptions[0].textContent
+  };
+  byId('startDate').value = start; byId('endDate').value = end;
+  byId('filterError').hidden = true;
+  closeDateCalendar();
+  refreshDashboard();
 }
-
-// 绑定demo切换按钮
-document.querySelectorAll('.demo-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    switchDemoMode(this.dataset.demo);
-  });
+function resetTimeFilter() {
+  byId('startDate').value = addDays(DEMO_TODAY,-6); byId('endDate').value = DEMO_TODAY;
+  byId('globalShopFilter').value = 'all'; byId('globalSceneFilter').value = 'all';
+  syncQuerySelects();
+  byId('filterError').hidden = true;
+  closeDateCalendar();
+  closeCategoryBreakdown();
+}
+document.addEventListener('click', event => {
+  if (!byId('dateCalendar').hidden && !byId('dateCalendar').contains(event.target) && !byId('dateRangeField').contains(event.target)) closeDateCalendar();
 });
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && !byId('dateCalendar').hidden) closeDateCalendar(true); });
+window.addEventListener('resize', () => { if (!byId('dateCalendar').hidden) positionCalendar(); });
+window.addEventListener('scroll', event => { if (!byId('dateCalendar').hidden && !byId('dateCalendar').contains(event.target)) closeDateCalendar(); }, true);
 
-// ===== 数据联动：根据筛选条件重新渲染 =====
-let currentTimeRange = '7d';
+document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => item.dataset.view === 'detail' ? goDetail(item.dataset.platform) : switchView(item.dataset.view)));
+document.querySelectorAll('.demo-btn').forEach(button => button.addEventListener('click', () => switchDemoMode(button.dataset.demo)));
+window.addEventListener('resize', () => Object.values(charts).forEach(chart => chart.resize()));
 
-// 根据时间范围计算缩放系数
-function getTimeMultiplier(range) {
-  switch(range) {
-    case 'today': return 0.12;   // 今日约占7天的1/7 ≈ 14%，取12%
-    case '7d': return 1;         // 基准
-    case '30d': return 4.2;       // 30天约7天的4.2倍
-    case 'month': return 4.2;     // 本月同30天
-    case 'custom': return 2;      // 自定义默认2倍
-    default: return 1;
-  }
-}
-
-// 根据店铺筛选计算缩放系数
-function getShopMultiplier(shop) {
-  if (shop === 'all') return 1;
-  // 4个店铺，每个约25%
-  return 0.25;
-}
-
-// 根据场景筛选计算缩放系数
-function getSceneMultiplier(scene) {
-  if (scene === 'all') return 1;
-  // 7个场景，平均14%，第一个场景最大约30%
-  const sceneMap = {
-    '退货退款': 0.3,
-    '在途无理由退款': 0.18,
-    '已发货无轨迹退款': 0.12,
-    '异常网点预警': 0.1,
-  };
-  return sceneMap[scene] || 0.1;
-}
-
-// 应用筛选到所有数据
-function applyFiltersToData(p, shop, scene) {
-  const timeMult = getTimeMultiplier(currentTimeRange);
-  const shopMult = getShopMultiplier(shop);
-  const sceneMult = getSceneMultiplier(scene);
-  const mult = timeMult * shopMult * sceneMult;
-  
-  return {
-    ...p,
-    today: Math.round(p.today * mult),
-    total: Math.round(p.total * mult),
-    afterSale: Math.round((p.afterSale || 0) * mult),
-    refund: Math.round((p.refund || 0) * mult),
-    success: Math.round(p.success * mult),
-    fail: Math.round(p.fail * mult),
-    scenes: (p.scenes || []).map(s => ({
-      ...s,
-      success: Math.round(s.success * mult),
-      fail: Math.round(s.fail * mult)
-    })),
-    hourly: (p.hourly || []).map(h => Math.round(h * mult)),
-    trend: (p.trend || []).map(t => Math.round(t * mult))
-  };
-}
-
-// 全局筛选变化时重新渲染
-function onGlobalFilterChange() {
-  const shop = document.getElementById('globalShopFilter').value;
-  const scene = document.getElementById('globalSceneFilter').value;
-  
-  if (currentView === 'overview') {
-    renderOverviewWithFilters();
-  } else if (currentView === 'detail') {
-    renderDetailWithFilters(currentPlatform, shop, scene);
-  }
-}
-
-// 总览页带筛选渲染
-function renderOverviewWithFilters() {
-  const shop = document.getElementById('globalShopFilter').value;
-  const scene = document.getElementById('globalSceneFilter').value;
-  
-  // 应用筛选到总览数据
-  const overviewP = applyFiltersToData(platforms.all, shop, scene);
-  
-  // 更新全局KPI
-  document.getElementById('kpiTotal').innerHTML = formatNum(overviewP.total) + '<span class="unit">单</span>';
-  document.getElementById('kpiRefund').innerHTML = formatNum(overviewP.refund) + '<span class="unit">单</span>';
-  document.getElementById('kpiSuccess').innerHTML = formatNum(overviewP.success) + '<span class="unit">单</span>';
-  document.getElementById('kpiRate').innerHTML = overviewP.rate + '<span class="unit">%</span>';
-  
-  // 重新渲染表格
-  renderOverviewTableWithFilters(shop, scene);
-  
-  // 重新渲染图表
-  renderTrendChartWithFilters(shop, scene);
-  renderRateChartWithFilters(shop, scene);
-}
-
-function renderOverviewTableWithFilters(shop, scene) {
-  const tbody = document.getElementById('overviewTableBody');
-  const items = Object.entries(platforms).filter(([k]) => k !== 'all');
-  let html = '';
-  items.forEach(([key, p]) => {
-    const filtered = applyFiltersToData(p, shop, scene);
-    const statusTag = filtered.rate >= 90 ? '<span class="tag tag-success">良好</span>' :
-                      filtered.rate >= 70 ? '<span class="tag tag-warning">待优化</span>' :
-                      '<span class="tag tag-danger">需关注</span>';
-    const rateColor = filtered.rate >= 90 ? 'var(--success)' : filtered.rate >= 70 ? 'var(--warning)' : 'var(--danger)';
-    html += `<tr>
-      <td><span class="clickable" onclick="goDetail('${key}')" style="color:${p.color};font-weight:600">● ${p.name}</span></td>
-      <td style="font-weight:600">${filtered.today}</td>
-      <td style="color:var(--warning)">${filtered.refund > 0 ? filtered.refund : '--'}</td>
-      <td style="color:var(--success)">${formatNum(filtered.success)}</td>
-      <td>
-        <span class="rate-bar"><span class="rate-bar-fill" style="width:${filtered.rate}%;background:${rateColor}"></span></span>
-        <span style="font-weight:600;color:${rateColor}">${filtered.rate}%</span>
-      </td>
-      <td>${formatNum(filtered.total)}</td>
-      <td>${statusTag}</td>
-    </tr>`;
-  });
-  tbody.innerHTML = html;
-}
-
-function renderTrendChartWithFilters(shop, scene) {
-  if (trendChartInstance) trendChartInstance.dispose();
-  const el = document.getElementById('trendChart');
-  trendChartInstance = echarts.init(el);
-
-  const days = ['09/13','09/14','09/15','09/16','09/17','09/18','09/19'];
-  const mult = getTimeMultiplier(currentTimeRange) * getShopMultiplier(shop) * getSceneMultiplier(scene);
-  
-  const series = Object.entries(platforms)
-    .filter(([k]) => k !== 'all' && k !== 'xhs' && k !== 'taogongchang')
-    .map(([k, p]) => ({
-      name: p.name,
-      type: 'line',
-      smooth: true,
-      symbol: 'circle',
-      symbolSize: 6,
-      lineStyle: { width: 2.5 },
-      itemStyle: { color: p.color },
-      data: p.trend.map(v => Math.round(v * mult))
-    }));
-
-  trendChartInstance.setOption({
-    tooltip: { trigger: 'axis', confine: true },
-    legend: { bottom: 0, icon: 'circle', itemWidth: 8, itemHeight: 8 },
-    grid: { left: 40, right: 20, top: 20, bottom: 50 },
-    xAxis: {
-      type: 'category',
-      data: days,
-      axisLine: { lineStyle: { color: '#E5E6EB' } },
-      axisLabel: { color: '#86909C', fontSize: 11 }
-    },
-    yAxis: {
-      type: 'value',
-      splitLine: { lineStyle: { color: '#F2F3F7' } },
-      axisLabel: { color: '#86909C', fontSize: 11 }
-    },
-    series: series
+const querySelectIds = ['globalShopFilter','globalSceneFilter','orderStatusFilter','orderResultFilter'];
+let openQuerySelect = null;
+function syncQuerySelects() {
+  querySelectIds.forEach(id => {
+    const select = byId(id), trigger = byId(id + 'Trigger');
+    trigger.querySelector('span').textContent = select.selectedOptions[0]?.textContent || '';
+    trigger.dataset.empty = String(select.value === 'all');
   });
 }
-
-function renderRateChartWithFilters(shop, scene) {
-  if (rateChartInstance) rateChartInstance.dispose();
-  const el = document.getElementById('rateChart');
-  rateChartInstance = echarts.init(el);
-
-  const items = Object.entries(platforms)
-    .filter(([k, p]) => k !== 'all' && p.total > 0)
-    .sort((a, b) => b[1].rate - a[1].rate);
-
-  rateChartInstance.setOption({
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true },
-    grid: { left: 80, right: 40, top: 10, bottom: 20 },
-    xAxis: {
-      type: 'value',
-      max: 100,
-      splitLine: { show: false },
-      axisLabel: { color: '#86909C', fontSize: 11, formatter: '{value}%' }
-    },
-    yAxis: {
-      type: 'category',
-      data: items.map(([k, p]) => p.name),
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { color: '#4E5969', fontSize: 12 }
-    },
-    series: [{
-      type: 'bar',
-      barWidth: 16,
-      itemStyle: {
-        borderRadius: [0, 4, 4, 0],
-        color: function(params) {
-          const colors = ['#00B42A', '#00B42A', '#FF7D00', '#FF7D00', '#F53F3F'];
-          return colors[params.dataIndex] || '#86909C';
-        }
-      },
-      label: {
-        show: true,
-        position: 'right',
-        formatter: '{c}%',
-        fontSize: 12,
-        fontWeight: 600,
-        color: '#1D2129'
-      },
-      data: items.map(([k, p]) => p.rate)
-    }]
+function closeQuerySelect(returnFocus = false) {
+  if (!openQuerySelect) return;
+  const trigger = byId(openQuerySelect + 'Trigger');
+  trigger.setAttribute('aria-expanded', 'false');
+  byId('querySelectMenu').hidden = true;
+  openQuerySelect = null;
+  if (returnFocus) trigger.focus();
+}
+function openQuerySelectMenu(id, focusOption = false) {
+  if (openQuerySelect === id && !focusOption) { closeQuerySelect(); return; }
+  closeQuerySelect(); closeDateCalendar(); closeCategoryBreakdown();
+  openQuerySelect = id;
+  const select = byId(id), trigger = byId(id + 'Trigger');
+  const menu = byId('querySelectMenu'), list = byId('querySelectOptions');
+  list.innerHTML = '';
+  list.setAttribute('aria-label', select.getAttribute('aria-label'));
+  Array.from(select.options).forEach(option => {
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'query-select-option'; button.setAttribute('role', 'option');
+    button.setAttribute('aria-selected', String(option.value === select.value)); button.textContent = option.textContent;
+    button.addEventListener('click', () => { select.value = option.value; syncQuerySelects(); closeQuerySelect(true); });
+    list.appendChild(button);
   });
+  menu.hidden = false; trigger.setAttribute('aria-expanded', 'true');
+  const rect = trigger.getBoundingClientRect();
+  const width = Math.min(Math.max(rect.width, 218), window.innerWidth - 24);
+  menu.style.width = width + 'px';
+  menu.style.left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12)) + 'px';
+  list.style.maxHeight = Math.max(80, Math.min(260, window.innerHeight - rect.bottom - 30)) + 'px';
+  menu.style.top = Math.max(12, Math.min(rect.bottom + 12, window.innerHeight - menu.offsetHeight - 12)) + 'px';
+  if (focusOption) (list.querySelector('[aria-selected="true"]') || list.firstElementChild)?.focus();
+}
+function initQuerySelects() {
+  querySelectIds.forEach(id => {
+    const select = byId(id), wrapper = document.createElement('div'), trigger = document.createElement('button');
+    wrapper.className = 'query-select';
+    select.parentNode.insertBefore(wrapper, select); wrapper.appendChild(select); select.classList.add('query-select-native');
+    trigger.id = id + 'Trigger'; trigger.type = 'button'; trigger.className = 'query-select-trigger';
+    trigger.setAttribute('aria-label', select.getAttribute('aria-label')); trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false'); trigger.setAttribute('aria-controls', 'querySelectOptions');
+    trigger.innerHTML = '<span></span><i class="query-select-arrow" aria-hidden="true"></i>';
+    trigger.addEventListener('click', () => openQuerySelectMenu(id));
+    trigger.addEventListener('keydown', event => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); openQuerySelectMenu(id, true); }
+    });
+    wrapper.appendChild(trigger);
+  });
+  byId('querySelectOptions').addEventListener('keydown', event => {
+    const items = Array.from(byId('querySelectOptions').querySelectorAll('button'));
+    let index = items.indexOf(document.activeElement);
+    if (event.key === 'ArrowDown') index = (index + 1) % items.length;
+    else if (event.key === 'ArrowUp') index = (index - 1 + items.length) % items.length;
+    else if (event.key === 'Home') index = 0;
+    else if (event.key === 'End') index = items.length - 1;
+    else return;
+    event.preventDefault(); items[index]?.focus();
+  });
+  document.addEventListener('click', event => {
+    if (openQuerySelect && !byId('querySelectMenu').contains(event.target) && !byId(openQuerySelect + 'Trigger').contains(event.target)) closeQuerySelect();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeQuerySelect(true);
+    if (event.key === 'Tab') closeQuerySelect(true);
+  });
+  window.addEventListener('resize', () => closeQuerySelect());
+  window.addEventListener('scroll', event => { if (!byId('querySelectMenu').contains(event.target)) closeQuerySelect(); }, true);
+  syncQuerySelects();
 }
 
-// 详情页带筛选渲染
-function renderDetailWithFilters(platformKey, shop, scene) {
-  const p = platforms[platformKey];
-  if (!p) return;
-  
-  const filtered = applyFiltersToData(p, shop, scene);
-  
-  document.getElementById('page-title').textContent = filtered.name + ' Agent 运营总览';
-  document.getElementById('page-subtitle').textContent = getTimeRangeText(currentTimeRange);
-
-  // KPI
-  const kpiRow = document.getElementById('detailKpiRow');
-  let kpiHtml = '';
-
-  const totalDone = Math.round(filtered.today * filtered.rate / 100);
-  kpiHtml += `
-    <div class="kpi-card featured">
-      <div class="kpi-label">总工单量</div>
-      <div class="kpi-value">${formatNum(filtered.today)}<span class="unit">单</span></div>
-      <div class="kpi-sub">已处理 ${totalDone} · 完成率 ${filtered.rate}%</div>
-    </div>
-  `;
-
-  const afterSaleDone = Math.round(filtered.afterSale * filtered.rate / 100);
-  kpiHtml += `
-    <div class="kpi-card">
-      <div class="kpi-label">其中：售后工单</div>
-      <div class="kpi-value" style="color:var(--primary)">${formatNum(filtered.afterSale)}<span class="unit">单</span></div>
-      <div class="kpi-sub">已处理 ${afterSaleDone} · 完成率 ${(filtered.rate).toFixed(1)}%</div>
-    </div>
-  `;
-
-  if (filtered.hasRefund && filtered.refund > 0) {
-    const refundDone = Math.round(filtered.refund * filtered.rate / 100);
-    kpiHtml += `
-      <div class="kpi-card">
-        <div class="kpi-label">其中：退货退款</div>
-        <div class="kpi-value" style="color:var(--warning)">${formatNum(filtered.refund)}<span class="unit">单</span></div>
-        <div class="kpi-sub">已处理 ${refundDone} · 完成率 ${(filtered.rate).toFixed(1)}%</div>
-      </div>
-    `;
-  }
-
-  kpiHtml += `
-    <div class="kpi-card">
-      <div class="kpi-label">自动化成功率</div>
-      <div class="kpi-value" style="color:var(--success)">${filtered.rate}<span class="unit">%</span></div>
-      <div class="kpi-sub">自动化成功 / 总工单</div>
-    </div>
-  `;
-
-  kpiHtml += `
-    <div class="kpi-card">
-      <div class="kpi-label">未成功 / 异常</div>
-      <div class="kpi-value" style="color:var(--danger)">${formatNum(filtered.fail)}<span class="unit">单</span></div>
-      <div class="kpi-sub">需人工介入</div>
-    </div>
-  `;
-
-  kpiRow.innerHTML = kpiHtml;
-
-  renderDetailTrendChart(filtered);
-  renderHourlyChart(filtered);
-  renderSceneList(filtered);
-  renderOrderTable();
-}
-
-function getTimeRangeText(range) {
-  switch(range) {
-    case 'today': return '今日数据';
-    case '7d': return '近7天工单处理数据';
-    case '30d': return '近30天工单处理数据';
-    case 'month': return '本月工单处理数据';
-    case 'custom': return '自定义时间范围';
-    default: return '近7天工单处理数据';
-  }
-}
-
-// 时间筛选切换
-function onTimeChange(range, btn) {
-
-  // 高亮切换
-  document.querySelectorAll('#timeFilter button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  
-  currentRange = range;
-  currentTimeRange = range;
-  
-  // 自定义模式显示日期选择器
-  const datePicker = document.getElementById('customDatePicker');
-  if (range === 'custom') {
-    datePicker.style.display = 'flex';
-  } else {
-    datePicker.style.display = 'none';
-  }
-  
-  // 数据联动
-  const shop = document.getElementById('globalShopFilter').value;
-  const scene = document.getElementById('globalSceneFilter').value;
-  if (currentView === 'overview') {
-    renderOverviewWithFilters();
-  } else if (currentView === 'detail' && currentPlatform !== 'all') {
-    renderDetailWithFilters(currentPlatform, shop, scene);
-  }
-}
-
-// ===== 初始化 =====
+initQuerySelects();
 updateSceneOptions(null);
-renderOverviewTable();
-renderTrendChart();
-renderRateChart();
+syncQuerySelects();
+refreshDashboard();
+
 </script>
 </body>
 </html>
+
+
+
 
 
 
