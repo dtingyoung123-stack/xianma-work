@@ -35,10 +35,10 @@
   /* ===== 顶부 ===== */
   .header {
     padding: 52px 10% 40px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 24px;
   }
   .header-title {
     font-size: 30px;
@@ -55,14 +55,41 @@
     color: var(--muted-soft);
   }
   .header-right {
-    text-align: right;
-    flex-shrink: 0;
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .skill-shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 16px;
+    border: 1px solid rgba(165,180,252,.3);
+    border-radius: 12px;
+    background: var(--indigo-dim);
+    color: #c7d2fe;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .2s, border-color .2s;
+  }
+  .skill-shortcut:hover {
+    background: rgba(99,102,241,.25);
+    border-color: var(--indigo);
+  }
+  .skill-shortcut:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 4px;
   }
   .header-date {
     font-size: 14px;
     font-weight: 600;
     color: var(--muted);
-    margin-bottom: 12px;
+    margin-bottom: 0;
   }
   .stats {
     display: flex;
@@ -639,7 +666,8 @@
 
   /* ===== 响应式 ===== */
   @media (max-width: 768px) {
-    .header { padding: 28px 20px 24px; flex-direction: column; gap: 16px; }
+    .header { padding: 28px 20px 24px; gap: 16px 12px; }
+    .skill-shortcut { padding: 11px 12px; gap: 7px; font-size: 13px; }
     .header-right { text-align: left; }
     .stats { justify-content: flex-start; }
     .filter-bar { padding: 0 20px; gap: 12px; }
@@ -669,7 +697,8 @@
     <div class="header-title">梦蝶的工作台</div>
     <div class="header-sub">内部项目 PRD & 原型 · 按链接分发给对应项目组</div>
   </div>
-    <div class="header-right">
+  <a class="skill-shortcut" href="http://127.0.0.1:8766/" title="本机使用，请先双击桌面“Skill 工作台”启动服务" aria-label="我的技能（本机使用，请先启动 Skill 工作台）"><span aria-hidden="true">◇</span> 我的技能 <span aria-hidden="true">↗</span></a>
+  <div class="header-right">
     <div class="header-date" id="todayDate"></div>
     <div class="stats">
       <div class="stat-pill"><span class="stat-dot dot-green"></span><span id="activeCount">0</span> 进行中</div>
@@ -1110,30 +1139,6 @@
 
 </div>
 
-
-<!-- Local-only tool: application code and personal data live outside this static site. -->
-<div class="section-row">
-  <span class="section-label">个人工具</span>
-  <div class="section-line"></div>
-</div>
-<div class="grid">
-  <div class="project-group">
-    <div class="project-group-head"><span class="project-group-title">个人 Skill 工作台</span></div>
-    <div class="project-grid">
-      <div class="card" onclick="location.href='http://127.0.0.1:8766/'" style="--c-accent: #b4a4ff;">
-        <div class="card-head"><div class="card-icon" style="background: rgba(180,164,255,.13);">◇</div></div>
-        <div class="card-name">Skill 工作台</div>
-        <div class="card-ver">仅本机 · 使用前启动</div>
-        <div class="card-tags"><span class="type-tag type-doc">个人工具</span></div>
-        <div class="card-desc">查找技能、收藏标签、记录效果和检查部署。请先双击桌面“Skill 工作台”启动服务；网页入口不会自动启动本机程序。</div>
-        <div class="card-footer">
-          <span class="card-date">更新 2026-09-30</span>
-          <div class="card-actions"><a class="act-btn primary" href="http://127.0.0.1:8766/" onclick="event.stopPropagation()">打开本机应用 →</a></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <section class="record-panel" id="recordPanel" aria-label="记录浮窗">
   <div class="record-head">
