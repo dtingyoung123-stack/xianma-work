@@ -1,0 +1,2516 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="color-scheme" content="light"><title>三库统一数据源建设｜第一阶段开发交付说明</title><style>
+    :root {
+      --brand: #D9353F;
+      --brand-deep: #B5222D;
+      --brand-soft: #FCEDEF;
+      --ink: #191B20;
+      --muted: #666B75;
+      --line: #E5E7EB;
+      --paper: #FFFFFF;
+      --page: #F5F6F8;
+      --blue: #2F6FED;
+      --blue-soft: #EDF3FF;
+      --green: #27835A;
+      --green-soft: #EAF7F0;
+      --gold: #A36A0A;
+      --gold-soft: #FFF5DF;
+      --violet: #6C52A3;
+      --violet-soft: #F3EFFB;
+      --shadow: 0 12px 28px rgba(24, 28, 38, .08);
+      --content: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 128px; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.72;
+      letter-spacing: 0;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .96);
+      backdrop-filter: blur(12px);
+    }
+    .topbar-inner {
+      max-width: var(--content);
+      min-height: 88px;
+      margin: 0 auto;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+    .brand-copy { min-width: 0; }
+    .brand-copy h1 {
+      margin: 0;
+      color: var(--brand-deep);
+      font-size: 27px;
+      line-height: 1.22;
+      font-weight: 800;
+    }
+    .brand-meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .status-tag {
+      margin-left: auto;
+      padding: 5px 10px;
+      border: 1px solid #F1C6CA;
+      border-radius: 4px;
+      color: var(--brand-deep);
+      background: var(--brand-soft);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .conclusion-bar {
+      border-bottom: 2px solid var(--brand);
+      background: #FFF7F7;
+    }
+    .conclusion-inner {
+      max-width: var(--content);
+      margin: 0 auto;
+      padding: 10px 28px;
+      color: var(--brand-deep);
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .page-shell {
+      max-width: var(--content);
+      margin: 0 auto;
+      padding: 30px 28px 80px;
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 40px;
+      align-items: start;
+    }
+    .toc {
+      position: sticky;
+      top: 132px;
+      padding-right: 24px;
+      border-right: 1px solid var(--line);
+    }
+    .toc-title {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .toc a {
+      display: block;
+      margin: 3px 0;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      color: #515660;
+      font-size: 14px;
+      transition: .2s ease;
+    }
+    .toc a:hover,
+    .toc a.active {
+      border-left-color: var(--brand);
+      color: var(--brand-deep);
+      background: var(--brand-soft);
+      font-weight: 700;
+    }
+
+    main { min-width: 0; }
+    .section {
+      margin: 0 0 62px;
+      scroll-margin-top: 132px;
+    }
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .section-no {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      background: var(--brand);
+      color: white;
+      font-size: 17px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+    .section-heading h2 {
+      margin: 0;
+      color: var(--brand-deep);
+      font-size: 25px;
+      line-height: 1.3;
+    }
+    .section-lead {
+      max-width: 820px;
+      margin: -7px 0 22px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .summary-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 30px 32px;
+      border: 1px solid #F1D3D6;
+      border-left: 5px solid var(--brand);
+      border-radius: 7px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .summary-panel::after {
+      content: "QUALITY";
+      position: absolute;
+      right: 22px;
+      top: -18px;
+      color: rgba(217, 53, 63, .06);
+      font-size: 76px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+    .eyebrow {
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .summary-panel h3 {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 7px 0 14px;
+      font-size: 36px;
+      line-height: 1.35;
+    }
+    .summary-panel p {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+    .summary-chips {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .summary-chips span {
+      padding: 6px 10px;
+      border-radius: 4px;
+      background: #F1F2F4;
+      color: #3F444C;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      min-height: 132px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .stat .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .stat .value {
+      margin: 5px 0 2px;
+      color: var(--ink);
+      font-size: 36px;
+      line-height: 1.15;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat.primary .value { color: var(--brand); }
+    .stat .note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .data-note {
+      margin-top: 12px;
+      padding: 10px 13px;
+      border-radius: 5px;
+      background: #F0F2F5;
+      color: #5F646D;
+      font-size: 12px;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .evidence-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .evidence-card h3 {
+      margin: 0 0 14px;
+      font-size: 17px;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 88px 1fr 58px;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0;
+      font-size: 13px;
+    }
+    .bar-track {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 2px;
+      background: #ECEEF1;
+    }
+    .bar-fill { height: 100%; background: var(--brand); }
+    .bar-fill.blue { background: var(--blue); }
+    .bar-fill.gold { background: #C28B2C; }
+    .bar-number { text-align: right; font-weight: 800; }
+    .signal {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 12px 0;
+    }
+    .signal-num {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      color: white;
+      background: var(--brand);
+      font-weight: 900;
+    }
+    .signal strong { display: block; font-size: 15px; }
+    .signal small { color: var(--muted); font-size: 12px; }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .problem-card {
+      padding: 20px;
+      border-top: 4px solid var(--brand);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+    }
+    .problem-card:nth-child(2) { border-top-color: var(--blue); }
+    .problem-card:nth-child(3) { border-top-color: var(--gold); }
+    .problem-tag {
+      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .problem-card h3 { margin: 0 0 8px; font-size: 19px; }
+    .problem-card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 9px;
+      align-items: stretch;
+    }
+    .flow-node {
+      position: relative;
+      min-height: 126px;
+      padding: 16px 13px;
+      border: 1px solid #E0E3E8;
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .flow-node:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -10px;
+      width: 10px;
+      height: 2px;
+      background: #C8CCD3;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+    .flow-node .mini-no {
+      display: inline-grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      margin-bottom: 11px;
+      border-radius: 5px;
+      color: white;
+      background: #323640;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .flow-node.highlight {
+      border-color: #F0BEC3;
+      background: var(--brand-soft);
+    }
+    .flow-node.highlight .mini-no { background: var(--brand); }
+    .flow-node h3 {
+      margin: 0 0 5px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .flow-node p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
+    }
+    .principle-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--line);
+    }
+    .principle {
+      padding: 15px;
+      background: var(--paper);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .principle strong { color: var(--brand); }
+
+    .stage-stack { display: grid; gap: 16px; }
+    .stage-card {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 20px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .stage-label {
+      padding-right: 20px;
+      border-right: 1px solid var(--line);
+    }
+    .stage-index {
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .stage-label h3 {
+      margin: 5px 0 4px;
+      font-size: 19px;
+      line-height: 1.35;
+    }
+    .stage-label p { margin: 0; color: var(--muted); font-size: 12px; }
+    .node-line {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 24px;
+      align-items: center;
+    }
+    .node-line.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .small-node {
+      position: relative;
+      min-height: 76px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 11px 12px;
+      border-radius: 6px;
+      background: #F4F5F7;
+      text-align: center;
+    }
+    .small-node:not(:last-child)::after {
+      content: "›";
+      position: absolute;
+      right: -17px;
+      top: 50%;
+      color: #A3A7AF;
+      font-size: 26px;
+      transform: translateY(-52%);
+    }
+    .small-node strong { font-size: 13px; line-height: 1.35; }
+    .small-node span { margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .small-node.result { color: #17573A; background: var(--green-soft); }
+
+    .workflow-map {
+      padding: 24px;
+      border-radius: 7px;
+      background: #20232A;
+      color: white;
+    }
+    .workflow-map .node-line { gap: 22px; }
+    .workflow-map .small-node {
+      border: 1px solid #3E424B;
+      background: #2A2D35;
+    }
+    .workflow-map .small-node span { color: #B8BDC7; }
+    .workflow-map .small-node:not(:last-child)::after { color: #787F8B; }
+    .feedback-loop {
+      margin: 16px 10% 0;
+      padding: 8px 14px;
+      border: 1px dashed #737986;
+      border-radius: 5px;
+      color: #D9DCE2;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .scene-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .scene-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .scene-head {
+      padding: 16px 18px;
+      color: white;
+      background: var(--brand);
+    }
+    .scene-card:nth-child(2) .scene-head { background: var(--gold); }
+    .scene-card:nth-child(3) .scene-head { background: var(--blue); }
+    .scene-head small { opacity: .78; font-weight: 700; }
+    .scene-head h3 { margin: 3px 0 0; font-size: 20px; }
+    .scene-body { padding: 17px 18px; }
+    .scene-row {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 8px;
+      padding: 9px 0;
+      border-bottom: 1px solid #ECEEF1;
+      font-size: 12px;
+    }
+    .scene-row:last-child { border-bottom: 0; }
+    .scene-row b { color: var(--muted); }
+
+    .platform-diagram {
+      display: grid;
+      grid-template-columns: 1fr 70px 1.15fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .platform-panel {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .platform-panel.future {
+      border-color: #E8B9BE;
+      box-shadow: 0 9px 24px rgba(217, 53, 63, .08);
+    }
+    .platform-panel h3 { margin: 0 0 14px; font-size: 18px; }
+    .platform-panel ul { margin: 0; padding: 0; list-style: none; }
+    .platform-panel li {
+      position: relative;
+      margin: 9px 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .platform-panel li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .75em;
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      background: #B8BBC1;
+      transform: translateY(-50%);
+    }
+    .platform-panel.future li::before { background: var(--brand); }
+    .platform-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--brand);
+      font-size: 38px;
+      font-weight: 300;
+    }
+    .dual-entry {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .entry {
+      padding: 12px;
+      border-radius: 5px;
+      background: var(--brand-soft);
+      color: var(--brand-deep);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .entry.secondary { color: #515660; background: #F1F2F4; }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      padding-top: 22px;
+    }
+    .schedule-assumption {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 13px 15px;
+      border: 1px solid #E6D2A7;
+      border-radius: 7px;
+      background: var(--gold-soft);
+    }
+    .assumption-title {
+      color: #835307;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .assumption-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px 16px;
+      color: #66522C;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .assumption-items span::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: #C28B2C;
+      vertical-align: 1px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 11%;
+      right: 11%;
+      height: 2px;
+      background: #D7DAE0;
+    }
+    .timeline-card {
+      position: relative;
+      min-height: 176px;
+      padding: 19px 17px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .timeline-card::before {
+      content: "";
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      width: 15px;
+      height: 15px;
+      border: 4px solid var(--page);
+      border-radius: 50%;
+      background: var(--brand);
+      transform: translateX(-50%);
+    }
+    .week {
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .timeline-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .milestone {
+      padding: 3px 7px;
+      border: 1px solid #F0BEC3;
+      border-radius: 4px;
+      color: var(--brand-deep);
+      background: var(--brand-soft);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .milestone.fixed {
+      border-color: var(--brand);
+      color: white;
+      background: var(--brand);
+    }
+    .milestone.review {
+      border-color: #E1BD73;
+      color: #835307;
+      background: var(--gold-soft);
+    }
+    .milestone.decision {
+      border-style: dashed;
+      border-color: #A9ADB5;
+      color: #515660;
+      background: #F1F2F4;
+    }
+    .timeline-card.review::before { background: #C28B2C; }
+    .timeline-card.decision::before { background: #777D87; }
+    .timeline-card h3 { margin: 5px 0 9px; font-size: 17px; }
+    .timeline-card p { margin: 0 0 12px; color: var(--muted); font-size: 12px; }
+    .deliverable {
+      padding-top: 9px;
+      border-top: 1px solid var(--line);
+      color: #343840;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .parallel-track {
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 7px;
+      color: white;
+      background: #272A31;
+    }
+    .parallel-title {
+      color: #F58D96;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .parallel-flow {
+      display: grid;
+      grid-template-columns: 1fr 18px 1fr 18px 1.35fr;
+      gap: 7px;
+      align-items: center;
+      color: #E2E5EA;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .parallel-step {
+      padding: 7px 8px;
+      border: 1px solid #484D57;
+      border-radius: 4px;
+      background: #30343C;
+    }
+    .parallel-arrow { color: #9298A4; font-size: 18px; font-weight: 400; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .metric-group {
+      padding: 19px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+    }
+    .metric-group:nth-child(1) { border-top: 4px solid var(--brand); }
+    .metric-group:nth-child(2) { border-top: 4px solid var(--green); }
+    .metric-group:nth-child(3) { border-top: 4px solid var(--violet); }
+    .metric-group h3 { margin: 0 0 12px; font-size: 17px; }
+    .metric-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid #ECEEF1;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .metric-item:last-child { border-bottom: 0; }
+    .metric-item b { color: var(--ink); text-align: right; }
+
+    .decision-panel {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 18px;
+      padding: 28px;
+      border-radius: 7px;
+      color: white;
+      background: #24272E;
+    }
+    .decision-panel h3 { margin: 0 0 9px; font-size: 24px; }
+    .decision-panel p { margin: 0; color: #C8CCD4; }
+    .decision-list {
+      display: grid;
+      gap: 8px;
+    }
+    .decision-item {
+      padding: 10px 12px;
+      border-left: 3px solid var(--brand);
+      background: rgba(255, 255, 255, .06);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    footer {
+      padding: 22px 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--paper);
+      font-size: 12px;
+      text-align: center;
+    }
+    .back-top {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 20;
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 6px;
+      color: white;
+      background: #272A31;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    @media (max-width: 980px) {
+      .page-shell { grid-template-columns: 1fr; gap: 18px; }
+      .toc {
+        position: static;
+        display: flex;
+        overflow-x: auto;
+        padding: 0 0 10px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .toc-title { display: none; }
+      .toc a { flex: 0 0 auto; border-left: 0; border-bottom: 2px solid transparent; }
+      .toc a:hover, .toc a.active { border-left-color: transparent; border-bottom-color: var(--brand); }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .flow { grid-template-columns: repeat(2, 1fr); }
+      .flow-node:not(:last-child)::after { display: none; }
+      .stage-card { grid-template-columns: 1fr; }
+      .stage-label { padding: 0 0 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .timeline::before, .timeline-card::before { display: none; }
+    }
+
+    @media (max-width: 680px) {
+      .topbar-inner { padding: 12px 18px; }
+      .brand-copy h1 { font-size: 21px; }
+      .section-heading h2 { font-size: 22px; }
+      .summary-panel h3 { font-size: 28px; }
+      .stat .value { font-size: 31px; }
+      .status-tag { display: none; }
+      .conclusion-inner { padding: 9px 18px; text-align: left; font-size: 13px; }
+      .page-shell { padding: 20px 16px 60px; }
+      .summary-panel { padding: 24px 20px; }
+      .stat-grid, .evidence-grid, .problem-grid, .scene-grid, .metric-grid,
+      .platform-diagram, .decision-panel { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .node-line, .node-line.five { grid-template-columns: 1fr; gap: 10px; }
+      .small-node:not(:last-child)::after { display: none; }
+      .platform-arrow { transform: rotate(90deg); }
+      .timeline { grid-template-columns: 1fr; }
+      .principle-strip { grid-template-columns: 1fr; }
+      .stage-card { padding: 18px; }
+      .parallel-track { grid-template-columns: 1fr; gap: 8px; }
+      .parallel-flow { grid-template-columns: 1fr; text-align: left; }
+      .parallel-arrow { display: none; }
+      .schedule-assumption { grid-template-columns: 1fr; gap: 7px; }
+      .assumption-items { display: grid; gap: 6px; }
+    }
+
+    @media print {
+      body { background: white; font-size: 12px; }
+      .topbar { position: static; }
+      .toc, .back-top { display: none; }
+      .page-shell { max-width: none; display: block; padding: 22px; }
+      .section { break-inside: avoid; margin-bottom: 34px; }
+      .summary-panel, .stat, .evidence-card, .problem-card, .stage-card,
+      .scene-card, .platform-panel, .timeline-card, .metric-group { box-shadow: none; }
+    }
+  
+@media (prefers-reduced-motion: reduce) {html {scroll-behavior:auto} * {transition:none !important}}
+table {width:100%;border-collapse:collapse} td,th {border:1px solid var(--line);padding:10px;text-align:left} .table-wrap {overflow-x:auto} img {max-width:100%} p,li,td {overflow-wrap:anywhere} :focus-visible {outline:3px solid var(--brand);outline-offset:3px}
+
+.diagram {margin:20px 0;padding:18px;background:white;border:1px solid var(--line);border-radius:8px;overflow:auto;text-align:center;position:relative}
+.diagram > svg {display:block;max-width:100%;height:auto;margin:0 auto}.diagram > img {display:block;max-width:100%;height:auto;margin:0 auto}
+.diagram figcaption {text-align:left;font-size:13px;color:var(--muted);margin-top:12px}
+.view-trigger {display:block;margin:10px 0 0 auto;border:1px solid var(--line);border-radius:4px;padding:6px 10px;background:white;color:var(--brand-deep);cursor:zoom-in}
+main img:not([data-no-viewer]) {cursor:zoom-in} .figure-viewer {width:94vw;max-width:1500px;height:90vh;max-height:90vh;padding:0;border:1px solid var(--line);border-radius:8px;color:var(--ink)}
+.figure-viewer::backdrop {background:rgba(0,0,0,.65)}.viewer-toolbar {display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px;border-bottom:1px solid var(--line)}
+.viewer-toolbar button {padding:7px 10px;background:white;border:1px solid var(--line);border-radius:4px;cursor:pointer}.viewer-toolbar strong {margin-right:auto}
+.viewer-viewport {height:calc(100% - 100px);overflow:auto;background:#f5f6f8;padding:16px}.viewer-canvas {margin:auto;background:white}.viewer-canvas > svg,.viewer-canvas > img {display:block;width:100%;height:100%;max-width:none}.viewer-help {margin:4px 12px;font-size:12px;color:var(--muted)}
+@media print {.figure-viewer,.view-trigger {display:none!important}.diagram {overflow:visible;break-inside:avoid}}
+</style><style>main a{color:#B5222D;text-decoration:underline;text-underline-offset:3px}main a:hover{color:#D9353F}main a:focus-visible{outline:2px solid #D9353F;outline-offset:3px}.section h2,.section h3{scroll-margin-top:120px}.section h3{font-size:22px;margin:28px 0 16px}.section h4{font-size:18px;margin-top:26px}.section p{margin:12px 0}.section li{margin:8px 0}.section pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f8;padding:18px;font-size:13px}.sequence-diagram{overflow-x:auto}.sequence-diagram svg{min-width:900px;width:100%;height:auto}.diagram-source{color:#666b75;margin:12px 0 25px}.table-wrap{overflow-x:auto}td,th{min-width:120px;vertical-align:top}td:first-child{min-width:150px}main img{max-width:100%;height:auto}a:focus-visible{outline:3px solid #D9353F;outline-offset:4px}@media print{.section{break-inside:auto}.table-wrap{overflow:visible}.sequence-diagram svg{min-width:0}.diagram-source{display:none}}@media(max-width:680px){.section h3{font-size:19px}}</style><style>main{position:relative;}.export-btn{position:absolute;top:32px;right:40px;z-index:10;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;font-size:14px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted);transition:all .2s;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,0.08);}.export-btn:hover{background:var(--brand);color:#fff;border-color:var(--brand);}#work-download-status{position:absolute;top:67px;right:40px;font-size:12px;color:var(--muted)}.work-package-download{font-size:13px;color:var(--muted)}@media(max-width:640px){.export-btn{top:18px;right:16px;}#work-download-status{top:55px;right:16px;}}@media print{.export-btn,#work-download-status,.work-package-download{display:none!important;}}</style>
+<link rel="stylesheet" href="/_shared/workbench-nav.css">
+<script src="/_shared/workbench-nav.js" defer></script>
+<style>.work-doc-tabs{display:flex;gap:8px;margin-left:auto;flex-shrink:0}.work-doc-tabs a{padding:8px 16px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--muted);font-size:14px;text-decoration:none;white-space:nowrap}.work-doc-tabs a[aria-current=page]{background:var(--brand);border-color:var(--brand);color:#fff}.work-doc-tabs a:focus-visible{outline:3px solid var(--brand);outline-offset:3px}.topbar-inner{flex-wrap:wrap}.topbar-inner .status-tag{margin-left:0}main{position:relative;padding:32px 40px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.04)}.work-doc-heading{display:flex;align-items:flex-start;gap:20px;justify-content:space-between}.work-doc-heading h1{flex:1;min-width:0;margin-top:0}.work-doc-heading .export-btn{position:static;flex-shrink:0;margin-top:0}.work-export-control{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}#work-download-status{position:static;font-size:12px;color:var(--muted)}@media(max-width:800px){main{padding:24px}.work-doc-heading{flex-wrap:wrap;gap:12px}.work-doc-heading h1{flex-basis:100%;margin-bottom:0}.work-export-control{margin-bottom:16px}.work-doc-tabs{margin-left:0}.topbar-inner{gap:12px}.work-doc-tabs a{padding:7px 12px}}@media(max-width:480px){main{padding:18px}.work-doc-tabs{width:100%}.work-doc-tabs a{flex:1;text-align:center}}@media print{main{padding:0;border:0;box-shadow:none}.work-doc-tabs,.work-export-control{display:none!important}}</style>
+</head><body>
+
+<header class="topbar"><div class="topbar-inner"><img class="brand-mark" src="data:image/png;base64,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" alt="先马公司形象物"><div class="brand-copy"><h1>三库统一数据源建设｜第一阶段开发交付说明</h1><div class="brand-meta">2026-10-10 · 三库统一数据源建设 · Markdown同步阅读版</div></div><span class="status-tag">产品规则已确认 · 待研发评审</span><nav class="work-doc-tabs" aria-label="切换项目文档"><a href="三库现状与统一数据源建设规划_2026-09-28.html">总体方案</a><a href="三库统一数据源建设_第一阶段开发交付说明.html" aria-current="page">第一阶段</a></nav></div></header>
+<div class="conclusion-bar"><div class="conclusion-inner">统一三库资产数据，保留各应用入口与审批；员工个人删除不影响企业资料，旧任务保留确定内容。</div></div>
+<div class="page-shell"><nav class="toc" aria-label="方案目录"><p class="toc-title">方案目录</p><a href="#overview">阅读说明</a><a href="#1-两份文档的分工与本阶段目标">1. 两份文档的分工与本阶段目标</a><a href="#2-产品侧交付清单">2. 产品侧交付清单</a><a href="#3-业务对象与共用数据要求">3. 业务对象与共用数据要求</a><a href="#4-三库专属字段与规则">4. 三库专属字段与规则</a><a href="#5-我的分组与存量字段处理">5. 我的分组与存量字段处理</a><a href="#6-已确认产品执行规则与研发交接">6. 已确认产品执行规则与研发交接</a><a href="#7-第一阶段交付的验收依据">7. 第一阶段交付的验收依据</a><a href="#8-研发现状核查阶段完成条件与来源">8. 研发现状核查、阶段完成条件与来源</a></nav><main><section class="section" id="overview"><div class="work-doc-heading"><h1 id="三库统一数据源建设第一阶段开发交付说明">三库统一数据源建设｜第一阶段开发交付说明</h1><div class="work-export-control"><button class="export-btn" type="button" id="work-md-download">⬇ 导出 MD</button><span id="work-download-status" role="status" aria-live="polite"></span></div></div>
+<blockquote>
+<p>整理日期：2026-10-10。<br />
+文档用途：第一阶段提供给产品、开发与测试共同确认的业务输入，供底座设计、工作量评估和后续实现使用。<br />
+当前状态：产品业务规则已确认，可交研发评审；技术兼容、容量、实际权限映射及留存依据需联合核查，不表示第一阶段联合评审完成或已开发、迁移、上线。<br />
+上位方案：<a href="三库现状与统一数据源建设规划_2026-09-28.html">三库现状与统一数据源建设规划</a>。</p>
+</blockquote>
+<p class="work-package-download"><a href="三库统一数据源建设-MD与架构图.zip" download>下载两份 MD＋配套架构图（ZIP）</a></p></section><section class="section" id="1-两份文档的分工与本阶段目标"><h2>1. 两份文档的分工与本阶段目标</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>文档</th>
+<th>负责回答</th>
+<th>后续维护方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="三库现状与统一数据源建设规划_2026-09-28.html">整体方案规划</a></td>
+<td>为什么统一、现状是什么、架构与职责怎样划分、分几阶段建设</td>
+<td>维护总体边界、路线与阶段完成条件</td>
+</tr>
+<tr>
+<td><a href="三库统一数据源建设_第一阶段开发交付说明.html">本文：第一阶段开发交付说明</a></td>
+<td>业务对象、字段与校验、权限与状态影响、业务输入输出、待决事项及验收要求是什么</td>
+<td>字段和执行细则在本文维护，整体方案通过链接引用</td>
+</tr>
+</tbody>
+</table></div>
+<p>第一阶段完成现状盘点与底座设计；第二阶段才建设统一底座，第三阶段接入现有两平台，第四阶段迁移与切换。本文作为第一阶段产物，描述后续实现需要遵循的业务要求，不意味着第一阶段就完成平台改造或生产迁移。</p>
+<p>统一范围是素材、提示词、技能的个人及共享资产，以及必要的归属、权限、版本和关联。保留应用操作入口与各自审批，不建设统一审批、全局审批排队、通用规则引擎或新管理后台。新应用不作为首期依赖。</p>
+<p>三库遵循整体方案的共性规则；素材、提示词字段见第 4.1—4.3 节，技能专属字段、页面依据与已确认规则见第4.4节，业务规则与入口清单见第6章。不能用两库字段限制代替技能字段限制。</p>
+<h3 id="11-规则状态口径">1.1 规则状态口径</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>标记</th>
+<th>含义</th>
+<th>开发使用方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>已确认规则</td>
+<td>本方案规定的目标行为</td>
+<td>纳入设计；涉及实现细节时与研发评审，不自行改动业务含义</td>
+</tr>
+<tr>
+<td>页面现状</td>
+<td>2026-10-10 查看当前页面得到的事实</td>
+<td>作为盘点依据；不自动等于新数据源规范，也不证明后端校验已一致</td>
+</tr>
+<tr>
+<td>待产品确认</td>
+<td>影响业务行为但未确认的选择</td>
+<td>先评估影响，定稿前明确，不自行填默认答案</td>
+</tr>
+<tr>
+<td>待研发核实</td>
+<td>需要检查代码、接口、数据库或存量记录的事实</td>
+<td>由研发提供证据，产品不代答技术事实</td>
+</tr>
+</tbody>
+</table></div>
+</section><section class="section" id="2-产品侧交付清单"><h2>2. 产品侧交付清单</h2>
+<p>本章仅说明产品经理需要交付的业务材料。以下六项已在本文件及整体方案中完善，可作为产品侧材料交付，无需另做六份文件。“已完善”表示业务材料已形成，不表示功能已经实现或验收测试已经执行。</p>
+<h3 id="21-交付内容与完成状态">2.1 交付内容与完成状态</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>产品交付物</th>
+<th>已交付的业务内容</th>
+<th>完成状态</th>
+<th>材料位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>范围与业务规则说明</td>
+<td>三库范围、对象关系、职责边界、共享与个人删除原则、历史兼容及迁移业务边界</td>
+<td>已完善</td>
+<td>本文第1、3章、第4.5节、第6.4节；整体方案第4—6、11—12章</td>
+</tr>
+<tr>
+<td>字段与校验说明</td>
+<td>共用信息、三库专属字段、长度、必填、分类标签、资源及历史超限处理规则</td>
+<td>已完善</td>
+<td>本文第3—5章、第6.1节</td>
+</tr>
+<tr>
+<td>权限、操作与版本影响矩阵</td>
+<td>个人／团队／公共／企业操作边界、账号停用、内容与管理信息变化、提审冻结及失效影响</td>
+<td>已完善</td>
+<td>本文第4.4.3、4.5、6.2—6.4节</td>
+</tr>
+<tr>
+<td>业务输入输出及异常要求</td>
+<td>新增、修改、查询、确定引用读取、发布写入和个人删除的业务输入、成功结果及失败含义</td>
+<td>已完善</td>
+<td>本文第6.6节；整体方案第8—10章</td>
+</tr>
+<tr>
+<td>受影响入口的业务清单</td>
+<td>两平台列表、选择器、新增编辑、导入收藏、审批发布、个人删除、任务引用及切换的预期行为</td>
+<td>已完善</td>
+<td>本文第6.5节</td>
+</tr>
+<tr>
+<td>验收标准与业务样例</td>
+<td>三库共性、专属字段、权限、版本、异常、个人删除及迁移检查场景与预期结果</td>
+<td>已完善</td>
+<td>本文第4.4.5、4.5节、第7章；整体方案第13章</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="22-产品交付口径">2.2 产品交付口径</h3>
+<ul>
+<li>六项材料集中维护在本文；整体方案负责总体架构、共性边界和阶段路线，字段及执行明细不重复维护。</li>
+<li>产品交付的是业务范围、目标行为、规则和验收标准；入口清单已明确第一阶段业务覆盖，不以具体代码文件或接口定位作为本章的产品完成标准。</li>
+<li>页面事实、已确认建设规则及需要证据的兼容／容量／留存事项保持区分；剩余核查与联合评审项集中在第8章，不混作本章尚未交付的业务材料。</li>
+<li>本章材料已具备产品交接条件；后续新增业务选择或变更已确认规则时另行记录确认，不把材料完善等同于整个项目或第一阶段联合评审完成。</li>
+</ul>
+</section><section class="section" id="3-业务对象与共用数据要求"><h2>3. 业务对象与共用数据要求</h2>
+<h3 id="31-对象边界">3.1 对象边界</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>业务含义</th>
+<th>已确认边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>素材资产</td>
+<td>文件及其管理信息</td>
+<td>素材与提示词的个人、团队、公共视图引用同一资产，不因跨平台读取重复创建</td>
+</tr>
+<tr>
+<td>提示词资产</td>
+<td>正文及其管理信息</td>
+<td>普通跨平台读取使用同一资产；明确复制为个人资产时可按既有规则产生独立副本并记录来源</td>
+</tr>
+<tr>
+<td>技能资产</td>
+<td>个人技能或企业发布快照</td>
+<td>个人技能与企业快照仍为不同对象，不因统一存储而合并</td>
+</tr>
+<tr>
+<td>正式内容版本</td>
+<td>一次确定的正式内容</td>
+<td>已发布内容更新形成新版本；旧任务沿用实际正文、文件或技能包版本</td>
+</tr>
+<tr>
+<td>个人分组及关联</td>
+<td>用户在某应用中的整理习惯</td>
+<td>保存于数据源，按用户和所属应用隔离；不是资产分类、共享范围或权限</td>
+</tr>
+<tr>
+<td>应用任务输入记录</td>
+<td>当次执行实际使用的输入</td>
+<td>保留在应用任务记录，不作为第二份资产库</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="32-底座需要承接的共用信息">3.2 底座需要承接的共用信息</h3>
+<p>本表描述业务数据要求，不指定数据库表、技术字段名或存储方式。不是每一项都由用户填写；个人与共享资产所需归属信息也不能机械要求完全相同。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文业务信息</th>
+<th>用途</th>
+<th>已有约定或边界</th>
+<th>仍需补齐</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>资产编号、资产类型</td>
+<td>跨平台识别同一对象并获取相应内容</td>
+<td>底座返回资产编号，三库对象关系保持明确</td>
+<td>编号生成、旧编号映射由研发设计</td>
+</tr>
+<tr>
+<td>创建人、个人归属、归属组织</td>
+<td>确定资产主体和追溯来源</td>
+<td>个人归属跟统一账号走；团队与公共范围保留既有边界</td>
+<td>保留创建与归属语义；无人维护不自动转移，按第6.2节及原授权核查</td>
+</tr>
+<tr>
+<td>来源平台、来源记录</td>
+<td>追溯新增或复制来源</td>
+<td>来源平台不默认隔离资产</td>
+<td>原有来源类型映射、外部灵感副本关系</td>
+</tr>
+<tr>
+<td>分类、用途、标签</td>
+<td>业务检索与展示筛选</td>
+<td>不代替真实权限；各库分类词表可不同</td>
+<td>词表维护、空值、条件组合、标签编辑权限</td>
+</tr>
+<tr>
+<td>可见范围、维护权限、发布结果</td>
+<td>一致的访问与写入判断</td>
+<td>能看不等于能改；审批过程仍在业务端</td>
+<td>第6.2节已确认角色边界；具体组织及角色映射待研发核查</td>
+</tr>
+<tr>
+<td>内容与确定版本</td>
+<td>获取文本、文件或技能包</td>
+<td>正式内容不直接覆盖；旧任务不自动换成最新内容</td>
+<td>变更版本规则见第6.3节，现有历史能力待研发核查</td>
+</tr>
+<tr>
+<td>必要审批来源与结果关联</td>
+<td>追溯获准写入</td>
+<td>不复制审批流程、待办或审批中状态</td>
+<td>业务服务具体提交哪些结果和关联信息</td>
+</tr>
+<tr>
+<td>必要操作记录</td>
+<td>追溯读写与冲突处理</td>
+<td>整体方案要求受控读写与操作记录</td>
+<td>记录范围、查询权限和留存要求</td>
+</tr>
+</tbody>
+</table></div>
+<p>页面展示的上传人、创建时间、当前状态、验证状态及使用次数仍由研发核查来源映射。尤其不能将审批中状态、验证状态、资产可用状态混成一个状态，也不能将各应用使用次数直接相加冒充已确认的统一统计口径。</p>
+</section><section class="section" id="4-三库专属字段与规则"><h2>4. 三库专属字段与规则</h2>
+<h3 id="41-素材库与提示词库字段限制">4.1 素材库与提示词库字段限制</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>2026-10-10 页面观测</th>
+<th>已确认建设规则</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提示词名称</td>
+<td>输入框最多 500 字符</td>
+<td>最多 100 字符</td>
+<td>便于列表识别，详细解释放入说明</td>
+</tr>
+<tr>
+<td>提示词用途说明</td>
+<td>输入框最多 2,000 字符</td>
+<td>最多 500 字符</td>
+<td>表达适用场景和使用条件</td>
+</tr>
+<tr>
+<td>提示词内容</td>
+<td>输入框最多 30,000 字符</td>
+<td>超过 5,000 字符提醒，最多 10,000 字符</td>
+<td>兼顾复杂指令；5,000 是提醒阈值，不禁止保存，10,000 是建设上限</td>
+</tr>
+<tr>
+<td>素材名称</td>
+<td>编辑输入框最多 200 字符</td>
+<td>最多 100 字符</td>
+<td>保留必要的商品、场景和版本信息</td>
+</tr>
+<tr>
+<td>标签</td>
+<td>未观察到数量限制，不能据此推断后端无限制</td>
+<td>最多 10 个，每个最多 20 字符；去除首尾空格和重复标签</td>
+<td>减少无效和重复标签</td>
+</tr>
+</tbody>
+</table></div>
+<p>页面长度属性仅作为前端观测，不代表已核实服务端校验。必填与空白规则见第6.1节；字符计数与大小写去重需研发提出一致实现口径并评审。</p>
+<h3 id="42-提示词库字段盘点">4.2 提示词库字段盘点</h3>
+<p>下表记录初次盘点问题；已关闭的产品选择以第6章规则为准，剩余问题由研发映射核查。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文字段</th>
+<th>页面现状与业务含义</th>
+<th>建设规则状态</th>
+<th>需要明确的细则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提示词名称</td>
+<td>新建、编辑与列表识别名称</td>
+<td>最多 100 字符已确认</td>
+<td>必填、去首尾空格、允许同名；历史缺失值由研发核查</td>
+</tr>
+<tr>
+<td>用途分类</td>
+<td>单选；通用、商品主图、详情页、买家秀、场景图、海报、视频；页面默认通用</td>
+<td>当前词表与默认值为页面现状</td>
+<td>沿用当前词表、默认通用；维护授权及历史映射由研发按原规则核查</td>
+</tr>
+<tr>
+<td>标签</td>
+<td>自由文本，多项以逗号分隔</td>
+<td>第 4.1 节数量、长度和整理规则已确认</td>
+<td>输入方式、中文逗号处理、维护权限、大小写去重口径</td>
+</tr>
+<tr>
+<td>用途说明</td>
+<td>说明适用商品或使用场景，页面提示语为“一句话说明”</td>
+<td>最多 500 字符已确认</td>
+<td>选填；空说明不作为保存阻断</td>
+</tr>
+<tr>
+<td>提示词内容</td>
+<td>多行正文</td>
+<td>超过 5,000 提醒、最多 10,000 字符已确认</td>
+<td>必填且不可纯空白；超限编辑见第6.1节，计数一致性由研发评审</td>
+</tr>
+<tr>
+<td>效果图</td>
+<td>可选；最多 3 张，JPG／PNG，单张不超过 20MB</td>
+<td>当前页面约束，不自动作为新底座定稿</td>
+<td>是否沿用数量、格式、大小；更换效果图是否产生内容版本</td>
+</tr>
+<tr>
+<td>是否需要参考图</td>
+<td>独立勾选项，表达使用时的输入要求</td>
+<td>页面现状；与效果图区别明确</td>
+<td>默认值、需要时的最少或最多输入数量、缺图时能否执行；由哪些应用执行校验</td>
+</tr>
+<tr>
+<td>保存位置／共享范围</td>
+<td>当前查看账号新建可选个人／公共；另有团队资源与团队编辑入口</td>
+<td>个人、团队、公共资产纳入底座已确认</td>
+<td>不同角色可选范围、默认位置；不能把高权限账号入口推广给所有员工</td>
+</tr>
+<tr>
+<td>可见组织</td>
+<td>团队编辑可多选</td>
+<td>页面现状；底座需承接实际可见范围</td>
+<td>适用资产范围、空值含义、调整权限及组织失效处理</td>
+</tr>
+<tr>
+<td>我的分组</td>
+<td>用户个人整理关系</td>
+<td>第 5 章规则已确认</td>
+<td>分组名50字符且同用户同应用不重名，具体规则见第6.1节</td>
+</tr>
+<tr>
+<td>来源</td>
+<td>页面展示如手动创建；灵感有外部来源信息</td>
+<td>来源追溯方向已确认，具体映射待核实</td>
+<td>来源类型、原记录关联和复制规则</td>
+</tr>
+<tr>
+<td>验证状态、当前状态、使用次数</td>
+<td>个人、团队、灵感有不同验证标识及状态／统计展示</td>
+<td>页面现状，不代表统一口径已确认</td>
+<td>状态分别由谁维护；验证是否跨应用有效；使用计数事件、范围与去重</td>
+</tr>
+</tbody>
+</table></div>
+<p>效果图展示版式或产出效果，不是任务实际执行时必须提供的参考图。“是否需要参考图”也不等于资产内已有参考图；任务输入由应用负责记录，避免把展示图片自动作为执行输入。</p>
+<h3 id="43-素材库字段盘点">4.3 素材库字段盘点</h3>
+<p>下表记录初次盘点问题；已关闭的产品选择以第6章规则为准，剩余问题由研发映射核查。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文字段</th>
+<th>页面现状与业务含义</th>
+<th>建设规则状态</th>
+<th>需要明确的细则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>素材文件</td>
+<td>图片、视频、音频；上传支持一次选择多个文件</td>
+<td>当前页面入口；未实际上传验证约束</td>
+<td>各类型格式、大小、时长／分辨率及批量数量；异常文件处理</td>
+</tr>
+<tr>
+<td>素材名称</td>
+<td>编辑输入框，列表与详情识别名称；上传有图片命名建议说明</td>
+<td>最多 100 字符已确认；逐文件命名建议未验证</td>
+<td>必填、命名建议采用方式、同名处理、批量命名与修改</td>
+</tr>
+<tr>
+<td>素材类目</td>
+<td>通用、医疗器械类、大健康类、宠物类、护具类、美妆类、进口保健品类、个护类、地毯类</td>
+<td>当前词表；各库分类含义分别保留</td>
+<td>沿用当前词表、默认通用；原词表维护授权与历史映射由研发核查</td>
+</tr>
+<tr>
+<td>说明／备注</td>
+<td>上传称“统一备注”，编辑称“素材说明”，详情称“备注”；未见长度属性</td>
+<td>是否同一字段待研发核实，不能因名称不同重复建字段</td>
+<td>统一素材说明、选填500字符；批量赋值及逐条编辑见第6.1节</td>
+</tr>
+<tr>
+<td>标签</td>
+<td>列表、详情展示；当前查看的编辑表单未见输入入口</td>
+<td>第 4.1 节数量、长度和整理规则已确认</td>
+<td>现有标签来源、谁能编辑、是否增加或复用维护入口</td>
+</tr>
+<tr>
+<td>素材范围</td>
+<td>当前账号上传可选个人／团体／公共</td>
+<td>页面现状；对应范围纳入底座已确认</td>
+<td>角色可选范围、默认值；“团体”与“团队”的命名映射</td>
+</tr>
+<tr>
+<td>所属组织</td>
+<td>团体上传时单选</td>
+<td>页面现状</td>
+<td>归属组织与上传人所属部门的区别、必填条件及组织变化处理</td>
+</tr>
+<tr>
+<td>可见组织</td>
+<td>团体上传时多选</td>
+<td>页面现状；不能与所属组织混为一个字段</td>
+<td>默认值、是否包含所属组织、空值语义及调整权限</td>
+</tr>
+<tr>
+<td>我的分组</td>
+<td>个人整理关系，不改变类目及权限</td>
+<td>第 5 章规则已确认</td>
+<td>分组名50字符且同用户同应用不重名，具体规则见第6.1节</td>
+</tr>
+<tr>
+<td>上传人、所属部门、创建时间、当前状态</td>
+<td>页面展示管理信息</td>
+<td>页面现状，需与共用信息映射</td>
+<td>来源、状态定义与历史数据缺失处理</td>
+</tr>
+<tr>
+<td>文件类型、文件大小、宽高等</td>
+<td>图片详情展示宽高和大小；音视频专属详情未检查</td>
+<td>文件信息存在；专属字段未全部核实</td>
+<td>音视频时长、编码等是否需要展示或查询；系统提取能力由研发核实</td>
+</tr>
+</tbody>
+</table></div>
+
+<h3 id="44-技能库数据源字段已确认方案与页面依据">4.4 技能库数据源字段、已确认方案与页面依据</h3>
+<h4 id="441-盘点依据与覆盖边界">4.4.1 盘点依据与覆盖边界</h4>
+<p>2026-10-10 用户端以用户提供的 8 张截图为主要依据；管理端通过已打开的聚合后台内 Studio 页面只读查看。以下仅记录字段、提示与可见入口，不复制员工信息、真实技能正文或脚本。页面文字和输入属性不是后端校验或完整流程已验证的证据。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>页面／证据</th>
+<th>已观察内容</th>
+<th>证据范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户截图 1：全部技能</td>
+<td>创建、导入、在线技能库入口；全部／我的／企业／我的提交页签；名称、说明或标签搜索；分类筛选；卡片名称、图标、来源、简介、分类、标签、版本</td>
+<td>详情、下载、使用是操作入口，不是资产字段；数量为页面即时值，不作为建设基线</td>
+</tr>
+<tr>
+<td>用户截图 2：内置技能详情</td>
+<td>来源、版本、分类、标签、用途描述、详细说明</td>
+<td>这是内置技能详情，不能冒充企业技能详情；详细说明与实际注入正文是否相同待核实</td>
+</tr>
+<tr>
+<td>用户截图 3—4：我的技能与个人管理详情</td>
+<td>名称、图标、简介、分类、标签、版本、流转状态、技能说明；下载、使用、编辑、删除个人技能、提交审批入口；说明技能归当前钉钉账号，审核中的版本不能修改</td>
+<td>仅见未提交样本的管理入口，不推断所有状态均可编辑或删除；版本说明底部截断，不补写不可见文字</td>
+</tr>
+<tr>
+<td>用户截图 5：我的提交</td>
+<td>名称、技能标识、提交版本、分类、状态、时间、驳回原因、查看技能入口；全部提交／审核中／已通过或发布计数</td>
+<td>同名样本有不同历史记录，说明提交记录需与资产区分；未核验提交 ID、时间语义、历史留存全量与所有状态</td>
+</tr>
+<tr>
+<td>用户截图 6—8：创建技能</td>
+<td>基本信息、七项执行规范、格式依赖资源；执行规范成为 SKILL.md 强制章节；草稿按当前钉钉用户在本机自动保存</td>
+<td>不修改用户草稿；不能从截图确认 maxlength、逐项必填、后台同步或服务端校验</td>
+</tr>
+<tr>
+<td>用户端导入入口</td>
+<td>选择来源→校验内容→完成导入；本地技能文件夹、GitHub 地址、ZIP 压缩包三入口；目录含 SKILL.md；ZIP 入口提示也支持单独 Markdown 技能文件</td>
+<td>未选择文件、未校验、未导入；后两阶段字段及单 Markdown 实际兼容性未核验，不能套用后台 ZIP 约束</td>
+</tr>
+<tr>
+<td>管理端审批列表与审核详情</td>
+<td>列表技能、提交人、分类、标签、版本、提交时间、状态；详情个人技能标识、版本、状态、提交人、部门、风险级别、说明、风险项、处理记录、文件结构及包内容预览</td>
+<td>审核模式另有企业分类、至少一个企业标签、检索勾选与逗号分隔新增标签；注明只影响企业副本，不修改个人技能。只打开表单，不点击驳回或审核通过</td>
+</tr>
+<tr>
+<td>管理端企业列表与详情</td>
+<td>企业名称、创建人、分类、标签、当前版本、累计调用次数、更新时间、状态；详情匿名累计调用／成功／失败／取消、说明、处理记录</td>
+<td>统计提示按技能与版本聚合，不保存使用人、提示词、附件或结果；这是页面声明，底层实现与删除后留存待核实</td>
+</tr>
+<tr>
+<td>管理端直接发布</td>
+<td>ZIP、本地文件夹、公开 GitHub；企业名称、分类、标签、风险确认</td>
+<td>名称前端 maxlength=80 且 required；分类 required 且单选；标签页面要求至少一个。ZIP 输入 accept=.zip、单文件；目录选择整个目录，SKILL.md 不区分大小写；GitHub 提示仓库或 /tree/main/skill-dir 地址。未选择文件、未勾风险确认、未校验发布，已取消</td>
+</tr>
+<tr>
+<td>管理端待发布</td>
+<td>页面列表为空</td>
+<td>未构造数据，不能确认具体发布表单与名称冲突提示</td>
+</tr>
+</tbody>
+</table></div>
+<p>用户端企业详情与导入校验后页面尚缺直接证据。已有截图用于现状映射，建设模型以本文规则为准，缺少证据的约束由研发核实。</p>
+<h4 id="442-已确认的数据源模型与字段2026-10-10">4.4.2 已确认的数据源模型与字段（2026-10-10）</h4>
+<p>技能数据源采用“技能资产＋内容版本＋资源包＋来源关系”四层模型。以下为目标建设模型；不指定物理表、数据库列名或部署方式。当前页面仅用于映射与兼容核查，不直接决定底座字段。</p>
+<p><strong>技能资产：身份、检索与权限。</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文业务字段</th>
+<th>已确认建设规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>技能 ID</td>
+<td>系统生成且稳定不变；名称与标识不能代替它</td>
+</tr>
+<tr>
+<td>技能名称</td>
+<td>个人与企业共用同一字段定义；企业发布默认继承个人来源名称，各对象分别保存值，后续调整不覆盖个人对象</td>
+</tr>
+<tr>
+<td>技能说明</td>
+<td>检索与列表展示信息，与执行正文分开</td>
+</tr>
+<tr>
+<td>技能标识</td>
+<td>保留包内技术标识用于解析兼容，不作为跨用户唯一资产编号</td>
+</tr>
+<tr>
+<td>归属范围</td>
+<td>个人或企业，决定权限边界，不与来源类型混用；首期内置保留原发布方式，不迁成员工资产</td>
+</tr>
+<tr>
+<td>归属主体 ID</td>
+<td>关联统一账号或企业组织，个人资产按授权读取</td>
+</tr>
+<tr>
+<td>分类 ID</td>
+<td>引用技能专属分类词表，不强行与素材或提示词分类合并</td>
+</tr>
+<tr>
+<td>标签关联</td>
+<td>引用技能标签，用于检索；个人与企业均选填，数量和长度见本节已确认校验</td>
+</tr>
+<tr>
+<td>图标资源引用</td>
+<td>可选，缺失使用默认图标</td>
+</tr>
+<tr>
+<td>可用状态</td>
+<td>表达是否允许使用，与应用审批状态分开；状态由获准操作与可用性表达，实际映射由研发提出并评审</td>
+</tr>
+<tr>
+<td>当前内容版本 ID</td>
+<td>指向当前生效的确定内容</td>
+</tr>
+<tr>
+<td>创建人、创建时间、更新时间</td>
+<td>系统维护，固定时间语义；修改展示信息不冒充内容版本变化</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>内容版本：保存确定的执行内容。</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文业务字段</th>
+<th>已确认建设规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内容版本 ID</td>
+<td>系统生成，内容确定后不可覆盖</td>
+</tr>
+<tr>
+<td>所属技能 ID</td>
+<td>关联技能资产</td>
+</tr>
+<tr>
+<td>来源版本号</td>
+<td>保留填写或导入的版本文本；不单独用于判断内容是否相同</td>
+</tr>
+<tr>
+<td>SKILL.md 正文</td>
+<td>完整保存，作为执行正文事实源</td>
+</tr>
+<tr>
+<td>对话引导语</td>
+<td>可选，属于使用引导，不是用户真实任务输入</td>
+</tr>
+<tr>
+<td>支持的输入类型</td>
+<td>多值能力声明，供应用判断兼容性，不证明实际运行能力</td>
+</tr>
+<tr>
+<td>输出格式</td>
+<td>多值能力声明，与正文输出要求分开</td>
+</tr>
+<tr>
+<td>权限声明</td>
+<td>不自动授予权限，空声明不等于无风险</td>
+</tr>
+<tr>
+<td>外部依赖声明</td>
+<td>保存依赖名称和要求，不保存凭据值</td>
+</tr>
+<tr>
+<td>包格式／Schema 版本</td>
+<td>支持解析和兼容</td>
+</tr>
+<tr>
+<td>必要扩展元数据</td>
+<td>保留尚未统一定义的包信息，避免迁移丢失；包括适用的动态输入表单定义</td>
+</tr>
+<tr>
+<td>内容校验摘要</td>
+<td>识别内容变化、校验完整性和同号不同包；算法待研发设计</td>
+</tr>
+<tr>
+<td>版本创建人、创建时间</td>
+<td>系统维护</td>
+</tr>
+</tbody>
+</table></div>
+<p>七项执行规范（适用场景、输入要求、输出要求、执行流程、边界与禁止事项、异常处理、使用示例）作为正文标准章节，首期不另存七份独立正文。创建页面可分项编辑，保存时生成统一正文；导入保留原文。若以后需要章节检索或编辑，再增加可重建的解析结果。新建七章必填；旧包缺章节提示但允许导入，不强行改写。</p>
+<p><strong>资源包：保存完整内容和文件关系。</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文业务字段</th>
+<th>已确认建设规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>资源 ID</td>
+<td>系统生成</td>
+</tr>
+<tr>
+<td>所属内容版本 ID</td>
+<td>文件绑定确定版本</td>
+</tr>
+<tr>
+<td>包内相对路径</td>
+<td>保留目录结构与正文引用关系</td>
+</tr>
+<tr>
+<td>存储引用</td>
+<td>指向底座管理的文件，不使用用户本机绝对路径作为跨平台地址</td>
+</tr>
+<tr>
+<td>文件名称、类型、大小</td>
+<td>支持展示与校验</td>
+</tr>
+<tr>
+<td>文件校验摘要</td>
+<td>检查完整性与变化</td>
+</tr>
+</tbody>
+</table></div>
+<p>正文、模板、图片、脚本和参考资料共同构成确定内容版本，不能只迁移正文。文件与总包容量、安全阈值和解析优先级待产品确认／研发核实。</p>
+<p><strong>来源关系：连接独立对象与业务记录。</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文业务字段</th>
+<th>已确认建设规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>来源类型</td>
+<td>区分创建、文件导入、公开仓库、应用发布等</td>
+</tr>
+<tr>
+<td>来源应用 ID</td>
+<td>标记来源业务系统，不直接授予共享权限</td>
+</tr>
+<tr>
+<td>原系统记录 ID</td>
+<td>支持迁移、重试与追溯</td>
+</tr>
+<tr>
+<td>必要来源地址</td>
+<td>可选，不保存敏感本机路径或凭据</td>
+</tr>
+<tr>
+<td>来源技能 ID</td>
+<td>企业对象可关联个人来源对象；直接发布可为空</td>
+</tr>
+<tr>
+<td>来源内容版本 ID</td>
+<td>企业发布关联具体获准内容，不指向个人技能的动态最新版本</td>
+</tr>
+<tr>
+<td>来源业务记录引用</td>
+<td>指向应用审批或直接发布记录，不复制整套审批流程</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>字段校验与业务细则：</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>事项</th>
+<th>已确认规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>名称</td>
+<td>个人与企业统一上限 100 字符，必填，去首尾空格；当前后台 80 字符属于需改造差异</td>
+</tr>
+<tr>
+<td>技能说明</td>
+<td>必填，上限 500 字符，去首尾空格</td>
+</tr>
+<tr>
+<td>对话引导语</td>
+<td>选填，上限 500 字符，去首尾空格</td>
+</tr>
+<tr>
+<td>分类</td>
+<td>技能专属词表，单选必填</td>
+</tr>
+<tr>
+<td>标签</td>
+<td>个人、企业均选填；最多 10 个，每个 20 字符，去首尾空格与重复项；取消当前企业至少一个的约束</td>
+</tr>
+<tr>
+<td>技能标识</td>
+<td>技术格式与包兼容要求由研发先核查，格式和长度限制以兼容核查结果为依据</td>
+</tr>
+<tr>
+<td>正文与章节</td>
+<td>新建七项标准章节均必填且非空；旧包缺章节时提示但允许导入，不补写原文；正文不套提示词长度限制，完整保存且禁止截断</td>
+</tr>
+<tr>
+<td>同名与重复</td>
+<td>允许同名，以技能 ID 区分；同一用户重复导入相同内容时提示并复用已有个人资产；企业重复发布相同内容时提示已有对象，不按名称合并</td>
+</tr>
+<tr>
+<td>审核与更新</td>
+<td>冻结提审版本，个人可另建新版本，原审批仍指向原内容；企业内容更新重新走原应用审批／发布流程</td>
+</tr>
+<tr>
+<td>企业失效与旧任务</td>
+<td>企业下架、删除后保留旧任务已保存的内容与结果供查看；禁止以失效技能发起新调用或重跑。执行中失效规则见第6.4节，实际中断能力待研发核查</td>
+</tr>
+<tr>
+<td>内置技能</td>
+<td>首期保留现有内置发布方式，不迁成员工个人／企业资产</td>
+</tr>
+<tr>
+<td>物理清理</td>
+<td>首期不因个人删除自动物理清理；员工个人删除边界见 4.5；具体清理条件及期限按制度和引用情况另定</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>交接依赖而非已定数值：</strong>研发提供单文件／总包容量、包兼容与标识格式核查；留存期限需制度依据。上述结果影响业务规则时再由产品确认。具体版本文本格式及状态映射仍需研发兼容方案，执行中行为见第6.4节，不预设未经兼容核查的技术限制。</p>
+<h4 id="443-已确认的职责与关联规则">4.4.3 已确认的职责与关联规则</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>事项</th>
+<th>已确认建设规则与边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>个人发布企业技能</td>
+<td>创建独立企业对象，默认继承名称及获准内容；企业后续调整不覆盖个人对象，删除个人对象不连带企业快照</td>
+</tr>
+<tr>
+<td>内容修改与旧任务</td>
+<td>内容修改生成新版本；旧任务继续引用原确定内容，不偷偷换最新包</td>
+</tr>
+<tr>
+<td>展示信息修改</td>
+<td>名称、说明、分类、标签作为资产信息维护，不因分类或标签修改重建完整资源包</td>
+</tr>
+<tr>
+<td>审批</td>
+<td>各应用保留独立流程，审批针对确定内容版本；通过后写入发布结果，不统一审批队列</td>
+</tr>
+<tr>
+<td>发布与风险校验</td>
+<td>审批申请、意见、驳回、撤回、扫描风险明细、人工风险确认留在应用业务，绑定确定内容版本；底座保留必要来源业务引用，不执行技能</td>
+</tr>
+<tr>
+<td>执行与统计</td>
+<td>任务、结果、失败原因及调用统计留在应用任务与统计系统，不混入技能资产</td>
+</tr>
+<tr>
+<td>我的分组</td>
+<td>底座独立保存用户、应用、分组与资产关联，不塞入正文；按用户及所属应用隔离</td>
+</tr>
+<tr>
+<td>草稿</td>
+<td>首期保留应用本机草稿现状，不自动迁入正式资产</td>
+</tr>
+<tr>
+<td>账号与组织展示</td>
+<td>创建人部门名称等从统一账号和组织获取，避免重复保存易过期值</td>
+</tr>
+<tr>
+<td>下架、删除与撤权</td>
+<td>新调用、历史查看、重跑及执行中规则见第6.4节；审核／匿名统计留存及物理清理需制度依据</td>
+</tr>
+<tr>
+<td>迁移</td>
+<td>保留完整内容和来源关系，不按名称合并、不截断正文、不把全部版本改成 1.0.0</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="444-来源差异与待决事项">4.4.4 来源差异与待决事项</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>事项</th>
+<th>来源差异／当前事实</th>
+<th>本文采用的口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>企业彻底删除</td>
+<td>2026-09-28 架构与 V2.1.0 旧需求仍禁止；Studio 项目记忆 2026-10-06 起记录新增删除功能，后续有删除实测；当前审核详情可见永久删除入口</td>
+<td>不恢复旧禁删条款。目标方案包含删除功能；员工个人删除及旧任务查看／禁止失效重跑已确认；管理员企业删除范围、审核与匿名统计最小留存、文件清除及执行中行为仍需补齐。删除行为未验证</td>
+</tr>
+<tr>
+<td>版本能力</td>
+<td>旧需求写首次统一 v1.0、暂不做更新／历史／回退；截图多数 1.0.0；审批页面样本 1.9.0，企业列表可见 1.1.1、1.5.0</td>
+<td>保留真实来源版本文本，不重写为固定版本；不能由多个版本号推断完整版本管理。统一底座的不可变内容版本和旧任务引用是建设要求，现有实现待研发核实</td>
+</tr>
+<tr>
+<td>状态文案</td>
+<td>旧需求规定用户端五类一级状态；截图仍见未提交、已驳回、已撤回、已下架</td>
+<td>保留页面事实，不擅自认定新建设沿用旧映射或当前文案；建议定义审批、个人可用、企业发布三个不同维度，再由应用展示映射</td>
+</tr>
+<tr>
+<td>包内声明与检测结果</td>
+<td>审核样本权限声明为空，但页面检测到网络、Shell、脚本风险</td>
+<td>证明两类信息需区分，不能以空权限声明判为安全；实际扫描能力、风险等级算法与批准策略待研发／产品确认</td>
+</tr>
+<tr>
+<td>用户导入与后台直发格式</td>
+<td>用户端 ZIP 入口说明也支持单独 Markdown；后台 ZIP 输入仅 accept=.zip</td>
+<td>分入口保留差异；新数据源接收哪种规范化包与转换结果待研发核实，不静默统一为同一上传限制</td>
+</tr>
+</tbody>
+</table></div>
+<p>已确认模型、字段校验及职责见 4.4.2—4.4.3。剩余交接依赖：容量与包兼容核查、留存制度依据；标识／版本格式及状态映射由研发核查兼容性，执行中失效按第6.4节实施。调用权限由实际服务校验，不以分类、标签或包内 visibility 声明代替授权；具体授权与拦截策略待核实。</p>
+<p>定稿前由研发核实：名称和标识唯一性范围、前后端全部校验、包解析优先级、资源完整性与安全阈值、稳定个人／企业／提交关联、跨设备个人数据存储、同版本不同内容及历史读取、发布写入失败重试、删除后审核与匿名统计真实留存。缺少代码或接口证据的项不在本文标为已实现。</p>
+<h4 id="445-技能专属验收要求">4.4.5 技能专属验收要求</h4>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>需要验证的结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>创建表单与生成包</td>
+<td>七项规范、简介、引导语、输入输出、权限与依赖映射准确；生成后再解析不丢内容</td>
+</tr>
+<tr>
+<td>含多级资源及扩展元数据的导入包</td>
+<td>原文、元数据、相对目录与文件完整；缺文件、非法路径、凭据与不兼容能力按确定规则处理</td>
+</tr>
+<tr>
+<td>个人技能提审与企业规范化</td>
+<td>审核对应确定提交内容；企业名称分类标签变更不覆盖个人对象；个人删除不连带企业快照</td>
+</tr>
+<tr>
+<td>同名个人／企业技能</td>
+<td>允许同名，以稳定对象和来源定位，不按名称误选；跨用户私有对象不可越权</td>
+</tr>
+<tr>
+<td>标签选填与校验</td>
+<td>企业无标签仍可按流程发布；填写时最多 10 个、每个 20 字符且去重；不得继续强制至少一个</td>
+</tr>
+<tr>
+<td>新建与旧包章节</td>
+<td>新建七章非空；旧包缺章节提示但允许导入，原文不被改写</td>
+</tr>
+<tr>
+<td>重复导入／发布</td>
+<td>同用户相同内容提示并复用个人资产；企业相同内容重复发布提示已有对象</td>
+</tr>
+<tr>
+<td>相同版本号但包内容不同</td>
+<td>能定位实际使用内容，不能仅凭版本文本判断相同包；具体冲突处理在规则确认后验收</td>
+</tr>
+<tr>
+<td>企业下架、删除或撤权与旧任务</td>
+<td>按已确认失效规则阻止不允许的新调用；历史展示与重跑分别验证，旧任务不偷偷换最新包</td>
+</tr>
+<tr>
+<td>业务审批通过或管理员直发后底座写入失败</td>
+<td>不虚报已发布；重试不重复创建企业对象；恢复结果可追溯</td>
+</tr>
+<tr>
+<td>技能匿名统计</td>
+<td>口径与版本关联一致；不以下载或查看冒充调用；删除后留存按后续确认规则核验</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="45-三库员工个人删除规则">4.5 三库员工个人删除规则</h3>
+<p>本规则适用于素材、提示词和技能，是已确认建设规则，不代表现有系统已实现。</p>
+<ul>
+<li>员工个人删除仅移除个人侧记录或可见关系，不向员工提供完整物理删除入口；未共享资料也不得由员工操作直接触发完整物理清除。</li>
+<li>已共享或已发布到企业的资料继续保留，个人删除不改变企业共享关系、企业可用状态或企业访问权限。</li>
+<li>素材和提示词保持原有同一资产共享模型，只移除个人侧关系，不删除企业仍引用的资产；技能保留独立企业对象及其确定内容。</li>
+<li>不得因个人删除连带清除企业引用的正文、文件、技能包及内容版本。</li>
+<li>底层物理清理由系统按留存规则处理，不向员工提供直接入口。首期不建设自动物理清理；清理条件、留存期限需制度依据，执行中行为见第6.4节；企业失效后的历史查看及禁止重跑见第4.4.2节；本条不扩大管理员企业删除权限。</li>
+</ul>
+<p>交付验收：三库分别验证员工删除后个人侧不再展示、企业侧仍可按原权限访问且内容完整；验证个人删除接口不会执行完整物理清除。企业删除、下架和撤权另按相应规则验收，不能混为个人删除。</p>
+</section><section class="section" id="5-我的分组与存量字段处理"><h2>5. 我的分组与存量字段处理</h2>
+<h3 id="51-已确认的分组规则">5.1 已确认的分组规则</h3>
+<p>统一数据源保存分组及资产关联，记录分组所属用户和所属应用。首期不强制跨平台共用分组；其他应用可以忽略分组，继续按资产权限、分类和标签读取同一资产，按需接入分组查询能力。</p>
+<ul>
+<li>分组属于用户的个人整理关系，不改变资产归属、共享范围或维护权限；其他用户不自动继承该分组。</li>
+<li>修改或删除分组只改变个人整理关系，不删除资产，不影响已有任务引用。</li>
+<li>分组不是各应用的必填字段，也不作为统一分类或权限判断依据。</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>中文业务信息</th>
+<th>用途</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分组所属用户</td>
+<td>确定谁的整理关系</td>
+<td>已确认按用户隔离；具体身份字段由研发设计</td>
+</tr>
+<tr>
+<td>分组所属应用</td>
+<td>区分不同应用的整理习惯</td>
+<td>已确认按所属应用隔离；按需跨应用使用</td>
+</tr>
+<tr>
+<td>分组名称</td>
+<td>用户识别分组</td>
+<td>名称50字符、同用户同应用不重名；首期不新增产品数量限制</td>
+</tr>
+<tr>
+<td>分组与资产关联</td>
+<td>记录哪些资产被整理进该分组</td>
+<td>关联保存已确认；单资产可加入多个分组，按用户和应用隔离</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="52-历史超限内容">5.2 历史超限内容</h3>
+<p>迁移时保留已有超限内容，不截断或丢弃。历史超限资产允许只改其他字段，修改超限字段时该字段适用新限制（见第6.1节）；研发提供名称、说明、正文、标签的实际长度分布及受影响记录数量，供产品复核。若需调整已确认上限，须记录新的确认结果。</p>
+<p>必填项、标签等新校验也不能自动当成历史数据删除依据。缺失归属、无效分类、文件不可读等迁移异常按第一阶段确认的业务处理规则执行，不伪造缺失的历史信息。</p>
+</section><section class="section" id="6-已确认产品执行规则与研发交接"><h2>6. 已确认产品执行规则与研发交接</h2>
+<p>本章定义字段、权限、版本、异常及入口行为要求。现有页面事实用于映射与兼容核查，不作为目标规则的限制。</p>
+<h3 id="61-素材提示词及共性字段规则">6.1 素材、提示词及共性字段规则</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>事项</th>
+<th>已确认业务规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>素材／提示词名称</td>
+<td>必填、去首尾空格、不可纯空白，最多100字符；允许同名，以资产ID区分</td>
+</tr>
+<tr>
+<td>提示词正文</td>
+<td>必填且不可纯空白；5,000以上提醒，10,000上限；保留正文内部换行和格式</td>
+</tr>
+<tr>
+<td>提示词用途说明</td>
+<td>选填，最多500字符</td>
+</tr>
+<tr>
+<td>素材说明</td>
+<td>统一业务字段“素材说明”，选填、最多500字符；批量统一备注用于本批各素材，逐条修改只影响对应资产；旧字段映射由研发核实</td>
+</tr>
+<tr>
+<td>分类</td>
+<td>保留现有各库词表，默认“通用”；技能单选必填；不跨库合并词表</td>
+</tr>
+<tr>
+<td>提示词效果图</td>
+<td>选填，最多3张，JPG／PNG，单张不超过20MB；不自动当作执行输入</td>
+</tr>
+<tr>
+<td>需要参考图</td>
+<td>勾选后执行时至少提供1张，缺图阻止执行；应用最大数量受实际能力约束；未勾选不强制</td>
+</tr>
+<tr>
+<td>标签处理</td>
+<td>输入支持中英文逗号；先拆分、去首尾空格、移除空项，再去重和校验上限；去重大小写及字符计数由研发给出一致方案，若影响业务再确认</td>
+</tr>
+<tr>
+<td>分组</td>
+<td>名称必填、最多50字符、去首尾空格；同用户同应用内不重名；一项资产可加入多个分组；首期不新增产品数量限制，技术容量需明确</td>
+</tr>
+<tr>
+<td>查询</td>
+<td>不同筛选维度取交集，同维度多选取并集；默认更新时间倒序，同时间稳定排序由研发实现；分页参数由研发设计。合法无结果返回空列表，无权限／查询失败返回明确原因</td>
+</tr>
+<tr>
+<td>验证与统计</td>
+<td>首期不新增统一验证标准或跨平台统计；保留应用职责与来源，不把某应用验证或次数当全局事实</td>
+</tr>
+<tr>
+<td>历史超限编辑</td>
+<td>原值完整保留，可只改其他字段；修改超限字段时，该字段须符合新规则；不因未修改历史超限值阻止其他信息维护</td>
+</tr>
+<tr>
+<td>缺失或异常迁移</td>
+<td>缺归属、无效分类、文件损坏等进入异常清单，不自动删除或转公共；未解决记录不通过该批切换，不伪造信息</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="62-角色与操作矩阵">6.2 角色与操作矩阵</h3>
+<p>沿用原平台已有授权，不因统一数据源接入新增权限或扩大可见范围。原平台角色具体映射由研发核查；映射不清时不自动授予权限。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>主体／范围</th>
+<th>查询和使用</th>
+<th>修改管理信息／内容</th>
+<th>删除或发布</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>员工本人个人资产</td>
+<td>本人获准读取和使用，应用另查执行能力</td>
+<td>按现有授权维护本人资产；提审内容冻结，可另建新版本</td>
+<td>个人删除只移除个人侧关系，不物理清除；共享／发布走原业务审批</td>
+</tr>
+<tr>
+<td>他人个人资产</td>
+<td>无明确授权拒绝</td>
+<td>无明确授权拒绝</td>
+<td>管理员身份不自动取得代删或编辑权</td>
+</tr>
+<tr>
+<td>团队资产</td>
+<td>原组织可见范围内使用</td>
+<td>原获授权维护角色操作，能看不等于能改</td>
+<td>原获授权角色按原审批和操作规则处理，不扩大权限</td>
+</tr>
+<tr>
+<td>公共／企业资产</td>
+<td>原可见范围内使用；企业技能沿用全员可见边界</td>
+<td>原获授权角色维护；内容更新重新走原应用发布流程</td>
+<td>员工个人删除不影响共享资产；下架及企业删除由原获授权角色操作</td>
+</tr>
+<tr>
+<td>获授权业务服务</td>
+<td>仅在授权范围内查询</td>
+<td>校验对象、修订和操作权限后写入</td>
+<td>写入可追溯发布结果；不相信客户端自行传入的“已通过”</td>
+</tr>
+<tr>
+<td>停用账号</td>
+<td>拒绝该账号后续受控访问</td>
+<td>拒绝</td>
+<td>企业共享资料保留，不随账号停用自动删除</td>
+</tr>
+</tbody>
+</table></div>
+<p>组织变化不自动扩大授权，由统一身份和原授权规则计算。归属不明或无人维护的共享资产保留，不自动转移所有权；需要业务授权的管理动作进入人工处理。</p>
+<h3 id="63-字段变化与版本影响">6.3 字段变化与版本影响</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变化</th>
+<th>版本及发布规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正文、素材文件、技能包、输入要求、执行配置</td>
+<td>生成新内容版本；已发布内容按原流程获准后才更新生效引用，旧内容不覆盖</td>
+</tr>
+<tr>
+<td>名称、说明、分类、标签、分组</td>
+<td>管理信息修改，不重建完整资源包，不改变旧任务实际输入</td>
+</tr>
+<tr>
+<td>共享范围、维护权限</td>
+<td>单独校验授权并更新权限关联，不覆盖正文；对新调用和受控访问生效</td>
+</tr>
+<tr>
+<td>效果图</td>
+<td>展示资源管理；不作为任务执行输入。变化的资源保持确定引用，不替换已记录任务内容</td>
+</tr>
+<tr>
+<td>内容提审</td>
+<td>冻结确定提审版本；个人新版本不自动替换原申请；审批结果只能作用于获准版本</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="64-失效留存与迁移边界">6.4 失效、留存与迁移边界</h3>
+<ul>
+<li>员工个人删除按第4.5节，企业资料继续保留，不执行完整物理删除。</li>
+<li>企业下架、删除或撤权后，禁止不获准的新调用和重跑；旧任务已保存内容和结果按任务权限查看，不因此重新授予原资产使用权。</li>
+<li>执行中发生企业下架／撤权时，停止后续受控读取及外部操作，保留已完成结果；应用无法中断时必须明确反馈限制，由研发核查实际覆盖，不能承诺已实现即时停止。</li>
+<li>首期不建设自动物理清理；具体清理条件、留存期限及制度依据另行确定。管理员企业删除不等于立即清除被历史引用的底层资源。</li>
+<li>迁移保留内容、归属、权限、旧编号及版本引用；不按名称自动合并。技能相同内容导入去重按第4.4节，不能将请求重试去重直接等同于所有资产内容去重。</li>
+<li>切换发现丢失、越权或关键引用损坏，该批不通过；批次、窗口与回退设计由研发提出，再联合评审。</li>
+</ul>
+<h3 id="65-第一阶段受影响入口清单">6.5 第一阶段受影响入口清单</h3>
+<p>本清单是产品要求的业务覆盖范围，不证明所有入口当前存在。第一阶段由两端研发逐行标记“现有／需适配／不适用及理由”，补充页面、接口、存储和负责人，作为底座设计与估算输入；第二阶段建设底座，第三阶段按清单改造并联调，第四阶段迁移切换。不得等底座完成才首次盘点。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>应用与业务入口</th>
+<th>本期预期行为</th>
+<th>底座或应用配合</th>
+<th>实际入口核查</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设计平台素材列表／详情／任务选择器</td>
+<td>按身份、范围、分类标签读取同一素材</td>
+<td>查询、详情与确定文件版本；列表与引用分离</td>
+<td>待研发定位页面／接口</td>
+</tr>
+<tr>
+<td>设计平台素材上传／编辑／个人删除</td>
+<td>主动入库、按规则编辑、个人删除不影响企业资料</td>
+<td>受控写入、版本、个人关系移除</td>
+<td>待研发核查批量及逐条入口</td>
+</tr>
+<tr>
+<td>设计平台提示词列表／详情／任务选择器</td>
+<td>读取统一正文及元数据，临时修改记录到任务</td>
+<td>查询、确定版本和实际任务输入</td>
+<td>待研发定位页面／接口</td>
+</tr>
+<tr>
+<td>设计平台提示词创建／编辑／个人删除</td>
+<td>执行长度校验、历史兼容及个人删除规则</td>
+<td>受控写入、版本、关系移除</td>
+<td>待研发定位页面／接口</td>
+</tr>
+<tr>
+<td>设计平台灵感收藏／复制</td>
+<td>保留原来源和个人副本关系，不等同普通读取</td>
+<td>来源关联、现有重复收藏规则</td>
+<td>待研发核查来源映射</td>
+</tr>
+<tr>
+<td>设计平台团队／公共审批及发布结果</td>
+<td>审批保留原系统，获准结果写回底座</td>
+<td>授权写入、失败重试、修订冲突</td>
+<td>待研发核查两级共享流程</td>
+</tr>
+<tr>
+<td>两端个人分组、分类标签筛选</td>
+<td>分组按用户与应用隔离，分类标签不代替权限</td>
+<td>分组关联、组合条件查询</td>
+<td>各端按已有能力适配，不强制新建分组页面</td>
+</tr>
+<tr>
+<td>Studio技能列表／详情／任务选择</td>
+<td>个人、企业统一读取各自对象及确定包</td>
+<td>技能查询、权限、版本与资源包</td>
+<td>待研发定位加载和缓存入口</td>
+</tr>
+<tr>
+<td>Studio技能创建／编辑／导入／在线来源</td>
+<td>七章及长度规则、兼容旧包、保留来源</td>
+<td>原包解析、内容版本、资源与去重</td>
+<td>待研发核查各来源及后续阶段</td>
+</tr>
+<tr>
+<td>Studio个人删除／我的提交</td>
+<td>删除不影响企业；提交关联确定内容</td>
+<td>个人关系移除；提交与审批保留业务端</td>
+<td>待研发核查状态及记录关联</td>
+</tr>
+<tr>
+<td>Studio审核／待发布／管理员直发</td>
+<td>不统一审批，企业标签选填；获准写入企业对象</td>
+<td>来源版本关联、校验授权、失败重试</td>
+<td>待研发核查发布接口与实际表单</td>
+</tr>
+<tr>
+<td>Studio企业管理／下架／删除</td>
+<td>原授权角色操作，控制新调用及重跑</td>
+<td>有效性和引用保留；留存待制度依据</td>
+<td>待研发核查物理清理及运行中控制</td>
+</tr>
+<tr>
+<td>两端新任务／历史查看／重跑</td>
+<td>记录实际输入，原版本重跑，重新校验执行条件</td>
+<td>应用任务记录与底座确定版本读取</td>
+<td>待研发核查历史可还原范围</td>
+</tr>
+<tr>
+<td>两端刷新、旧编号、存量迁移切换</td>
+<td>重新读取一致结果，单一权威写入</td>
+<td>缓存刷新、映射、对账和回退</td>
+<td>第一阶段设计，第四阶段执行</td>
+</tr>
+</tbody>
+</table></div>
+<p>研发交接产物需补：入口定位、接口／存储现状、适配工作、不可还原限制、负责人、依赖及工作量；产品核对业务行为。具体代码文件、函数、接口地址、错误码和部署方式不在本清单预设。</p>
+<h3 id="66-输入输出与异常交接">6.6 输入输出与异常交接</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>业务输入</th>
+<th>必须可理解的输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新增</td>
+<td>类型、内容资源、归属与目标范围、分类标签、来源、可信身份及请求标识</td>
+<td>已保存、资产ID、确定版本及可用状态；校验／权限失败返回原因</td>
+</tr>
+<tr>
+<td>内容修改或发布</td>
+<td>目标资产、基于版本、新内容、保存／发布意图、获准授权及请求标识</td>
+<td>新修订ID、当前生效版本及“修订已保存／发布已生效”；冲突不覆盖，返回可访问当前修订信息</td>
+</tr>
+<tr>
+<td>列表查询</td>
+<td>身份、范围、应用筛选、排序分页</td>
+<td>获准列表及分页；合法无结果为空，失败不是空列表</td>
+</tr>
+<tr>
+<td>按确定引用读取</td>
+<td>资产ID、指定或当前获准版本、身份及查看／使用用途</td>
+<td>素材确定文件引用、提示词完整正文、技能完整包及必要声明；均返回确定版本。无权、失效、版本缺失、服务异常返回不同业务原因，不换最新内容</td>
+</tr>
+<tr>
+<td>发布结果写入</td>
+<td>获准业务服务、确定修订、业务记录引用及请求标识</td>
+<td>发布已生效或明确未生效；超时结果待确认，按原请求标识核查／重试，不重复发布</td>
+</tr>
+<tr>
+<td>新任务输入记录</td>
+<td>实际输入、确定版本、执行配置及来源</td>
+<td>任务ID、执行记录ID及保存确认；失败或结果未知时不执行</td>
+</tr>
+<tr>
+<td>旧任务重跑</td>
+<td>旧任务ID、可信身份、重跑请求标识</td>
+<td>原输入可还原且有权执行时新建本次执行记录；返回旧任务ID、本次执行记录ID、状态及结果引用，不覆盖原输入及执行结果</td>
+</tr>
+<tr>
+<td>个人删除</td>
+<td>本人身份、目标个人记录</td>
+<td>个人侧移除结果，企业关联和底层内容保留；不提供物理删除执行结果</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>超时或连接中断可能发生在写入完成之后，不能一律等同“未保存”。显示结果待确认，使用同一请求标识核查或安全重试；不可另发全新请求导致重复资产、版本或发布。</li>
+<li>请求重试去重与内容重复规则是两件事；核查结果只返回有权读取的信息。</li>
+<li>任务实际输入与本次执行记录必须确认保存后才执行。执行后结果记录失败时，明确报告执行与记录的真实状态，不因记录失败自动再执行外部动作。</li>
+<li>修订保存成功不等于发布生效；待发布内容不自动替换当前生效版本。</li>
+<li>历史任务无权限、记录不存在、原输入无法还原与服务异常分别表达；不把当前资产内容补成历史输入。</li>
+<li>技术请求结构、核查接口、错误码及分页结构由研发设计，不在总方案预设。</li>
+</ul>
+</section><section class="section" id="7-第一阶段交付的验收依据"><h2>7. 第一阶段交付的验收依据</h2>
+<h3 id="71-底座验收要求">7.1 底座验收要求</h3>
+<p>以下从原整体方案第 12.3 节迁入，作为第一阶段需要交付的验证要求，在第二阶段执行；应用任务记录与重跑完整链路在第三阶段验证。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>产品跟进项</th>
+<th>核心检查</th>
+<th>验收证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>三库范围完整</td>
+<td>素材、提示词、技能都支持本期约定的个人与共享资产能力，不能只用提示词通过代表全库通过</td>
+<td>三库分别执行的结果记录</td>
+</tr>
+<tr>
+<td>跨平台同一资产</td>
+<td>同一用户从两个应用身份查询，获得同一资产编号、内容和归属；修改写回同一处</td>
+<td>两个应用请求上下文的读写记录</td>
+</tr>
+<tr>
+<td>权限与筛选分离</td>
+<td>列表先满足访问权限再按业务条件筛选；已有引用不套用列表过滤；改查询条件不能读到他人私有资产</td>
+<td>正向、排除筛选及越权反例</td>
+</tr>
+<tr>
+<td>新增和修改结果可理解</td>
+<td>保存成功才返回成功；重复请求不重复建资产；旧修订覆盖新内容时明确返回冲突</td>
+<td>成功、失败、重试和并发修改记录</td>
+</tr>
+<tr>
+<td>版本与历史读取</td>
+<td>正式内容更新不覆盖原版本；底座支持按确定版本获取文件、正文或技能包</td>
+<td>新旧版本对比及固定版本读取结果</td>
+</tr>
+<tr>
+<td>业务结果写入</td>
+<td>有权业务服务能够保存审批后的发布结果；无权写入被拒绝；失败不能伪报已发布</td>
+<td>发布结果写入及冲突记录</td>
+</tr>
+<tr>
+<td>删除与失效</td>
+<td>按第一阶段确定的规则处理删除、下架、撤权及已有引用；不把“不展示”当成“已删除”</td>
+<td>相应条件下的响应和资产状态</td>
+</tr>
+<tr>
+<td>接口可交接</td>
+<td>接口说明使用清楚的业务解释，包含筛选示例、操作结果、错误原因和两端需配合事项</td>
+<td>接口说明与联调清单</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="72-共性规则的最小验证集">7.2 共性规则的最小验证集</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>样例</th>
+<th>需要验证的结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本人个人资产、他人个人资产</td>
+<td>本人按授权读取，他人私有资产不能越权访问</td>
+</tr>
+<tr>
+<td>团队、公共／企业资产</td>
+<td>相应可见范围正确，能使用不自动获得编辑权</td>
+</tr>
+<tr>
+<td>带有被某应用排除标签的资产</td>
+<td>列表不展示，但已有引用在实际权限允许时仍可读取</td>
+</tr>
+<tr>
+<td>已发布内容的旧版本与新版本</td>
+<td>新查询按规则获得当前版本，指定旧版本仍定位原内容</td>
+</tr>
+<tr>
+<td>两个应用同时编辑同一资产</td>
+<td>无提示覆盖被阻止，冲突原因可交回业务端处理</td>
+</tr>
+<tr>
+<td>请求超时后重试</td>
+<td>不重复新增资产或重复产生同一发布结果</td>
+</tr>
+<tr>
+<td>业务端审批通过但底座写入失败</td>
+<td>结果可追溯，业务端能够识别未生效，不错误显示已发布</td>
+</tr>
+</tbody>
+</table></div>
+<p>各库使用等价样例验证共性规则，并保留文件读取、提示词正文、技能包完整性等专属检查。样例覆盖个人与共享范围，不要求构造无意义的维度组合；测试数据使用受控样本。</p>
+<h3 id="73-字段规则的边界样例">7.3 字段规则的边界样例</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>样例</th>
+<th>预期行为</th>
+<th>前置条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新增素材名称或提示词名称为 100／101 字符</td>
+<td>100 满足长度限制；101 不满足长度限制</td>
+<td>按后续统一计数口径；其他保存条件均满足</td>
+</tr>
+<tr>
+<td>用途说明为 500／501 字符</td>
+<td>500 满足长度限制；501 不满足长度限制</td>
+<td>不据此推断是否必填</td>
+</tr>
+<tr>
+<td>正文为 5,000／5,001／10,000／10,001 字符</td>
+<td>5,000 不触发长度提醒；5,001 与 10,000 提醒但不因长度阻止保存；10,001 不满足新内容上限</td>
+<td>按研发评审的一致计数口径；历史超限编辑见第6.1节</td>
+</tr>
+<tr>
+<td>标签为 10／11 个，单标签为 20／21 字符</td>
+<td>分别检查数量与单项长度上限</td>
+<td>拆分、去首尾空格、移除空项、去重后校验；大小写及计数按研发一致方案</td>
+</tr>
+<tr>
+<td>标签带首尾空格或出现重复项</td>
+<td>去除首尾空格与重复项</td>
+<td>大小写判重与计数由研发提出一致方案，影响业务时联合评审</td>
+</tr>
+<tr>
+<td>设计平台存在个人分组，Studio 未接入分组功能</td>
+<td>Studio 仍可按权限与自身筛选规则读取资产</td>
+<td>Studio 不把设计平台分组作为必填条件</td>
+</tr>
+<tr>
+<td>修改或删除个人分组</td>
+<td>资产本身、共享权限和已有任务引用保持有效</td>
+<td>只修改分组及关联，不额外执行资产操作</td>
+</tr>
+<tr>
+<td>迁移历史超限正文</td>
+<td>原文完整保留，不截断或丢弃</td>
+<td>允许改其他字段，修改超限字段时适用新规则</td>
+</tr>
+</tbody>
+</table></div>
+<p>以上用例用于后续验收。</p>
+<h3 id="74-补齐规则的验收样例后续执行">7.4 补齐规则的验收样例（后续执行）</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>预期结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>名称纯空白、同名资产</td>
+<td>空白不允许；同名可保存且ID不同</td>
+</tr>
+<tr>
+<td>素材说明500／501字符</td>
+<td>500允许，501拒绝；不覆盖其他批次素材</td>
+</tr>
+<tr>
+<td>提示词效果图3／4张、格式／大小不符</td>
+<td>3张允许；超数量或约定格式、大小拒绝，提示原因</td>
+</tr>
+<tr>
+<td>要求参考图但任务无图</td>
+<td>阻止执行并提示补图；展示效果图不自动计入输入</td>
+</tr>
+<tr>
+<td>企业技能无标签</td>
+<td>仍可按原获准流程发布</td>
+</tr>
+<tr>
+<td>分组同用户同应用重名／跨应用同名</td>
+<td>前者拒绝，后者允许；同资产可关联多个分组</td>
+</tr>
+<tr>
+<td>多维筛选、同维多选、空结果、服务异常</td>
+<td>交集／并集正确；合法空列表与失败明确区分</td>
+</tr>
+<tr>
+<td>他人个人资产、停用账号、无权管理员</td>
+<td>拒绝越权读写；不影响企业共享资料留存</td>
+</tr>
+<tr>
+<td>历史超限正文只改标签／修改正文</td>
+<td>只改标签允许；修改正文须满足新上限；未改原文完整保留</td>
+</tr>
+<tr>
+<td>三库个人删除</td>
+<td>个人侧关系移除，企业仍按原权限读取，文件正文包内容完整，无物理清除</td>
+</tr>
+<tr>
+<td>内容更新与管理信息修改</td>
+<td>内容变化新版本；分类标签不重建包，旧任务原输入不变</td>
+</tr>
+<tr>
+<td>下架／撤权发生在执行中</td>
+<td>停止后续受控读取和外部操作，保留已完成结果；不可中断能力明确报告</td>
+</tr>
+<tr>
+<td>归属不明、文件损坏、关键引用缺失</td>
+<td>列入异常清单，不自动删除或转公共；相关记录不通过该批切换</td>
+</tr>
+</tbody>
+</table></div>
+<p>| 写入超时但实际已保存 | 展示待确认，原请求标识核查／重试返回同一结果，不重复资产或版本 |
+| 修订保存与发布生效 | 两种结果及当前生效版本明确区分，未发布修订不替换当前内容 |
+| 输入或执行记录保存失败 | 不启动执行／重跑；结果未知先核查，不盲目重复执行 |
+| 历史记录不存在／不可还原／服务异常 | 分别提示，不用最新内容替代历史输入 |
+| 重跑成功及结果记录失败 | 新执行记录关联旧任务，原记录不覆盖；记录失败不自动重做外部动作 |</p>
+<p>以上仅为验收要求，未执行生产测试。</p>
+</section><section class="section" id="8-研发现状核查阶段完成条件与来源"><h2>8. 研发现状核查、阶段完成条件与来源</h2>
+<h3 id="81-研发需要提供的核查结果">8.1 研发需要提供的核查结果</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>核查项</th>
+<th>开发需要给出的事实</th>
+<th>产品据此决定什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据与文件</td>
+<td>实际数据库、文件或技能包位置、资产数量、文件规模、归属及分类缺失情况；两库字段长度和标签分布</td>
+<td>本期迁移范围、分批顺序、业务清理优先级及字段规则兼容</td>
+</tr>
+<tr>
+<td>身份与接口</td>
+<td>已有账号标识、组织映射、资产接口、权限检查及可复用能力</td>
+<td>跨平台权限规则是否可直接承接，哪些业务规则需要补齐</td>
+</tr>
+<tr>
+<td>历史任务</td>
+<td>是否保存实际正文、文件版本、技能包版本及旧引用</td>
+<td>哪些历史任务可继续使用，哪些存在无法还原的限制</td>
+</tr>
+<tr>
+<td>技能字段与包兼容</td>
+<td>短字段、正文与资源规模分布；前后端校验；包解析优先级、扩展元数据及资源完整性</td>
+<td>技能专属阈值、导入兼容与迁移规则，不直接套用两库长度</td>
+</tr>
+<tr>
+<td>技能关联与留存</td>
+<td>个人、提交、企业对象与确定包内容的真实关联；同号不同包；删除后审核、匿名统计和文件的留存</td>
+<td>发布关联、历史引用、删除边界及最小留存规则</td>
+</tr>
+<tr>
+<td>工程与上线</td>
+<td>两平台改造点、测试环境、发布方式、技术依赖和工作量</td>
+<td>阶段排期、业务配合及切换影响</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="82-第一阶段完成条件">8.2 第一阶段完成条件</h3>
+<p>产品范围和关键业务规则可执行，开发完成必要事实核查，形成可评审的数据模型、接口范围、两端改造和迁移方案；产品与研发对影响范围和验收口径无关键分歧。负责人和排期按真实工作量安排。</p>
+<p>产品业务规则可交研发评审；仍需实际入口、权限映射、容量、包兼容、历史可还原性及留存制度依据。第一阶段只有联合设计评审及必要核查完成后才可关闭，不宣称已完成开发或上线。</p>
+<h3 id="83-来源与维护">8.3 来源与维护</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>来源</th>
+<th>使用范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="三库现状与统一数据源建设规划_2026-09-28.html">整体方案规划</a></td>
+<td>已确认架构边界、共性规则、四阶段路线</td>
+</tr>
+<tr>
+<td>素材库与提示词库现状规则（2026-09-28） <small>（Markdown来源）</small></td>
+<td>两库既有对象关系与审批、共享规则；用于现状映射与兼容核查</td>
+</tr>
+<tr>
+<td>设计平台素材页面与提示词页面（2026-10-10 查看）</td>
+<td>字段、输入长度属性、分类选项与展示信息；仅做只读盘点，未验证后端校验</td>
+</tr>
+
+
+<tr>
+<td>Studio 用户端页面截图（2026-10-10）</td>
+<td>列表、内置详情、个人管理、我的提交与创建字段；截图无法确认的约束保留待核实，不转载真实正文与人员信息</td>
+</tr>
+<tr>
+<td>Studio 用户端导入入口与管理端现行页面（2026-10-10 只读查看）</td>
+<td>导入首阶段；审批、企业详情及直接发布字段和可见约束；未执行导入、审批、发布或删除，不代表端到端验证</td>
+</tr>
+<tr>
+<td>Studio 项目记忆 <small>（Markdown来源）</small></td>
+<td>删除功能及验证证据；审核与统计留存仍待确认</td>
+</tr>
+<tr>
+<td>技能库 V2.1.0 需求 <small>（Markdown来源）</small></td>
+<td>既有字段、来源与对象规则；删除与版本能力差异见4.4.4，现行要求见本文规则</td>
+</tr>
+<tr>
+<td>技能库架构与业务流程 <small>（Markdown来源）</small></td>
+<td>2026-09-28 历史架构背景；现行要求见本文规则</td>
+</tr>
+</tbody>
+</table></div>
+</section></main></div>
+<footer>公司内部材料 · 来源：三库统一数据源建设_第一阶段开发交付说明.md · 建设方案不表示已开发或上线</footer><button class="back-top" type="button" title="返回顶部" aria-label="返回顶部">↑</button>
+<dialog class="figure-viewer" aria-labelledby="viewer-title"><div class="viewer-toolbar"><strong id="viewer-title">图形查看</strong><button type="button" data-zoom="out" aria-label="缩小">−</button><output aria-live="polite" id="viewer-scale">100%</output><button type="button" data-zoom="in" aria-label="放大">＋</button><button type="button" data-zoom="fit">适应窗口</button><button type="button" data-zoom="actual">原始大小</button><button type="button" data-zoom="close">关闭</button></div><p class="viewer-help">放大后可滚动查看；Esc 关闭</p><div class="viewer-viewport"><div class="viewer-canvas"></div></div></dialog>
+<script>
+const navLinks=[...document.querySelectorAll('.toc a')], sections=[...document.querySelectorAll('main .section')];
+function activate(id){navLinks.forEach(a=>{const active=a.getAttribute('href')==='#'+id;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')})}
+function update(){const top=document.querySelector('.topbar').getBoundingClientRect().height+20;document.documentElement.style.scrollPaddingTop=top+'px';sections.forEach(s=>s.style.scrollMarginTop=top+'px');let current=sections[0];for(const section of sections){if(section.getBoundingClientRect().top<=top+40)current=section}if(current)activate(current.id)}
+let queued=false;addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(()=>{update();queued=false})}},{passive:true});addEventListener('resize',update);addEventListener('load',update);update();
+document.querySelector('.back-top').addEventListener('click',()=>window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
+
+// Local content-figure viewer: no network or external dependencies.
+const viewer=document.querySelector('.figure-viewer'), viewport=viewer.querySelector('.viewer-viewport'), canvas=viewer.querySelector('.viewer-canvas'), scaleLabel=viewer.querySelector('#viewer-scale');
+let zoom=1,naturalW=800,naturalH=400,opener=null,savedOverflow='',viewCounter=0;
+function setZoom(value){zoom=Math.max(.1,Math.min(4,value));canvas.style.width=(naturalW*zoom)+'px';canvas.style.height=(naturalH*zoom)+'px';scaleLabel.textContent=Math.round(zoom*100)+'%'}
+function fitFigure(){setZoom(Math.min((viewport.clientWidth-32)/naturalW,(viewport.clientHeight-32)/naturalH));viewport.scrollTo(0,0)}
+function prefixSvgIds(svg){const prefix='viewer-'+(++viewCounter)+'-';const ids=new Map();svg.querySelectorAll('[id]').forEach(el=>{const id=el.id;ids.set(id,prefix+id);el.id=prefix+id});svg.querySelectorAll('*').forEach(el=>{[...el.attributes].forEach(attr=>{let val=attr.value;ids.forEach((next,old)=>{val=val.split('url(#'+old+')').join('url(#'+next+')');if((attr.name==='href'||attr.name==='xlink:href')&&val==='#'+old)val='#'+next;if(attr.name==='aria-labelledby'||attr.name==='aria-describedby')val=val.split(' ').map(x=>x===old?next:x).join(' ')});if(val!==attr.value)el.setAttribute(attr.name,val)})})}
+function openFigure(media,button){opener=button;canvas.replaceChildren();const clone=media.cloneNode(true);clone.removeAttribute('id');clone.removeAttribute('style');clone.removeAttribute('tabindex');clone.removeAttribute('data-viewer-bound');
+if(media.tagName.toLowerCase()==='svg'){const box=media.viewBox.baseVal;naturalW=box.width||media.getBoundingClientRect().width;naturalH=box.height||media.getBoundingClientRect().height;prefixSvgIds(clone)}else{naturalW=media.naturalWidth||media.width;naturalH=media.naturalHeight||media.height}
+naturalW=Math.max(1,naturalW);naturalH=Math.max(1,naturalH);canvas.append(clone);savedOverflow=document.body.style.overflow;document.body.style.overflow='hidden';viewer.showModal();setZoom(1);viewport.scrollTo(0,0);if(clone.tagName==='IMG'&&!clone.complete)clone.addEventListener('load',()=>{naturalW=clone.naturalWidth||naturalW;naturalH=clone.naturalHeight||naturalH;setZoom(1);viewport.scrollTo(0,0)},{once:true})}
+viewer.addEventListener('close',()=>{document.body.style.overflow=savedOverflow;canvas.replaceChildren();if(opener)opener.focus()});viewer.addEventListener('click',event=>{const action=event.target.closest('[data-zoom]')?.dataset.zoom;if(action==='in')setZoom(zoom*1.25);if(action==='out')setZoom(zoom/1.25);if(action==='fit')fitFigure();if(action==='actual')setZoom(1);if(action==='close')viewer.close()});
+document.querySelectorAll('main figure.diagram').forEach(figure=>{const media=figure.querySelector('svg,img');if(!media)return;const button=document.createElement('button');button.type='button';button.className='view-trigger';button.textContent='点击查看 / 放大缩小';button.addEventListener('click',()=>openFigure(media,button));figure.append(button);media.style.cursor='zoom-in';media.addEventListener('click',()=>openFigure(media,button));media.dataset.viewerBound='true'});
+document.querySelectorAll('main img:not([data-no-viewer])').forEach(media=>{if(media.dataset.viewerBound)return;media.tabIndex=0;media.setAttribute('role','button');media.setAttribute('aria-label',(media.alt||'内容图片')+'，点击查看');media.addEventListener('click',()=>openFigure(media,media));media.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openFigure(media,media)}})});
+
+</script><script>document.getElementById('work-md-download').addEventListener('click',async function(){const status=document.getElementById('work-download-status');this.disabled=true;status.textContent='正在下载…';try{const response=await fetch('./三库统一数据源建设_第一阶段开发交付说明.md');if(!response.ok)throw new Error('HTTP '+response.status);const url=URL.createObjectURL(await response.blob());const link=document.createElement('a');link.href=url;link.download='三库统一数据源建设_第一阶段开发交付说明.md';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent='已发起下载';}catch(error){status.textContent='下载失败，请重试';}finally{this.disabled=false;}});</script>
+</body></html>
