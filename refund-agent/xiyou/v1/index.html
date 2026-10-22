@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="喜佑天猫国际退款 PRD 与看板原型">
+  <title>喜佑天猫国际退款 Agent V1.0 - 原型与 PRD</title>
+  <style>
+    :root {
+      --brand: #D9353F;
+      --brand-dark: #B72832;
+      --ink: #171A21;
+      --muted: #AEB5C0;
+      --line: #343B46;
+      --surface: #FFFFFF;
+      --canvas: #F5F7FA;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body {
+      display: flex;
+      min-width: 320px;
+      flex-direction: column;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .topbar {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      min-height: 68px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 10px 24px;
+      color: #FFFFFF;
+      background: #1D232B;
+      border-bottom: 1px solid #303741;
+    }
+    .brand { min-width: 0; }
+    .brand h1 {
+      margin: 0;
+      overflow: hidden;
+      font-size: 17px;
+      font-weight: 750;
+      letter-spacing: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .brand h1::before {
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      margin-right: 10px;
+      vertical-align: -3px;
+      background: var(--brand);
+      border-radius: 2px;
+      content: "";
+    }
+    .brand p {
+      margin: 5px 0 0 14px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tabs {
+      display: inline-flex;
+      flex: none;
+      gap: 4px;
+      padding: 4px;
+      background: #2A313B;
+      border: 1px solid #3A424D;
+      border-radius: 7px;
+    }
+    .tab {
+      min-height: 36px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 5px;
+      color: #C9CFD8;
+      background: transparent;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .tab:hover { color: #FFFFFF; background: #353D48; }
+    .tab[aria-selected="true"] { color: #FFFFFF; background: var(--brand); }
+    .tab:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+    .release-bar {
+      display: flex;
+      min-height: 38px;
+      flex: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 24px;
+      color: #7B2730;
+      background: #FFF5F6;
+      border-bottom: 1px solid #F2CDD1;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .release-dot { width: 7px; height: 7px; flex: none; background: var(--brand); border-radius: 50%; }
+    .release-bar strong { color: var(--brand-dark); }
+    .frame-wrap { position: relative; min-height: 0; flex: 1; }
+    .frame-wrap iframe {
+      position: absolute;
+      inset: 0;
+      display: none;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: var(--canvas);
+    }
+    .frame-wrap iframe.active { display: block; }
+    @media (max-width: 680px) {
+      .topbar { min-height: 0; align-items: stretch; flex-direction: column; gap: 10px; padding: 12px 16px; }
+      .brand h1 { font-size: 15px; }
+      .brand p { font-size: 11px; }
+      .tabs { align-self: flex-start; }
+      .tab { min-height: 34px; padding: 0 13px; font-size: 12px; }
+      .release-bar { align-items: flex-start; padding: 7px 16px; font-size: 11px; }
+    }
+  </style>
+<link rel="stylesheet" href="/_shared/workbench-nav.css">
+<script src="/_shared/workbench-nav.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>喜佑天猫国际退款 Agent V1.0</h1>
+      <p>退款 PRD 与独立看板原型</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="项目资料">
+      <button class="tab" id="tab-prototype" type="button" role="tab" aria-controls="panel-prototype">交互原型</button>
+      <button class="tab" id="tab-prd" type="button" role="tab" aria-controls="panel-prd">PRD 文档</button>
+    </div>
+  </header>
+
+  <div class="release-bar">
+    <span class="release-dot" aria-hidden="true"></span>
+    <strong>2026-10-22</strong>
+    <span>开发交付版 PRD；看板使用模拟数据，待用户评审，不代表已开发、部署或上线。</span>
+  </div>
+
+  <main class="frame-wrap">
+    <iframe id="panel-prototype" src="prototype.html" title="客服 Agent 数据看板原型"></iframe>
+    <iframe id="panel-prd" src="prd.html?embedded=true" title="客服 Agent 数据看板 PRD"></iframe>
+  </main>
+
+  <script>
+    const views = {
+      prototype: {
+        tab: document.getElementById("tab-prototype"),
+        panel: document.getElementById("panel-prototype")
+      },
+      prd: {
+        tab: document.getElementById("tab-prd"),
+        panel: document.getElementById("panel-prd")
+      }
+    };
+
+    function showView(name, updateHash = true) {
+      const target = views[name] || views.prototype;
+      Object.entries(views).forEach(([key, view]) => {
+        const active = view === target;
+        view.tab.setAttribute("aria-selected", String(active));
+        view.tab.tabIndex = active ? 0 : -1;
+        view.panel.classList.toggle("active", active);
+      });
+      if (updateHash && window.location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+    }
+
+    Object.entries(views).forEach(([name, view]) => {
+      view.tab.addEventListener("click", () => showView(name));
+      view.tab.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const next = name === "prototype" ? "prd" : "prototype";
+        showView(next);
+        views[next].tab.focus();
+      });
+    });
+    window.addEventListener("hashchange", () => showView(window.location.hash.slice(1), false));
+    showView(window.location.hash.slice(1) || "prototype", false);
+  </script>
+</body>
+</html>
