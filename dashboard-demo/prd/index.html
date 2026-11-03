@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="客服 Agent 数据看板增量 PRD V1.0 与业务线开发分册">
+  <meta name="description" content="客服 Agent 数据看板增量 PRD V1.1 与业务线开发分册">
   <title>客服 Agent 数据看板 - PRD 文档</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="../assets/marked.umd.js"></script>
   <style>
     :root {
       --brand: #D9353F;
@@ -186,16 +186,18 @@
       .markdown-body { max-width: none; padding: 0; border: 0; box-shadow: none; }
     }
   </style>
+<script src="../assets/mermaid.min.js"></script>
+<link rel="stylesheet" href="/_shared/workbench-nav.css"><script src="/_shared/workbench-nav.js" defer></script>
 </head>
 <body>
   <header class="doc-header">
     <div class="doc-title">
-      <strong id="current-title">客服 Agent 看板增量 PRD V1.0</strong>
-      <span>知识库 Markdown 为事实源，本页为发布副本 · <span class="status">PRD 初版，待技术评审</span></span>
+      <strong id="current-title">客服 Agent 看板增量 PRD V1.1</strong>
+      <span>知识库 Markdown 为事实源，本页为发布副本 · <span class="status">V1.1 规则已确认，待技术评审</span></span>
     </div>
     <div class="actions">
       <a class="action" id="download-current" href="#" download>↓ 当前 Markdown</a>
-      <a class="action primary" href="../downloads/客服Agent看板-PRD完整包-V1.0-20260929.zip" download>↓ 完整 PRD 包</a>
+      <a class="action primary" href="../downloads/客服Agent看板-PRD完整包-V1.1-20261103.zip" download>↓ 完整 PRD 包</a>
       <button class="action" id="print" type="button">打印 / PDF</button>
     </div>
   </header>
@@ -213,14 +215,14 @@
       <nav class="toc-list" id="toc"></nav>
     </aside>
     <main class="content-wrap">
-      <div class="source-note"><span aria-hidden="true">●</span><span>完整包包含 1 份增量 PRD、8 份开发分册和文件清单。原型与文档均为评审材料，不代表生产能力。</span></div>
+      <div class="source-note"><span aria-hidden="true">●</span><span>完整包包含 1 份增量 PRD、7 份开发分册和文件清单。原型与文档均为评审材料，不代表生产能力。</span></div>
       <article class="markdown-body" id="content"><div class="loading">正在加载 PRD...</div></article>
     </main>
   </div>
 
   <script>
     const documents = [
-      { label: "增量 PRD V1.0", path: "客服Agent看板_统计口径与交互优化_增量PRD_V1.0.md" },
+      { label: "增量 PRD V1.1", path: "客服Agent看板_统计口径与交互优化_增量PRD_V1.1.md" },
       { label: "跨平台总览分册", path: "业务线开发分册/跨平台总览_开发分册.md" },
       { label: "大健康分册", path: "业务线开发分册/大健康_开发分册.md" },
       { label: "拼多多分册", path: "业务线开发分册/拼多多_开发分册.md" },
@@ -228,7 +230,7 @@
       { label: "天猫国际分册", path: "业务线开发分册/天猫国际_开发分册.md" },
       { label: "淘宝分册", path: "业务线开发分册/淘宝_开发分册.md" },
       { label: "淘工厂分册", path: "业务线开发分册/淘工厂_开发分册.md" },
-      { label: "小红书分册", path: "业务线开发分册/小红书_开发分册.md" }
+      { label: "各平台取数规则", path: "各平台总数取数规则及影响_客服口径执行稿_20261028.md" }
     ];
     const byPath = new Map(documents.map((doc) => [doc.path, doc]));
     const content = document.getElementById("content");
@@ -266,7 +268,7 @@
       content.querySelectorAll("a[href]").forEach((link) => {
         const sourceHref = link.getAttribute("href");
         if (!sourceHref || sourceHref.startsWith("#")) return;
-        if (sourceHref.includes("dashboard-demo/index.html")) {
+        if (sourceHref.includes("dashboard-demo/index.html") || sourceHref.endsWith("#prototype")) {
           link.href = "../#prototype";
           link.target = "_top";
           return;
@@ -305,6 +307,10 @@
           table.parentNode.insertBefore(wrapper, table);
           wrapper.appendChild(table);
         });
+        content.querySelectorAll('img[src]').forEach(img=>{img.src=new URL(img.getAttribute('src'),new URL(doc.path,location.href)).href;img.style.maxWidth='100%';img.style.height='auto';});
+        const diagrams=[...content.querySelectorAll('code.language-mermaid')];
+        mermaid.initialize({startOnLoad:false,securityLevel:'strict',theme:'neutral'});
+        for(let i=0;i<diagrams.length;i++){const code=diagrams[i];const result=await mermaid.render('flow-'+Date.now()+'-'+i,code.textContent);const panel=document.createElement('div');panel.style.overflowX='auto';panel.innerHTML=result.svg;code.parentElement.replaceWith(panel);}
         rewriteDocumentLinks();
         buildToc();
         history.replaceState(null, "", "?doc=" + encodeURIComponent(doc.path));

@@ -1,52 +1,48 @@
 {
   "project": "客服 Agent 数据看板",
-  "release": "V1.0",
-  "publishedDate": "2026-09-29",
-  "status": "PRD初版，产品主口径已确认，待技术评审与生产数据核验",
+  "release": "V1.1",
+  "publishedDate": "2026-11-03",
+  "status": "业务规则已确认，待技术评审与生产字段核验",
   "prototype": {
     "path": "prototype/index.html",
-    "sha256": "0E46110BA1FB8799BE50316AF61DE63ED34603ACED38C2F7DA11329D5CB246EF"
+    "sha256": "5b52d8da63e18661a65085a044e353686a74aee19d9121e1e5a960c8531870da"
   },
   "documents": [
     {
-      "path": "prd/客服Agent看板_统计口径与交互优化_增量PRD_V1.0.md",
-      "sha256": "DC160D5ADB42CE9A6036F17A57E04FF403A8E43E8A5DA1412D6D432D77D4AFDD"
+      "path": "prd/客服Agent看板_统计口径与交互优化_增量PRD_V1.1.md",
+      "sha256": "039913e2445bd4e4bd15028f245ca9702c1373df909d0908b797dbb36f3b2042"
+    },
+    {
+      "path": "prd/各平台总数取数规则及影响_客服口径执行稿_20261028.md",
+      "sha256": "1674035ce42fda12564bd529e528eb0d838ea4f074d06fded04b64adec206ec2"
     },
     {
       "path": "prd/业务线开发分册/跨平台总览_开发分册.md",
-      "sha256": "FFC2EB401B67B3154CEFCA08D6484DDFB9D2748EBCADA0A63D1323A8B47DA8FD"
+      "sha256": "edff92f65d7b446675cc54017796e8c08f96d2df5519933e8035b15162ea619c"
     },
     {
       "path": "prd/业务线开发分册/大健康_开发分册.md",
-      "sha256": "793BA3E5F97DBDF0EEF086E04ED2AB0AA0948697D9B2AAE3F350005C8EF74D2F"
+      "sha256": "1b4f2a7e5b514e8cf13e7ed6831992c03140da8853d94424c3802798e8d9d2c7"
     },
     {
       "path": "prd/业务线开发分册/拼多多_开发分册.md",
-      "sha256": "6F850F3BFC766C4FCB205AE7EFF1F61951447DBD773D474024357EBB7FC7DE37"
+      "sha256": "715fb782c3ecc41f81ec6e28e059b4b5ddb4cf55c1f688b6b06430e4490f9a3d"
     },
     {
       "path": "prd/业务线开发分册/抖音_开发分册.md",
-      "sha256": "EDEF42617EC1DA378C24C665E9E14AB9ED41F8EB8D0BA7790CB2EF66ADD42EB0"
+      "sha256": "a8e8f8f2566cc06214a44810a616d3411231fffadab151fa6247c35b0aa7f02a"
     },
     {
       "path": "prd/业务线开发分册/天猫国际_开发分册.md",
-      "sha256": "6E43ECBAC6E4C4E822493B9716867F0318FE680439A250E802B7D64DBB2C4A5E"
+      "sha256": "e81e32ac0e64a1b4f606f84fbc68f08d5bb996610786152559f8cf2d3c73b6f9"
     },
     {
       "path": "prd/业务线开发分册/淘宝_开发分册.md",
-      "sha256": "9F2221E6848FA62E86884055ADF90015825FF1B4958387F3DA2040B78DDC642F"
+      "sha256": "06ea4aa664e21b4f4c25d90fecc36f477b92a7761631338875989724621d2477"
     },
     {
       "path": "prd/业务线开发分册/淘工厂_开发分册.md",
-      "sha256": "00A87E9A4007B338E96629F7BB3D9691B0230CDC158793A2899437D46265026A"
-    },
-    {
-      "path": "prd/业务线开发分册/小红书_开发分册.md",
-      "sha256": "1CD0532D49831FF84699C3B2FC6D047FEF2B17AF71F7DF4F7C6C9CA08DFE7F68"
+      "sha256": "642d15fe9c741975c1b2599d6deb223173a14d3339bda0fafb3dc5ebf5626822"
     }
-  ],
-  "package": {
-    "path": "downloads/客服Agent看板-PRD完整包-V1.0-20260929.zip",
-    "sha256": "91EEB8596205AF97F4E6915D1BE775A08B145D0AD95AD20A416D7AEA406A41AD"
-  }
+  ]
 }
