@@ -814,6 +814,11 @@ body.demo-hierarchy .nav-item[data-view="overview-new"]{display:flex!important}
 .overview-rule-summary{margin:12px 0 2px;padding:10px 12px;border-radius:6px;background:#F7F8FA;color:#5F6B7A;font-size:12px;line-height:1.7}
 .overview-rule-summary strong{color:#303A4B}
 #view-overview .grid-2col>.card{min-width:0}
+
+/* 人工日量填报，沿用现有卡片、查询区和弹窗视觉。 */
+.manual-entry-button{margin-left:auto;border:1px solid var(--primary);color:var(--primary);background:#fff;border-radius:6px;padding:7px 12px;min-height:34px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}.manual-entry-button:hover{background:#FFF4F5}.manual-entry-button[hidden]{display:none}
+.manual-entry-dialog{width:min(640px,calc(100vw - 32px));padding:24px}.manual-entry-description{font-size:13px;line-height:1.8;color:#667085;margin-bottom:18px}.manual-entry-field{display:flex;flex-direction:column;gap:8px;margin:16px 0}.manual-entry-field>span{font-size:13px;color:#344054;font-weight:500}.manual-entry-field input,.manual-entry-field textarea{width:100%;padding:10px 12px;border:1px solid #DCDFE6;border-radius:6px;font:inherit;font-size:14px;color:#1D2129;background:#fff;box-sizing:border-box}.manual-entry-field input:focus,.manual-entry-field textarea:focus{outline:0;border-color:#D9353F;box-shadow:0 0 0 2px #FBE1E3}.manual-entry-field small{font-size:12px;line-height:1.6;color:#86909C}.manual-entry-counts{display:grid;grid-template-columns:1fr 1fr;gap:16px}.manual-entry-counts .manual-entry-field{margin-top:0}.manual-entry-audit{font-size:12px;line-height:1.7;color:#667085;background:#F7F8FA;border-radius:6px;padding:12px}.manual-entry-audit p{margin:4px 0}.manual-entry-feedback{font-size:13px;line-height:1.7;margin-top:12px;color:#C4303D}.manual-entry-feedback[data-success="true"]{color:#228754}.manual-entry-feedback[hidden]{display:none}.manual-entry-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #EEF0F3}.manual-entry-actions button{padding:9px 18px;border:1px solid #DCDFE6;border-radius:6px;background:#fff;color:#4E5969;font:inherit;cursor:pointer}.manual-entry-actions .manual-entry-save{background:#D9353F;color:#fff;border-color:#D9353F}.manual-entry-actions button:disabled{opacity:.55;cursor:wait}.manual-entry-history{margin-top:16px;font-size:12px;color:#667085}.manual-entry-history summary{cursor:pointer;color:#475467}.manual-entry-history ol{padding-left:20px;max-height:180px;overflow:auto}.manual-entry-history li{line-height:1.7;margin-top:10px}.manual-entry-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:1500;padding:12px 20px;max-width:calc(100vw - 40px);background:#243044;color:white;border-radius:7px;font-size:13px;box-shadow:0 6px 24px #17203233}.manual-entry-toast[hidden]{display:none}
+@media(max-width:560px){.manual-entry-counts{grid-template-columns:1fr;gap:0}.manual-entry-dialog{padding:18px}.manual-entry-button{font-size:12px}}
 </style>
 </head>
 <body>
@@ -905,6 +910,7 @@ body.demo-hierarchy .nav-item[data-view="overview-new"]{display:flex!important}
             <option value="all">全部场景</option>
           </select>
         </div>
+        <button type="button" class="manual-entry-button" id="manualEntryOpen" onclick="openManualEntry(this)">人工处理量填报</button>
       </div>
     </header>
 
@@ -1129,6 +1135,27 @@ body.demo-hierarchy .nav-item[data-view="overview-new"]{display:flex!important}
 </div>
 
 <dialog id="reviewSourceDialog" class="review-source-dialog" aria-labelledby="reviewDialogTitle"><div class="review-dialog-header"><h2 id="reviewDialogTitle"></h2><button type="button" id="reviewDialogClose" aria-label="关闭口径说明">×</button></div><div id="reviewDialogBody"></div></dialog>
+
+<dialog id="manualEntryDialog" class="review-source-dialog manual-entry-dialog" aria-labelledby="manualEntryTitle">
+  <div class="review-dialog-header"><h2 id="manualEntryTitle">人工处理量填报</h2><button type="button" aria-label="关闭人工处理量填报" onclick="closeManualEntry()">×</button></div>
+  <p class="manual-entry-description">填写阿里大健康、天猫国际的每日人工已处理量。请在每天9:30前填报昨日数据，保存后更新对应日期的参考总量。</p>
+  <form id="manualEntryForm" novalidate>
+    <label class="manual-entry-field"><span>实际处理日期</span><input type="date" id="manualEntryDate" required onchange="changeManualEntryDate()"><small>默认昨日，可选择过去日期补填；数据按处理日期归属，不按填写日期。</small></label>
+    <div class="manual-entry-counts">
+      <label class="manual-entry-field"><span>阿里大健康人工处理量</span><input type="text" inputmode="numeric" id="manualEntryHealth" autocomplete="off" placeholder="未填报" maxlength="16"><small id="manualEntryHealthStatus">未填报</small></label>
+      <label class="manual-entry-field"><span>天猫国际人工处理量</span><input type="text" inputmode="numeric" id="manualEntryInternational" autocomplete="off" placeholder="未填报" maxlength="16"><small id="manualEntryInternationalStatus">未填报</small></label>
+    </div>
+    <label class="manual-entry-field"><span>备注（选填）</span><textarea id="manualEntryRemark" rows="2" placeholder="可填写补填或更正说明"></textarea></label>
+    <div class="manual-entry-audit" id="manualEntryAudit"></div>
+    <p class="manual-entry-description">填写平台日总数，不拆店铺或场景。至少填写一项；0表示当日无人工处理量，留空不新增或清除该平台已有值。</p>
+    <details class="manual-entry-history"><summary>修改记录 <span id="manualEntryHistoryCount"></span></summary><ol id="manualEntryHistory"></ol></details>
+    <div id="manualEntryFeedback" class="manual-entry-feedback" role="alert" hidden></div>
+    <div class="manual-entry-actions"><button type="button" onclick="closeManualEntry()">取消</button><button type="submit" class="manual-entry-save" id="manualEntrySave">保存</button></div>
+  </form>
+  <p class="manual-entry-description" style="margin:12px 0 0;font-size:11px">本地交互演示：填写人为“演示用户”，保存到当前浏览器；正式系统由登录账号记录身份并保存至服务端。</p>
+</dialog>
+<div id="manualEntryToast" class="manual-entry-toast" role="status" hidden></div>
+
 <div id="querySelectMenu" class="query-select-menu" hidden><div id="querySelectOptions" class="query-select-options" role="listbox"></div></div>
 <script>
 // ===== 模拟数据 =====
@@ -1397,11 +1424,130 @@ const demoUnconnectedRecords = Object.keys(platforms).filter(key => key !== 'all
   }
   return records;
 });
-// 合成日登记演示：今日人工量尚未提供，天猫国际另有一个历史日期待补取。
+// 合成日登记演示：今日人工量尚未提供，天猫国际另有一个历史日期待补填。
 const referenceManualRows = ['dajiankang','tmall','taogongchang'].flatMap((key, pi) =>
   Array.from({length:60}, (_,day) => ({ platform:key, date:addDays(DEMO_TODAY,-day),
     quantity: ((key !== 'taogongchang' && day === 0) || (key === 'tmall' && day === 2)) ? null :
       key === 'dajiankang' && day === 4 ? 0 : 18 + (day * 3 + pi * 7) % 22 })));
+// Local prototype only. Production uses authenticated identity, atomic server writes and audit records.
+const MANUAL_ENTRY_STORAGE_KEY = 'xianma-dashboard-manual-entry-demo-v1';
+const MANUAL_ENTRY_PLATFORMS = ['dajiankang', 'tmall'];
+const MANUAL_ENTRY_USER = '演示用户';
+let manualEntryState = {days:{}};
+let manualEntryLoadError = '';
+let manualEntryDate = '';
+let manualEntryDraft = '';
+let manualEntryVersion = 0;
+let manualEntryOpener = null;
+let manualEntryToastTimer;
+const manualEscape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function readManualEntryStorage() {
+  const raw = localStorage.getItem(MANUAL_ENTRY_STORAGE_KEY);
+  const parsed = raw ? JSON.parse(raw) : {days:{}};
+  if (!parsed || typeof parsed.days !== 'object' || Array.isArray(parsed.days) || parsed.days === null) throw Error('Invalid manual entry storage');
+  Object.entries(parsed.days).forEach(([date, row]) => {
+    if (!validDate(date) || !row || !row.values || !Number.isInteger(row.version) || !Array.isArray(row.history)) throw Error('Invalid manual entry record');
+    Object.entries(row.values).forEach(([key, value]) => {
+      if (!MANUAL_ENTRY_PLATFORMS.includes(key) || !Number.isSafeInteger(value) || value < 0) throw Error('Invalid manual entry count');
+    });
+  });
+  return parsed;
+}
+function applyManualEntryOverrides(state) {
+  Object.entries(state.days).forEach(([date, row]) => Object.entries(row.values).forEach(([key, value]) => {
+    const existing = referenceManualRows.find(r => r.date === date && r.platform === key);
+    if (existing) existing.quantity = value;
+    else referenceManualRows.push({platform:key,date,quantity:value});
+  }));
+}
+try { manualEntryState=readManualEntryStorage(); applyManualEntryOverrides(manualEntryState); }
+catch { manualEntryLoadError='本地填报记录无法读取，请检查浏览器存储后重试；为避免覆盖，暂不能保存。'; }
+function manualEntrySnapshot() {
+  return JSON.stringify([byId('manualEntryHealth').value, byId('manualEntryInternational').value, byId('manualEntryRemark').value]);
+}
+function manualEntryFeedback(message, success = false) {
+  const node=byId('manualEntryFeedback'); node.textContent=message;node.dataset.success=String(success);node.hidden=!message;
+}
+function loadManualEntryDate(date) {
+  manualEntryDate=date;
+  const row=manualEntryState.days[date];
+  manualEntryVersion=row?.version || 0;
+  const fields=[['dajiankang','manualEntryHealth','manualEntryHealthStatus'],['tmall','manualEntryInternational','manualEntryInternationalStatus']];
+  fields.forEach(([key,id,status])=>{
+    const record=referenceManualRows.find(r=>r.platform===key&&r.date===date);
+    const value=record?.quantity;
+    byId(id).value=Number.isSafeInteger(value)?String(value):'';
+    byId(status).textContent=Number.isSafeInteger(value)?'已填报 · '+value+' 单（可更正）':'未填报 · 不能视为0';
+  });
+  byId('manualEntryRemark').value=row?.remark || '';
+  byId('manualEntryAudit').innerHTML='<p>当前填写人：<strong>'+manualEscape(MANUAL_ENTRY_USER)+'</strong>（自动记录）</p>'+
+    (row?'<p>最近修改：'+manualEscape(row.modifiedBy)+' · '+manualEscape(row.modifiedAt)+'</p>':'<p>最近修改：'+(fields.some(([,id])=>byId(id).value!=='')?'原型初始演示数据，暂无修改记录':'尚未填写')+'</p>');
+  const history=row?.history || [];
+  byId('manualEntryHistoryCount').textContent='（'+history.length+'）';
+  byId('manualEntryHistory').innerHTML=history.length?history.slice().reverse().map(item=>'<li><strong>'+manualEscape(item.actor)+'</strong> · '+manualEscape(item.time)+'<br>'+MANUAL_ENTRY_PLATFORMS.filter(key=>Object.hasOwn(item.after,key)).map(key=>manualEscape(key==='dajiankang'?'阿里大健康':'天猫国际')+'：'+manualEscape(item.before[key]??'未填')+' → '+manualEscape(item.after[key])).join('；')+(item.remark?'<br>备注：'+manualEscape(item.remark):'')+'</li>').join(''):'<li>暂无修改记录</li>';
+  manualEntryDraft=manualEntrySnapshot();
+  manualEntryFeedback(manualEntryLoadError);
+}
+function openManualEntry(opener) {
+  closeDateCalendar();closeQuerySelect();closeCategoryBreakdown();
+  manualEntryOpener=opener;
+  try {manualEntryState=readManualEntryStorage();applyManualEntryOverrides(manualEntryState);manualEntryLoadError='';}
+  catch {manualEntryLoadError='本地填报记录无法读取，请检查浏览器存储后重试；为避免覆盖，暂不能保存。';}
+  const yesterday=addDays(DEMO_TODAY,-1);
+  byId('manualEntryDate').max=yesterday;byId('manualEntryDate').value=yesterday;
+  byId('manualEntryDate').nextElementSibling.textContent='默认昨日，可补填历史日期；原型演示今日为 '+DEMO_TODAY+'。按处理日期归属，不按填写日期。';
+  loadManualEntryDate(yesterday);
+  byId('manualEntryDialog').showModal();
+}
+function changeManualEntryDate() {
+  const date=byId('manualEntryDate').value;
+  if (!validDate(date) || date >= DEMO_TODAY) {byId('manualEntryDate').value=manualEntryDate;manualEntryFeedback('请选择昨日或更早的有效处理日期。');return;}
+  if (manualEntrySnapshot()!==manualEntryDraft && !confirm('当前填写尚未保存，确定切换日期并放弃本次修改吗？')) {byId('manualEntryDate').value=manualEntryDate;return;}
+  loadManualEntryDate(date);
+}
+function closeManualEntry() {
+  if (manualEntrySnapshot()!==manualEntryDraft && !confirm('当前填写尚未保存，确定关闭并放弃本次修改吗？')) return;
+  byId('manualEntryDialog').close();
+}
+function saveManualEntry(event) {
+  event.preventDefault();
+  const date=byId('manualEntryDate').value;
+  if(!validDate(date) || date>=DEMO_TODAY || date!==manualEntryDate){manualEntryFeedback('请选择昨日或更早的有效处理日期。');return;}
+  if(manualEntryLoadError){manualEntryFeedback(manualEntryLoadError);return;}
+  const values={};
+  for(const [key,id] of [['dajiankang','manualEntryHealth'],['tmall','manualEntryInternational']]){
+    const raw=byId(id).value.trim();
+    if(raw==='')continue;
+    if(!/^\d+$/.test(raw) || !Number.isSafeInteger(Number(raw))){manualEntryFeedback('人工处理量须为非负整数；没有处理量请填0。');byId(id).focus();return;}
+    values[key]=Number(raw);
+  }
+  if(!Object.keys(values).length){manualEntryFeedback('请至少填写一个平台的人工处理量，0也是有效值。');return;}
+  byId('manualEntrySave').disabled=true;
+  let committed=false;
+  try{
+    const latest=readManualEntryStorage(), previous=latest.days[date];
+    if((previous?.version || 0)!==manualEntryVersion){manualEntryFeedback('该日期已被更新，请重新打开弹窗核对最新值后再保存；本次输入已保留。');return;}
+    const before=Object.fromEntries(Object.keys(values).map(key=>[key,referenceManualRows.find(r=>r.platform===key&&r.date===date)?.quantity??null]));
+    const remark=byId('manualEntryRemark').value.trim();
+    const modifiedAt=new Date().toLocaleString('sv-SE',{timeZone:'Asia/Shanghai',hour12:false})+'（北京时间）';
+    const unchanged=Object.entries(values).every(([key,value])=>before[key]===value) && remark===(previous?.remark || '');
+    if(unchanged){manualEntryFeedback('没有需要保存的变更。',true);return;}
+    latest.days[date]={values:{...(previous?.values || {}),...values},remark,modifiedBy:MANUAL_ENTRY_USER,modifiedAt,
+      version:manualEntryVersion+1,history:[...(previous?.history || []),{actor:MANUAL_ENTRY_USER,time:modifiedAt,before,after:values,remark}]};
+    // Commit before changing dashboard totals; write failure never changes a metric.
+    localStorage.setItem(MANUAL_ENTRY_STORAGE_KEY,JSON.stringify(latest));
+    committed=true;
+    manualEntryState=latest;applyManualEntryOverrides(latest);loadManualEntryDate(date);refreshDashboard();
+    byId('manualEntryDialog').close();
+    byId('manualEntryToast').textContent='已保存 '+date+' 人工处理量，参考总量已更新';byId('manualEntryToast').hidden=false;
+    clearTimeout(manualEntryToastTimer);manualEntryToastTimer=setTimeout(()=>{byId('manualEntryToast').hidden=true},4200);
+  }catch {manualEntryFeedback(committed?'已保存，报表刷新失败。请刷新页面查看，勿重复填报。':'保存失败，本次输入已保留，报表数据未更新。请检查浏览器存储后重试。');}
+  finally {byId('manualEntrySave').disabled=false;}
+}
+byId('manualEntryForm').addEventListener('submit',saveManualEntry);
+byId('manualEntryDialog').addEventListener('cancel',event=>{event.preventDefault();closeManualEntry();});
+byId('manualEntryDialog').addEventListener('close',()=>manualEntryOpener?.focus());
+
 function getCompletionRecordsForKey(key, referenceType = null) {
   return coreRecords(demoRecords).filter(r => r.platform === key && isCompleted(r) && r.completedAt.slice(0,10) >= activeDates.start && r.completedAt.slice(0,10) <= activeDates.end
     && (appliedFilters.shop === 'all' || r.shopKey === appliedFilters.shop)
@@ -1583,9 +1729,9 @@ const OVERVIEW_REFERENCE_RULES = {
     {name:'拼多多 · 平台工单', source:'后台 → 工单管理，按工单创建时间筛选，取工单数量；不取有效完结率。', date:'工单创建时间', impact:'包含尚未处理的工单，不是当天实际完成量。'},
     {name:'拼多多 · 退货退款', source:'后台 → 售后工作台，操作类型选“商家同意退款”，按申请时间筛选后取数量。', date:'售后申请时间', impact:'只取约定退款范围；筛选结果不区分AI或人工，不能当作人工完成量。'}
   ],
-  dajiankang:[{name:'阿里大健康', source:'总表按实际完成日期汇总：AI实际独立完成量＋钉钉表对应日期的“阿里大健康人工已处理量”；人工只填总数，不拆业务类型，本轮补数业务AI与人工不重复计数。', date:'AI与人工均按实际完成／处理日期；人工次日填报上一日', impact:'是完成处理量汇总，不能代表全部新增需处理量；与子报表按任务创建日期统计的结果可能不同。人工每天9:30前填昨日数据，9:30首取，未成功每30分钟补取，成功停止；缺失不当0。'}],
-  tmall:[{name:'天猫国际', source:'总表按实际完成日期汇总：AI实际独立完成量＋钉钉表对应日期的“天猫国际人工已处理量”；只取本业务人工总数，本轮补数业务AI与人工不重复计数。', date:'AI与人工均按实际完成／处理日期；人工次日填报上一日', impact:'是完成处理量汇总，不包含全部未处理单；与子报表按任务创建日期统计的结果可能不同。人工每天9:30前填昨日数据，9:30首取，未成功每30分钟补取，成功停止；缺失不当0。'}],
-  taogongchang:[{name:'淘工厂', source:'直接复用淘工厂现有子报表人工已处理量，按实际处理日期查询；不读取金山表，不增加钉钉填报列。AI只监控通知，AI处理量为0。范围为已支付待揽收、已揽收待更新物流、运输中待派送；排除支付18—24小时未揽收及延迟／虚假发货。已支付待揽收五类：支付24-36小时未揽收、支付36-48小时未揽收、支付超48小时未揽收、发货12-24小时未揽收、发货24小时未揽收。', date:'人工实际处理日期', impact:'人工量的字段、实际处理日期、去重、店铺/场景维度及刷新方式由本线开发核验；现有接口不可用时显示缺失，不用通知量或后台列表差额代替。后台异常列表是当前存量，不能累加为每日新增。'}],
+  dajiankang:[{name:'阿里大健康', source:'总表按实际完成日期汇总：AI实际独立完成量＋页面填报对应日期的“阿里大健康人工已处理量”；人工只填总数，不拆业务类型，本轮补数业务AI与人工不重复计数。', date:'AI与人工均按实际完成／处理日期；人工次日填报上一日', impact:'是完成处理量汇总，不能代表全部新增需处理量；与子报表按任务创建日期统计的结果可能不同。人工每天9:30前在本页填昨日数据，保存成功即更新参考量；可补填和更正，记录填写人与修改时间；缺失不当0。'}],
+  tmall:[{name:'天猫国际', source:'总表按实际完成日期汇总：AI实际独立完成量＋页面填报对应日期的“天猫国际人工已处理量”；只取本业务人工总数，本轮补数业务AI与人工不重复计数。', date:'AI与人工均按实际完成／处理日期；人工次日填报上一日', impact:'是完成处理量汇总，不包含全部未处理单；与子报表按任务创建日期统计的结果可能不同。人工每天9:30前在本页填昨日数据，保存成功即更新参考量；可补填和更正，记录填写人与修改时间；缺失不当0。'}],
+  taogongchang:[{name:'淘工厂', source:'直接复用淘工厂现有子报表人工已处理量，按实际处理日期查询；不读取金山表，不纳入本次人工填报弹窗。AI只监控通知，AI处理量为0。范围为已支付待揽收、已揽收待更新物流、运输中待派送；排除支付18—24小时未揽收及延迟／虚假发货。已支付待揽收五类：支付24-36小时未揽收、支付36-48小时未揽收、支付超48小时未揽收、发货12-24小时未揽收、发货24小时未揽收。', date:'人工实际处理日期', impact:'人工量的字段、实际处理日期、去重、店铺/场景维度及刷新方式由本线开发核验；现有接口不可用时显示缺失，不用通知量或后台列表差额代替。后台异常列表是当前存量，不能累加为每日新增。'}],
   taobao:[{name:'淘宝', source:'淘宝／千牛 → 交易 → 退款管理，按相同申请时段分别查询未收货退款、已收货退款、退货退款、退运费、换货，状态选“全部”（含处理中、已结束、关闭／撤销等），合并后按店铺＋售后单号去重；不同售后单不因同一订单合并，取全部分页总条数。', date:'售后申请时间', impact:'是约定五类的售后申请单量，不是人工完成量；与AI数据的统计单位、日期及范围可能不同。'}],
   douyin:[{name:'抖音', source:'后台 → 售后工作台，状态选“退款成功”，类型取已发货退款、退货退款、换货，按申请时间筛选后取条数，不增加未发货退款等其他类型。', date:'售后申请时间', impact:'只含退款成功且符合类型的数据，不包含全部待处理售后，也不是按完成日统计。'}]
 };
@@ -1594,7 +1740,7 @@ function openOverviewRules(key, opener) {
   const rules = keys.flatMap(k => OVERVIEW_REFERENCE_RULES[k] || []);
   const body = '<p class="review-dialog-intro">工单总量为各平台按客服约定取得的参考数据，日期与范围不同，合计不代表统一的新增需处理量。总表完成量按实际完成日期归属；尚未完成按创建日期归属，展示当前仍未完成存量。</p>' +
     (rules.length ? rules.map(r => '<section class="overview-rule-section"><h3>'+r.name+'</h3><p><strong>取数：</strong>'+r.source+'</p><p><strong>日期：</strong>'+r.date+'</p><p><strong>影响：</strong>'+r.impact+'</p></section>').join('') : '<p class="review-dialog-intro">小红书本期不做，原型中的旧演示数值不作为本期取数依据。</p>') +
-    '<div class="review-dialog-note">昨天创建、今天完成计入今天完成量；尚未完成按所选创建日期统计当前仍未完成的任务，后续完成会减少，不是历史日终快照。进入自动化仍按创建日，不能与完成日指标相加减。AI完成占比＝同一完成日集合的AI独立完成÷自动化内已完成，不含平台外人工填报。参考总量不能用于反推人工或未完成；AI覆盖率仍为进入自动化量÷参考总量，日期、范围不同，仅供参考，可能超过100%。人工缺失不当0，覆盖率显示“—”；大健康、天猫国际及淘工厂无人工店铺拆分，指定店铺参考总量显示“—”。淘工厂AI只通知；人工参考量复用既有子报表。钉钉只填大健康、天猫国际，次日9:30首取昨日人工，仅未成功项每30分钟补取，成功停止。已确认平台自行结束且AI/人工均未处理的单排除有效处理统计，历史创建日有效量可能减少。拼多多两行进入原拼多多子报表；演示来源标识不代替生产映射。本页为合成演示，尚未接入真实取数。</div>';
+    '<div class="review-dialog-note">昨天创建、今天完成计入今天完成量；尚未完成按所选创建日期统计当前仍未完成的任务，后续完成会减少，不是历史日终快照。进入自动化仍按创建日，不能与完成日指标相加减。AI完成占比＝同一完成日集合的AI独立完成÷自动化内已完成，不含平台外人工填报。参考总量不能用于反推人工或未完成；AI覆盖率仍为进入自动化量÷参考总量，日期、范围不同，仅供参考，可能超过100%。人工缺失不当0，覆盖率显示“—”；大健康、天猫国际及淘工厂无人工店铺拆分，指定店铺参考总量显示“—”。淘工厂AI只通知；人工参考量复用既有子报表。本页人工处理量填报只填大健康、天猫国际，次日9:30前登记昨日数据，保存即生效；支持补填、更正并记录填写人与修改时间。本期不单独配置填写权限。已确认平台自行结束且AI/人工均未处理的单排除有效处理统计，历史创建日有效量可能减少。拼多多两行进入原拼多多子报表；演示来源标识不代替生产映射。本页为合成演示，尚未接入真实取数。</div>';
   reviewShowDialog((key ? platforms[key].name+' · ' : '')+'工单总量取数规则', body, opener);
 }
 
@@ -1830,6 +1976,7 @@ function switchView(view) {
   closeDateCalendar();
   closeCategoryBreakdown();
   currentView = view;
+  byId('manualEntryOpen').hidden = view !== 'overview';
   draftTimeRange = currentTimeRange;
   renderDatePresets();
   byId('startDate').value = activeDates.start;
@@ -2102,10 +2249,10 @@ function renderReviewRate(records, keys) {
 }
 // Separate review copy. Original overview and source records are preserved.
 const REVIEW_RULES = {
-  dajiankang: {source:'AI完成量＋钉钉人工量',date:'AI按任务创建日期；人工按实际处理日期',meaning:'AI处理量＋已登记人工处理量；不是新增需处理总量。',manual:'物流主动＋直发仓工单，按每日人员合计。'},
+  dajiankang: {source:'AI完成量＋页面填报人工量',date:'AI按任务创建日期；人工按实际处理日期',meaning:'AI处理量＋已登记人工处理量；不是新增需处理总量。',manual:'物流主动＋直发仓工单，按每日人员合计。'},
   pdd: {source:'工单管理／售后工作台',date:'平台工单按创建时间；退货退款按申请时间',meaning:'平台工单数量＋商家同意退款筛选数量，沿用客服指定范围。',manual:'当前未提供平台外人工处理量来源，显示“—”。'},
   douyin: {source:'售后工作台指定筛选',date:'按售后申请时间',meaning:'退款成功＋已发货退款／退货退款／换货筛选后的数量，未包含筛选外待处理单。',manual:'当前未提供独立人工处理量来源，显示“—”。'},
-  tmall: {source:'AI完成量＋钉钉人工量',date:'AI按任务创建日期；人工按实际处理日期',meaning:'AI处理量＋天猫国际区域已登记人工量；保留现有日期差异。',manual:'只汇总天猫国际区域，不混入天猫超市、淘工厂。'},
+  tmall: {source:'AI完成量＋页面填报人工量',date:'AI按任务创建日期；人工按实际处理日期',meaning:'AI处理量＋天猫国际区域已登记人工量；保留现有日期差异。',manual:'只填写天猫国际人工日总数，不混入其他业务。'},
   taobao: {source:'生意参谋 · 完结退款笔数',date:'沿用生意参谋报表日期',meaning:'行云＋婉安＋梦蝶的完结退款笔数，不包含尚未完结单据。',manual:'行云＋婉安。梦蝶账号量不直接等同Agent纯自动完成。'},
   taogongchang: {source:'淘工厂现有子报表人工量',date:'按实际处理日期',meaning:'沿用人工登记合计。AI仅监控通知，AI实际处理为0。',manual:'原业务范围为三个物流类型，排除支付18—24小时未揽收及延迟／虚假发货；不从人工汇总数自行估算扣减。'}
 };
@@ -2226,7 +2373,7 @@ function reviewOpenSource(key,opener){
 function reviewOpenDataStatus(){
   const data=reviewSelectedKeys().filter(key=>REVIEW_LEDGER_KEYS.includes(key)).map(reviewPlatformData);
   if(!data.length) return;
-  reviewShowDialog('人工填报情况','<p class="review-dialog-intro">仅展示需客服手工登记的业务，按实际处理日期查看填报进度；未登记不作为0。以下仅演示填报状态。</p><div class="review-status-list">'+data.map(r=>'<div><strong>'+platforms[r.key].name+'</strong><span>'+(r.manualReason||((r.rows.length-r.missing.length)+'/'+r.rows.length+'天已登记'))+'</span>'+(r.missing.length&&r.hasManual&&appliedFilters.shop==='all'?'<small>未登记：'+r.missing.join('、')+'</small>':'')+'</div>').join('')+'</div><p class="review-dialog-note">演示业务日期截至 '+DEMO_TODAY+'，不代表实际客服填报情况。本次没有接入真实金山表。</p>');
+  reviewShowDialog('人工填报情况','<p class="review-dialog-intro">仅展示需客服手工登记的业务，按实际处理日期查看填报进度；未登记不作为0。以下仅演示填报状态。</p><div class="review-status-list">'+data.map(r=>'<div><strong>'+platforms[r.key].name+'</strong><span>'+(r.manualReason||((r.rows.length-r.missing.length)+'/'+r.rows.length+'天已登记'))+'</span>'+(r.missing.length&&r.hasManual&&appliedFilters.shop==='all'?'<small>未登记：'+r.missing.join('、')+'</small>':'')+'</div>').join('')+'</div><p class="review-dialog-note">演示业务日期截至 '+DEMO_TODAY+'，不代表实际客服填报情况。本次为浏览器本地填报演示。</p>');
 }
 byId('reviewDialogClose').addEventListener('click',()=>byId('reviewSourceDialog').close());
 byId('reviewSourceDialog').addEventListener('close',()=>reviewDialogOpener?.focus());
