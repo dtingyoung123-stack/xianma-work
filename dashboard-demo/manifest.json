@@ -10,7 +10,7 @@
   "documents": [
     {
       "path": "prd/客服Agent看板_跨平台总览（汇总报表）PRD_V1.1.md",
-      "sha256": "fedb4c598e2a5a9e3aa626b1b4ce40029d1f2273c4b1631205c2e5f12b331ce6"
+      "sha256": "8b6f13db7e6d90925967ad9602120c92e0b1a8825dc2ecde2d2fa6264eb8642a"
     },
     {
       "path": "prd/各平台总数取数规则及影响_客服口径执行稿_20261028.md",
@@ -18,27 +18,27 @@
     },
     {
       "path": "prd/业务线开发分册/大健康_开发分册.md",
-      "sha256": "7bcc3ceb293da4ba962c5639cdf33b9389c70a28a485845e17b183424f8d2163"
+      "sha256": "f444c38a136c46602569b1c77b769bf8b8cf730a674cdcdb557856816322a296"
     },
     {
       "path": "prd/业务线开发分册/拼多多_开发分册.md",
-      "sha256": "bf4e0a73af7ce76477ec83094b56aad2e56d51c5c0a2349ac1f32f44af1f5094"
+      "sha256": "ea436839458b773adb982d64b034e388171c6db08164ee9643d00488e599b663"
     },
     {
       "path": "prd/业务线开发分册/抖音_开发分册.md",
-      "sha256": "8799b3f9995f1f9b895de1de0a47dd8b71539f26b1223768e102b9c3f2254160"
+      "sha256": "930c400660026eeed4fe5e9d64b065f5d8f884a5e2014fa0fb467ba6fdebca7c"
     },
     {
       "path": "prd/业务线开发分册/天猫国际_开发分册.md",
-      "sha256": "6cc3664c7205dd3467155beb9769588920391790dc93a21ced2884cb8a7ba7b8"
+      "sha256": "0b0523921774d33fd439288fe227cd1b9748d16c1cddd24bb2e1afba749900a1"
     },
     {
       "path": "prd/业务线开发分册/淘宝_开发分册.md",
-      "sha256": "559e451fbfe8fa3eeb8931d514a9a576461dbb21cc80b29c21d3b253108c5fbc"
+      "sha256": "d9e9558c83e64a5a5da2a81c040aa1ca9b46583167dcef07114acf0e61fb6688"
     },
     {
       "path": "prd/业务线开发分册/淘工厂_开发分册.md",
-      "sha256": "c28bf9ae01402f9829c41beb14606c64b479c3a9cc34dc4d1bcf870039bc9b79"
+      "sha256": "cd397ec2e48ee4b81d0b7c5000e484380086c864722c1c0ae2dc76a3d530f227"
     }
   ]
 }
