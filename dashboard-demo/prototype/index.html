@@ -1114,7 +1114,7 @@ body.demo-hierarchy .nav-item[data-view="overview-new"]{display:flex!important}
         </div>
         <div class="proposal-section"><h2>业务评审说明</h2>
           <p>分类浮层按各业务线的数据支持情况展示，示例不表示任何平台已具备对应分类能力。四类完整且口径一致时，分类合计等于总量；部分拆分时不要求合计相等。</p>
-          <p>本原型采用2026-09-28作为演示“今日”，示例记录覆盖近60天。总览完成量按实际完成日期，进入自动化和当前未完成存量按创建日；子报表按创建日期查看同批任务的当前结果。平台自行结束且AI、人工均未处理的单排除有效处理统计，历史创建日有效量可能减少。业务量趋势按日、周、月自动聚合。</p>
+          <p>本原型按北京时间当天作为“今日”，默认展示当天数据；示例记录覆盖近60天，全部为合成演示数据。总览完成量按实际完成日期，进入自动化和当前未完成存量按创建日；子报表按创建日期查看同批任务的当前结果。平台自行结束且AI、人工均未处理的单排除有效处理统计，历史创建日有效量可能减少。业务量趋势按日、周、月自动聚合。</p>
           <p>总览AI完成占比＝同完成日AI独立完成／自动化内已完成；子报表自动化率＝创建日集合纯自动完成／进入量。实际各平台的数据支持清单、历史数据和取数能力仍待核对。</p>
           <p>平铺式导航沿用已有确认；本次不调整权限规则。当前仅为本地原型，无真实业务操作。</p>
         </div>
@@ -1340,16 +1340,16 @@ const platforms = {
 };
 
 // 本轮原型的所有联动使用同一组脱敏合成明细，避免汇总与明细互相矛盾。
-const DEMO_TODAY = '2026-09-28';
-const DEMO_NOW = '2026-09-28T23:30:00+08:00';
+const DEMO_TODAY = new Intl.DateTimeFormat('sv-SE', {timeZone:'Asia/Shanghai'}).format(new Date());
+const DEMO_NOW = new Date().toISOString();
 const CATEGORY_NAMES = ['退货退款', '仅退款', '换货', '其他工单'];
 let currentView = 'overview';
 let currentPlatform = 'all';
-let currentTimeRange = '7d';
-let draftTimeRange = '7d';
+let currentTimeRange = 'today';
+let draftTimeRange = 'today';
 let currentPage = 1;
 let currentOrders = [];
-let activeDates = { start: '2026-09-22', end: DEMO_TODAY };
+let activeDates = { start: DEMO_TODAY, end: DEMO_TODAY };
 let appliedFilters = { shop:'all', scene:'all', shopLabel:'全部店铺', sceneLabel:'全部业务线' };
 let appliedOrderFilters = { status:'all', result:'all' };
 const PAGE_SIZE = 10;
@@ -2094,6 +2094,7 @@ function renderDateCalendar() {
   }).join('');
 }
 function renderDatePresets() {
+  if (draftTimeRange !== 'custom') { byId('startDate').value = addDays(DEMO_TODAY, draftTimeRange === '30d' ? -29 : draftTimeRange === '7d' ? -6 : 0); byId('endDate').value = DEMO_TODAY; }
   const choices = [['today','今日'],['7d','近七天'],['30d','近30天'],['custom','自定义']];
   byId('datePresetControls').innerHTML = choices.map(([key,label]) => `<button type="button" class="${draftTimeRange === key ? 'active' : ''}" aria-pressed="${draftTimeRange === key}" onclick="selectTimeRange('${key}')">${label}</button>`).join('');
   byId('dateRangeField').hidden = draftTimeRange !== 'custom';
@@ -2127,9 +2128,9 @@ function onCustomDateChange() {
   refreshDashboard();
 }
 function resetTimeFilter() {
-  draftTimeRange = '7d';
+  draftTimeRange = 'today';
   renderDatePresets();
-  byId('startDate').value = addDays(DEMO_TODAY,-6); byId('endDate').value = DEMO_TODAY;
+  byId('startDate').value = DEMO_TODAY; byId('endDate').value = DEMO_TODAY;
   byId('globalShopFilter').value = 'all'; byId('globalSceneFilter').value = 'all';
   syncQuerySelects();
   byId('filterError').hidden = true;

@@ -5,12 +5,12 @@
   "status": "文档与模拟原型，生产保存及审计服务待接入",
   "prototype": {
     "path": "prototype/index.html",
-    "sha256": "1bb470f358e50252931465166d6e795f8535ca869f3589ad787be38d4f4c0a9b"
+    "sha256": "2e0a2a5f824048d702cdb771f485252f7127582c6854b2357f928becf2b33b2e"
   },
   "documents": [
     {
       "path": "prd/客服Agent看板_跨平台总览（汇总报表）PRD_V1.1.md",
-      "sha256": "8b6f13db7e6d90925967ad9602120c92e0b1a8825dc2ecde2d2fa6264eb8642a"
+      "sha256": "d7c6057f7089503842839530eba81323e058f32beb44eae2504cddf8f5b93874"
     },
     {
       "path": "prd/各平台总数取数规则及影响_客服口径执行稿_20261028.md",
