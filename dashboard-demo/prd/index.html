@@ -229,7 +229,8 @@
       { label: "天猫国际分册", path: "业务线开发分册/天猫国际_开发分册.md" },
       { label: "淘宝分册", path: "业务线开发分册/淘宝_开发分册.md" },
       { label: "淘工厂分册", path: "业务线开发分册/淘工厂_开发分册.md" },
-      { label: "各平台取数规则", path: "各平台总数取数规则及影响_客服口径执行稿_20261028.md" }
+      { label: "各平台取数规则", path: "各平台总数取数规则及影响_客服口径执行稿_20261028.md" },
+      { label: "人效报表 PRD V1.1", path: "人效报表_首次新增_PRD_V1.1.md" }
     ];
     const byPath = new Map(documents.map((doc) => [doc.path, doc]));
     const content = document.getElementById("content");
@@ -256,7 +257,7 @@
     }
 
     function buildToc() {
-      const headings = [...content.querySelectorAll("h2, h3")];
+      const headings = [...content.querySelectorAll(currentDocument.path === "人效报表_首次新增_PRD_V1.1.md" ? "h1, h2, h3" : "h2, h3")];
       headings.forEach((heading, index) => { heading.id = "section-" + (index + 1); });
       toc.innerHTML = headings.map((heading) => `<a class="toc-link level-${heading.tagName.slice(1)}" href="#${heading.id}" title="${heading.textContent}">${heading.textContent}</a>`).join("");
     }
@@ -267,6 +268,11 @@
       content.querySelectorAll("a[href]").forEach((link) => {
         const sourceHref = link.getAttribute("href");
         if (!sourceHref || sourceHref.startsWith("#")) return;
+        if (sourceHref === "dashboard-demo/ai-efficiency-home-v2.html") {
+          link.href = "../ai-efficiency-home-v2.html";
+          link.target = "_top";
+          return;
+        }
         if (sourceHref.includes("dashboard-demo/index.html") || sourceHref.endsWith("#prototype")) {
           link.href = "../#prototype";
           link.target = "_top";
@@ -290,6 +296,15 @@
       currentDocument = doc;
       setActiveNavigation(doc.path);
       currentTitle.textContent = doc.label;
+      const isEfficiency = doc.path === "人效报表_首次新增_PRD_V1.1.md";
+      document.title = doc.label + " - PRD 文档";
+      document.querySelector(".status").textContent = isEfficiency
+        ? "V1.1 复查修订稿，仍有待确认项，非开发冻结稿"
+        : "V1.1 规则已确认，待技术评审";
+      document.querySelector(".actions .primary").style.display = isEfficiency ? "none" : "";
+      document.querySelector(".source-note span:last-child").textContent = isEfficiency
+        ? "人效报表首次新增 PRD V1.1；原型及核心公式已确认，仍有待确认项。未进入开发，未上线生产功能。"
+        : "完整包包含 1 份增量 PRD、6 份开发分册和文件清单。原型与文档均为评审材料，不代表生产能力。";
       currentDownload.href = doc.path;
       currentDownload.download = doc.path.split("/").pop();
       content.innerHTML = '<div class="loading">正在加载 PRD...</div>';
